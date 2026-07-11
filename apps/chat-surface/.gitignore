@@ -1,0 +1,19 @@
+.vercel
+
+# local env/config
+.env.local
+
+# local virtualenv
+.venv/
+venv/
+
+# Python cache/test artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# OS/editor noise
+.DS_Store

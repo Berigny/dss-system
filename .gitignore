@@ -36,16 +36,24 @@ backend-data/
 *.log
 *.pid
 
+# Keep control-plane seed benchmark data for tests
+!apps/control-plane/data/
+!apps/control-plane/data/**
+
 # OS files
 .DS_Store
 Thumbs.db
 
-# IDE
+# IDE / local tooling
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.openclaw*
+__write_test
+*.textClipping
+pyrightconfig.json
 
 # Terraform / infra
 *.tfstate
