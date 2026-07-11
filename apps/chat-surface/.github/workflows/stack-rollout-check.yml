@@ -1,0 +1,83 @@
+name: Stack Rollout Contract Check (Frontend)
+
+on:
+  workflow_dispatch:
+    inputs:
+      frontend_url:
+        description: "Frontend base URL"
+        required: true
+        default: "https://ds-frontend-local-new.vercel.app"
+      expected_api_base:
+        description: "Expected middleware/API base URL"
+        required: true
+        default: "https://ds-middleware-new.fly.dev"
+      expected_commit_sha:
+        description: "Optional expected Vercel commit SHA (full)"
+        required: false
+        default: ""
+
+jobs:
+  frontend-rollout-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate frontend contract
+        env:
+          FRONTEND_URL: ${{ github.event.inputs.frontend_url }}
+          EXPECTED_API_BASE: ${{ github.event.inputs.expected_api_base }}
+          EXPECTED_COMMIT_SHA: ${{ github.event.inputs.expected_commit_sha }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import sys
+          import urllib.request
+
+          frontend = os.environ["FRONTEND_URL"].rstrip("/")
+          expected_api_base = os.environ["EXPECTED_API_BASE"].rstrip("/")
+          expected_commit = os.environ["EXPECTED_COMMIT_SHA"].strip()
+
+          def get_json(url: str):
+              req = urllib.request.Request(url=url, method="GET")
+              with urllib.request.urlopen(req, timeout=20) as resp:
+                  return int(resp.status), json.loads(resp.read().decode("utf-8"))
+
+          failures = []
+
+          deploy_status, deploy_info = get_json(f"{frontend}/api/deploy-info")
+          if deploy_status != 200:
+              failures.append(f"/api/deploy-info status={deploy_status}")
+          if str(deploy_info.get("status")) != "ok":
+              failures.append(f"/api/deploy-info payload status={deploy_info.get('status')}")
+          api_base = str(deploy_info.get("api_base") or "").rstrip("/")
+          if api_base != expected_api_base:
+              failures.append(f"api_base mismatch got={api_base} expected={expected_api_base}")
+          commit_sha = str(deploy_info.get("vercel_commit_sha") or "").strip()
+          if not commit_sha:
+              failures.append("vercel_commit_sha missing")
+          if expected_commit and commit_sha != expected_commit:
+              failures.append(f"vercel_commit_sha mismatch got={commit_sha} expected={expected_commit}")
+
+          wake_status, wake = get_json(f"{frontend}/api/wake")
+          if wake_status != 200:
+              failures.append(f"/api/wake status={wake_status}")
+          if str(wake.get("status")) not in {"awake", "waking"}:
+              failures.append(f"/api/wake payload status={wake.get('status')}")
+
+          models_status, _models = get_json(f"{frontend}/api/models?agent=")
+          if models_status != 200:
+              failures.append(f"/api/models status={models_status}")
+
+          limits_status, limits = get_json(f"{frontend}/api/ingest/limits")
+          if limits_status != 200:
+              failures.append(f"/api/ingest/limits status={limits_status}")
+          if not isinstance(limits.get("attachment_max_bytes"), int):
+              failures.append("attachment_max_bytes missing")
+
+          if failures:
+              print("FAIL")
+              for item in failures:
+                  print(f"- {item}")
+              sys.exit(1)
+          print("PASS frontend rollout contract")
+          PY
+

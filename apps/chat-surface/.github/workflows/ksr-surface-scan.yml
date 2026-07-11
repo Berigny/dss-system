@@ -1,0 +1,36 @@
+name: KSR Surface Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ksr-surface-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout ds-frontend-local
+        uses: actions/checkout@v4
+        with:
+          path: ds-frontend-local
+
+      - name: Checkout ds-backend-local
+        uses: actions/checkout@v4
+        with:
+          repository: davidberigny/ds-backend-local
+          path: ds-backend-local
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install backend dependencies
+        working-directory: ds-backend-local
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Cross-repo KSR surface scan
+        run: python ds-backend-local/scripts/cross_repo_stripper.py --targets ds-frontend-local
