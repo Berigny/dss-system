@@ -1,0 +1,72 @@
+{
+  "generated_at": "20260711T073251Z",
+  "source_scaling": "backend/benchmarks/output/scaling/scaling_report_20260711T073251Z.json",
+  "source_ablation": "backend/benchmarks/output/ablations/ablation_report_20260711T015725Z.json",
+  "recall_vs_context": [
+    {
+      "context_tokens": 517129,
+      "mode": "semantic_only",
+      "recall_at_k": 0.0,
+      "recall_at_1": 0.0,
+      "avg_latency_ms": 722.7189679979347
+    },
+    {
+      "context_tokens": 517129,
+      "mode": "coordinate_guided",
+      "recall_at_k": 1.0,
+      "recall_at_1": 1.0,
+      "avg_latency_ms": 771.5958480257541
+    },
+    {
+      "context_tokens": 517129,
+      "mode": "full_dss",
+      "recall_at_k": 1.0,
+      "recall_at_1": 1.0,
+      "avg_latency_ms": 916.474981000647
+    }
+  ],
+  "latency_tradeoff": [
+    {
+      "condition": "semantic_only",
+      "mode": "semantic_only",
+      "recall_at_1": 1.0,
+      "recall_at_k": 1.0,
+      "avg_latency_ms": 0.0632943443229629
+    },
+    {
+      "condition": "coordinate_guided",
+      "mode": "coordinate_guided",
+      "recall_at_1": 0.0,
+      "recall_at_k": 0.16666666666666666,
+      "avg_latency_ms": 0.6167612801719871
+    },
+    {
+      "condition": "full_dss",
+      "mode": "full_dss",
+      "recall_at_1": 0.16666666666666666,
+      "recall_at_k": 0.16666666666666666,
+      "avg_latency_ms": 0.6827428329011632
+    },
+    {
+      "condition": "coordinate_no_filters",
+      "mode": "coordinate_guided",
+      "recall_at_1": 0.3333333333333333,
+      "recall_at_k": 1.0,
+      "avg_latency_ms": 0.23980255031751263
+    },
+    {
+      "condition": "coordinate_token_index",
+      "mode": "coordinate_guided",
+      "recall_at_1": 0.0,
+      "recall_at_k": 0.16666666666666666,
+      "avg_latency_ms": 0.49811131773620015
+    },
+    {
+      "condition": "abstention_on",
+      "mode": "full_dss",
+      "recall_at_1": 0.16666666666666666,
+      "recall_at_k": 0.16666666666666666,
+      "avg_latency_ms": 0.8573878472412212
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+.venv/
+.vercel
+.env*.local
+scripts/node_modules/
+scripts/package-lock.json
+data/control_plane_state.json

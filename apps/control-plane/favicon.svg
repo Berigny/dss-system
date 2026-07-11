@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Dual Substrate identity hub icon">
+  <defs>
+    <linearGradient id="bg" x1="0%" x2="100%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1d4ed8" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="url(#bg)" />
+  <g fill="none" stroke="#dbeafe" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="25" cy="26" r="11.5" stroke-width="2.6" />
+    <path d="M13.5 26h23" stroke-width="2.2" opacity="0.9" />
+    <path d="M25 14.5c-3.8 4.1-5.8 7.9-5.8 11.5S21.2 33.4 25 37.5c3.8-4.1 5.8-7.9 5.8-11.5S28.8 18.6 25 14.5Z" stroke-width="2.2" opacity="0.9" />
+  </g>
+  <g>
+    <rect x="29.5" y="31" width="22" height="14.5" rx="4" fill="#f8fafc" />
+    <rect x="26" y="26.5" width="22" height="14.5" rx="4" fill="#22c55e" />
+    <rect x="26" y="31.2" width="22" height="4.3" fill="#14532d" opacity="0.22" />
+    <circle cx="44.2" cy="33.6" r="1.6" fill="#f8fafc" />
+  </g>
+</svg>

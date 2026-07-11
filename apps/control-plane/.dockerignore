@@ -1,0 +1,10 @@
+.git
+.venv
+.vercel
+.vscode
+node_modules
+__pycache__
+.pytest_cache
+.env.local
+*.pyc
+.DS_Store

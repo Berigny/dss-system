@@ -1,0 +1,4370 @@
+{
+  "note": "Published benchmark artefacts are read-only trust material. The Control Plane renders them but does not execute benchmark runs. Aggregate runs report mean \u00b1 standard deviation across 3 random seeds.",
+  "canonical_publication_source": {
+    "canonical_publication_owner": "ds_backend_local",
+    "control_plane_consumer": "dss_dashboard",
+    "production_truth_rule": "dashboard_must_consume_backend_publication_truth",
+    "required_backend_config": [
+      "BENCHMARK_ARTIFACT_ROOT",
+      "BENCHMARK_PUBLICATION_OUTPUT"
+    ],
+    "required_failure_states": [
+      "benchmark_artifact_root_not_configured",
+      "benchmark_publication_output_not_configured",
+      "no_valid_benchmark_artifacts_found",
+      "canonical_publication_unavailable"
+    ],
+    "required_outcomes": [
+      "backend_owns_canonical_publication_feed",
+      "control_plane_api_reads_backend_backed_publication",
+      "prod_rendering_and_prod_publication_share_one_truth_source"
+    ]
+  },
+  "operator_publication": {
+    "owner_surface": "dss_dashboard",
+    "execution_owner": "ds_backend_local",
+    "request_path_policy": "background_jobs_only",
+    "trigger_label": "Update & publish",
+    "trigger_modes": [
+      "publish_existing",
+      "execute_and_publish"
+    ],
+    "domain_groups": [
+      {
+        "domain_key": "retrieval",
+        "label": "Retrieval",
+        "suite_names": [
+          "MuSiQue",
+          "HotpotQA",
+          "2WikiMultiHopQA"
+        ],
+        "family": "retrieval_and_multihop",
+        "execution_rule": "run_phase1_suite_family",
+        "trigger_mode": "execute_and_publish",
+        "domain_semantics": "execute_phase1_retrieval_suites_then_publish"
+      },
+      {
+        "domain_key": "memory_traceability",
+        "label": "Memory / Traceability",
+        "suite_names": [
+          "LongMemEval",
+          "LoCoMo"
+        ],
+        "family": "long_memory",
+        "execution_rule": "run_phase1_suite_family",
+        "trigger_mode": "execute_and_publish",
+        "domain_semantics": "execute_phase1_memory_suites_then_publish"
+      },
+      {
+        "domain_key": "governance",
+        "label": "Governance",
+        "suite_names": [],
+        "family": "dss_native_governance",
+        "execution_rule": "run_dss_native_governance_suite",
+        "trigger_mode": "publish_existing",
+        "domain_semantics": "planned_or_publish_existing_until_dedicated_governance_execution_lane_exists"
+      },
+      {
+        "domain_key": "latency_and_cost",
+        "label": "Latency and Cost",
+        "suite_names": [],
+        "family": "derived_from_benchmark_runs",
+        "execution_rule": "derive_from_domain_runs",
+        "trigger_mode": "publish_existing",
+        "domain_semantics": "derive_from_executed_domain_runs_or_publish_existing_rollups"
+      }
+    ],
+    "required_job_states": [
+      "queued",
+      "running_benchmarks",
+      "writing_artefacts",
+      "publishing",
+      "failed",
+      "published"
+    ],
+    "permission_requirements": [
+      "explicit_operator_or_admin_authority"
+    ],
+    "completion_requirements": [
+      "regenerate_canonical_publication",
+      "refresh_activation_and_freshness_state"
+    ],
+    "non_goals": [
+      "inline_page_execution",
+      "ad_hoc_manual_copy_only_refresh"
+    ]
+  },
+  "phase_1_activation": {
+    "phase": "phase_1",
+    "publication_checked_at": "2026-07-11T08:57:54.426778+00:00",
+    "max_age_hours": 168,
+    "suite_families": {
+      "retrieval_and_multihop": [
+        "MuSiQue",
+        "HotpotQA",
+        "2WikiMultiHopQA"
+      ],
+      "long_memory": [
+        "LongMemEval",
+        "LoCoMo",
+        "RULER256K"
+      ]
+    },
+    "required_modes": [
+      "semantic_only",
+      "coordinate_guided",
+      "full_dss"
+    ],
+    "required_metrics": [
+      "recall_at_1",
+      "recall_at_5",
+      "avg_latency_ms",
+      "token_cost"
+    ],
+    "suite_activation": [
+      {
+        "suite_name": "MuSiQue",
+        "family": "retrieval_and_multihop",
+        "status": "active",
+        "freshness_status": "fresh",
+        "checked_at": "2026-07-11T08:57:54.426778+00:00",
+        "max_age_hours": 168,
+        "latest_run_id": "MuSiQue-full_dss-20260711T081546Z",
+        "latest_executed_at": "2026-07-11T08:15:46.977685+00:00",
+        "age_hours": 0.702,
+        "required_modes": [
+          "semantic_only",
+          "coordinate_guided",
+          "full_dss"
+        ],
+        "published_modes": [
+          "coordinate_guided",
+          "full_dss",
+          "semantic_only"
+        ],
+        "required_metrics": [
+          "recall_at_1",
+          "recall_at_5",
+          "avg_latency_ms",
+          "token_cost"
+        ],
+        "run_count": 3
+      },
+      {
+        "suite_name": "HotpotQA",
+        "family": "retrieval_and_multihop",
+        "status": "active",
+        "freshness_status": "fresh",
+        "checked_at": "2026-07-11T08:57:54.426778+00:00",
+        "max_age_hours": 168,
+        "latest_run_id": "HotpotQA-full_dss-20260711T081546Z",
+        "latest_executed_at": "2026-07-11T08:15:46.980754+00:00",
+        "age_hours": 0.702,
+        "required_modes": [
+          "semantic_only",
+          "coordinate_guided",
+          "full_dss"
+        ],
+        "published_modes": [
+          "coordinate_guided",
+          "full_dss",
+          "semantic_only"
+        ],
+        "required_metrics": [
+          "recall_at_1",
+          "recall_at_5",
+          "avg_latency_ms",
+          "token_cost"
+        ],
+        "run_count": 3
+      },
+      {
+        "suite_name": "2WikiMultiHopQA",
+        "family": "retrieval_and_multihop",
+        "status": "active",
+        "freshness_status": "fresh",
+        "checked_at": "2026-07-11T08:57:54.426778+00:00",
+        "max_age_hours": 168,
+        "latest_run_id": "2WikiMultiHopQA-full_dss-20260711T081546Z",
+        "latest_executed_at": "2026-07-11T08:15:46.984305+00:00",
+        "age_hours": 0.702,
+        "required_modes": [
+          "semantic_only",
+          "coordinate_guided",
+          "full_dss"
+        ],
+        "published_modes": [
+          "coordinate_guided",
+          "full_dss",
+          "semantic_only"
+        ],
+        "required_metrics": [
+          "recall_at_1",
+          "recall_at_5",
+          "avg_latency_ms",
+          "token_cost"
+        ],
+        "run_count": 3
+      },
+      {
+        "suite_name": "LongMemEval",
+        "family": "long_memory",
+        "status": "reference_only",
+        "freshness_status": "unpublished",
+        "checked_at": "2026-07-11T08:57:54.426778+00:00",
+        "max_age_hours": 168,
+        "latest_run_id": "",
+        "latest_executed_at": "",
+        "age_hours": null,
+        "required_modes": [
+          "semantic_only",
+          "coordinate_guided",
+          "full_dss"
+        ],
+        "published_modes": [],
+        "required_metrics": [
+          "recall_at_1",
+          "recall_at_5",
+          "avg_latency_ms",
+          "token_cost"
+        ],
+        "run_count": 0
+      },
+      {
+        "suite_name": "LoCoMo",
+        "family": "long_memory",
+        "status": "reference_only",
+        "freshness_status": "unpublished",
+        "checked_at": "2026-07-11T08:57:54.426778+00:00",
+        "max_age_hours": 168,
+        "latest_run_id": "",
+        "latest_executed_at": "",
+        "age_hours": null,
+        "required_modes": [
+          "semantic_only",
+          "coordinate_guided",
+          "full_dss"
+        ],
+        "published_modes": [],
+        "required_metrics": [
+          "recall_at_1",
+          "recall_at_5",
+          "avg_latency_ms",
+          "token_cost"
+        ],
+        "run_count": 0
+      },
+      {
+        "suite_name": "RULER256K",
+        "family": "long_memory",
+        "status": "reference_only",
+        "freshness_status": "unpublished",
+        "checked_at": "2026-07-11T08:57:54.426778+00:00",
+        "max_age_hours": 168,
+        "latest_run_id": "",
+        "latest_executed_at": "",
+        "age_hours": null,
+        "required_modes": [
+          "semantic_only",
+          "coordinate_guided",
+          "full_dss"
+        ],
+        "published_modes": [],
+        "required_metrics": [
+          "recall_at_1",
+          "recall_at_5",
+          "avg_latency_ms",
+          "token_cost"
+        ],
+        "run_count": 0
+      }
+    ]
+  },
+  "runs": [
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "2WikiMultiHopQA-full_dss-20260711T081546Z",
+      "suite_id": "2WikiMultiHopQA",
+      "suite_version": "phase1-v1",
+      "executed_at": "2026-07-11T08:15:46.984305Z",
+      "mode": "full_dss",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "unknown",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "2wikimultihopqa_phase1_dataset",
+          "version": "phase1-v1",
+          "split": "benchmark",
+          "record_count": null
+        }
+      ],
+      "metrics": {
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "recall_at_10": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top 10 results.",
+              "statistics": null
+            },
+            "recall_at_1": {
+              "value": 0.25,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top result.",
+              "statistics": null
+            },
+            "recall_at_5": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top 5 results.",
+              "statistics": null
+            },
+            "mrr": {
+              "value": 0.55,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank across benchmark queries.",
+              "statistics": null
+            },
+            "queries": {
+              "value": 4,
+              "unit": "count",
+              "description": "Number of evaluated benchmark queries.",
+              "statistics": null
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "dual_retrieval_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "dual_retrieval_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 0.17719824973028153,
+              "unit": "ms",
+              "description": "Average end-to-end benchmark query latency.",
+              "statistics": null
+            }
+          }
+        },
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "token_cost": {
+              "value": 624.0,
+              "unit": "tokens",
+              "description": "Estimated token cost for the retrieval benchmark run.",
+              "statistics": null
+            }
+          }
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T08:15:46.984305Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": null,
+      "run_config": {
+        "mode_label": "Blended lexical plus coordinate-guided retrieval baseline.",
+        "top_k": 10,
+        "dataset_name": "2wikimultihopqa_phase1_dataset.jsonl",
+        "phase_1_activation_family": "retrieval_and_multihop"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "2WikiMultiHopQA-coordinate_guided-20260711T081546Z",
+      "suite_id": "2WikiMultiHopQA",
+      "suite_version": "phase1-v1",
+      "executed_at": "2026-07-11T08:15:46.983223Z",
+      "mode": "coordinate_guided",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "unknown",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "2wikimultihopqa_phase1_dataset",
+          "version": "phase1-v1",
+          "split": "benchmark",
+          "record_count": null
+        }
+      ],
+      "metrics": {
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "recall_at_10": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top 10 results.",
+              "statistics": null
+            },
+            "recall_at_1": {
+              "value": 0.25,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top result.",
+              "statistics": null
+            },
+            "recall_at_5": {
+              "value": 0.75,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top 5 results.",
+              "statistics": null
+            },
+            "mrr": {
+              "value": 0.5416666666666666,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank across benchmark queries.",
+              "statistics": null
+            },
+            "queries": {
+              "value": 4,
+              "unit": "count",
+              "description": "Number of evaluated benchmark queries.",
+              "statistics": null
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "dual_retrieval_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "dual_retrieval_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 0.17661324818618596,
+              "unit": "ms",
+              "description": "Average end-to-end benchmark query latency.",
+              "statistics": null
+            }
+          }
+        },
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "token_cost": {
+              "value": 624.0,
+              "unit": "tokens",
+              "description": "Estimated token cost for the retrieval benchmark run.",
+              "statistics": null
+            }
+          }
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T08:15:46.983223Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": null,
+      "run_config": {
+        "mode_label": "Prime-factor coordinate retrieval baseline.",
+        "top_k": 10,
+        "dataset_name": "2wikimultihopqa_phase1_dataset.jsonl",
+        "phase_1_activation_family": "retrieval_and_multihop"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "2WikiMultiHopQA-semantic_only-20260711T081546Z",
+      "suite_id": "2WikiMultiHopQA",
+      "suite_version": "phase1-v1",
+      "executed_at": "2026-07-11T08:15:46.982120Z",
+      "mode": "semantic_only",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "unknown",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "2wikimultihopqa_phase1_dataset",
+          "version": "phase1-v1",
+          "split": "benchmark",
+          "record_count": null
+        }
+      ],
+      "metrics": {
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "recall_at_10": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top 10 results.",
+              "statistics": null
+            },
+            "recall_at_1": {
+              "value": 0.0,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top result.",
+              "statistics": null
+            },
+            "recall_at_5": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top 5 results.",
+              "statistics": null
+            },
+            "mrr": {
+              "value": 0.35,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank across benchmark queries.",
+              "statistics": null
+            },
+            "queries": {
+              "value": 4,
+              "unit": "count",
+              "description": "Number of evaluated benchmark queries.",
+              "statistics": null
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "dual_retrieval_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "dual_retrieval_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 0.17802750517148525,
+              "unit": "ms",
+              "description": "Average end-to-end benchmark query latency.",
+              "statistics": null
+            }
+          }
+        },
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "token_cost": {
+              "value": 624.0,
+              "unit": "tokens",
+              "description": "Estimated token cost for the retrieval benchmark run.",
+              "statistics": null
+            }
+          }
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T08:15:46.982120Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": null,
+      "run_config": {
+        "mode_label": "Deterministic lexical retrieval baseline.",
+        "top_k": 10,
+        "dataset_name": "2wikimultihopqa_phase1_dataset.jsonl",
+        "phase_1_activation_family": "retrieval_and_multihop"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "HotpotQA-full_dss-20260711T081546Z",
+      "suite_id": "HotpotQA",
+      "suite_version": "phase1-v1",
+      "executed_at": "2026-07-11T08:15:46.980754Z",
+      "mode": "full_dss",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "unknown",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "hotpotqa_phase1_dataset",
+          "version": "phase1-v1",
+          "split": "benchmark",
+          "record_count": null
+        }
+      ],
+      "metrics": {
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "recall_at_10": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top 10 results.",
+              "statistics": null
+            },
+            "recall_at_1": {
+              "value": 0.25,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top result.",
+              "statistics": null
+            },
+            "recall_at_5": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top 5 results.",
+              "statistics": null
+            },
+            "mrr": {
+              "value": 0.5416666666666666,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank across benchmark queries.",
+              "statistics": null
+            },
+            "queries": {
+              "value": 4,
+              "unit": "count",
+              "description": "Number of evaluated benchmark queries.",
+              "statistics": null
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "dual_retrieval_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "dual_retrieval_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 0.20643474999815226,
+              "unit": "ms",
+              "description": "Average end-to-end benchmark query latency.",
+              "statistics": null
+            }
+          }
+        },
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "token_cost": {
+              "value": 504.0,
+              "unit": "tokens",
+              "description": "Estimated token cost for the retrieval benchmark run.",
+              "statistics": null
+            }
+          }
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T08:15:46.980754Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": null,
+      "run_config": {
+        "mode_label": "Blended lexical plus coordinate-guided retrieval baseline.",
+        "top_k": 10,
+        "dataset_name": "hotpotqa_phase1_dataset.jsonl",
+        "phase_1_activation_family": "retrieval_and_multihop"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "HotpotQA-coordinate_guided-20260711T081546Z",
+      "suite_id": "HotpotQA",
+      "suite_version": "phase1-v1",
+      "executed_at": "2026-07-11T08:15:46.979697Z",
+      "mode": "coordinate_guided",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "unknown",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "hotpotqa_phase1_dataset",
+          "version": "phase1-v1",
+          "split": "benchmark",
+          "record_count": null
+        }
+      ],
+      "metrics": {
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "recall_at_10": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top 10 results.",
+              "statistics": null
+            },
+            "recall_at_1": {
+              "value": 0.0,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top result.",
+              "statistics": null
+            },
+            "recall_at_5": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top 5 results.",
+              "statistics": null
+            },
+            "mrr": {
+              "value": 0.41666666666666663,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank across benchmark queries.",
+              "statistics": null
+            },
+            "queries": {
+              "value": 4,
+              "unit": "count",
+              "description": "Number of evaluated benchmark queries.",
+              "statistics": null
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "dual_retrieval_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "dual_retrieval_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 0.16494224837515503,
+              "unit": "ms",
+              "description": "Average end-to-end benchmark query latency.",
+              "statistics": null
+            }
+          }
+        },
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "token_cost": {
+              "value": 504.0,
+              "unit": "tokens",
+              "description": "Estimated token cost for the retrieval benchmark run.",
+              "statistics": null
+            }
+          }
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T08:15:46.979697Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": null,
+      "run_config": {
+        "mode_label": "Prime-factor coordinate retrieval baseline.",
+        "top_k": 10,
+        "dataset_name": "hotpotqa_phase1_dataset.jsonl",
+        "phase_1_activation_family": "retrieval_and_multihop"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "HotpotQA-semantic_only-20260711T081546Z",
+      "suite_id": "HotpotQA",
+      "suite_version": "phase1-v1",
+      "executed_at": "2026-07-11T08:15:46.978633Z",
+      "mode": "semantic_only",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "unknown",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "hotpotqa_phase1_dataset",
+          "version": "phase1-v1",
+          "split": "benchmark",
+          "record_count": null
+        }
+      ],
+      "metrics": {
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "recall_at_10": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top 10 results.",
+              "statistics": null
+            },
+            "recall_at_1": {
+              "value": 0.5,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top result.",
+              "statistics": null
+            },
+            "recall_at_5": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top 5 results.",
+              "statistics": null
+            },
+            "mrr": {
+              "value": 0.7083333333333333,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank across benchmark queries.",
+              "statistics": null
+            },
+            "queries": {
+              "value": 4,
+              "unit": "count",
+              "description": "Number of evaluated benchmark queries.",
+              "statistics": null
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "dual_retrieval_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "dual_retrieval_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 0.16913676518015563,
+              "unit": "ms",
+              "description": "Average end-to-end benchmark query latency.",
+              "statistics": null
+            }
+          }
+        },
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "token_cost": {
+              "value": 504.0,
+              "unit": "tokens",
+              "description": "Estimated token cost for the retrieval benchmark run.",
+              "statistics": null
+            }
+          }
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T08:15:46.978633Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": null,
+      "run_config": {
+        "mode_label": "Deterministic lexical retrieval baseline.",
+        "top_k": 10,
+        "dataset_name": "hotpotqa_phase1_dataset.jsonl",
+        "phase_1_activation_family": "retrieval_and_multihop"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "MuSiQue-full_dss-20260711T081546Z",
+      "suite_id": "MuSiQue",
+      "suite_version": "phase1-v1",
+      "executed_at": "2026-07-11T08:15:46.977685Z",
+      "mode": "full_dss",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "unknown",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "musique_phase1_dataset",
+          "version": "phase1-v1",
+          "split": "benchmark",
+          "record_count": null
+        }
+      ],
+      "metrics": {
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "recall_at_10": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top 10 results.",
+              "statistics": null
+            },
+            "recall_at_1": {
+              "value": 0.75,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top result.",
+              "statistics": null
+            },
+            "recall_at_5": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top 5 results.",
+              "statistics": null
+            },
+            "mrr": {
+              "value": 0.875,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank across benchmark queries.",
+              "statistics": null
+            },
+            "queries": {
+              "value": 4,
+              "unit": "count",
+              "description": "Number of evaluated benchmark queries.",
+              "statistics": null
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "dual_retrieval_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "dual_retrieval_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 0.14297376037575305,
+              "unit": "ms",
+              "description": "Average end-to-end benchmark query latency.",
+              "statistics": null
+            }
+          }
+        },
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "token_cost": {
+              "value": 440.0,
+              "unit": "tokens",
+              "description": "Estimated token cost for the retrieval benchmark run.",
+              "statistics": null
+            }
+          }
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T08:15:46.977685Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": null,
+      "run_config": {
+        "mode_label": "Blended lexical plus coordinate-guided retrieval baseline.",
+        "top_k": 10,
+        "dataset_name": "musique_phase1_dataset.jsonl",
+        "phase_1_activation_family": "retrieval_and_multihop"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "MuSiQue-coordinate_guided-20260711T081546Z",
+      "suite_id": "MuSiQue",
+      "suite_version": "phase1-v1",
+      "executed_at": "2026-07-11T08:15:46.976623Z",
+      "mode": "coordinate_guided",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "unknown",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "musique_phase1_dataset",
+          "version": "phase1-v1",
+          "split": "benchmark",
+          "record_count": null
+        }
+      ],
+      "metrics": {
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "recall_at_10": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top 10 results.",
+              "statistics": null
+            },
+            "recall_at_1": {
+              "value": 0.5,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top result.",
+              "statistics": null
+            },
+            "recall_at_5": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top 5 results.",
+              "statistics": null
+            },
+            "mrr": {
+              "value": 0.75,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank across benchmark queries.",
+              "statistics": null
+            },
+            "queries": {
+              "value": 4,
+              "unit": "count",
+              "description": "Number of evaluated benchmark queries.",
+              "statistics": null
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "dual_retrieval_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "dual_retrieval_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 0.15718501526862383,
+              "unit": "ms",
+              "description": "Average end-to-end benchmark query latency.",
+              "statistics": null
+            }
+          }
+        },
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "token_cost": {
+              "value": 440.0,
+              "unit": "tokens",
+              "description": "Estimated token cost for the retrieval benchmark run.",
+              "statistics": null
+            }
+          }
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T08:15:46.976623Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": null,
+      "run_config": {
+        "mode_label": "Prime-factor coordinate retrieval baseline.",
+        "top_k": 10,
+        "dataset_name": "musique_phase1_dataset.jsonl",
+        "phase_1_activation_family": "retrieval_and_multihop"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "MuSiQue-semantic_only-20260711T081546Z",
+      "suite_id": "MuSiQue",
+      "suite_version": "phase1-v1",
+      "executed_at": "2026-07-11T08:15:46.975468Z",
+      "mode": "semantic_only",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "unknown",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "musique_phase1_dataset",
+          "version": "phase1-v1",
+          "split": "benchmark",
+          "record_count": null
+        }
+      ],
+      "metrics": {
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "recall_at_10": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top 10 results.",
+              "statistics": null
+            },
+            "recall_at_1": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top result.",
+              "statistics": null
+            },
+            "recall_at_5": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Fraction of benchmark queries with a relevant memory in the top 5 results.",
+              "statistics": null
+            },
+            "mrr": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank across benchmark queries.",
+              "statistics": null
+            },
+            "queries": {
+              "value": 4,
+              "unit": "count",
+              "description": "Number of evaluated benchmark queries.",
+              "statistics": null
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "dual_retrieval_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "dual_retrieval_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 0.14695599384140223,
+              "unit": "ms",
+              "description": "Average end-to-end benchmark query latency.",
+              "statistics": null
+            }
+          }
+        },
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "token_cost": {
+              "value": 440.0,
+              "unit": "tokens",
+              "description": "Estimated token cost for the retrieval benchmark run.",
+              "statistics": null
+            }
+          }
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T08:15:46.975468Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": null,
+      "run_config": {
+        "mode_label": "Deterministic lexical retrieval baseline.",
+        "top_k": 10,
+        "dataset_name": "musique_phase1_dataset.jsonl",
+        "phase_1_activation_family": "retrieval_and_multihop"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "comparison-grok_latest-multihop-aggregate-20260711T020900Z",
+      "suite_id": "comparison-multihop",
+      "suite_version": "v1",
+      "executed_at": "2026-07-11T02:09:00.410586Z",
+      "mode": "baseline_dense",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "1b9ea3936647f11736fe0b49c4cfa50b70df311c",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "longbench-multihop",
+          "version": "v1",
+          "split": "benchmark",
+          "record_count": 9
+        }
+      ],
+      "metrics": {
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "completion_tokens": {
+              "value": 0.0,
+              "unit": "tokens",
+              "description": "Completion tokens per query.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "prompt_tokens": {
+              "value": 0.0,
+              "unit": "tokens",
+              "description": "Prompt tokens per query.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "token_cost": {
+              "value": 0.0,
+              "unit": "tokens",
+              "description": "Estimated total token cost per query.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "comparison_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 0.0,
+              "unit": "ms",
+              "description": "Average end-to-end latency per query.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "mrr": {
+              "value": 0.0,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "recall_at_1": {
+              "value": 0.0,
+              "unit": "ratio",
+              "description": "Fraction of queries with a relevant memory at rank 1.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "recall_at_k": {
+              "value": 0.0,
+              "unit": "ratio",
+              "description": "Fraction of queries with a relevant memory in the top k.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "comparison_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T02:09:00.410586Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": {
+        "platform": "Darwin-25.5.0-x86_64",
+        "processor": "i386",
+        "cpu_count": 16,
+        "memory_gb": 16.0,
+        "gpu_name": null,
+        "gpu_count": null,
+        "cuda_version": null,
+        "mps_available": true,
+        "backend_accelerator": "mps"
+      },
+      "run_config": {
+        "baseline": "grok_latest",
+        "benchmark": "longbench-multihop",
+        "seed": 193,
+        "blocked": true,
+        "blocked_reason": "no_api_key_or_access_configured",
+        "chain_count": 9,
+        "top_k": 5,
+        "aggregate": true,
+        "seeds": "193,42,7",
+        "seed_count": 3,
+        "seed_run_ids": "comparison-longbench-multihop-grok_latest-20260711T020900Z-193,comparison-longbench-multihop-grok_latest-20260711T020900Z-42,comparison-longbench-multihop-grok_latest-20260711T020900Z-7"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "comparison-grok_latest-needle-aggregate-20260711T020900Z",
+      "suite_id": "comparison-needle",
+      "suite_version": "v1",
+      "executed_at": "2026-07-11T02:09:00.244338Z",
+      "mode": "baseline_dense",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "1b9ea3936647f11736fe0b49c4cfa50b70df311c",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "longbench-needle",
+          "version": "v1",
+          "split": "benchmark",
+          "record_count": 7
+        }
+      ],
+      "metrics": {
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "completion_tokens": {
+              "value": 0.0,
+              "unit": "tokens",
+              "description": "Completion tokens per query.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "prompt_tokens": {
+              "value": 0.0,
+              "unit": "tokens",
+              "description": "Prompt tokens per query.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "token_cost": {
+              "value": 0.0,
+              "unit": "tokens",
+              "description": "Estimated total token cost per query.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "comparison_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 0.0,
+              "unit": "ms",
+              "description": "Average end-to-end latency per query.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "mrr": {
+              "value": 0.0,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "recall_at_1": {
+              "value": 0.0,
+              "unit": "ratio",
+              "description": "Fraction of queries with a relevant memory at rank 1.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "recall_at_k": {
+              "value": 0.0,
+              "unit": "ratio",
+              "description": "Fraction of queries with a relevant memory in the top k.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "comparison_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T02:09:00.244338Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": {
+        "platform": "Darwin-25.5.0-x86_64",
+        "processor": "i386",
+        "cpu_count": 16,
+        "memory_gb": 16.0,
+        "gpu_name": null,
+        "gpu_count": null,
+        "cuda_version": null,
+        "mps_available": true,
+        "backend_accelerator": "mps"
+      },
+      "run_config": {
+        "baseline": "grok_latest",
+        "benchmark": "longbench-needle",
+        "seed": 193,
+        "blocked": true,
+        "blocked_reason": "no_api_key_or_access_configured",
+        "lengths": "4,8,16,32,64,128,256",
+        "top_k": 10,
+        "aggregate": true,
+        "seeds": "193,42,7",
+        "seed_count": 3,
+        "seed_run_ids": "comparison-longbench-needle-grok_latest-20260711T020859Z-193,comparison-longbench-needle-grok_latest-20260711T020900Z-42,comparison-longbench-needle-grok_latest-20260711T020900Z-7"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "comparison-long_context_model-multihop-aggregate-20260711T020859Z",
+      "suite_id": "comparison-multihop",
+      "suite_version": "v1",
+      "executed_at": "2026-07-11T02:08:59.945364Z",
+      "mode": "baseline_dense",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "1b9ea3936647f11736fe0b49c4cfa50b70df311c",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "longbench-multihop",
+          "version": "v1",
+          "split": "benchmark",
+          "record_count": 9
+        }
+      ],
+      "metrics": {
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "completion_tokens": {
+              "value": 576.0,
+              "unit": "tokens",
+              "description": "Completion tokens per query.",
+              "statistics": {
+                "mean": 576.0,
+                "standard_deviation": 0.0,
+                "min": 576.0,
+                "max": 576.0,
+                "ci_95_low": 576.0,
+                "ci_95_high": 576.0,
+                "sample_count": 3
+              }
+            },
+            "prompt_tokens": {
+              "value": 409.0,
+              "unit": "tokens",
+              "description": "Prompt tokens per query.",
+              "statistics": {
+                "mean": 409.0,
+                "standard_deviation": 0.0,
+                "min": 409.0,
+                "max": 409.0,
+                "ci_95_low": 409.0,
+                "ci_95_high": 409.0,
+                "sample_count": 3
+              }
+            },
+            "token_cost": {
+              "value": 985.0,
+              "unit": "tokens",
+              "description": "Estimated total token cost per query.",
+              "statistics": {
+                "mean": 985.0,
+                "standard_deviation": 0.0,
+                "min": 985.0,
+                "max": 985.0,
+                "ci_95_low": 985.0,
+                "ci_95_high": 985.0,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "comparison_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 4.310253988175343,
+              "unit": "ms",
+              "description": "Average end-to-end latency per query.",
+              "statistics": {
+                "mean": 4.310253988175343,
+                "standard_deviation": 0.3107844210632212,
+                "min": 4.094799980521202,
+                "max": 4.6665199915878475,
+                "ci_95_low": 3.9585747709270795,
+                "ci_95_high": 4.661933205423606,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "mrr": {
+              "value": 0.6703703703703704,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank.",
+              "statistics": {
+                "mean": 0.6703703703703704,
+                "standard_deviation": 0.0,
+                "min": 0.6703703703703704,
+                "max": 0.6703703703703704,
+                "ci_95_low": 0.6703703703703704,
+                "ci_95_high": 0.6703703703703704,
+                "sample_count": 3
+              }
+            },
+            "recall_at_1": {
+              "value": 0.5555555555555556,
+              "unit": "ratio",
+              "description": "Fraction of queries with a relevant memory at rank 1.",
+              "statistics": {
+                "mean": 0.5555555555555556,
+                "standard_deviation": 0.0,
+                "min": 0.5555555555555556,
+                "max": 0.5555555555555556,
+                "ci_95_low": 0.5555555555555556,
+                "ci_95_high": 0.5555555555555556,
+                "sample_count": 3
+              }
+            },
+            "recall_at_k": {
+              "value": 0.8888888888888888,
+              "unit": "ratio",
+              "description": "Fraction of queries with a relevant memory in the top k.",
+              "statistics": {
+                "mean": 0.8888888888888888,
+                "standard_deviation": 0.0,
+                "min": 0.8888888888888888,
+                "max": 0.8888888888888888,
+                "ci_95_low": 0.8888888888888888,
+                "ci_95_high": 0.8888888888888888,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "comparison_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T02:08:59.945364Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": {
+        "platform": "Darwin-25.5.0-x86_64",
+        "processor": "i386",
+        "cpu_count": 16,
+        "memory_gb": 16.0,
+        "gpu_name": null,
+        "gpu_count": null,
+        "cuda_version": null,
+        "mps_available": true,
+        "backend_accelerator": "mps"
+      },
+      "run_config": {
+        "baseline": "long_context_model",
+        "benchmark": "longbench-multihop",
+        "seed": 193,
+        "blocked": false,
+        "chain_count": 9,
+        "top_k": 5,
+        "aggregate": true,
+        "seeds": "193,42,7",
+        "seed_count": 3,
+        "seed_run_ids": "comparison-longbench-multihop-long_context_model-20260711T020859Z-193,comparison-longbench-multihop-long_context_model-20260711T020859Z-42,comparison-longbench-multihop-long_context_model-20260711T020859Z-7"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "comparison-long_context_model-needle-aggregate-20260711T020859Z",
+      "suite_id": "comparison-needle",
+      "suite_version": "v1",
+      "executed_at": "2026-07-11T02:08:59.763274Z",
+      "mode": "baseline_dense",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "1b9ea3936647f11736fe0b49c4cfa50b70df311c",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "longbench-needle",
+          "version": "v1",
+          "split": "benchmark",
+          "record_count": 7
+        }
+      ],
+      "metrics": {
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "completion_tokens": {
+              "value": 448.0,
+              "unit": "tokens",
+              "description": "Completion tokens per query.",
+              "statistics": {
+                "mean": 448.0,
+                "standard_deviation": 0.0,
+                "min": 448.0,
+                "max": 448.0,
+                "ci_95_low": 448.0,
+                "ci_95_high": 448.0,
+                "sample_count": 3
+              }
+            },
+            "prompt_tokens": {
+              "value": 2335.6666666666665,
+              "unit": "tokens",
+              "description": "Prompt tokens per query.",
+              "statistics": {
+                "mean": 2335.6666666666665,
+                "standard_deviation": 88.91194145520237,
+                "min": 2233.0,
+                "max": 2387.0,
+                "ci_95_low": 2235.0551821269437,
+                "ci_95_high": 2436.2781512063893,
+                "sample_count": 3
+              }
+            },
+            "token_cost": {
+              "value": 2783.6666666666665,
+              "unit": "tokens",
+              "description": "Estimated total token cost per query.",
+              "statistics": {
+                "mean": 2783.6666666666665,
+                "standard_deviation": 88.91194145520237,
+                "min": 2681.0,
+                "max": 2835.0,
+                "ci_95_low": 2683.0551821269437,
+                "ci_95_high": 2884.2781512063893,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "comparison_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 39.740744997592024,
+              "unit": "ms",
+              "description": "Average end-to-end latency per query.",
+              "statistics": {
+                "mean": 39.740744997592024,
+                "standard_deviation": 2.6130616868230607,
+                "min": 37.54483500961214,
+                "max": 42.63078700751066,
+                "ci_95_low": 36.78384167052203,
+                "ci_95_high": 42.69764832466202,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "mrr": {
+              "value": 0.0,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "recall_at_1": {
+              "value": 0.0,
+              "unit": "ratio",
+              "description": "Fraction of queries with a relevant memory at rank 1.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "recall_at_k": {
+              "value": 0.0,
+              "unit": "ratio",
+              "description": "Fraction of queries with a relevant memory in the top k.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "comparison_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T02:08:59.763274Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": {
+        "platform": "Darwin-25.5.0-x86_64",
+        "processor": "i386",
+        "cpu_count": 16,
+        "memory_gb": 16.0,
+        "gpu_name": null,
+        "gpu_count": null,
+        "cuda_version": null,
+        "mps_available": true,
+        "backend_accelerator": "mps"
+      },
+      "run_config": {
+        "baseline": "long_context_model",
+        "benchmark": "longbench-needle",
+        "seed": 193,
+        "blocked": false,
+        "lengths": "4,8,16,32,64,128,256",
+        "top_k": 10,
+        "aggregate": true,
+        "seeds": "193,42,7",
+        "seed_count": 3,
+        "seed_run_ids": "comparison-longbench-needle-long_context_model-20260711T020859Z-193,comparison-longbench-needle-long_context_model-20260711T020859Z-42,comparison-longbench-needle-long_context_model-20260711T020859Z-7"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "comparison-hierarchical_rag-multihop-aggregate-20260711T020859Z",
+      "suite_id": "comparison-multihop",
+      "suite_version": "v1",
+      "executed_at": "2026-07-11T02:08:59.338487Z",
+      "mode": "baseline_dense",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "1b9ea3936647f11736fe0b49c4cfa50b70df311c",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "longbench-multihop",
+          "version": "v1",
+          "split": "benchmark",
+          "record_count": 9
+        }
+      ],
+      "metrics": {
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "completion_tokens": {
+              "value": 576.0,
+              "unit": "tokens",
+              "description": "Completion tokens per query.",
+              "statistics": {
+                "mean": 576.0,
+                "standard_deviation": 0.0,
+                "min": 576.0,
+                "max": 576.0,
+                "ci_95_low": 576.0,
+                "ci_95_high": 576.0,
+                "sample_count": 3
+              }
+            },
+            "prompt_tokens": {
+              "value": 395.0,
+              "unit": "tokens",
+              "description": "Prompt tokens per query.",
+              "statistics": {
+                "mean": 395.0,
+                "standard_deviation": 0.0,
+                "min": 395.0,
+                "max": 395.0,
+                "ci_95_low": 395.0,
+                "ci_95_high": 395.0,
+                "sample_count": 3
+              }
+            },
+            "token_cost": {
+              "value": 971.0,
+              "unit": "tokens",
+              "description": "Estimated total token cost per query.",
+              "statistics": {
+                "mean": 971.0,
+                "standard_deviation": 0.0,
+                "min": 971.0,
+                "max": 971.0,
+                "ci_95_low": 971.0,
+                "ci_95_high": 971.0,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "comparison_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 3.773629665374756,
+              "unit": "ms",
+              "description": "Average end-to-end latency per query.",
+              "statistics": {
+                "mean": 3.773629665374756,
+                "standard_deviation": 0.23539307014508792,
+                "min": 3.5969720338471234,
+                "max": 4.04085498303175,
+                "ci_95_low": 3.5072622252981827,
+                "ci_95_high": 4.039997105451329,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "mrr": {
+              "value": 0.5407407407407407,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank.",
+              "statistics": {
+                "mean": 0.5407407407407407,
+                "standard_deviation": 0.0,
+                "min": 0.5407407407407407,
+                "max": 0.5407407407407407,
+                "ci_95_low": 0.5407407407407407,
+                "ci_95_high": 0.5407407407407407,
+                "sample_count": 3
+              }
+            },
+            "recall_at_1": {
+              "value": 0.4444444444444444,
+              "unit": "ratio",
+              "description": "Fraction of queries with a relevant memory at rank 1.",
+              "statistics": {
+                "mean": 0.4444444444444444,
+                "standard_deviation": 0.0,
+                "min": 0.4444444444444444,
+                "max": 0.4444444444444444,
+                "ci_95_low": 0.4444444444444444,
+                "ci_95_high": 0.4444444444444444,
+                "sample_count": 3
+              }
+            },
+            "recall_at_k": {
+              "value": 0.7777777777777778,
+              "unit": "ratio",
+              "description": "Fraction of queries with a relevant memory in the top k.",
+              "statistics": {
+                "mean": 0.7777777777777778,
+                "standard_deviation": 0.0,
+                "min": 0.7777777777777778,
+                "max": 0.7777777777777778,
+                "ci_95_low": 0.7777777777777778,
+                "ci_95_high": 0.7777777777777778,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "comparison_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T02:08:59.338487Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": {
+        "platform": "Darwin-25.5.0-x86_64",
+        "processor": "i386",
+        "cpu_count": 16,
+        "memory_gb": 16.0,
+        "gpu_name": null,
+        "gpu_count": null,
+        "cuda_version": null,
+        "mps_available": true,
+        "backend_accelerator": "mps"
+      },
+      "run_config": {
+        "baseline": "hierarchical_rag",
+        "benchmark": "longbench-multihop",
+        "seed": 193,
+        "blocked": false,
+        "chain_count": 9,
+        "top_k": 5,
+        "aggregate": true,
+        "seeds": "193,42,7",
+        "seed_count": 3,
+        "seed_run_ids": "comparison-longbench-multihop-hierarchical_rag-20260711T020859Z-193,comparison-longbench-multihop-hierarchical_rag-20260711T020859Z-42,comparison-longbench-multihop-hierarchical_rag-20260711T020859Z-7"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "comparison-hierarchical_rag-needle-aggregate-20260711T020859Z",
+      "suite_id": "comparison-needle",
+      "suite_version": "v1",
+      "executed_at": "2026-07-11T02:08:59.156641Z",
+      "mode": "baseline_dense",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "1b9ea3936647f11736fe0b49c4cfa50b70df311c",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "longbench-needle",
+          "version": "v1",
+          "split": "benchmark",
+          "record_count": 7
+        }
+      ],
+      "metrics": {
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "completion_tokens": {
+              "value": 448.0,
+              "unit": "tokens",
+              "description": "Completion tokens per query.",
+              "statistics": {
+                "mean": 448.0,
+                "standard_deviation": 0.0,
+                "min": 448.0,
+                "max": 448.0,
+                "ci_95_low": 448.0,
+                "ci_95_high": 448.0,
+                "sample_count": 3
+              }
+            },
+            "prompt_tokens": {
+              "value": 2284.3333333333335,
+              "unit": "tokens",
+              "description": "Prompt tokens per query.",
+              "statistics": {
+                "mean": 2284.3333333333335,
+                "standard_deviation": 177.82388291040473,
+                "min": 2079.0,
+                "max": 2387.0,
+                "ci_95_low": 2083.110364253888,
+                "ci_95_high": 2485.556302412779,
+                "sample_count": 3
+              }
+            },
+            "token_cost": {
+              "value": 2732.3333333333335,
+              "unit": "tokens",
+              "description": "Estimated total token cost per query.",
+              "statistics": {
+                "mean": 2732.3333333333335,
+                "standard_deviation": 177.82388291040473,
+                "min": 2527.0,
+                "max": 2835.0,
+                "ci_95_low": 2531.110364253888,
+                "ci_95_high": 2933.556302412779,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "comparison_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 23.49176164716482,
+              "unit": "ms",
+              "description": "Average end-to-end latency per query.",
+              "statistics": {
+                "mean": 23.49176164716482,
+                "standard_deviation": 0.5669305283257308,
+                "min": 22.840133984573185,
+                "max": 23.87185499537736,
+                "ci_95_low": 22.85023114909916,
+                "ci_95_high": 24.133292145230484,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "mrr": {
+              "value": 0.0,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "recall_at_1": {
+              "value": 0.0,
+              "unit": "ratio",
+              "description": "Fraction of queries with a relevant memory at rank 1.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "recall_at_k": {
+              "value": 0.0,
+              "unit": "ratio",
+              "description": "Fraction of queries with a relevant memory in the top k.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "comparison_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T02:08:59.156641Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": {
+        "platform": "Darwin-25.5.0-x86_64",
+        "processor": "i386",
+        "cpu_count": 16,
+        "memory_gb": 16.0,
+        "gpu_name": null,
+        "gpu_count": null,
+        "cuda_version": null,
+        "mps_available": true,
+        "backend_accelerator": "mps"
+      },
+      "run_config": {
+        "baseline": "hierarchical_rag",
+        "benchmark": "longbench-needle",
+        "seed": 193,
+        "blocked": false,
+        "lengths": "4,8,16,32,64,128,256",
+        "top_k": 10,
+        "aggregate": true,
+        "seeds": "193,42,7",
+        "seed_count": 3,
+        "seed_run_ids": "comparison-longbench-needle-hierarchical_rag-20260711T020858Z-193,comparison-longbench-needle-hierarchical_rag-20260711T020858Z-42,comparison-longbench-needle-hierarchical_rag-20260711T020859Z-7"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "comparison-dense_retrieval-multihop-aggregate-20260711T020858Z",
+      "suite_id": "comparison-multihop",
+      "suite_version": "v1",
+      "executed_at": "2026-07-11T02:08:58.796321Z",
+      "mode": "baseline_dense",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "1b9ea3936647f11736fe0b49c4cfa50b70df311c",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "longbench-multihop",
+          "version": "v1",
+          "split": "benchmark",
+          "record_count": 9
+        }
+      ],
+      "metrics": {
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "completion_tokens": {
+              "value": 576.0,
+              "unit": "tokens",
+              "description": "Completion tokens per query.",
+              "statistics": {
+                "mean": 576.0,
+                "standard_deviation": 0.0,
+                "min": 576.0,
+                "max": 576.0,
+                "ci_95_low": 576.0,
+                "ci_95_high": 576.0,
+                "sample_count": 3
+              }
+            },
+            "prompt_tokens": {
+              "value": 395.0,
+              "unit": "tokens",
+              "description": "Prompt tokens per query.",
+              "statistics": {
+                "mean": 395.0,
+                "standard_deviation": 0.0,
+                "min": 395.0,
+                "max": 395.0,
+                "ci_95_low": 395.0,
+                "ci_95_high": 395.0,
+                "sample_count": 3
+              }
+            },
+            "token_cost": {
+              "value": 971.0,
+              "unit": "tokens",
+              "description": "Estimated total token cost per query.",
+              "statistics": {
+                "mean": 971.0,
+                "standard_deviation": 0.0,
+                "min": 971.0,
+                "max": 971.0,
+                "ci_95_low": 971.0,
+                "ci_95_high": 971.0,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "comparison_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 3.330864342084775,
+              "unit": "ms",
+              "description": "Average end-to-end latency per query.",
+              "statistics": {
+                "mean": 3.330864342084775,
+                "standard_deviation": 0.15211561957548836,
+                "min": 3.158354025799781,
+                "max": 3.4457430010661483,
+                "ci_95_low": 3.1587324770429945,
+                "ci_95_high": 3.502996207126556,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "mrr": {
+              "value": 0.5407407407407407,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank.",
+              "statistics": {
+                "mean": 0.5407407407407407,
+                "standard_deviation": 0.0,
+                "min": 0.5407407407407407,
+                "max": 0.5407407407407407,
+                "ci_95_low": 0.5407407407407407,
+                "ci_95_high": 0.5407407407407407,
+                "sample_count": 3
+              }
+            },
+            "recall_at_1": {
+              "value": 0.4444444444444444,
+              "unit": "ratio",
+              "description": "Fraction of queries with a relevant memory at rank 1.",
+              "statistics": {
+                "mean": 0.4444444444444444,
+                "standard_deviation": 0.0,
+                "min": 0.4444444444444444,
+                "max": 0.4444444444444444,
+                "ci_95_low": 0.4444444444444444,
+                "ci_95_high": 0.4444444444444444,
+                "sample_count": 3
+              }
+            },
+            "recall_at_k": {
+              "value": 0.7777777777777778,
+              "unit": "ratio",
+              "description": "Fraction of queries with a relevant memory in the top k.",
+              "statistics": {
+                "mean": 0.7777777777777778,
+                "standard_deviation": 0.0,
+                "min": 0.7777777777777778,
+                "max": 0.7777777777777778,
+                "ci_95_low": 0.7777777777777778,
+                "ci_95_high": 0.7777777777777778,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "comparison_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T02:08:58.796321Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": {
+        "platform": "Darwin-25.5.0-x86_64",
+        "processor": "i386",
+        "cpu_count": 16,
+        "memory_gb": 16.0,
+        "gpu_name": null,
+        "gpu_count": null,
+        "cuda_version": null,
+        "mps_available": true,
+        "backend_accelerator": "mps"
+      },
+      "run_config": {
+        "baseline": "dense_retrieval",
+        "benchmark": "longbench-multihop",
+        "seed": 193,
+        "blocked": false,
+        "chain_count": 9,
+        "top_k": 5,
+        "aggregate": true,
+        "seeds": "193,42,7",
+        "seed_count": 3,
+        "seed_run_ids": "comparison-longbench-multihop-dense_retrieval-20260711T020858Z-193,comparison-longbench-multihop-dense_retrieval-20260711T020858Z-42,comparison-longbench-multihop-dense_retrieval-20260711T020858Z-7"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "comparison-dense_retrieval-needle-aggregate-20260711T020858Z",
+      "suite_id": "comparison-needle",
+      "suite_version": "v1",
+      "executed_at": "2026-07-11T02:08:58.611912Z",
+      "mode": "baseline_dense",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "1b9ea3936647f11736fe0b49c4cfa50b70df311c",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "longbench-needle",
+          "version": "v1",
+          "split": "benchmark",
+          "record_count": 7
+        }
+      ],
+      "metrics": {
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "completion_tokens": {
+              "value": 448.0,
+              "unit": "tokens",
+              "description": "Completion tokens per query.",
+              "statistics": {
+                "mean": 448.0,
+                "standard_deviation": 0.0,
+                "min": 448.0,
+                "max": 448.0,
+                "ci_95_low": 448.0,
+                "ci_95_high": 448.0,
+                "sample_count": 3
+              }
+            },
+            "prompt_tokens": {
+              "value": 2284.3333333333335,
+              "unit": "tokens",
+              "description": "Prompt tokens per query.",
+              "statistics": {
+                "mean": 2284.3333333333335,
+                "standard_deviation": 177.82388291040473,
+                "min": 2079.0,
+                "max": 2387.0,
+                "ci_95_low": 2083.110364253888,
+                "ci_95_high": 2485.556302412779,
+                "sample_count": 3
+              }
+            },
+            "token_cost": {
+              "value": 2732.3333333333335,
+              "unit": "tokens",
+              "description": "Estimated total token cost per query.",
+              "statistics": {
+                "mean": 2732.3333333333335,
+                "standard_deviation": 177.82388291040473,
+                "min": 2527.0,
+                "max": 2835.0,
+                "ci_95_low": 2531.110364253888,
+                "ci_95_high": 2933.556302412779,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "comparison_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 19.817847351077944,
+              "unit": "ms",
+              "description": "Average end-to-end latency per query.",
+              "statistics": {
+                "mean": 19.817847351077944,
+                "standard_deviation": 2.33568503221707,
+                "min": 18.43057299265638,
+                "max": 22.514489013701677,
+                "ci_95_low": 17.174819489325863,
+                "ci_95_high": 22.460875212830025,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "mrr": {
+              "value": 0.0,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "recall_at_1": {
+              "value": 0.0,
+              "unit": "ratio",
+              "description": "Fraction of queries with a relevant memory at rank 1.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "recall_at_k": {
+              "value": 0.0,
+              "unit": "ratio",
+              "description": "Fraction of queries with a relevant memory in the top k.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "comparison_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T02:08:58.611912Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": {
+        "platform": "Darwin-25.5.0-x86_64",
+        "processor": "i386",
+        "cpu_count": 16,
+        "memory_gb": 16.0,
+        "gpu_name": null,
+        "gpu_count": null,
+        "cuda_version": null,
+        "mps_available": true,
+        "backend_accelerator": "mps"
+      },
+      "run_config": {
+        "baseline": "dense_retrieval",
+        "benchmark": "longbench-needle",
+        "seed": 193,
+        "blocked": false,
+        "lengths": "4,8,16,32,64,128,256",
+        "top_k": 10,
+        "aggregate": true,
+        "seeds": "193,42,7",
+        "seed_count": 3,
+        "seed_run_ids": "comparison-longbench-needle-dense_retrieval-20260711T020858Z-193,comparison-longbench-needle-dense_retrieval-20260711T020858Z-42,comparison-longbench-needle-dense_retrieval-20260711T020858Z-7"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "ablation-abstention_on-aggregate-20260711T015728Z",
+      "suite_id": "ablation_retrieval",
+      "suite_version": "v1",
+      "executed_at": "2026-07-11T01:57:28.086104Z",
+      "mode": "full_dss",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "1b9ea3936647f11736fe0b49c4cfa50b70df311c",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "benchmark_dataset",
+          "version": "local-v1",
+          "split": "benchmark",
+          "record_count": null
+        }
+      ],
+      "metrics": {
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "completion_tokens": {
+              "value": 64.0,
+              "unit": "tokens",
+              "description": "Estimated completion tokens for the answer.",
+              "statistics": {
+                "mean": 64.0,
+                "standard_deviation": 0.0,
+                "min": 64.0,
+                "max": 64.0,
+                "ci_95_low": 64.0,
+                "ci_95_high": 64.0,
+                "sample_count": 3
+              }
+            },
+            "coordinate_lookup_tokens": {
+              "value": 2.6666666666666665,
+              "unit": "tokens",
+              "description": "Coordinate factor / lookup tokens.",
+              "statistics": {
+                "mean": 2.6666666666666665,
+                "standard_deviation": 0.0,
+                "min": 2.6666666666666665,
+                "max": 2.6666666666666665,
+                "ci_95_low": 2.6666666666666665,
+                "ci_95_high": 2.6666666666666665,
+                "sample_count": 3
+              }
+            },
+            "prompt_tokens": {
+              "value": 10.333333333333334,
+              "unit": "tokens",
+              "description": "Tokens in the query plus admitted context.",
+              "statistics": {
+                "mean": 10.333333333333334,
+                "standard_deviation": 0.0,
+                "min": 10.333333333333334,
+                "max": 10.333333333333334,
+                "ci_95_low": 10.333333333333334,
+                "ci_95_high": 10.333333333333334,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "ablation_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 0.8573878472412212,
+              "unit": "ms",
+              "description": "Total end-to-end latency per query.",
+              "statistics": {
+                "mean": 0.8573878472412212,
+                "standard_deviation": 0.37191954780745634,
+                "min": 0.5685466846140722,
+                "max": 1.2770396715495735,
+                "ci_95_low": 0.43652899271824286,
+                "ci_95_high": 1.2782467017641994,
+                "sample_count": 3
+              }
+            },
+            "coordinate_resolution_ms": {
+              "value": 0.2126590083611922,
+              "unit": "ms",
+              "description": "Deriving the query coordinate from text.",
+              "statistics": {
+                "mean": 0.2126590083611922,
+                "standard_deviation": 0.10595084287075733,
+                "min": 0.14286567845071355,
+                "max": 0.33457434619776905,
+                "ci_95_low": 0.09276654605529713,
+                "ci_95_high": 0.33255147066708723,
+                "sample_count": 3
+              }
+            },
+            "llm_generation_ms": {
+              "value": 0.0,
+              "unit": "ms",
+              "description": "LLM answer generation latency (not exercised here).",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "post_processing_ms": {
+              "value": 0.0008948296049816741,
+              "unit": "ms",
+              "description": "Abstention and score-blending overhead.",
+              "statistics": {
+                "mean": 0.0008948296049816741,
+                "standard_deviation": 0.00013229296032386242,
+                "min": 0.0007793326706935962,
+                "max": 0.0010391619677344959,
+                "ci_95_low": 0.0007451287783604864,
+                "ci_95_high": 0.0010445304316028619,
+                "sample_count": 3
+              }
+            },
+            "retrieval_ms": {
+              "value": 0.6438340092750473,
+              "unit": "ms",
+              "description": "Ranking / similarity computation latency.",
+              "statistics": {
+                "mean": 0.6438340092750473,
+                "standard_deviation": 0.2671180940456562,
+                "min": 0.42481501198684174,
+                "max": 0.94142616338407,
+                "ci_95_low": 0.34156698473936553,
+                "ci_95_high": 0.9461010338107291,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "mrr": {
+              "value": 0.16666666666666666,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank.",
+              "statistics": {
+                "mean": 0.16666666666666666,
+                "standard_deviation": 0.0,
+                "min": 0.16666666666666666,
+                "max": 0.16666666666666666,
+                "ci_95_low": 0.16666666666666666,
+                "ci_95_high": 0.16666666666666666,
+                "sample_count": 3
+              }
+            },
+            "queries": {
+              "value": 6.0,
+              "unit": "count",
+              "description": "Number of evaluated queries.",
+              "statistics": {
+                "mean": 6.0,
+                "standard_deviation": 0.0,
+                "min": 6.0,
+                "max": 6.0,
+                "ci_95_low": 6.0,
+                "ci_95_high": 6.0,
+                "sample_count": 3
+              }
+            },
+            "recall_at_1": {
+              "value": 0.16666666666666666,
+              "unit": "ratio",
+              "description": "Recall at rank 1.",
+              "statistics": {
+                "mean": 0.16666666666666666,
+                "standard_deviation": 0.0,
+                "min": 0.16666666666666666,
+                "max": 0.16666666666666666,
+                "ci_95_low": 0.16666666666666666,
+                "ci_95_high": 0.16666666666666666,
+                "sample_count": 3
+              }
+            },
+            "recall_at_10": {
+              "value": 0.16666666666666666,
+              "unit": "ratio",
+              "description": "Recall within top 10.",
+              "statistics": {
+                "mean": 0.16666666666666666,
+                "standard_deviation": 0.0,
+                "min": 0.16666666666666666,
+                "max": 0.16666666666666666,
+                "ci_95_low": 0.16666666666666666,
+                "ci_95_high": 0.16666666666666666,
+                "sample_count": 3
+              }
+            },
+            "recall_at_5": {
+              "value": 0.16666666666666666,
+              "unit": "ratio",
+              "description": "Recall at rank 5.",
+              "statistics": {
+                "mean": 0.16666666666666666,
+                "standard_deviation": 0.0,
+                "min": 0.16666666666666666,
+                "max": 0.16666666666666666,
+                "ci_95_low": 0.16666666666666666,
+                "ci_95_high": 0.16666666666666666,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "ablation_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T01:57:28.086104Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": {
+        "platform": "Darwin-25.5.0-x86_64",
+        "processor": "i386",
+        "cpu_count": 16,
+        "memory_gb": 16.0,
+        "gpu_name": null,
+        "gpu_count": null,
+        "cuda_version": null,
+        "mps_available": true,
+        "backend_accelerator": "mps"
+      },
+      "run_config": {
+        "condition": "abstention_on",
+        "mode": "full_dss",
+        "use_qp_filters": true,
+        "use_abstention": true,
+        "abstention_threshold": 0.35,
+        "coordinate_resolution": "factor",
+        "top_k": 10,
+        "seed": 193,
+        "dataset": "benchmark_dataset.jsonl",
+        "aggregate": true,
+        "seeds": "193,42,7",
+        "seed_count": 3,
+        "seed_run_ids": "ablation-abstention_on-20260711T015727Z-193,ablation-abstention_on-20260711T015727Z-42,ablation-abstention_on-20260711T015728Z-7"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "ablation-coordinate_token_index-aggregate-20260711T015727Z",
+      "suite_id": "ablation_retrieval",
+      "suite_version": "v1",
+      "executed_at": "2026-07-11T01:57:27.913444Z",
+      "mode": "coordinate_guided",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "1b9ea3936647f11736fe0b49c4cfa50b70df311c",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "benchmark_dataset",
+          "version": "local-v1",
+          "split": "benchmark",
+          "record_count": null
+        }
+      ],
+      "metrics": {
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "completion_tokens": {
+              "value": 64.0,
+              "unit": "tokens",
+              "description": "Estimated completion tokens for the answer.",
+              "statistics": {
+                "mean": 64.0,
+                "standard_deviation": 0.0,
+                "min": 64.0,
+                "max": 64.0,
+                "ci_95_low": 64.0,
+                "ci_95_high": 64.0,
+                "sample_count": 3
+              }
+            },
+            "coordinate_lookup_tokens": {
+              "value": 2.6666666666666665,
+              "unit": "tokens",
+              "description": "Coordinate factor / lookup tokens.",
+              "statistics": {
+                "mean": 2.6666666666666665,
+                "standard_deviation": 0.0,
+                "min": 2.6666666666666665,
+                "max": 2.6666666666666665,
+                "ci_95_low": 2.6666666666666665,
+                "ci_95_high": 2.6666666666666665,
+                "sample_count": 3
+              }
+            },
+            "prompt_tokens": {
+              "value": 10.333333333333334,
+              "unit": "tokens",
+              "description": "Tokens in the query plus admitted context.",
+              "statistics": {
+                "mean": 10.333333333333334,
+                "standard_deviation": 0.0,
+                "min": 10.333333333333334,
+                "max": 10.333333333333334,
+                "ci_95_low": 10.333333333333334,
+                "ci_95_high": 10.333333333333334,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "ablation_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 0.49811131773620015,
+              "unit": "ms",
+              "description": "Total end-to-end latency per query.",
+              "statistics": {
+                "mean": 0.49811131773620015,
+                "standard_deviation": 0.031208234749940698,
+                "min": 0.46978498964260024,
+                "max": 0.5315661449761441,
+                "ci_95_low": 0.462796524507467,
+                "ci_95_high": 0.5334261109649333,
+                "sample_count": 3
+              }
+            },
+            "coordinate_resolution_ms": {
+              "value": 0.15414972181638908,
+              "unit": "ms",
+              "description": "Deriving the query coordinate from text.",
+              "statistics": {
+                "mean": 0.15414972181638908,
+                "standard_deviation": 0.017668466935282918,
+                "min": 0.13612399925477803,
+                "max": 0.17143783043138683,
+                "ci_95_low": 0.1341563366894264,
+                "ci_95_high": 0.17414310694335178,
+                "sample_count": 3
+              }
+            },
+            "llm_generation_ms": {
+              "value": 0.0,
+              "unit": "ms",
+              "description": "LLM answer generation latency (not exercised here).",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "post_processing_ms": {
+              "value": 0.0004661528186665641,
+              "unit": "ms",
+              "description": "Abstention and score-blending overhead.",
+              "statistics": {
+                "mean": 0.0004661528186665641,
+                "standard_deviation": 1.549999423603721e-05,
+                "min": 0.0004531563414881627,
+                "max": 0.0004833079098413388,
+                "ci_95_low": 0.0004486132463108015,
+                "ci_95_high": 0.00048369239102232674,
+                "sample_count": 3
+              }
+            },
+            "retrieval_ms": {
+              "value": 0.3434954431011445,
+              "unit": "ms",
+              "description": "Ranking / similarity computation latency.",
+              "statistics": {
+                "mean": 0.3434954431011445,
+                "standard_deviation": 0.014159904885085678,
+                "min": 0.33320783404633403,
+                "max": 0.3596450066349159,
+                "ci_95_low": 0.32747229673730605,
+                "ci_95_high": 0.35951858946498294,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "mrr": {
+              "value": 0.08333333333333333,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank.",
+              "statistics": {
+                "mean": 0.08333333333333333,
+                "standard_deviation": 0.0,
+                "min": 0.08333333333333333,
+                "max": 0.08333333333333333,
+                "ci_95_low": 0.08333333333333333,
+                "ci_95_high": 0.08333333333333333,
+                "sample_count": 3
+              }
+            },
+            "queries": {
+              "value": 6.0,
+              "unit": "count",
+              "description": "Number of evaluated queries.",
+              "statistics": {
+                "mean": 6.0,
+                "standard_deviation": 0.0,
+                "min": 6.0,
+                "max": 6.0,
+                "ci_95_low": 6.0,
+                "ci_95_high": 6.0,
+                "sample_count": 3
+              }
+            },
+            "recall_at_1": {
+              "value": 0.0,
+              "unit": "ratio",
+              "description": "Recall at rank 1.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "recall_at_10": {
+              "value": 0.16666666666666666,
+              "unit": "ratio",
+              "description": "Recall within top 10.",
+              "statistics": {
+                "mean": 0.16666666666666666,
+                "standard_deviation": 0.0,
+                "min": 0.16666666666666666,
+                "max": 0.16666666666666666,
+                "ci_95_low": 0.16666666666666666,
+                "ci_95_high": 0.16666666666666666,
+                "sample_count": 3
+              }
+            },
+            "recall_at_5": {
+              "value": 0.16666666666666666,
+              "unit": "ratio",
+              "description": "Recall at rank 5.",
+              "statistics": {
+                "mean": 0.16666666666666666,
+                "standard_deviation": 0.0,
+                "min": 0.16666666666666666,
+                "max": 0.16666666666666666,
+                "ci_95_low": 0.16666666666666666,
+                "ci_95_high": 0.16666666666666666,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "ablation_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T01:57:27.913444Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": {
+        "platform": "Darwin-25.5.0-x86_64",
+        "processor": "i386",
+        "cpu_count": 16,
+        "memory_gb": 16.0,
+        "gpu_name": null,
+        "gpu_count": null,
+        "cuda_version": null,
+        "mps_available": true,
+        "backend_accelerator": "mps"
+      },
+      "run_config": {
+        "condition": "coordinate_token_index",
+        "mode": "coordinate_guided",
+        "use_qp_filters": true,
+        "use_abstention": false,
+        "abstention_threshold": 0.35,
+        "coordinate_resolution": "token",
+        "top_k": 10,
+        "seed": 193,
+        "dataset": "benchmark_dataset.jsonl",
+        "aggregate": true,
+        "seeds": "193,42,7",
+        "seed_count": 3,
+        "seed_run_ids": "ablation-coordinate_token_index-20260711T015727Z-193,ablation-coordinate_token_index-20260711T015727Z-42,ablation-coordinate_token_index-20260711T015727Z-7"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "ablation-coordinate_no_filters-aggregate-20260711T015727Z",
+      "suite_id": "ablation_retrieval",
+      "suite_version": "v1",
+      "executed_at": "2026-07-11T01:57:27.756951Z",
+      "mode": "coordinate_guided",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "1b9ea3936647f11736fe0b49c4cfa50b70df311c",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "benchmark_dataset",
+          "version": "local-v1",
+          "split": "benchmark",
+          "record_count": null
+        }
+      ],
+      "metrics": {
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "completion_tokens": {
+              "value": 64.0,
+              "unit": "tokens",
+              "description": "Estimated completion tokens for the answer.",
+              "statistics": {
+                "mean": 64.0,
+                "standard_deviation": 0.0,
+                "min": 64.0,
+                "max": 64.0,
+                "ci_95_low": 64.0,
+                "ci_95_high": 64.0,
+                "sample_count": 3
+              }
+            },
+            "coordinate_lookup_tokens": {
+              "value": 2.6666666666666665,
+              "unit": "tokens",
+              "description": "Coordinate factor / lookup tokens.",
+              "statistics": {
+                "mean": 2.6666666666666665,
+                "standard_deviation": 0.0,
+                "min": 2.6666666666666665,
+                "max": 2.6666666666666665,
+                "ci_95_low": 2.6666666666666665,
+                "ci_95_high": 2.6666666666666665,
+                "sample_count": 3
+              }
+            },
+            "prompt_tokens": {
+              "value": 31.5,
+              "unit": "tokens",
+              "description": "Tokens in the query plus admitted context.",
+              "statistics": {
+                "mean": 31.5,
+                "standard_deviation": 0.0,
+                "min": 31.5,
+                "max": 31.5,
+                "ci_95_low": 31.5,
+                "ci_95_high": 31.5,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "ablation_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 0.23980255031751263,
+              "unit": "ms",
+              "description": "Total end-to-end latency per query.",
+              "statistics": {
+                "mean": 0.23980255031751263,
+                "standard_deviation": 0.017071773537386117,
+                "min": 0.2208190174618115,
+                "max": 0.2538948125826816,
+                "ci_95_low": 0.2204843749272274,
+                "ci_95_high": 0.25912072570779787,
+                "sample_count": 3
+              }
+            },
+            "coordinate_resolution_ms": {
+              "value": 0.1594008806730724,
+              "unit": "ms",
+              "description": "Deriving the query coordinate from text.",
+              "statistics": {
+                "mean": 0.1594008806730724,
+                "standard_deviation": 0.010114824598175174,
+                "min": 0.14953999198041856,
+                "max": 0.1697518261304746,
+                "ci_95_low": 0.1479550894550946,
+                "ci_95_high": 0.17084667189105018,
+                "sample_count": 3
+              }
+            },
+            "llm_generation_ms": {
+              "value": 0.0,
+              "unit": "ms",
+              "description": "LLM answer generation latency (not exercised here).",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "post_processing_ms": {
+              "value": 0.000454944610181782,
+              "unit": "ms",
+              "description": "Abstention and score-blending overhead.",
+              "statistics": {
+                "mean": 0.000454944610181782,
+                "standard_deviation": 2.050702222891241e-05,
+                "min": 0.0004356746406604846,
+                "max": 0.0004764976135144631,
+                "ci_95_low": 0.0004317391563791618,
+                "ci_95_high": 0.0004781500639844022,
+                "sample_count": 3
+              }
+            },
+            "retrieval_ms": {
+              "value": 0.07994672503425843,
+              "unit": "ms",
+              "description": "Ranking / similarity computation latency.",
+              "statistics": {
+                "mean": 0.07994672503425843,
+                "standard_deviation": 0.007927525631925475,
+                "min": 0.07084335084073246,
+                "max": 0.08533033542335033,
+                "ci_95_low": 0.07097605012264838,
+                "ci_95_high": 0.08891739994586847,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "mrr": {
+              "value": 0.6388888888888888,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank.",
+              "statistics": {
+                "mean": 0.6388888888888888,
+                "standard_deviation": 0.0,
+                "min": 0.6388888888888888,
+                "max": 0.6388888888888888,
+                "ci_95_low": 0.6388888888888888,
+                "ci_95_high": 0.6388888888888888,
+                "sample_count": 3
+              }
+            },
+            "queries": {
+              "value": 6.0,
+              "unit": "count",
+              "description": "Number of evaluated queries.",
+              "statistics": {
+                "mean": 6.0,
+                "standard_deviation": 0.0,
+                "min": 6.0,
+                "max": 6.0,
+                "ci_95_low": 6.0,
+                "ci_95_high": 6.0,
+                "sample_count": 3
+              }
+            },
+            "recall_at_1": {
+              "value": 0.3333333333333333,
+              "unit": "ratio",
+              "description": "Recall at rank 1.",
+              "statistics": {
+                "mean": 0.3333333333333333,
+                "standard_deviation": 0.0,
+                "min": 0.3333333333333333,
+                "max": 0.3333333333333333,
+                "ci_95_low": 0.3333333333333333,
+                "ci_95_high": 0.3333333333333333,
+                "sample_count": 3
+              }
+            },
+            "recall_at_10": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Recall within top 10.",
+              "statistics": {
+                "mean": 1.0,
+                "standard_deviation": 0.0,
+                "min": 1.0,
+                "max": 1.0,
+                "ci_95_low": 1.0,
+                "ci_95_high": 1.0,
+                "sample_count": 3
+              }
+            },
+            "recall_at_5": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Recall at rank 5.",
+              "statistics": {
+                "mean": 1.0,
+                "standard_deviation": 0.0,
+                "min": 1.0,
+                "max": 1.0,
+                "ci_95_low": 1.0,
+                "ci_95_high": 1.0,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "ablation_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T01:57:27.756951Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": {
+        "platform": "Darwin-25.5.0-x86_64",
+        "processor": "i386",
+        "cpu_count": 16,
+        "memory_gb": 16.0,
+        "gpu_name": null,
+        "gpu_count": null,
+        "cuda_version": null,
+        "mps_available": true,
+        "backend_accelerator": "mps"
+      },
+      "run_config": {
+        "condition": "coordinate_no_filters",
+        "mode": "coordinate_guided",
+        "use_qp_filters": false,
+        "use_abstention": false,
+        "abstention_threshold": 0.35,
+        "coordinate_resolution": "factor",
+        "top_k": 10,
+        "seed": 193,
+        "dataset": "benchmark_dataset.jsonl",
+        "aggregate": true,
+        "seeds": "193,42,7",
+        "seed_count": 3,
+        "seed_run_ids": "ablation-coordinate_no_filters-20260711T015727Z-193,ablation-coordinate_no_filters-20260711T015727Z-42,ablation-coordinate_no_filters-20260711T015727Z-7"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "ablation-full_dss-aggregate-20260711T015727Z",
+      "suite_id": "ablation_retrieval",
+      "suite_version": "v1",
+      "executed_at": "2026-07-11T01:57:27.600572Z",
+      "mode": "full_dss",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "1b9ea3936647f11736fe0b49c4cfa50b70df311c",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "benchmark_dataset",
+          "version": "local-v1",
+          "split": "benchmark",
+          "record_count": null
+        }
+      ],
+      "metrics": {
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "completion_tokens": {
+              "value": 64.0,
+              "unit": "tokens",
+              "description": "Estimated completion tokens for the answer.",
+              "statistics": {
+                "mean": 64.0,
+                "standard_deviation": 0.0,
+                "min": 64.0,
+                "max": 64.0,
+                "ci_95_low": 64.0,
+                "ci_95_high": 64.0,
+                "sample_count": 3
+              }
+            },
+            "coordinate_lookup_tokens": {
+              "value": 2.6666666666666665,
+              "unit": "tokens",
+              "description": "Coordinate factor / lookup tokens.",
+              "statistics": {
+                "mean": 2.6666666666666665,
+                "standard_deviation": 0.0,
+                "min": 2.6666666666666665,
+                "max": 2.6666666666666665,
+                "ci_95_low": 2.6666666666666665,
+                "ci_95_high": 2.6666666666666665,
+                "sample_count": 3
+              }
+            },
+            "prompt_tokens": {
+              "value": 10.333333333333334,
+              "unit": "tokens",
+              "description": "Tokens in the query plus admitted context.",
+              "statistics": {
+                "mean": 10.333333333333334,
+                "standard_deviation": 0.0,
+                "min": 10.333333333333334,
+                "max": 10.333333333333334,
+                "ci_95_low": 10.333333333333334,
+                "ci_95_high": 10.333333333333334,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "ablation_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 0.6827428329011632,
+              "unit": "ms",
+              "description": "Total end-to-end latency per query.",
+              "statistics": {
+                "mean": 0.6827428329011632,
+                "standard_deviation": 0.037880536044640624,
+                "min": 0.6394304994804164,
+                "max": 0.7096873208259543,
+                "ci_95_low": 0.6398777587138896,
+                "ci_95_high": 0.7256079070884368,
+                "sample_count": 3
+              }
+            },
+            "coordinate_resolution_ms": {
+              "value": 0.187679387939473,
+              "unit": "ms",
+              "description": "Deriving the query coordinate from text.",
+              "statistics": {
+                "mean": 0.187679387939473,
+                "standard_deviation": 0.023471953223537612,
+                "min": 0.16486716534321508,
+                "max": 0.21175966442873081,
+                "ci_95_low": 0.16111886052081462,
+                "ci_95_high": 0.2142399153581314,
+                "sample_count": 3
+              }
+            },
+            "llm_generation_ms": {
+              "value": 0.0,
+              "unit": "ms",
+              "description": "LLM answer generation latency (not exercised here).",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "post_processing_ms": {
+              "value": 0.0005977183011256986,
+              "unit": "ms",
+              "description": "Abstention and score-blending overhead.",
+              "statistics": {
+                "mean": 0.0005977183011256986,
+                "standard_deviation": 4.3340402162394507e-05,
+                "min": 0.0005504892518122991,
+                "max": 0.0006356664622823397,
+                "ci_95_low": 0.0005486749203296089,
+                "ci_95_high": 0.0006467616819217883,
+                "sample_count": 3
+              }
+            },
+            "retrieval_ms": {
+              "value": 0.49446572666056454,
+              "unit": "ms",
+              "description": "Ranking / similarity computation latency.",
+              "statistics": {
+                "mean": 0.49446572666056454,
+                "standard_deviation": 0.019185396643745006,
+                "min": 0.47401284488538903,
+                "max": 0.5120636778883636,
+                "ci_95_low": 0.47275580551590984,
+                "ci_95_high": 0.5161756478052193,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "mrr": {
+              "value": 0.16666666666666666,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank.",
+              "statistics": {
+                "mean": 0.16666666666666666,
+                "standard_deviation": 0.0,
+                "min": 0.16666666666666666,
+                "max": 0.16666666666666666,
+                "ci_95_low": 0.16666666666666666,
+                "ci_95_high": 0.16666666666666666,
+                "sample_count": 3
+              }
+            },
+            "queries": {
+              "value": 6.0,
+              "unit": "count",
+              "description": "Number of evaluated queries.",
+              "statistics": {
+                "mean": 6.0,
+                "standard_deviation": 0.0,
+                "min": 6.0,
+                "max": 6.0,
+                "ci_95_low": 6.0,
+                "ci_95_high": 6.0,
+                "sample_count": 3
+              }
+            },
+            "recall_at_1": {
+              "value": 0.16666666666666666,
+              "unit": "ratio",
+              "description": "Recall at rank 1.",
+              "statistics": {
+                "mean": 0.16666666666666666,
+                "standard_deviation": 0.0,
+                "min": 0.16666666666666666,
+                "max": 0.16666666666666666,
+                "ci_95_low": 0.16666666666666666,
+                "ci_95_high": 0.16666666666666666,
+                "sample_count": 3
+              }
+            },
+            "recall_at_10": {
+              "value": 0.16666666666666666,
+              "unit": "ratio",
+              "description": "Recall within top 10.",
+              "statistics": {
+                "mean": 0.16666666666666666,
+                "standard_deviation": 0.0,
+                "min": 0.16666666666666666,
+                "max": 0.16666666666666666,
+                "ci_95_low": 0.16666666666666666,
+                "ci_95_high": 0.16666666666666666,
+                "sample_count": 3
+              }
+            },
+            "recall_at_5": {
+              "value": 0.16666666666666666,
+              "unit": "ratio",
+              "description": "Recall at rank 5.",
+              "statistics": {
+                "mean": 0.16666666666666666,
+                "standard_deviation": 0.0,
+                "min": 0.16666666666666666,
+                "max": 0.16666666666666666,
+                "ci_95_low": 0.16666666666666666,
+                "ci_95_high": 0.16666666666666666,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "ablation_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T01:57:27.600572Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": {
+        "platform": "Darwin-25.5.0-x86_64",
+        "processor": "i386",
+        "cpu_count": 16,
+        "memory_gb": 16.0,
+        "gpu_name": null,
+        "gpu_count": null,
+        "cuda_version": null,
+        "mps_available": true,
+        "backend_accelerator": "mps"
+      },
+      "run_config": {
+        "condition": "full_dss",
+        "mode": "full_dss",
+        "use_qp_filters": true,
+        "use_abstention": false,
+        "abstention_threshold": 0.35,
+        "coordinate_resolution": "factor",
+        "top_k": 10,
+        "seed": 193,
+        "dataset": "benchmark_dataset.jsonl",
+        "aggregate": true,
+        "seeds": "193,42,7",
+        "seed_count": 3,
+        "seed_run_ids": "ablation-full_dss-20260711T015727Z-193,ablation-full_dss-20260711T015727Z-42,ablation-full_dss-20260711T015727Z-7"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "ablation-coordinate_guided-aggregate-20260711T015727Z",
+      "suite_id": "ablation_retrieval",
+      "suite_version": "v1",
+      "executed_at": "2026-07-11T01:57:27.418632Z",
+      "mode": "coordinate_guided",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "1b9ea3936647f11736fe0b49c4cfa50b70df311c",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "benchmark_dataset",
+          "version": "local-v1",
+          "split": "benchmark",
+          "record_count": null
+        }
+      ],
+      "metrics": {
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "completion_tokens": {
+              "value": 64.0,
+              "unit": "tokens",
+              "description": "Estimated completion tokens for the answer.",
+              "statistics": {
+                "mean": 64.0,
+                "standard_deviation": 0.0,
+                "min": 64.0,
+                "max": 64.0,
+                "ci_95_low": 64.0,
+                "ci_95_high": 64.0,
+                "sample_count": 3
+              }
+            },
+            "coordinate_lookup_tokens": {
+              "value": 2.6666666666666665,
+              "unit": "tokens",
+              "description": "Coordinate factor / lookup tokens.",
+              "statistics": {
+                "mean": 2.6666666666666665,
+                "standard_deviation": 0.0,
+                "min": 2.6666666666666665,
+                "max": 2.6666666666666665,
+                "ci_95_low": 2.6666666666666665,
+                "ci_95_high": 2.6666666666666665,
+                "sample_count": 3
+              }
+            },
+            "prompt_tokens": {
+              "value": 10.333333333333334,
+              "unit": "tokens",
+              "description": "Tokens in the query plus admitted context.",
+              "statistics": {
+                "mean": 10.333333333333334,
+                "standard_deviation": 0.0,
+                "min": 10.333333333333334,
+                "max": 10.333333333333334,
+                "ci_95_low": 10.333333333333334,
+                "ci_95_high": 10.333333333333334,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "ablation_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 0.6167612801719871,
+              "unit": "ms",
+              "description": "Total end-to-end latency per query.",
+              "statistics": {
+                "mean": 0.6167612801719871,
+                "standard_deviation": 0.03202772674032782,
+                "min": 0.5841936799697578,
+                "max": 0.6482203510434678,
+                "ci_95_low": 0.5805191614977422,
+                "ci_95_high": 0.6530033988462319,
+                "sample_count": 3
+              }
+            },
+            "coordinate_resolution_ms": {
+              "value": 0.19425494893867937,
+              "unit": "ms",
+              "description": "Deriving the query coordinate from text.",
+              "statistics": {
+                "mean": 0.19425494893867937,
+                "standard_deviation": 0.01004616364964215,
+                "min": 0.18274250517909726,
+                "max": 0.20124532359962663,
+                "ci_95_low": 0.1828868534705497,
+                "ci_95_high": 0.20562304440680904,
+                "sample_count": 3
+              }
+            },
+            "llm_generation_ms": {
+              "value": 0.0,
+              "unit": "ms",
+              "description": "LLM answer generation latency (not exercised here).",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "post_processing_ms": {
+              "value": 0.0005613385130547815,
+              "unit": "ms",
+              "description": "Abstention and score-blending overhead.",
+              "statistics": {
+                "mean": 0.0005613385130547815,
+                "standard_deviation": 9.049644781994267e-06,
+                "min": 0.0005518280280133089,
+                "max": 0.000569843299066027,
+                "ci_95_low": 0.0005510980641210199,
+                "ci_95_high": 0.0005715789619885431,
+                "sample_count": 3
+              }
+            },
+            "retrieval_ms": {
+              "value": 0.42194499272025293,
+              "unit": "ms",
+              "description": "Ranking / similarity computation latency.",
+              "statistics": {
+                "mean": 0.42194499272025293,
+                "standard_deviation": 0.02453273349402736,
+                "min": 0.4008813314915945,
+                "max": 0.4488809887940685,
+                "ci_95_low": 0.3941841014805189,
+                "ci_95_high": 0.44970588395998695,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "mrr": {
+              "value": 0.08333333333333333,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank.",
+              "statistics": {
+                "mean": 0.08333333333333333,
+                "standard_deviation": 0.0,
+                "min": 0.08333333333333333,
+                "max": 0.08333333333333333,
+                "ci_95_low": 0.08333333333333333,
+                "ci_95_high": 0.08333333333333333,
+                "sample_count": 3
+              }
+            },
+            "queries": {
+              "value": 6.0,
+              "unit": "count",
+              "description": "Number of evaluated queries.",
+              "statistics": {
+                "mean": 6.0,
+                "standard_deviation": 0.0,
+                "min": 6.0,
+                "max": 6.0,
+                "ci_95_low": 6.0,
+                "ci_95_high": 6.0,
+                "sample_count": 3
+              }
+            },
+            "recall_at_1": {
+              "value": 0.0,
+              "unit": "ratio",
+              "description": "Recall at rank 1.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "recall_at_10": {
+              "value": 0.16666666666666666,
+              "unit": "ratio",
+              "description": "Recall within top 10.",
+              "statistics": {
+                "mean": 0.16666666666666666,
+                "standard_deviation": 0.0,
+                "min": 0.16666666666666666,
+                "max": 0.16666666666666666,
+                "ci_95_low": 0.16666666666666666,
+                "ci_95_high": 0.16666666666666666,
+                "sample_count": 3
+              }
+            },
+            "recall_at_5": {
+              "value": 0.16666666666666666,
+              "unit": "ratio",
+              "description": "Recall at rank 5.",
+              "statistics": {
+                "mean": 0.16666666666666666,
+                "standard_deviation": 0.0,
+                "min": 0.16666666666666666,
+                "max": 0.16666666666666666,
+                "ci_95_low": 0.16666666666666666,
+                "ci_95_high": 0.16666666666666666,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "ablation_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T01:57:27.418632Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": {
+        "platform": "Darwin-25.5.0-x86_64",
+        "processor": "i386",
+        "cpu_count": 16,
+        "memory_gb": 16.0,
+        "gpu_name": null,
+        "gpu_count": null,
+        "cuda_version": null,
+        "mps_available": true,
+        "backend_accelerator": "mps"
+      },
+      "run_config": {
+        "condition": "coordinate_guided",
+        "mode": "coordinate_guided",
+        "use_qp_filters": true,
+        "use_abstention": false,
+        "abstention_threshold": 0.35,
+        "coordinate_resolution": "factor",
+        "top_k": 10,
+        "seed": 193,
+        "dataset": "benchmark_dataset.jsonl",
+        "aggregate": true,
+        "seeds": "193,42,7",
+        "seed_count": 3,
+        "seed_run_ids": "ablation-coordinate_guided-20260711T015727Z-193,ablation-coordinate_guided-20260711T015727Z-42,ablation-coordinate_guided-20260711T015727Z-7"
+      }
+    },
+    {
+      "artefact_schema_version": "1.0.0",
+      "run_id": "ablation-semantic_only-aggregate-20260711T015727Z",
+      "suite_id": "ablation_retrieval",
+      "suite_version": "v1",
+      "executed_at": "2026-07-11T01:57:27.237269Z",
+      "mode": "semantic_only",
+      "status": "partial",
+      "repos": [
+        {
+          "name": "ds-backend-local",
+          "commit_sha": "1b9ea3936647f11736fe0b49c4cfa50b70df311c",
+          "role": "canonical_benchmark_engine",
+          "required_for_run": true
+        }
+      ],
+      "datasets": [
+        {
+          "name": "benchmark_dataset",
+          "version": "local-v1",
+          "split": "benchmark",
+          "record_count": null
+        }
+      ],
+      "metrics": {
+        "cost": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "completion_tokens": {
+              "value": 64.0,
+              "unit": "tokens",
+              "description": "Estimated completion tokens for the answer.",
+              "statistics": {
+                "mean": 64.0,
+                "standard_deviation": 0.0,
+                "min": 64.0,
+                "max": 64.0,
+                "ci_95_low": 64.0,
+                "ci_95_high": 64.0,
+                "sample_count": 3
+              }
+            },
+            "coordinate_lookup_tokens": {
+              "value": 0.0,
+              "unit": "tokens",
+              "description": "Coordinate factor / lookup tokens.",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "prompt_tokens": {
+              "value": 31.5,
+              "unit": "tokens",
+              "description": "Tokens in the query plus admitted context.",
+              "statistics": {
+                "mean": 31.5,
+                "standard_deviation": 0.0,
+                "min": 31.5,
+                "max": 31.5,
+                "ci_95_low": 31.5,
+                "ci_95_high": 31.5,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "governance": {
+          "status": "absent",
+          "absence_reason": "ablation_runner_does_not_measure_governance_yet",
+          "metrics": {}
+        },
+        "latency": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "avg_latency_ms": {
+              "value": 0.0632943443229629,
+              "unit": "ms",
+              "description": "Total end-to-end latency per query.",
+              "statistics": {
+                "mean": 0.0632943443229629,
+                "standard_deviation": 0.032435396302557054,
+                "min": 0.0386345200240612,
+                "max": 0.10003685019910336,
+                "ci_95_low": 0.026590912587882327,
+                "ci_95_high": 0.09999777605804347,
+                "sample_count": 3
+              }
+            },
+            "coordinate_resolution_ms": {
+              "value": 0.0006552792102512386,
+              "unit": "ms",
+              "description": "Deriving the query coordinate from text.",
+              "statistics": {
+                "mean": 0.0006552792102512386,
+                "standard_deviation": 0.0003506052364103313,
+                "min": 0.0004363343274841706,
+                "max": 0.0010596607656528552,
+                "ci_95_low": 0.0002585393264369041,
+                "ci_95_high": 0.001052019094065573,
+                "sample_count": 3
+              }
+            },
+            "llm_generation_ms": {
+              "value": 0.0,
+              "unit": "ms",
+              "description": "LLM answer generation latency (not exercised here).",
+              "statistics": {
+                "mean": 0.0,
+                "standard_deviation": 0.0,
+                "min": 0.0,
+                "max": 0.0,
+                "ci_95_low": 0.0,
+                "ci_95_high": 0.0,
+                "sample_count": 3
+              }
+            },
+            "post_processing_ms": {
+              "value": 0.00042489652211467427,
+              "unit": "ms",
+              "description": "Abstention and score-blending overhead.",
+              "statistics": {
+                "mean": 0.00042489652211467427,
+                "standard_deviation": 5.0043899888752296e-05,
+                "min": 0.0003685029999663432,
+                "max": 0.00046401207024852437,
+                "ci_95_low": 0.00036826755892302606,
+                "ci_95_high": 0.0004815254853063225,
+                "sample_count": 3
+              }
+            },
+            "retrieval_ms": {
+              "value": 0.06221416859059698,
+              "unit": "ms",
+              "description": "Ranking / similarity computation latency.",
+              "statistics": {
+                "mean": 0.06221416859059698,
+                "standard_deviation": 0.03250775728476011,
+                "min": 0.03775601120044788,
+                "max": 0.09910299559123814,
+                "ci_95_low": 0.025428854200351687,
+                "ci_95_high": 0.09899948298084227,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "retrieval": {
+          "status": "present",
+          "absence_reason": null,
+          "metrics": {
+            "mrr": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Mean reciprocal rank.",
+              "statistics": {
+                "mean": 1.0,
+                "standard_deviation": 0.0,
+                "min": 1.0,
+                "max": 1.0,
+                "ci_95_low": 1.0,
+                "ci_95_high": 1.0,
+                "sample_count": 3
+              }
+            },
+            "queries": {
+              "value": 6.0,
+              "unit": "count",
+              "description": "Number of evaluated queries.",
+              "statistics": {
+                "mean": 6.0,
+                "standard_deviation": 0.0,
+                "min": 6.0,
+                "max": 6.0,
+                "ci_95_low": 6.0,
+                "ci_95_high": 6.0,
+                "sample_count": 3
+              }
+            },
+            "recall_at_1": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Recall at rank 1.",
+              "statistics": {
+                "mean": 1.0,
+                "standard_deviation": 0.0,
+                "min": 1.0,
+                "max": 1.0,
+                "ci_95_low": 1.0,
+                "ci_95_high": 1.0,
+                "sample_count": 3
+              }
+            },
+            "recall_at_10": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Recall within top 10.",
+              "statistics": {
+                "mean": 1.0,
+                "standard_deviation": 0.0,
+                "min": 1.0,
+                "max": 1.0,
+                "ci_95_low": 1.0,
+                "ci_95_high": 1.0,
+                "sample_count": 3
+              }
+            },
+            "recall_at_5": {
+              "value": 1.0,
+              "unit": "ratio",
+              "description": "Recall at rank 5.",
+              "statistics": {
+                "mean": 1.0,
+                "standard_deviation": 0.0,
+                "min": 1.0,
+                "max": 1.0,
+                "ci_95_low": 1.0,
+                "ci_95_high": 1.0,
+                "sample_count": 3
+              }
+            }
+          }
+        },
+        "traceability": {
+          "status": "absent",
+          "absence_reason": "ablation_runner_does_not_measure_traceability_yet",
+          "metrics": {}
+        }
+      },
+      "freshness": {
+        "status": "fresh",
+        "checked_at": "2026-07-11T01:57:27.237269Z",
+        "max_age_hours": 24,
+        "age_hours": 0.0
+      },
+      "failure_reason": null,
+      "hardware": {
+        "platform": "Darwin-25.5.0-x86_64",
+        "processor": "i386",
+        "cpu_count": 16,
+        "memory_gb": 16.0,
+        "gpu_name": null,
+        "gpu_count": null,
+        "cuda_version": null,
+        "mps_available": true,
+        "backend_accelerator": "mps"
+      },
+      "run_config": {
+        "condition": "semantic_only",
+        "mode": "semantic_only",
+        "use_qp_filters": true,
+        "use_abstention": false,
+        "abstention_threshold": 0.35,
+        "coordinate_resolution": "factor",
+        "top_k": 10,
+        "seed": 193,
+        "dataset": "benchmark_dataset.jsonl",
+        "aggregate": true,
+        "seeds": "193,42,7",
+        "seed_count": 3,
+        "seed_run_ids": "ablation-semantic_only-20260711T015727Z-193,ablation-semantic_only-20260711T015727Z-42,ablation-semantic_only-20260711T015727Z-7"
+      }
+    }
+  ]
+}

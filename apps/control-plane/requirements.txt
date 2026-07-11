@@ -1,0 +1,8 @@
+httpx
+starlette
+uvicorn
+python-multipart
+qrcode[pil]
+PyJWT
+cryptography
+pytest
