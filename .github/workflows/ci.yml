@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  scaffold-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check required scaffold files exist
+        run: |
+          test -f README.md
+          test -f LICENSE
+          test -f .env.example
+          test -f Makefile
+          test -f docker-compose.yml
+          test -f .gitignore
+          test -d .github/workflows
+          test -d apps/backend
+          test -d apps/middleware
+          test -d apps/did-issuer
+          test -d apps/control-plane
+          test -d apps/chat-surface
+          test -d apps/coord-demo
+          test -d packages/shared-types
+          test -d infra/staging
+          test -d infra/prod
+          test -d docs
+
+      - name: Validate docker-compose syntax
+        run: docker compose config

@@ -1,0 +1,54 @@
+# Environment secrets
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+*.egg
+.venv/
+venv/
+env/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# FastHTML / Starlette
+.sesskey
+*.db
+*.sqlite
+*.sqlite3
+
+# Node / Vercel
+node_modules/
+.vercel/
+.next/
+out/
+
+# Local data and runtime artifacts
+data/
+backend-data/
+*.log
+*.pid
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Terraform / infra
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl

@@ -1,0 +1,19 @@
+name: Deploy backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/backend/**'
+      - 'packages/shared-types/**'
+      - '.github/workflows/deploy-backend.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Fly.io
+        run: echo "Fly.io deploy step for apps/backend/ (TBD)"
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
