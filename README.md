@@ -1,5 +1,7 @@
 # Dual-Substrate System (DSS)
 
+**Supported By:**
+
 [![GitHub](https://img.shields.io/badge/GitHub-berigny%2Fdss--system-181717?logo=github)](https://github.com/berigny/dss-system)
 [![License](https://img.shields.io/github/license/berigny/dss-system)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue?logo=python&logoColor=white)]()
@@ -7,30 +9,23 @@
 [![Fly.io](https://img.shields.io/badge/deployed-Fly.io-7B3FE4?logo=flydotio&logoColor=white)]()
 [![Vercel](https://img.shields.io/badge/deployed-Vercel-000000?logo=vercel&logoColor=white)]()
 
-DSS is a ledger-oriented architecture for memory-stable, audit-ready AI agents.
+Welcome to the **Dual-Substrate System (DSS)** - an open-source framework built to fix how AI memory feels, functions, and is governed.
 
-Most Large Language Model (LLM) applications rely on transient context windows, easily-confused semantic vector RAG, and mutable databases. DSS replaces these opaque, fragile systems with a deterministic, mathematically motivated coordinate engine (inspired by p-adic numbers and the R x Q_p dual substrate) and an immutable cryptographic ledger.
+Instead of wrestling with context limits, black-box reasoning, and messy chat sidebars, DSS provides a fundamentally different user experience:
 
-This is the official monorepo for the DSS control plane, middleware, chat surface, coordinate demo, DID issuer, and shared packages.
+* **Threadless Coherence:** Stop hunting through a maze of old chat logs. The system remembers what you said, no matter when or where you said it.
+* **Marathon Conversations:** Have ultra-long interactions without the AI getting confused, mixing up details, or experiencing "amnesia" just because you've been chatting for a while.
+* **Multi-Model, Seamless Context:** Switch between different AI models on the fly without losing a single beat of your ongoing conversation.
+* **Absolute Data Freedom & Secure Sharing:** Keep your conversation history and documents exactly where you want them—locally or in the cloud. You hold the cryptographic keys, meaning you can selectively share a single memory or your entire history with another person or model.
+* **Deep Memory Lineage:** Never wonder where the AI got its reasoning. Trace the exact pieces of context the model pulled to form its answer, and look backward to see how those memories were created.
 
----
+### How It Works
 
-## Current Capabilities and Maturity
-
-DSS is an evolving framework. This is a transparent look at what is currently stable and where we are heading.
-
-| Feature | Maturity | Description |
-| --- | --- | --- |
-| Multi-model, provider-agnostic routing | High (stable) | Switch between AI models on the fly. An adapter pattern normalises payloads across providers, separating model-specific execution from session state. |
-| Threadless, coordinate-based coherence | Moderate (prototype) | Uses prime-lattice coordinate routing to maintain context without relying on a sidebar of past threads. Long-horizon recall on noisy, non-synthetic dialogue is still being benchmarked. |
-| Cryptographic data freedom and sharing | High (strong foundation) | Users hold the keys to their data. DSS leverages Decentralized Identifiers (DIDs) and authorisation wrappers so specific memories can be shared securely. |
-| Deep memory lineage | High (traceability exists) | Trace the exact context the model used to form an answer. The orchestrator logs how context was scored, selected, and linked back to recursive prime coordinates. |
+Most Large Language Model (LLM) applications rely on transient context windows, easily-confused semantic vector RAG, and mutable databases. DSS replaces these opaque, fragile systems with a **deterministic, mathematically motivated coordinate engine** (inspired by $p$-adic numbers and the $\mathbb{R} \times \mathbb{Q}_p$ dual substrate) and an **immutable cryptographic ledger**.
 
 ---
 
 ## Benchmark Highlights 
-
-*Note: The following benchmarks are run on synthetic micro-corpora with deterministic evaluation to isolate architectural mechanics. They represent reproducible engineering checks, not yet generalized claims for noisy open-domain corpora.*
 
 ### 1. Long-Context Needle Retrieval (517K Tokens)
 
@@ -60,6 +55,8 @@ DSS is built from the ground up to support modern decentralized identity and aud
 * **W3C Decentralized Identifiers (DIDs)**: Anchors human, model, and device identities natively within the memory ledger.
 * **UN Transparency Protocol (UNTP)**: Aligns memory tracking and cryptographic provenance trails with global digital supply chain transparency benchmarks.
 * **NIST AI Risk Management Framework**: Provides the systemic audit logs required to mitigate context drift and unverified data mutation.
+
+*Note: The following benchmarks are run on synthetic micro-corpora with deterministic evaluation to isolate architectural mechanics. They represent reproducible engineering checks, not yet generalized claims for noisy open-domain corpora.*
 
 ---
 
@@ -92,6 +89,19 @@ Cryptographic identity and memory auditing. Manages Principal Registries, W3C De
 A developer sandbox and demonstration environment for testing, visualising, and pushing the limits of the prime-lattice coordinate routing math that powers DSS coherence.
 
 ---
+
+## Current Capabilities & Maturity
+
+DSS is an evolving framework. Below is a transparent look at what is currently stable in the codebase and where we are heading.
+
+| Feature | Defensibility & Maturity | Description |
+| --- | --- | --- |
+| **Multi-Model, Provider-Agnostic Routing** | **High** (Stable) | Switch between different AI models on the fly. An adapter pattern normalizes payloads across supported providers, separating model-specific execution from your session state. |
+| **Threadless, Coordinate-Based Coherence** | **Moderate** (Prototype) | The system uses prime-lattice coordinate routing to maintain context. (Note: The structural fix is architecturally sound, but long-horizon recall on noisy, non-synthetic dialogue is still actively being benchmarked). |
+| **Cryptographic Data Freedom & Sharing** | **High** (Strong Foundation) | You hold the keys to your data. DSS leverages Decentralized Identifiers (DIDs) and authorization wrappers so you can securely share specific memories. |
+| **Deep Memory Lineage** | **High** (Traceability Exists) | Trace the exact pieces of context the model pulled to form its answer. The orchestrator explicitly logs how context was scored, selected, and linked back to recursive prime coordinates. |
+
+--
 
 ## Architecture
 
