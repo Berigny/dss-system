@@ -1,0 +1,106 @@
+{
+  "repos": {
+    "ds-backend-local": {
+      "files_processed": 1220,
+      "files_modified": 74,
+      "replacements": {
+        "Genesis": 23,
+        "Grace": 76,
+        "Drift": 109,
+        "Law": 148,
+        "Coherent Genesis Ladder": 3,
+        "teleological": 5,
+        "Holy Grail": 2,
+        "teleology": 21,
+        "Omega Point": 17,
+        "Omega": 9,
+        "Aether": 2,
+        "Grail": 9,
+        "Ark": 1,
+        "Do not take the name in vain": 3,
+        "Do not bear false witness": 3,
+        "No other gods before me": 3,
+        "Honor father and mother": 3,
+        "Do not commit adultery": 3,
+        "Remember the Sabbath": 3,
+        "No carved images": 3,
+        "Do not murder": 3,
+        "Do not steal": 3,
+        "Do not covet": 3,
+        "DEMO_GOD_MODE": 9,
+        "Genesis Ladder": 5,
+        "I AM": 9,
+        "demo god mode": 1,
+        "God mode": 5,
+        "YHVH": 4,
+        "Machine Soul": 1,
+        "Merkabah": 1
+      },
+      "violations": {}
+    },
+    "ds-middleware-local": {
+      "files_processed": 79,
+      "files_modified": 13,
+      "replacements": {
+        "Drift": 158,
+        "Law": 54,
+        "Genesis": 151,
+        "Grace": 6,
+        "I AM": 1
+      },
+      "violations": {}
+    },
+    "ds-frontend-local": {
+      "files_processed": 61,
+      "files_modified": 7,
+      "replacements": {
+        "Drift": 26,
+        "Law": 15,
+        "Grace": 4
+      },
+      "violations": {}
+    },
+    "DSS-Dashboard": {
+      "files_processed": 22,
+      "files_modified": 0,
+      "replacements": {},
+      "violations": {}
+    }
+  },
+  "files_processed": 1382,
+  "files_modified": 94,
+  "replacements": {
+    "Genesis": 174,
+    "Grace": 86,
+    "Drift": 293,
+    "Law": 217,
+    "Coherent Genesis Ladder": 3,
+    "teleological": 5,
+    "Holy Grail": 2,
+    "teleology": 21,
+    "Omega Point": 17,
+    "Omega": 9,
+    "Aether": 2,
+    "Grail": 9,
+    "Ark": 1,
+    "Do not take the name in vain": 3,
+    "Do not bear false witness": 3,
+    "No other gods before me": 3,
+    "Honor father and mother": 3,
+    "Do not commit adultery": 3,
+    "Remember the Sabbath": 3,
+    "No carved images": 3,
+    "Do not murder": 3,
+    "Do not steal": 3,
+    "Do not covet": 3,
+    "DEMO_GOD_MODE": 9,
+    "Genesis Ladder": 5,
+    "I AM": 10,
+    "demo god mode": 1,
+    "God mode": 5,
+    "YHVH": 4,
+    "Machine Soul": 1,
+    "Merkabah": 1
+  },
+  "violations": {}
+}

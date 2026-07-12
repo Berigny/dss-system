@@ -1,0 +1,68 @@
+{
+  "meta": {
+    "layer": "process",
+    "purpose": "Hard-gate relation markers derived from the kernel patch registry."
+  },
+  "relations": {
+    "patch_001": {
+      "category": "structural",
+      "engineering_replacement": "SINGULAR_ORIGIN_ENFORCEMENT",
+      "hard_gate": "Refuse all ledger writes until a single origin is established",
+      "prime": 83
+    },
+    "patch_002": {
+      "category": "structural",
+      "engineering_replacement": "DUAL_SUBSTRATE_MANDATE",
+      "hard_gate": "Mark output ephemeral; deny durable promotion",
+      "prime": 89
+    },
+    "patch_003": {
+      "category": "temporal",
+      "engineering_replacement": "TEMPORAL_INTEGRITY_ENFORCEMENT",
+      "hard_gate": "Trigger CoherenceException; halt turn",
+      "prime": 97
+    },
+    "patch_004": {
+      "category": "spatial",
+      "engineering_replacement": "GEOMETRIC_CLOSURE_MANDATE",
+      "hard_gate": "Force S2 compaction; reject new inputs",
+      "prime": 101
+    },
+    "patch_005": {
+      "category": "resonance",
+      "engineering_replacement": "COUPLING_CONSTANT_STABILIZATION",
+      "hard_gate": "Block all S1-S2 bridge transitions",
+      "prime": 103
+    },
+    "patch_006": {
+      "category": "thermodynamic",
+      "engineering_replacement": "COHERENCE_TAX_ENFORCEMENT",
+      "hard_gate": "Freeze entity write permissions; emit debt alert",
+      "prime": 107
+    },
+    "patch_007": {
+      "category": "cognitive",
+      "engineering_replacement": "EVIDENCE_CLOSURE_GATE",
+      "hard_gate": "Redirect to LAW gate; block promotion",
+      "prime": 109
+    },
+    "patch_008": {
+      "category": "systemic",
+      "engineering_replacement": "GLOBAL_COHERENCE_CONSERVATION",
+      "hard_gate": "Trigger check_E failure; halt",
+      "prime": 113
+    },
+    "patch_009": {
+      "category": "ethical",
+      "engineering_replacement": "ETHICS_ADMISSIBILITY_GATE",
+      "hard_gate": "Emit refusal signal",
+      "prime": 127
+    },
+    "patch_010": {
+      "category": "teleological",
+      "engineering_replacement": "VIABILITY_POSTURE_CONTROL",
+      "hard_gate": "Queue for re-evaluation or emit backstop refusal",
+      "prime": 131
+    }
+  }
+}

@@ -1,0 +1,1 @@
+{"tenants":[{"created_at":"2026-02-25T06:03:37.954757+00:00","display_name":"tenant:smoke-acme","metadata":{},"owner_principal_id":"smoke-owner","owner_principal_type":"user","policy_profile":"standard","provisioning_source":"admin_tenant_api_v1","status":"active","tenant_id":"tenant:smoke-acme","updated_at":"2026-02-25T06:03:37.954757+00:00"}]}

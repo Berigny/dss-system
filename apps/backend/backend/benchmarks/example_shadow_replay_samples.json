@@ -1,0 +1,44 @@
+{
+  "samples": [
+    {
+      "sample_id": "shadow-001",
+      "request_id": "req-shadow-001",
+      "session_id": "sess-shadow-001",
+      "tenant_id": "tenant:demo",
+      "principal_hash": "sha256:demo001",
+      "source_mode": "chat",
+      "source_build_sha": "484defc",
+      "surface": "chat",
+      "entity": "aurora",
+      "query": "Who is researching quantum networks?",
+      "memories": [
+        "Aurora researches quantum networks and writes concise technical notes.",
+        "Aurora enjoys composing minimalist piano pieces in her free time."
+      ],
+      "relevant": [
+        "Aurora researches quantum networks and writes concise technical notes."
+      ],
+      "captured_at": "2026-04-24T11:55:00Z"
+    },
+    {
+      "sample_id": "shadow-002",
+      "request_id": "req-shadow-002",
+      "session_id": "sess-shadow-002",
+      "tenant_id": "tenant:demo",
+      "principal_hash": "sha256:demo002",
+      "source_mode": "resolve",
+      "source_build_sha": "484defc",
+      "surface": "backend",
+      "entity": "boreal",
+      "query": "Who designs interactive data visualizations?",
+      "memories": [
+        "Boreal documents forest canopy health using drone imagery.",
+        "Boreal designs interactive data visualizations for conservation teams."
+      ],
+      "relevant": [
+        "Boreal designs interactive data visualizations for conservation teams."
+      ],
+      "captured_at": "2026-04-24T11:56:00Z"
+    }
+  ]
+}

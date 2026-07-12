@@ -1,0 +1,87 @@
+{
+  "concepts": {
+    "action": {
+      "domain": "context",
+      "kernel_prime": 7,
+      "prime": 13,
+      "type": "value_node"
+    },
+    "autonomy": {
+      "domain": "context",
+      "kernel_prime": 13,
+      "prime": 17,
+      "type": "value_node"
+    },
+    "centroid": {
+      "domain": "integration",
+      "kernel_prime": 137,
+      "prime": 19,
+      "type": "value_node"
+    },
+    "connection": {
+      "domain": "relatedness",
+      "kernel_prime": 5,
+      "prime": 23,
+      "type": "value_node"
+    },
+    "constraint": {
+      "domain": "kernel",
+      "kernel_prime": 137,
+      "prime": 29,
+      "type": "dimension"
+    },
+    "context": {
+      "domain": "kernel",
+      "kernel_prime": 17,
+      "prime": 31,
+      "type": "dimension"
+    },
+    "mastery": {
+      "domain": "context",
+      "kernel_prime": 19,
+      "prime": 37,
+      "type": "value_node"
+    },
+    "novelty": {
+      "domain": "interest",
+      "kernel_prime": 2,
+      "prime": 41,
+      "type": "value_node"
+    },
+    "potential": {
+      "domain": "context",
+      "kernel_prime": 11,
+      "prime": 43,
+      "type": "value_node"
+    },
+    "recall": {
+      "domain": "kernel",
+      "kernel_prime": 23,
+      "prime": 47,
+      "type": "dimension"
+    },
+    "relatedness": {
+      "domain": "context",
+      "kernel_prime": 17,
+      "prime": 53,
+      "type": "value_node"
+    },
+    "relaxation": {
+      "domain": "kernel",
+      "kernel_prime": 139,
+      "prime": 59,
+      "type": "dimension"
+    },
+    "uniqueness": {
+      "domain": "interest",
+      "kernel_prime": 3,
+      "prime": 61,
+      "type": "value_node"
+    }
+  },
+  "meta": {
+    "layer": "ontology",
+    "note": "Concepts are derived from kernel value-node and dimension registries; process primes are disjoint from quaternary and slot primes.",
+    "version": "1.2.0"
+  }
+}

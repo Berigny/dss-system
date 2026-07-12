@@ -74,3 +74,8 @@ docker compose up coord-demo
 
 - `src/main.py` imports and re-exports the FastHTML application defined in
   `app.py` for a stable Vercel/Docker entrypoint path.
+
+## See also
+
+- [Root README](../../README.md) — monorepo quick start, architecture, and CI/CD secrets
+- [docs/staging.md](../../docs/staging.md) and [docs/production.md](../../docs/production.md) — deployment runbooks

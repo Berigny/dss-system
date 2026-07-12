@@ -1,0 +1,515 @@
+
+## How E6 should work on an edge robot using Dual Substrate
+
+Think of **E6 as the robot’s “referee + diary clerk”**:
+
+* The robot *acts* in the fast **ℝ layer** (sensors → control loop → motion).
+* E6 decides whether what just happened is:
+
+  * **lawful** (physics/topology limits weren’t broken),
+  * **stable over time** (hysteresis says it isn’t jittery),
+  * **properly provenanced** (inputs/schema/version are bound),
+  * **worth committing** (adds coherent value, not drift).
+* If it passes, E6 writes a **small, hash-chained memory commit** into the **ℚ ledger layer** (local flash/ledger), so the robot’s learning doesn’t “drift into nonsense” later.
+
+The attached doc is already set up for a **base-4 operational loop**: **Halt → Probe → Stabilise → Express**. 
+And it treats “lawfulness” as a **0–3 discrete level** that governs what the system is allowed to do. 
+
+So, on a robot:
+
+* **Mode 0 (HALT):** freeze motion / safe posture, log only, no “learning commits”.
+* **Mode 1 (PROBE):** tiny low-risk moves, sandboxed tests, collect evidence.
+* **Mode 2 (STABILISE):** normal operation, allow calibrations, build stable memory.
+* **Mode 3 (EXPRESS):** publish/commit “world updates” confidently.
+
+And you can treat outputs as the four packet types in your schema (WU / HR / PP / CA). 
+
+---
+
+## Simple E6 state machine
+
+### States (base-4)
+
+* **0 HALT**
+* **1 PROBE**
+* **2 STABILISE**
+* **3 EXPRESS** 
+
+### Core transitions (minimal, practical)
+
+* **ANY → HALT** if any hard violation:
+
+  * causality cap exceeded (||ΔE|| / ||ΔB|| too large),
+  * topology jump (|ΔW| > 1),
+  * ledger broken (K=0),
+  * provenance broken (P=0),
+  * catastrophic invariant tear.
+* **HALT → PROBE** when a recovery condition is met (human clear, or stable sensor self-test).
+* **PROBE → STABILISE** when stability is proven:
+
+  * H ≥ θH (multi-scale hysteresis),
+  * L ≥ θL (lawfulness),
+  * K=1 and P=1.
+* **STABILISE → EXPRESS** when *momentum is stable*:
+
+  * mean(V over last 3) ≥ θV
+  * std(V over last 3) < 0.1
+* **EXPRESS → STABILISE** if drift rises, V becomes noisy, or novelty spikes uncertainty.
+* **STABILISE → PROBE** if a new situation appears and uncertainty is high (needs testing).
+
+### Packet mapping (simple)
+
+* **PP (Pulse Packet):** “here’s what I sensed/attempted” (safe in PROBE)
+* **CA (Calibration Adjustment):** “I tuned something locally” (typical in STABILISE)
+* **WU (World Update):** “this is now stable truth for me/us” (EXPRESS only)
+* **HR (Heat Report):** “something is straining / risky / costly” (any time, especially HALT/PROBE) 
+
+---
+
+## Data structures
+
+### Event packet (edge-friendly, base-4 fields)
+
+Below is a compact structure that can be packed into a few dozen bytes and transmitted or written to flash.
+
+```python
+from __future__ import annotations
+from dataclasses import dataclass
+from enum import IntEnum
+from typing import Optional
+
+class Mode(IntEnum):
+    HALT = 0
+    PROBE = 1
+    STABILISE = 2
+    EXPRESS = 3
+
+class PacketType(IntEnum):
+    WU = 0  # World Update
+    HR = 1  # Heat Report
+    PP = 2  # Pulse Packet
+    CA = 3  # Calibration Adjustment
+
+@dataclass
+class Provenance:
+    # 64-bit truncated commitments are usually enough on-device; verify fully off-device if needed.
+    inputs_stub_hash64: int       # hash(inputs snapshot)
+    schema_hash64: int            # hash(schema)
+    version_hash32: int           # hash(version string) truncated
+
+@dataclass
+class LedgerLink:
+    prev_hash64: int              # previous ledger hash (truncated)
+    hash64: int                   # current ledger hash (truncated)
+    provenance_commit64: int      # hash(inputs_stub || schema || version) (truncated)
+
+@dataclass
+class MetricsQ:
+    # Fixed-point quantised scalars for cheap compute.
+    # Example: Q0.16 for [0..1], Q8.8 for signed deltas.
+    dE2_q: int        # squared norm (avoid sqrt), Q8.8-ish scale
+    dB2_q: int
+    dW: int           # -2..2 typical
+    L_q: int          # Q0.16
+    H_q: int          # Q0.16
+    A_q: int          # Q0.16
+    U_q: int          # Q0.16
+    V_q: int          # Q0.16
+    K: int            # 0/1
+    P: int            # 0/1
+    E: int            # 0/1 (admissibility)
+
+@dataclass
+class EventPacket:
+    # Header (base-4 friendly)
+    seq: int                  # monotonically increasing
+    t_ms: int                 # local tick timestamp
+    mode: Mode                # 0..3
+    ptype: PacketType         # 0..3
+    lawfulness: int           # 0..3
+    node: int                 # 0..7 (your S1/S2 nodes)
+
+    # Payload (minimal)
+    prov: Provenance
+    link: LedgerLink
+    m: MetricsQ
+
+    # Optional tiny payload (e.g., action id, sensor class)
+    action_tag: int = 0        # small enum
+    sensor_tag: int = 0        # small enum
+```
+
+**Key point:** base-4 decisioning is explicit: `mode`, `ptype`, `lawfulness` are all **2-bit concepts** (0–3). That matches your quaternary operational modes and packet types.
+
+---
+
+## Minimal on-device compute budget version (what E6 computes per tick)
+
+Aim: **O(1) work per tick**, no heavy maths, no big arrays.
+
+### What to keep in memory
+
+* `V_last3[3]` (3 values)
+* `mismatch_stats` for 3 windows (approximate [5,12,20])
+
+  * use **EWMA variance** instead of storing 20 samples
+* last ledger hash (64-bit) + device secret for MAC/signature (optional)
+
+### What to compute (cheap path)
+
+1. **Hard constraints (fast fail):**
+
+   * Use squared norms to avoid sqrt:
+
+     * if `||ΔE||² > (1.5)²` → HALT
+     * if `||ΔB||² > (1.5/c)²` → HALT
+   * if `abs(dW) > 1` → HALT
+2. **Provenance + ledger checks:**
+
+   * `prov_commit = H(inputs_stub || schema_hash || version)` (truncate)
+   * `P = (state.prov_commit == prov_commit)`
+   * `K = (ledger_hash == H(prev_hash || payload || fingerprint))`
+3. **Hysteresis (multi-scale)**
+
+   * Maintain 3 EWMA variances (α≈2/(w+1))
+   * Convert to `H = min(exp(-μ * var_w))` (use a tiny lookup table for exp)
+4. **Utility + admissibility**
+
+   * Compute quantised `L, A, U`, then `E`, then `V = A*U*E`
+5. **V-momentum gate**
+
+   * Keep last 3 V values (including current).
+   * Compare **variance** to avoid sqrt:
+
+     * `var(V_last3) < 0.01` (since std < 0.1)
+     * and `mean(V_last3) >= θV`
+6. **Choose next mode**
+
+   * FAIL → HALT
+   * PASS but uncertain/noisy → PROBE
+   * PASS and stable → STABILISE
+   * PASS and stable momentum → EXPRESS
+
+### Tiny pseudo-loop
+
+```python
+def e6_tick(prev_state, curr_state, packet):
+    # 1) hard fail
+    if packet.m.dE2_q > MAX_DE2_Q or packet.m.dB2_q > MAX_DB2_Q or abs(packet.m.dW) > 1:
+        return Mode.HALT, PacketType.HR, commit=False
+
+    # 2) provenance & ledger
+    if packet.m.K == 0 or packet.m.P == 0:
+        return Mode.HALT, PacketType.HR, commit=False
+
+    # 3) stability
+    if packet.m.H_q < THETA_H_Q:
+        return Mode.PROBE, PacketType.PP, commit=False
+
+    # 4) admissibility + momentum
+    if packet.m.E == 0:
+        return Mode.STABILISE, PacketType.CA, commit=False
+
+    if mean3(packet.m.V_q_history) >= THETA_V_Q and var3(packet.m.V_q_history) < V_VAR_MAX_Q:
+        return Mode.EXPRESS, PacketType.WU, commit=True
+
+    return Mode.STABILISE, PacketType.CA, commit=True
+```
+
+---
+
+
+## 128-bit header v0 (16 bytes)
+
+### Field map (bit positions)
+
+Bits are numbered **[127:0]** (MSB → LSB).
+
+| Bits    | Size | Name    | Type | Notes                                                                        |
+| ------- | ---: | ------- | ---- | ---------------------------------------------------------------------------- |
+| 127–112 |   16 | `magic` | u16  | `0x4347` (“CG”)                                                              |
+| 111–108 |    4 | `ver`   | u4   | protocol version (e.g. 1)                                                    |
+| 107–104 |    4 | `fmt`   | u4   | header format (0 = this layout)                                              |
+| 103–102 |    2 | `mode`  | u2   | 0 HALT, 1 PROBE, 2 STABILISE, 3 EXPRESS                                      |
+| 101–100 |    2 | `ptype` | u2   | 0 WU, 1 HR, 2 PP, 3 CA                                                       |
+| 99–98   |    2 | `law`   | u2   | lawfulness level 0–3                                                         |
+| 97–96   |    2 | `route` | u2   | E6 decision routing (0 block, 1 quarantine, 2 local-commit, 3 ledger-commit) |
+| 95–92   |    4 | `node`  | u4   | 0–7 (fits your 8 nodes; 8–15 reserved)                                       |
+| 91–88   |    4 | `flags` | u4   | bit0=K, bit1=P, bit2=E, bit3=valid                                           |
+| 87–80   |    8 | `dW`    | i8   | signed defect delta (two’s complement)                                       |
+| 79–56   |   24 | `seq`   | u24  | monotonic sequence (wrap ok)                                                 |
+| 55–32   |   24 | `t_ms`  | u24  | ms modulo ~4.66 hours                                                        |
+| 31–16   |   16 | `V_q`   | u16  | Q0.16 fixed-point V (0..1 maps to 0..65535)                                  |
+| 15–0    |   16 | `crc16` | u16  | CRC-CCITT over bits [127..16]                                                |
+
+### Why this works well
+
+* **Base-4 decisioning is literal**: `mode`, `ptype`, `law`, `route` are all **2-bit digits**.
+* Header contains **everything E6 needs for routing** without parsing the payload.
+* `crc16` gives cheap corruption detection before any heavy work.
+* You can keep ledger/provenance hashes in the payload (bigger fields), but still have **K/P/E flags** here.
+
+---
+
+## Byte layout (same header, easier to visualise)
+
+**Byte 0..15** (big-endian):
+
+* **0–1**: `magic`
+* **2**: high nibble `ver`, low nibble `fmt`
+* **3**: `mode|ptype|law|route` packed as 2 bits each
+* **4**: high nibble `node`, low nibble `flags`
+* **5**: `dW` (signed int8)
+* **6–8**: `seq` (u24)
+* **9–11**: `t_ms` (u24)
+* **12–13**: `V_q` (u16)
+* **14–15**: `crc16` (u16)
+
+---
+
+## Bit packing details (exact)
+
+### Byte 3 (2-bit digits)
+
+Let `b3` be byte 3:
+
+* bits 7–6: `mode`
+* bits 5–4: `ptype`
+* bits 3–2: `law`
+* bits 1–0: `route`
+
+So:
+
+```
+b3 = (mode<<6) | (ptype<<4) | (law<<2) | route
+```
+
+### Byte 4 (node + flags)
+
+Let `b4` be byte 4:
+
+* bits 7–4: `node`
+* bits 3–0: `flags` (K,P,E,valid)
+
+So:
+
+```
+b4 = (node<<4) | flags
+```
+
+Flags nibble:
+
+* bit0: K
+* bit1: P
+* bit2: E
+* bit3: valid
+
+---
+
+## CRC choice
+
+Use **CRC-16/CCITT-FALSE** (common and small):
+
+* poly `0x1021`
+* init `0xFFFF`
+* xorout `0x0000`
+* no reflection
+
+Compute over **bytes 0..13** (everything except the CRC itself).
+
+---
+
+## Notes / extensions (still 128-bit)
+
+If later you want a “harder” header without changing size:
+
+* repurpose `V_q` to `chain_tag16 || V_q8 || H_q8` (still 16 bits total), or
+* repurpose `route` to encode **“why blocked”** (00 cause=physics, 01 provenance, 10 hysteresis, 11 ledger).
+
+---
+
+### 1) Fix the Pylance “Optional[Dict]” errors in the v1.3-beta fixed file
+
+Those diagnostics are happening because `compute_metrics()` is annotated as returning `Optional[Dict]`, so Pylance must assume it can be `None`, and then it complains when you do `metrics["..."]` / `metrics.get(...)` or pass `metrics` into functions that expect a `Dict`.
+
+**Reality:** your `compute_metrics()` always returns a dict (either `{"valid": False, ...}` or a full metrics dict). So the clean fix is to **remove `Optional` from the return type**.
+
+Minimal patch:
+
+```diff
+- from typing import Dict, List, Tuple, Optional
++ from typing import Dict, List, Tuple, Any
+
+- ) -> Optional[Dict]:
++ ) -> Dict[str, Any]:
+```
+
+That alone clears every error you listed (subscript/member access + argument type).
+
+Here’s an updated file with that fix applied:
+[Download cgr_kernel_tests_v1_3_beta_fixed_pylance.py](sandbox:/mnt/data/cgr_kernel_tests_v1_3_beta_fixed_pylance.py)
+
+---
+
+### 2) E6 in an edge robot running Dual Substrate
+
+Think of **E6 as the robot’s “write-permission gate”**.
+
+Robots do loads of fast, messy stuff locally (sensor noise, twitch corrections, exploration). If you commit all of that into long-term memory, you get drift, superstition, and brittle behaviour.
+
+So E6 sits between:
+
+* **R-domain (continuous flow)**: energy, drift, retention, coherence deltas, strain, etc. 
+  and
+* **Qₚ-domain (symbolic ledger)**: identities, rails/edges, lawfulness, policies—stable, auditable constraints. 
+
+**Operationally, per tick (or per micro-episode):**
+
+1. **Collect a candidate “work update”** (what changed; what action you took; what it did to ΔE/ΔDrift/ΔRetention/𝒦).
+2. **Check lawfulness (0–3)** (blocked → fully lawful). 
+3. **Require “real improvement”** (Pareto-style deltas) before merging. 
+4. **Block fast nonsense**: don’t allow a sudden jump into “high-impact mode” if the last few ticks weren’t consistently coherent (your v1.3-beta V-momentum + ethical sprint logic).
+5. **Only then commit** to the ledger (or allow a bridge/upgrade). That way, the robot’s long-term identity stays stable while still learning.
+
+---
+
+### 3) Simple E6 base-4 state machine (fits your quaternary modes)
+
+Your attached doc already gives the four-mode quaternary state machine: **Halt (0), Probe (1), Stabilise (2), Express (3)**. 
+It also ties the whole architecture to base-4 / quaternary representation. 
+
+Here’s a tight **E6 FSM** (what it *does*, not just names):
+
+**States (2 bits):**
+
+* **0 Halt**: stop commits; resolve critical strain; request help.
+* **1 Probe**: reversible moves; low confidence WUs; watch metrics.
+* **2 Stabilise**: consolidate; only medium-risk actions; build consistency.
+* **3 Express**: allow high-impact actions; commits allowed at higher rate.
+
+**Transitions (rule-of-thumb):**
+
+* **Halt → Probe** if strain < critical and you have a safe action plan.
+* **Probe → Stabilise** if:
+
+  * lawfulness ≥ 2 
+  * coherence/𝒦 trend improves (or stays balanced) 
+  * risk is low and actions are reversible (during Probe). 
+* **Stabilise → Express** if:
+
+  * V-momentum stable over last 3 ticks (your beta rule)
+  * strain stays low; hysteresis is stable
+* **Any → Halt** if HR says strain is critical (3). 
+
+---
+
+### 4) Event packet data structures (what you actually send/log)
+
+Your doc defines these packet types: **WU, HR, PP, CA**. 
+
+For an edge robot, keep **WU + HR** hot-path (tiny, frequent). Treat **PP + CA** as cold-path (rare, larger payload, maybe forwarded upstream).
+
+#### WU (Work Update) minimal fields
+
+From the doc, WU includes: lawfulness level (0–3), metric deltas, risk, reversible flag. 
+
+Minimal struct (logical):
+
+```text
+WU {
+  mode: 0..3
+  rail_id: 0..3          # P1..P4
+  lawfulness: 0..3
+  dE, dDrift, dRetention # quantised ints
+  K (coherence)          # quantised
+  risk: 0..1             # quantised
+  reversible: bool
+  seq, dt_ms
+  auth_tag (optional MAC)
+}
+```
+
+#### HR (Heat Report) minimal fields
+
+HR is strain Σ quantised into 4 levels (0..3). 
+
+```text
+HR {
+  mode: 0..3
+  rail_id: 0..3
+  strain_q: 0..3
+  seq, dt_ms
+  auth_tag
+}
+```
+
+---
+
+### 5) Bit-level packing layout (base-4 friendly)
+
+Your doc explicitly notes: **two binary bits simulate a quaternary digit**, and IDs can be base-4 encoded for transmission efficiency. 
+
+So: pack the *control plane* as quaternary digits (2-bit fields) and quantise the rest.
+
+#### **E6Packet16 (16 bytes / 128 bits)** — hot path (WU/HR)
+
+**Byte order:** big-endian.
+**Signed fields:** two’s complement.
+
+| Bits (hi→lo) | Len | Name         | Notes                                 |
+| -----------: | --: | ------------ | ------------------------------------- |
+|     127..120 |   8 | magic        | `0xE6`                                |
+|     119..116 |   4 | version      | e.g. 0                                |
+|     115..114 |   2 | pkt_type     | 0=WU, 1=HR, 2=PP, 3=CA                |
+|     113..112 |   2 | mode         | 0 Halt,1 Probe,2 Stabilise,3 Express  |
+|     111..110 |   2 | rail_id      | P1..P4 as 0..3                        |
+|     109..108 |   2 | lawfulness   | 0..3                                  |
+|          107 |   1 | reversible   | WU only                               |
+|          106 |   1 | reserved     |                                       |
+|      105..96 |  10 | seq          | wraps 0..1023 (cheap)                 |
+|       95..80 |  16 | dt_ms        | delta ms since last packet            |
+|       79..68 |  12 | dE_q         | signed                                |
+|       67..56 |  12 | dDrift_q     | signed                                |
+|       55..44 |  12 | dRetention_q | signed                                |
+|       43..34 |  10 | K_q          | 0..1023 (maps to 𝒦)                  |
+|       33..26 |   8 | risk_q       | 0..255 (maps to [0,1])                |
+|       25..24 |   2 | strain_q     | HR: 0..3; WU: 0                       |
+|       23..16 |   8 | V_q          | 0..255 (your V-momentum gate signal)  |
+|        15..0 |  16 | crc16        | optional (or leave for MAC prefix)    |
+
+**Security add-on (recommended):** append an **8-byte MAC** (SipHash/BLAKE3 keyed) → total 24 bytes.
+That gives you tamper resistance similar in spirit to your `ledger_hash` check, but cheaper than SHA on tiny devices.
+
+---
+
+### 6) Minimal on-device compute budget version (what to actually run per tick)
+
+Keep it brutal:
+
+**Always-on (per tick):**
+
+* Maintain **ring buffers**:
+
+  * `mismatch[20]` (for multi-window hysteresis)
+  * `V[3]`
+* Maintain **running sums + sumsqs** for windows **5,12,20** → variance in O(1).
+* Quantise everything to ints early.
+
+**Cheap gate maths (no exp):**
+
+* Replace `exp(-x)` with a fast monotonic squash:
+
+  * `score = 1 / (1 + x)`  (float)
+    or fixed-point:
+  * `score_q = 1023 - clamp(k*x, 0..1023)`
+
+**Decision:**
+
+* Compute `E_gate` (0/1) using:
+
+  * lawfulness ≥ 2 
+  * risk below threshold 
+  * multi-H ≥ threshold
+  * “ethical sprint” block (if V_history is spiky)
+* Only if `E_gate==1`: commit WU to the local ledger (or queue it for merge).
+

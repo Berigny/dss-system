@@ -1,0 +1,28 @@
+{
+  "meta": {
+    "layer": "process",
+    "note": "Fixed positional bases encode syntax; exponents encode concepts."
+  },
+  "slots": {
+    "agent": {
+      "base": 2,
+      "description": "Who/What acts"
+    },
+    "context": {
+      "base": 11,
+      "description": "Where/When/How"
+    },
+    "patient": {
+      "base": 5,
+      "description": "What is acted upon"
+    },
+    "result": {
+      "base": 7,
+      "description": "What is produced"
+    },
+    "verb": {
+      "base": 3,
+      "description": "What happens"
+    }
+  }
+}

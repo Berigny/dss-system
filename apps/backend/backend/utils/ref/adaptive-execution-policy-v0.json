@@ -1,0 +1,154 @@
+{
+  "version": "0.1.0",
+  "description": "Adaptive execution policy for middleware orchestration under compute/network/stability pressure.",
+  "sampling": {
+    "interval_ms": 1000,
+    "token_rate_windows_ms": [3000, 15000],
+    "req_rate_window_ms": 10000,
+    "profile_min_dwell_ms": 15000,
+    "profile_recovery_stable_ms": 25000
+  },
+  "capability_baseline": {
+    "node_class": {
+      "low": {
+        "cpu_pct_warn": 70,
+        "cpu_pct_crit": 85,
+        "mem_pct_warn": 75,
+        "mem_pct_crit": 90,
+        "queue_warn": 2,
+        "queue_crit": 4
+      },
+      "mid": {
+        "cpu_pct_warn": 80,
+        "cpu_pct_crit": 92,
+        "mem_pct_warn": 82,
+        "mem_pct_crit": 93,
+        "queue_warn": 4,
+        "queue_crit": 8
+      },
+      "high": {
+        "cpu_pct_warn": 88,
+        "cpu_pct_crit": 96,
+        "mem_pct_warn": 88,
+        "mem_pct_crit": 95,
+        "queue_warn": 8,
+        "queue_crit": 16
+      }
+    },
+    "network_class": {
+      "good": {
+        "rtt_ms_warn": 150,
+        "rtt_ms_crit": 350,
+        "timeout_rate_warn": 0.02,
+        "timeout_rate_crit": 0.05
+      },
+      "normal": {
+        "rtt_ms_warn": 250,
+        "rtt_ms_crit": 600,
+        "timeout_rate_warn": 0.04,
+        "timeout_rate_crit": 0.08
+      },
+      "poor": {
+        "rtt_ms_warn": 500,
+        "rtt_ms_crit": 1000,
+        "timeout_rate_warn": 0.08,
+        "timeout_rate_crit": 0.15
+      }
+    }
+  },
+  "pressure": {
+    "components": {
+      "compute_pressure": {
+        "weight": 1.0
+      },
+      "queue_pressure": {
+        "weight": 1.0
+      },
+      "token_pressure": {
+        "weight": 1.0,
+        "drop_warn_ratio": 0.35,
+        "drop_crit_ratio": 0.55
+      },
+      "network_pressure": {
+        "weight": 1.0,
+        "apply_to_online_only": true
+      },
+      "stability_pressure": {
+        "weight": 1.0,
+        "dW_warn_abs": 1,
+        "dW_crit_abs": 2,
+        "vq_low_warn": 20000,
+        "vq_low_crit": 12000,
+        "require_flags": ["K", "P", "E"]
+      }
+    },
+    "combine": "max"
+  },
+  "profiles": {
+    "FULL": {
+      "enter_if_pressure_lt": 35,
+      "actions": {
+        "recursive_assembly": "on",
+        "walk_hops_max": 4,
+        "retrieval_top_k": 8,
+        "guardian_pre_output": "on",
+        "guardian_post_output_async": "optional",
+        "token_budget_scale": 1.0,
+        "timeout_scale": 1.0
+      }
+    },
+    "FAST": {
+      "enter_if_pressure_gte": 35,
+      "enter_if_pressure_lt": 70,
+      "actions": {
+        "recursive_assembly": "off",
+        "walk_hops_max": 1,
+        "retrieval_top_k": 4,
+        "guardian_pre_output": "conditional",
+        "guardian_pre_output_condition": "law>=2 && flags(K,P,E)=true && queue_depth<=queue_warn",
+        "guardian_post_output_async": "on",
+        "token_budget_scale": 0.7,
+        "timeout_scale": 0.8
+      }
+    },
+    "MINIMAL": {
+      "enter_if_pressure_gte": 70,
+      "actions": {
+        "recursive_assembly": "off",
+        "walk_hops_max": 0,
+        "retrieval_top_k": 2,
+        "guardian_pre_output": "off",
+        "guardian_post_output_async": "required",
+        "token_budget_scale": 0.45,
+        "timeout_scale": 0.65
+      }
+    }
+  },
+  "autonomy": {
+    "mid_turn_escalation": {
+      "abort_new_walks": true,
+      "cap_remaining_walk_hops": true,
+      "prioritize_stream_first_token": true
+    },
+    "guardian_deferral": {
+      "set_pending_enrichment_flag": true,
+      "store_defer_reason": true,
+      "enqueue_async_job": true
+    }
+  },
+  "safety_floor": {
+    "always_enforce": [
+      "schema_validation",
+      "provenance_checks",
+      "signature_nonce_checks",
+      "hard_lawfulness_blocks"
+    ]
+  },
+  "metrics": [
+    "profile_switch_total{from,to,reason}",
+    "guardian_deferred_total{reason}",
+    "walk_aborted_total{reason}",
+    "latency_ms{profile,route}",
+    "sync_quarantine_total{reason}"
+  ]
+}

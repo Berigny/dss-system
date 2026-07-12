@@ -1,0 +1,116 @@
+# DSS Control Plane — Connection Governance Ontology
+# DSS-CP-GOV-v1.0.0-alpha
+
+entity_types:
+  principal:
+    subtypes:
+      - human
+      - runtime_model
+      - organisation
+    can_hold:
+      - principal
+    can_be_held_by:
+      - ledger
+      - surface
+      - principal
+
+  ledger:
+    subtypes:
+      - governed_memory_boundary
+    can_hold:
+      - principal
+      - surface
+      - ledger
+    can_be_held_by:
+      - ledger
+
+  surface:
+    subtypes:
+      - chat
+      - portal
+      - api
+    can_hold:
+      - principal
+      - ledger
+    can_be_held_by:
+      - ledger
+    constraints:
+      - "CANNOT_HOLD: surface"
+
+relationship_types:
+  member_of:
+    from:
+      - principal
+      - surface
+    to:
+      - ledger
+    cardinality: many_to_many
+    meaning: "Entity is governed by and can access the ledger's namespace"
+
+  links_to:
+    from:
+      - ledger
+    to:
+      - ledger
+    cardinality: many_to_many
+    bidirectional: true
+    meaning: "Federation. Membership and capabilities propagate transitively"
+
+  belongs_to:
+    from:
+      - principal
+    to:
+      - principal
+    cardinality: many_to_many
+    meaning: "Implicit org structure. Grants NO capabilities, only grouping"
+
+  holds:
+    from:
+      - principal
+    to:
+      - principal
+      - ledger
+      - surface
+    cardinality: one_to_many
+    meaning: "Explicit containment. Organisation owns entity lifecycle"
+    constraints:
+      - "REQUIRES_SUBTYPE: organisation"
+
+  hosts:
+    from:
+      - surface
+    to:
+      - principal
+      - ledger
+    cardinality: many_to_many
+    meaning: "Surface can render or act on behalf of the hosted entity"
+
+  access_grant:
+    from:
+      - surface
+      - principal
+    to:
+      - ledger
+    cardinality: many_to_many
+    meaning: "Concrete read/write permission for a principal on a surface to a ledger"
+
+legacy_relationship_types:
+  related_to:
+    maps_to: member_of
+    meaning: "Generic relationship treated as membership for impact analysis"
+  member_of_ledger:
+    maps_to: member_of
+    meaning: "Existing principal/surface membership in a ledger"
+  surface_bound_to_ledger:
+    maps_to: member_of
+    meaning: "Surface membership in a ledger"
+  can_access_surface:
+    maps_to: hosts
+    reverse_direction: true
+    meaning: "Principal can access surface becomes surface hosts principal"
+  writes_to_ledger:
+    maps_to: access_grant
+    meaning: "Principal write permission to ledger treated as access_grant when hosted"
+  administered_by:
+    maps_to: holds
+    meaning: "Principal administered by another principal"

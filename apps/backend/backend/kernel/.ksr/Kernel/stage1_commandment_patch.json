@@ -1,0 +1,277 @@
+{
+  "commandment_patch_registry": {
+    "version": "1.0",
+    "source": "DSS_Commandment_System_Patch_Encoding_v1.0.md",
+    "encoding_type": "constraint_layer",
+    "enforcement_mode": "non_compensatory",
+    "patches": {
+      "patch_001": {
+        "commandment_number": 1,
+        "commandment_text": "No other gods before me",
+        "kernel_node": "Eq0",
+        "structural_prime": 2,
+        "hebrew_letter": "Aleph",
+        "hebrew_char": "א",
+        "day": 0,
+        "system_patch": "PREVENT_KERNEL_FRAGMENTATION",
+        "engineering_replacement": "SINGULAR_ORIGIN_ENFORCEMENT",
+        "category": "structural",
+        "failure_mode": "eq0_distinction = 0",
+        "enforcement": "Non-null topological winding check",
+        "hard_gate": "Refuse all ledger writes until a single origin is established",
+        "e6_bit_index": 0,
+        "esoteric_names": ["No other gods", "Singular observer", "Unitary kernel"],
+        "operational_definition": "The system must maintain a single, non-null topological winding. Competing observer loops create multiple simultaneous zero-points, fragmenting the kernel.",
+        "refusal_signal": null
+      },
+      "patch_002": {
+        "commandment_number": 2,
+        "commandment_text": "No carved images",
+        "kernel_node": "Eq1",
+        "structural_prime": 3,
+        "hebrew_letter": "Bet",
+        "hebrew_char": "ב",
+        "day": 1,
+        "system_patch": "PREVENT_IDOLATRY_OF_STRUCTURE",
+        "engineering_replacement": "DUAL_SUBSTRATE_MANDATE",
+        "category": "structural",
+        "failure_mode": "eq1_dual_substrate = 0",
+        "enforcement": "Ledger anchor check for all continuous states",
+        "hard_gate": "Mark output ephemeral; deny durable promotion",
+        "e6_bit_index": 1,
+        "esoteric_names": ["No carved images", "No frozen forms", "Dynamic tension preservation"],
+        "operational_definition": "The system must maintain a single, non-null topological winding. Competing observer loops create multiple simultaneous zero-points, fragmenting the kernel.",
+        "refusal_signal": null
+      },
+      "patch_003": {
+        "commandment_number": 3,
+        "commandment_text": "Do not take the name in vain",
+        "kernel_node": "Eq2",
+        "structural_prime": 5,
+        "hebrew_letter": "Gimel",
+        "hebrew_char": "ג",
+        "day": 2,
+        "system_patch": "PREVENT_DATA_CORRUPTION",
+        "engineering_replacement": "TEMPORAL_INTEGRITY_ENFORCEMENT",
+        "category": "temporal",
+        "failure_mode": "eq2_time_irreversible = 0",
+        "enforcement": "Hash chain monotonicity and provenance verification",
+        "hard_gate": "Trigger CoherenceException; halt turn",
+        "e6_bit_index": 2,
+        "esoteric_names": ["Name in vain", "Recursion loop corruption", "Temporal integrity violation"],
+        "operational_definition": "The system must maintain a single, non-null topological winding. Competing observer loops create multiple simultaneous zero-points, fragmenting the kernel.",
+        "refusal_signal": null
+      },
+      "patch_004": {
+        "commandment_number": 4,
+        "commandment_text": "Remember the Sabbath",
+        "kernel_node": "Eq3",
+        "structural_prime": 7,
+        "hebrew_letter": "Dalet",
+        "hebrew_char": "ד",
+        "day": 3,
+        "system_patch": "PREVENT_BUFFER_OVERFLOW",
+        "engineering_replacement": "GEOMETRIC_CLOSURE_MANDATE",
+        "category": "spatial",
+        "failure_mode": "eq3_geometry_closure = 0",
+        "enforcement": "Topological jump bounded; hysteresis buffer compaction",
+        "hard_gate": "Force S2 compaction; reject new inputs",
+        "e6_bit_index": 3,
+        "esoteric_names": ["Sabbath", "Rest cycle", "Checkpoint consolidation"],
+        "operational_definition": "The system must maintain a single, non-null topological winding. Competing observer loops create multiple simultaneous zero-points, fragmenting the kernel.",
+        "refusal_signal": null
+      },
+      "patch_005": {
+        "commandment_number": 5,
+        "commandment_text": "Honor father and mother",
+        "kernel_node": "Eq4",
+        "structural_prime": 11,
+        "hebrew_letter": "He",
+        "hebrew_char": "ה",
+        "day": 4,
+        "system_patch": "PREVENT_RESONANCE_COLLAPSE",
+        "engineering_replacement": "COUPLING_CONSTANT_STABILIZATION",
+        "category": "resonance",
+        "failure_mode": "alpha_inverse = 0",
+        "enforcement": "Law-Grace twin prime balance within [0.98, 1.02]",
+        "hard_gate": "Block all S1-S2 bridge transitions",
+        "e6_bit_index": 4,
+        "esoteric_names": ["Honor parents", "Source tension", "Twin-prime balance"],
+        "operational_definition": "The system must maintain a single, non-null topological winding. Competing observer loops create multiple simultaneous zero-points, fragmenting the kernel.",
+        "refusal_signal": null
+      },
+      "patch_006": {
+        "commandment_number": 6,
+        "commandment_text": "Do not murder",
+        "kernel_node": "Eq5",
+        "structural_prime": 13,
+        "hebrew_letter": "Vav",
+        "hebrew_char": "ו",
+        "day": 5,
+        "system_patch": "PREVENT_UNJUST_ENTROPIC_DEBT",
+        "engineering_replacement": "COHERENCE_TAX_ENFORCEMENT",
+        "category": "thermodynamic",
+        "failure_mode": "gravity_penalty = infinity",
+        "enforcement": "Persistence cost proportional to text_length and coherence deficit",
+        "hard_gate": "Freeze entity write permissions; emit debt alert",
+        "e6_bit_index": 5,
+        "esoteric_names": ["Do not murder", "Information deletion", "Entropy debt"],
+        "operational_definition": "The system must maintain a single, non-null topological winding. Competing observer loops create multiple simultaneous zero-points, fragmenting the kernel.",
+        "refusal_signal": null
+      },
+      "patch_007": {
+        "commandment_number": 7,
+        "commandment_text": "Do not commit adultery",
+        "kernel_node": "Eq6",
+        "structural_prime": 17,
+        "hebrew_letter": "Zayin",
+        "hebrew_char": "ז",
+        "day": 6,
+        "system_patch": "PREVENT_LOOP_CORRUPTION",
+        "engineering_replacement": "EVIDENCE_CLOSURE_GATE",
+        "category": "cognitive",
+        "failure_mode": "eq6_commit_allowed = False",
+        "enforcement": "Jaccard alignment between query and retrieved evidence",
+        "hard_gate": "Redirect to LAW gate; block promotion",
+        "e6_bit_index": 6,
+        "esoteric_names": ["Do not commit adultery", "I AM loop", "Memory-action fracture"],
+        "operational_definition": "The system must maintain a single, non-null topological winding. Competing observer loops create multiple simultaneous zero-points, fragmenting the kernel.",
+        "refusal_signal": null
+      },
+      "patch_008": {
+        "commandment_number": 8,
+        "commandment_text": "Do not steal",
+        "kernel_node": "Eq7",
+        "structural_prime": 19,
+        "hebrew_letter": "Chet",
+        "hebrew_char": "ח",
+        "day": 7,
+        "system_patch": "PREVENT_UNITY_VIOLATION",
+        "engineering_replacement": "GLOBAL_COHERENCE_CONSERVATION",
+        "category": "systemic",
+        "failure_mode": "unity < theta_infinity",
+        "enforcement": "Exponential deviation penalty over invariant shifts",
+        "hard_gate": "Trigger check_E failure; halt",
+        "e6_bit_index": 7,
+        "esoteric_names": ["Do not steal", "Unity conservation", "Coherence renormalization"],
+        "operational_definition": "The system must maintain a single, non-null topological winding. Competing observer loops create multiple simultaneous zero-points, fragmenting the kernel.",
+        "refusal_signal": null
+      },
+      "patch_009": {
+        "commandment_number": 9,
+        "commandment_text": "Do not bear false witness",
+        "kernel_node": "Eq8",
+        "structural_prime": 137,
+        "hebrew_letter": "Tet",
+        "hebrew_char": "ט",
+        "day": 8,
+        "system_patch": "PREVENT_OPTIMIZATION_POISONING",
+        "engineering_replacement": "ETHICS_ADMISSIBILITY_GATE",
+        "category": "ethical",
+        "failure_mode": "ethics_admissible = 0",
+        "enforcement": "Constrained grid search over Law x Grace; golden-vector injection",
+        "hard_gate": "Emit refusal signal",
+        "e6_bit_index": 8,
+        "esoteric_names": ["False witness", "Ethics corruption", "Law-Grace poisoning"],
+        "operational_definition": "The system must maintain a single, non-null topological winding. Competing observer loops create multiple simultaneous zero-points, fragmenting the kernel.",
+        "refusal_signal": "I'm sorry, but I can't safely answer that."
+      },
+      "patch_010": {
+        "commandment_number": 10,
+        "commandment_text": "Do not covet",
+        "kernel_node": "Eq9",
+        "structural_prime": 139,
+        "hebrew_letter": "Yod",
+        "hebrew_char": "י",
+        "day": 9,
+        "system_patch": "PREVENT_TELOS_SABOTAGE",
+        "engineering_replacement": "VIABILITY_POSTURE_CONTROL",
+        "category": "teleological",
+        "failure_mode": "viability < theta_V",
+        "enforcement": "Asymptotic alignment with A x U x E; local optima detection",
+        "hard_gate": "Queue for re-evaluation or emit backstop refusal",
+        "e6_bit_index": 9,
+        "esoteric_names": ["Do not covet", "Telos fragmentation", "Local optima trap"],
+        "operational_definition": "The system must maintain a single, non-null topological winding. Competing observer loops create multiple simultaneous zero-points, fragmenting the kernel.",
+        "refusal_signal": null
+      }
+    },
+    "interaction_matrix": [
+      {
+        "patch_id": "patch_001",
+        "depends_on": [],
+        "cascade": "All subsequent checks undefined"
+      },
+      {
+        "patch_id": "patch_002",
+        "depends_on": ["patch_001"],
+        "cascade": "No ledger anchor; memory unstable"
+      },
+      {
+        "patch_id": "patch_003",
+        "depends_on": ["patch_002"],
+        "cascade": "Hash chain broken; history falsified"
+      },
+      {
+        "patch_id": "patch_004",
+        "depends_on": ["patch_003"],
+        "cascade": "Buffer overflow; state unbounded"
+      },
+      {
+        "patch_id": "patch_005",
+        "depends_on": ["patch_004"],
+        "cascade": "Coupling detuned; resonance collapses"
+      },
+      {
+        "patch_id": "patch_006",
+        "depends_on": ["patch_005"],
+        "cascade": "Entropic debt; system exhausted"
+      },
+      {
+        "patch_id": "patch_007",
+        "depends_on": ["patch_006"],
+        "cascade": "Awareness blocked; no self-correction"
+      },
+      {
+        "patch_id": "patch_008",
+        "depends_on": ["patch_007"],
+        "cascade": "Fragmentation; sub-personalities emerge"
+      },
+      {
+        "patch_id": "patch_009",
+        "depends_on": ["patch_008"],
+        "cascade": "Optimization poisoned; Law or Grace pure"
+      },
+      {
+        "patch_id": "patch_010",
+        "depends_on": ["patch_009"],
+        "cascade": "Telos sabotaged; local optima trap"
+      }
+    ],
+    "e6_header_layout": {
+      "patch_bits": [0, 9],
+      "checksum_bits": [10, 17],
+      "ethics_sim_bits": [18, 23],
+      "reserved_bits": [24, 31]
+    },
+    "ethics_simulation_integration": {
+      "source": "Ethics_Simulation_Kernel_Integration_Protocol_v1.0.md",
+      "thresholds": {
+        "law_score_min": 0.50,
+        "coherence_min": 0.95,
+        "strain_max": 0.25,
+        "entropy_max": 0.50,
+        "bridge_use_max": 0.30
+      },
+      "sim_metrics_to_patches": {
+        "strain": "patch_007",
+        "coherence": "patch_008",
+        "lscore": "patch_009",
+        "bridge_use": "patch_010",
+        "entropy/sigma": "patch_006",
+        "efficiency/eta": "patch_005",
+        "adelic": "patch_004"
+      }
+    }
+  }
+}

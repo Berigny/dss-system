@@ -6,10 +6,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PORT=3000
 
-COPY requirements.txt .
+COPY packages/shared-types /packages/shared-types
+COPY apps/control-plane/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY apps/control-plane/ .
 
 EXPOSE 3000
 

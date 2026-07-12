@@ -1,0 +1,50 @@
+name: Stack Rollout Contract Check
+
+on:
+  workflow_dispatch:
+    inputs:
+      backend_url:
+        description: "Backend base URL"
+        required: true
+        default: "https://ds-backend-new.fly.dev"
+      middleware_url:
+        description: "Middleware base URL"
+        required: true
+        default: "https://ds-middleware-new.fly.dev"
+      frontend_url:
+        description: "Frontend base URL"
+        required: true
+        default: "https://ds-frontend-local-new.vercel.app"
+      expected_backend_sha:
+        description: "Optional expected backend git SHA (full commit)"
+        required: false
+        default: ""
+
+jobs:
+  rollout-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Run rollout contract checker
+        env:
+          BACKEND_URL: ${{ github.event.inputs.backend_url }}
+          MIDDLEWARE_URL: ${{ github.event.inputs.middleware_url }}
+          FRONTEND_URL: ${{ github.event.inputs.frontend_url }}
+          EXPECTED_BACKEND_SHA: ${{ github.event.inputs.expected_backend_sha }}
+        run: |
+          ARGS=(
+            --backend-url "$BACKEND_URL"
+            --middleware-url "$MIDDLEWARE_URL"
+            --frontend-url "$FRONTEND_URL"
+          )
+          if [ -n "$EXPECTED_BACKEND_SHA" ]; then
+            ARGS+=(--expected-backend-sha "$EXPECTED_BACKEND_SHA")
+          fi
+          python backend/scripts/rollout_contract_check.py "${ARGS[@]}"

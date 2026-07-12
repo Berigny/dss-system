@@ -9,13 +9,14 @@ import html
 import json
 import base64
 import httpx
+import prometheus_client
 import asyncio
 from datetime import datetime
 from urllib.parse import unquote, parse_qs, urlparse, urlencode, quote
 from typing import Any, cast
 from fasthtml.common import Button, Div, Input, Option, P, Script, Title, fast_app, serve
 from starlette.middleware.cors import CORSMiddleware
-from starlette.responses import JSONResponse, StreamingResponse, RedirectResponse
+from starlette.responses import JSONResponse, StreamingResponse, RedirectResponse, Response
 from starlette.requests import Request
 from starlette.exceptions import HTTPException
 from starlette.datastructures import UploadFile
@@ -27,6 +28,7 @@ from routes.orchestrator import register_orchestrator_routes
 from routes.wake import register_wake_routes
 from routes.agent import register_agent_routes
 from utils.session import build_entity_namespace, get_session, update_session
+from utils.qp_pure_metrics import qp_pure_metrics
 from utils.stats import build_stats_payload
 from utils.text_processing import COORD_PATTERN, extract_coords_from_text, truncate_text, normalize_coord_token
 from utils.execution_governor import ExecutionGovernor
@@ -1329,10 +1331,27 @@ def health_check():
         "llm_configured": llm is not None,
         "backend_url": settings.API_BASE,
         "git_sha": (os.getenv("GIT_SHA", "").strip() or "unknown"),
+        "qp_pure_metrics": qp_pure_metrics.snapshot(),
     }
     if llm is not None:
-        status["llm_model"] = settings.LLM_PROVIDER 
+        status["llm_model"] = settings.LLM_PROVIDER
     return status
+
+
+@rt("/metrics")
+def metrics_check():
+    return {
+        "status": "ok",
+        "qp_pure_metrics": qp_pure_metrics.snapshot(),
+    }
+
+
+@rt("/prometheus")
+def prometheus_metrics(request: Request):
+    return Response(
+        content=prometheus_client.generate_latest(prometheus_client.REGISTRY),
+        media_type=prometheus_client.CONTENT_TYPE_LATEST,
+    )
 
 
 @rt("/version")

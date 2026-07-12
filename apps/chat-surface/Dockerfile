@@ -6,10 +6,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PORT=3001
 
-COPY requirements.txt .
+COPY packages/shared-types /packages/shared-types
+COPY apps/chat-surface/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY apps/chat-surface/ .
 
 EXPOSE 3001
 

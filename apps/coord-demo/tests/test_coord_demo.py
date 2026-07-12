@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import json
-
 import pytest
 from starlette.testclient import TestClient
 
@@ -25,10 +23,10 @@ def test_index_renders_form(client: TestClient) -> None:
     response = client.get("/")
     assert response.status_code == 200
     assert "Resolve COORD" in response.text
-    assert "coord" in response.text
+    assert "coordinate" in response.text
 
 
-def test_resolve_forwards_json_to_middleware(
+def test_resolve_forwards_coordinate_to_middleware(
     client: TestClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     captured: dict[str, object] = {}
@@ -50,19 +48,12 @@ def test_resolve_forwards_json_to_middleware(
 
     monkeypatch.setattr("httpx.post", fake_post)
 
-    payload = {"coord": "chat-demo:WX-1"}
-    response = client.post("/resolve", data={"coord": json.dumps(payload)})
+    response = client.post("/resolve", data={"coordinate": "chat-demo:WX-1"})
 
     assert response.status_code == 200
-    assert captured["url"] == f"{app.MIDDLEWARE_URL}/resolve"
-    assert captured["json"] == payload
+    assert captured["url"] == f"{app.MIDDLEWARE_URL}/api/decode_coordinate"
+    assert captured["json"] == {"coordinate": "chat-demo:WX-1"}
     assert "resolved" in response.text
-
-
-def test_resolve_renders_invalid_json_error(client: TestClient) -> None:
-    response = client.post("/resolve", data={"coord": "not-json"})
-    assert response.status_code == 200
-    assert "Invalid JSON" in response.text
 
 
 def test_resolve_renders_upstream_error(
@@ -75,6 +66,6 @@ def test_resolve_renders_upstream_error(
 
     monkeypatch.setattr("httpx.post", fake_post)
 
-    response = client.post("/resolve", data={"coord": '{"coord":"x"}'})
+    response = client.post("/resolve", data={"coordinate": "chat-demo:WX-1"})
     assert response.status_code == 200
     assert "Resolver error" in response.text

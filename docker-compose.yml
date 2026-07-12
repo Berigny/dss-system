@@ -1,8 +1,8 @@
-version: "3.9"
-
 services:
   backend:
-    build: ./apps/backend
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
     container_name: dss-backend
     ports:
       - "8000:8000"
@@ -27,14 +27,16 @@ services:
     networks:
       - dss-network
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/livez >/dev/null"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 15s
 
   middleware:
-    build: ./apps/middleware
+    build:
+      context: .
+      dockerfile: apps/middleware/Dockerfile
     container_name: dss-middleware
     ports:
       - "8001:8001"
@@ -54,7 +56,9 @@ services:
       start_period: 15s
 
   control-plane:
-    build: ./apps/control-plane
+    build:
+      context: .
+      dockerfile: apps/control-plane/Dockerfile
     container_name: dss-control-plane
     ports:
       - "3000:3000"
@@ -74,7 +78,9 @@ services:
       start_period: 15s
 
   chat-surface:
-    build: ./apps/chat-surface
+    build:
+      context: .
+      dockerfile: apps/chat-surface/Dockerfile
     container_name: dss-chat-surface
     ports:
       - "3001:3001"
@@ -94,7 +100,9 @@ services:
       start_period: 15s
 
   coord-demo:
-    build: ./apps/coord-demo
+    build:
+      context: .
+      dockerfile: apps/coord-demo/Dockerfile
     container_name: dss-coord-demo
     ports:
       - "3002:3002"

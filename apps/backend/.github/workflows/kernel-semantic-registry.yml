@@ -1,0 +1,54 @@
+name: Kernel Semantic Registry Hygiene
+
+on:
+  push:
+    branches: [main, codex-epic-03-onboarding-revision]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ksr-hygiene:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout ds-backend-local
+        uses: actions/checkout@v4
+        with:
+          path: ds-backend-local
+
+      - name: Checkout ds-middleware-local
+        uses: actions/checkout@v4
+        with:
+          repository: davidberigny/ds-middleware-local
+          path: ds-middleware-local
+
+      - name: Checkout ds-frontend-local
+        uses: actions/checkout@v4
+        with:
+          repository: davidberigny/ds-frontend-local
+          path: ds-frontend-local
+
+      - name: Checkout DSS-Dashboard
+        uses: actions/checkout@v4
+        with:
+          repository: davidberigny/DSS-Dashboard
+          path: DSS-Dashboard
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        working-directory: ds-backend-local
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: KSR pre-commit gate
+        working-directory: ds-backend-local
+        env:
+          DSS_KSR_PASSWORD: ${{ secrets.DSS_KSR_PASSWORD }}
+        run: python scripts/ksr_precommit.py
+
+      - name: Cross-repo KSR surface scan
+        run: python ds-backend-local/scripts/cross_repo_stripper.py

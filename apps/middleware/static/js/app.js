@@ -3,6 +3,32 @@
  * Handles chat helpers, Settings Panel, Stats, and Ledger Management.
  */
 
+// DSS-245: BigInt-safe coordinate fields.
+const _BIGINT_COORDINATE_KEYS = new Set([
+    'prime_multiplicative_value',
+    'token_prime_product',
+    'body_prime',
+    'numerator',
+    'denominator',
+]);
+
+function parseCoordinateJson(text) {
+    return JSON.parse(text, (key, value) => {
+        if (
+            _BIGINT_COORDINATE_KEYS.has(key)
+            && typeof value === 'string'
+            && /^-?\d+$/.test(value)
+        ) {
+            try {
+                return BigInt(value);
+            } catch (_) {
+                return value;
+            }
+        }
+        return value;
+    });
+}
+
 // --- UI Interactivity (Settings Panel) ---
 
 const threadlessMetrics = {
@@ -500,7 +526,7 @@ async function readStream(response, onEvent) {
             if (!trimmed) continue;
             let payload;
             try {
-                payload = JSON.parse(trimmed);
+                payload = parseCoordinateJson(trimmed);
             } catch (err) {
                 continue;
             }
@@ -513,7 +539,7 @@ async function readStream(response, onEvent) {
     const trailing = buffer.trim();
     if (trailing) {
         try {
-            const payload = JSON.parse(trailing);
+            const payload = parseCoordinateJson(trailing);
             if (onEvent) {
                 onEvent(payload);
             }
