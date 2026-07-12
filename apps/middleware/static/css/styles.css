@@ -1,0 +1,1054 @@
+/* ========================================
+   1. CORE TYPOGRAPHY & RESET
+   ======================================== */
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,200..900;1,200..900&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+    --font-serif: 'Crimson Pro', serif;
+    --font-sans: 'Inter', sans-serif;
+    --color-bg: #ffffff;
+    --color-text-main: #1a1a1a;
+    --color-text-sub: #6b7280;
+    --color-accent: #000000;
+}
+
+body {
+    font-family: var(--font-sans);
+    background-color: var(--color-bg);
+    color: var(--color-text-main);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+#chat-stream {
+    padding-top: var(--header-height, 0px);
+    z-index: 0;
+}
+
+/* Force Serif on the Manifesto parts */
+.font-serif {
+    font-family: var(--font-serif) !important;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ========================================
+   2. HEADER & NAVIGATION
+   ======================================== */
+.header {
+    background: transparent; /* Transparent header */
+    position: absolute;
+    top: 30px;
+    left: 40px;
+    z-index: 50;
+}
+
+.header-title h1 {
+    font-family: var(--font-sans);
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: -0.02em;
+    color: var(--color-text-main);
+}
+
+.tagline {
+    display: none; /* Hide tagline for minimalist look */
+}
+
+
+/* Icon button base styles */
+.icon-button {
+  background: transparent;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  display: inline-block;
+  position: fixed;
+  z-index: 1000;
+}
+
+.icon-button:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+/* Hamburger positioning (top right) */
+.hamburger-btn {
+  top: 30px;
+  right: 40px;
+  z-index: 999; /* Above most content */
+}
+
+/* Hamburger Menu Icon */
+.hamburger {
+  width: 25px;
+  height: 20px;
+  position: relative;
+  display: inline-block;
+}
+
+.hamburger span {
+  display: block;
+  position: absolute;
+  height: 2px;
+  width: 100%;
+  background: #000;
+  border-radius: 2px;
+  opacity: 1;
+  left: 0;
+  transform: rotate(0deg);
+  transition: .25s ease-in-out;
+}
+
+.hamburger span:nth-child(1) {
+  top: 0px;
+}
+
+.hamburger span:nth-child(2),
+.hamburger span:nth-child(3) {
+  top: 9px;
+}
+
+.hamburger span:nth-child(4) {
+  top: 18px;
+}
+
+.hamburger.open span:nth-child(1) {
+  top: 9px;
+  width: 0%;
+  left: 50%;
+}
+
+.hamburger.open span:nth-child(2) {
+  transform: rotate(45deg);
+}
+
+.hamburger.open span:nth-child(3) {
+  transform: rotate(-45deg);
+}
+
+.hamburger.open span:nth-child(4) {
+  top: 9px;
+  width: 0%;
+  left: 50%;
+}
+
+
+/* Stats Badges - Minimalist pill style */
+.stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.stat {
+    font-size: 0.75rem;
+    background: #f3f4f6;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    color: var(--color-text-sub);
+    font-weight: 500;
+}
+
+.stat-value {
+    color: var(--color-text-main);
+    font-weight: 600;
+}
+/* ========================================
+   3. BODY (Monochrome Theme)
+   ======================================== */
+
+.response-AI {
+    font-size: 2.5rem;
+}
+
+#input-shell {
+    position: absolute;
+    top: 75px;
+}
+
+/* -- div#canvas-area {
+    padding-top: 8.5rem;
+} -- */
+
+.footer-indicator {
+    position:relative
+}
+
+/*  when a real reply is present, text starts well below the input .canvas-offset.has-reply { } */
+
+
+/* ========================================
+   3A. LOADING OVERLAY & ANIMATION
+   ======================================== */
+.loading-overlay {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 999;
+}
+
+.status-ticker {
+    margin-top: 2rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    text-align: center;
+    min-height: 1.2rem;
+}
+
+.loading-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#canvas-area.is-loading {
+    opacity: 0.35;
+    filter: saturate(0.6);
+}
+
+.polyhedron {
+    position: relative;
+    width: 8em;
+    height: 8em;
+    perspective: 50em;
+    transform-style: preserve-3d;
+    animation: rot 3s infinite linear;
+}
+
+@keyframes rot {
+    from { transform: rotateZ(-15deg) rotateX(45deg) rotateY(0deg); }
+    to { transform: rotateZ(345deg) rotateX(-315deg) rotateY(360deg); }
+}
+
+.polyhedron .side, .polyhedron .side:after {
+    overflow: hidden;
+    position: absolute;
+    width: inherit;
+    height: inherit;
+    backface-visibility: hidden;
+}
+
+.polyhedron .triangle:after {
+    transform: scaleX(1.155) skewY(-30deg) rotate(-30deg) translateY(-50%);
+    content: '';
+}
+
+.polyhedron.tetrahedron .side.triangle:first-child {
+    transform: translateZ(2.3094em)
+               rotateX(19.47deg)
+               rotate(30deg) skewY(30deg) scaleX(.866);
+}
+
+.polyhedron.tetrahedron .side.triangle:first-child:after {
+    background: #333333;
+    opacity: 0.25;
+}
+
+.polyhedron.tetrahedron .side.triangle:nth-child(2) {
+    transform: rotateY(120deg) translateZ(2.3094em)
+               rotateX(19.47deg)
+               rotate(30deg) skewY(30deg) scaleX(.866);
+}
+
+.polyhedron.tetrahedron .side.triangle:nth-child(2):after {
+    background: #666666;
+    opacity: 0.25;
+}
+
+.polyhedron.tetrahedron .side.triangle:nth-child(3) {
+    transform: rotateY(-120deg) translateZ(2.3094em)
+               rotateX(19.47deg)
+               rotate(30deg) skewY(30deg) scaleX(.866);
+}
+
+.polyhedron.tetrahedron .side.triangle:nth-child(3):after {
+    background: #999999;
+    opacity: 0.25;
+}
+
+.polyhedron.tetrahedron .side.triangle:last-child {
+    transform: translateZ(2.3094em)
+               rotateX(90deg) rotateY(180deg)
+               rotate(30deg) skewY(30deg) scaleX(.866);
+}
+
+.polyhedron.tetrahedron .side.triangle:last-child:after {
+    background: #000000;
+    opacity: 0.25;
+}
+
+/* ========================================
+   4. SETTINGS PANEL (Monochrome Theme)
+   ======================================== */
+.settings-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 100%;
+    max-width: 400px;
+    height: 100vh;
+    background: white;
+    border-left: 1px solid #e5e7eb;
+    box-shadow: -10px 0 40px rgba(0,0,0,0.05);
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 911;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.settings-panel.open {
+    transform: translateX(0);
+}
+
+.menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+    z-index: 911;
+}
+
+.menu-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Panel Header */
+.panel-header {
+    padding: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.panel-header h2 {
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--color-text-main);
+}
+
+.panel-title {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.panel-subtitle {
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    color: var(--color-text-sub);
+    margin: 0;
+}
+
+/* Hamburger Button (Black lines) */
+.hamburger-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hamburger-icon {
+    width: 25px;
+    height: 20px;
+    position: relative;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.hamburger-icon span {
+    display: block;
+    position: absolute;
+    height: 2px;
+    width: 100%;
+    background: var(--color-text-main);
+    border-radius: 2px;
+    opacity: 1;
+    left: 0;
+    transform: rotate(0deg);
+    transition: .25s ease-in-out;
+}
+
+.hamburger-icon span:nth-child(1) {
+    top: 0px;
+}
+
+.hamburger-icon span:nth-child(2),
+.hamburger-icon span:nth-child(3) {
+    top: 9px;
+}
+
+.hamburger-icon span:nth-child(4) {
+    top: 18px;
+}
+
+.hamburger-icon.open span:nth-child(1) {
+    top: 9px;
+    width: 0%;
+    left: 50%;
+}
+
+.hamburger-icon.open span:nth-child(2) {
+    transform: rotate(45deg);
+}
+
+.hamburger-icon.open span:nth-child(3) {
+    transform: rotate(-45deg);
+}
+
+.hamburger-icon.open span:nth-child(4) {
+    top: 9px;
+    width: 0%;
+    left: 50%;
+}
+
+/* Inputs & Selects in Panel */
+.setting-group {
+    padding: 2rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.setting-group label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-sub);
+    margin-bottom: 0.75rem;
+    display: block;
+}
+
+.setting-group select,
+.setting-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-family: var(--font-sans);
+    font-size: 0.95rem;
+    background: #fff;
+    transition: border-color 0.2s;
+}
+
+.help-text {
+    font-size: 0.9rem;
+    color: var(--color-text-sub);
+    margin-top: 0.5rem;
+    padding-top: 0.35rem;
+    line-height: 1.4;
+    display: block;
+}
+
+.stats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    margin-top: 0.75rem;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 0.95rem;
+    color: var(--color-text-sub);
+}
+
+.stat-label {
+    margin-right: 0.35rem;
+}
+
+.stat-number {
+    font-weight: 700;
+    color: var(--color-text-main);
+}
+
+.setting-group select:focus,
+.setting-group input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.toggle-label {
+    font-size: 0.85rem;
+    color: var(--color-text-main);
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 3.2rem;
+    height: 1.75rem;
+    flex: 0 0 auto;
+}
+
+.switch-input,
+.setting-group .switch-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+}
+
+.switch-slider {
+    position: absolute;
+    inset: 0;
+    cursor: pointer;
+    background: #d1d5db;
+    border-radius: 999px;
+    transition: background 0.2s ease;
+}
+
+.switch-slider::after {
+    content: "";
+    position: absolute;
+    height: 1.35rem;
+    width: 1.35rem;
+    left: 0.2rem;
+    top: 0.2rem;
+    background: #fff;
+    border-radius: 999px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease, width 0.2s ease;
+}
+
+.switch-input:checked + .switch-slider {
+    background: var(--color-accent);
+}
+
+.switch-input:checked + .switch-slider::after {
+    transform: translateX(1.4rem);
+}
+
+.switch-input:active + .switch-slider::after {
+    width: 1.6rem;
+}
+
+.switch-input:checked:active + .switch-slider::after {
+    transform: translateX(1.2rem);
+}
+
+.ledger-create-group,
+.agent-add-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.add-agent-btn {
+    margin-top: -0.15rem;
+}
+
+/* Buttons */
+.action-btn {
+    width: 100%;
+    padding: 1rem;
+    background: var(--color-accent);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-btn:hover { opacity: 0.9; }
+
+.action-btn.secondary {
+    background: #f3f4f6;
+    color: var(--color-text-main);
+}
+
+.action-btn.secondary:hover {
+    background: #e5e7eb;
+}
+
+.action-btn.loading {
+    pointer-events: none;
+}
+
+.action-btn.loading::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 2px;
+    width: 0%;
+    background: #000000;
+    animation: action-btn-loading 1.1s linear infinite;
+}
+
+@keyframes action-btn-loading {
+    0% { width: 0%; }
+    100% { width: 100%; }
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.setting-group.compact {
+    margin-top: 0.5rem;
+}
+
+.accordion {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 0.75rem;
+}
+
+.accordion-toggle {
+    width: 100%;
+    background: transparent;
+    border: none;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+    color: var(--color-text-main);
+    padding: 0.35rem 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.accordion-toggle::after {
+    content: '+';
+    font-weight: 600;
+    color: #111827;
+}
+
+.accordion.open .accordion-toggle::after {
+    content: '–';
+}
+
+.accordion-content {
+    display: none;
+    margin-top: 0.35rem;
+}
+
+.accordion.open .accordion-content {
+    display: block;
+}
+
+.toast-container {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    z-index: 120;
+    pointer-events: none;
+}
+
+.toast {
+    background: #111827;
+    color: #f9fafb;
+    padding: 0.6rem 0.9rem;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    letter-spacing: 0.02em;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transform: translateY(6px);
+    animation: toast-in 0.2s ease forwards;
+}
+
+.toast.success {
+    background: #111827;
+}
+
+.toast.error {
+    background: #7f1d1d;
+}
+
+@keyframes toast-in {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+   5. THREADLESS UI ANIMATIONS
+   ======================================== */
+
+/* Fade In Up (for Response) */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Fade In (for Value Prop) */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 1.5s ease-out forwards;
+    transition: opacity 0.3s ease;
+}
+
+/* Input Focus States */
+#cmd-input {
+    max-height: 25vh;
+    overflow-y: hidden;
+}
+
+#cmd-input::placeholder {
+    color: #9ca3af;
+    font-style: italic;
+    font-family: var(--font-serif);
+}
+
+/* Scrollbar hiding for cleaner look */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #d1d5db;
+}
+/* ========================================
+   6. HISTORY OVERLAY TRANSITIONS
+   ======================================== */
+
+/* Smooth fade/slide behavior for the history overlay */
+.history-transition {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(6px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    will-change: opacity, transform;
+}
+
+.history-open {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+/* Ease the canvas dimming when the history panel is toggled */
+#canvas-area {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#history-overlay h3 {
+            text-align: center;
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 600;
+            font-size: 1.5rem;
+            letter-spacing: -0.02em;
+            color: #000000;
+            margin-top: 4rem;
+        }
+
+div.history-open .assistant {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+        }
+
+div.history-open .user {
+            padding: 1.5rem 1.5rem 0 1.5rem;
+        }
+
+div.history-open .message-content {
+            line-height: 1.6;
+            margin-bottom: 0.75rem;
+        }
+
+div.history-open .user .message-content {
+            font-family: var(--font-serif);
+            font-size: 1.25rem;
+            font-style: italic;
+            font-weight: 500;
+            color: #111827;
+        }
+
+div.history-open .assistant .message-content {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.44rem;
+            color: #000000;
+        }
+
+.prose {
+    max-width: 65ch;
+    line-height: 1.7;
+}
+
+.prose p {
+    margin: 0 0 1rem;
+}
+
+.prose :where(ul, ol) {
+    margin: 0 0 1rem 1.25rem;
+}
+
+.prose :where(h1, h2, h3, h4) {
+    margin: 1.5rem 0 0.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.markdown-content .streaming-tail {
+    opacity: 1;
+    transition: opacity 0.5s ease;
+}
+
+.markdown-content.streaming-active .streaming-tail {
+    opacity: 0.5;
+}
+
+.markdown-content.streaming-complete .streaming-tail {
+    opacity: 1;
+}
+
+div.message div.meta {
+            font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+            font-size: 0.75rem;
+            line-height: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: rgb(209 213 219 / 1);
+            letter-spacing: 0.1em;
+        }
+
+#canvas-area, #history-list {
+    max-width: 900px;
+}
+
+#landing-zone {height: auto}
+
+#canvas-area {margin: 140px auto !important; padding: 0 40px;}
+
+div.header  {position: fixed; top: 0; left: 0; padding: 35px 40px; width: 100%; z-index: 99; background-color: white}
+
+#input-shell {width: 100%; position: fixed; z-index: 99; background-color: white}
+#input-shell form, .loading-history {max-width: 900px; margin: 0 auto;}
+#input-shell form {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+}
+
+@media (max-width: 1024px) {
+    #input-shell form,
+    .loading-history {
+        max-width: 720px;
+    }
+}
+
+@media (max-width: 768px) {
+    #input-shell form,
+    .loading-history {
+        max-width: 92vw;
+    }
+}
+
+.input-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.plus-button {
+    width: 32px;
+    height: 32px;
+    background: #ffffff;
+    border: none;
+    border-radius: 2px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    padding: 0;
+}
+
+.plus-button:hover {
+    background: #e5e7eb;
+}
+
+.plus-button:active {
+    background: #d1d5db;
+}
+
+.plus-button::before,
+.plus-button::after {
+    content: '';
+    position: absolute;
+    background: #000000;
+    border-radius: 1px;
+}
+
+.plus-button::before {
+    width: 16px;
+    height: 2px;
+    left: 8px;
+    top: 15px;
+}
+
+.plus-button::after {
+    width: 2px;
+    height: 16px;
+    left: 15px;
+    top: 8px;
+}
+
+.attachment-coordinate {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    justify-content: center;
+    text-align: center;
+    max-width: 100%;
+}
+
+.attachment-coordinate.copied::after {
+    content: 'Copied';
+    margin-left: 0.35rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+}
+
+.attachment-coordinate-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    width: 100%;
+    margin-bottom: 0.4rem;
+}
+
+#history-overlay {overflow-y: scroll; margin-top: 140px; padding: 0 40px;}
+#history-content {max-width: 900px; margin: 0 auto;}
+#history-list {margin: 0 auto;}
+
+/* 1. Ensure the HTML container takes up full height */
+html {
+  height: 100%;
+}
+
+body {
+  /* 2. Force body to be at least the height of the screen */
+  min-height: 100vh;
+  
+  /* 3. Remove default browser margins so the pattern touches the edges dddd */
+  margin: 0;
+
+  /* 4. The Pattern Setup */
+  /*background-image:
+    linear-gradient(rgba(255,255,255,0.25), rgba(255,255,255,0.25)),
+    url('/static/css/bg-x-v3.png')*/
+  background-repeat:
+    no-repeat,
+    repeat-x;
+  background-position:
+    top left,
+    0 90%;
+  background-size:
+    auto,
+    auto;
+  background-color: #ffffff;
+}
+
+.reference-rack span {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.reference-rack, .reference-rack span {
+    /* Color with fallback for the opacity variable */
+    --tw-text-opacity: 1;
+    color: rgb(209 213 219 / var(--tw-text-opacity, 1));
+
+    /* Typography */
+    font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-weight: 700;
+    
+    /* Formatting */
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.meta .coordinate,
+.reference-rack .coordinate {
+    text-transform: none;
+    letter-spacing: 0.05em;
+}
+
+#history-list  > div, #chat-stream > div {padding-bottom: 45px}
+#history-list  > div.user, #chat-stream > div.user {padding-bottom: 10px}
+
+.reference-rack, .meta {margin-top: 10px; display: inline}
+
+#chat-form textarea {border: none; resize: none; font-size: 22px; text-align: center}
+#chat-form textarea:focus {
+    outline: none;
+}
+#chat-form .input-actions {border-top: 2px solid #ddd; padding: 20px 0}
+.message-content div.prose {font-size: 150%}
+div.user .message-content {font-size: 22px; font-family:'Crimson Pro', serif; color: #777; font-style: italic; line-height: 150%}

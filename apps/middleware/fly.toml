@@ -1,0 +1,43 @@
+# fly.toml app configuration for dss-system/apps/middleware
+# See https://fly.io/docs/reference/configuration/
+
+app = 'dss-middleware'
+primary_region = 'syd'
+
+[build]
+
+[env]
+  APP_MODE = "fastapi"
+  QP_PURE_ENABLED = "true"
+  PRINCIPAL_REGISTRY_PATH = "/app/data/principal_registry.json"
+  PRINCIPAL_LINK_CHALLENGES_PATH = "/app/data/principal_link_challenges.json"
+
+[processes]
+  app = "uvicorn src.main:app --host 0.0.0.0 --port 8001"
+
+[http_service]
+  internal_port = 8001
+  force_https = true
+  auto_stop_machines = 'off'
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ['app']
+
+  [[http_service.checks]]
+    grace_period = '15s'
+    interval = '15s'
+    method = 'GET'
+    path = '/health'
+    protocol = 'http'
+    timeout = '5s'
+
+[[mounts]]
+  source = "middleware_data"
+  destination = "/app/data"
+  processes = ["app"]
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+  memory_mb = 1024

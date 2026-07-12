@@ -1,0 +1,73 @@
+name: Stack Rollout Contract Check (Middleware)
+
+on:
+  workflow_dispatch:
+    inputs:
+      middleware_url:
+        description: "Middleware base URL"
+        required: true
+        default: "https://ds-middleware-new.fly.dev"
+      backend_url:
+        description: "Expected backend base URL"
+        required: true
+        default: "https://ds-backend-new.fly.dev"
+      expected_middleware_sha:
+        description: "Optional expected middleware git SHA"
+        required: false
+        default: ""
+
+jobs:
+  middleware-rollout-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate middleware contract
+        env:
+          MIDDLEWARE_URL: ${{ github.event.inputs.middleware_url }}
+          BACKEND_URL: ${{ github.event.inputs.backend_url }}
+          EXPECTED_SHA: ${{ github.event.inputs.expected_middleware_sha }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          import sys
+          import urllib.request
+
+          middleware = os.environ["MIDDLEWARE_URL"].rstrip("/")
+          expected_backend = os.environ["BACKEND_URL"].rstrip("/")
+          expected_sha = os.environ["EXPECTED_SHA"].strip()
+
+          def get_json(url: str):
+              with urllib.request.urlopen(url, timeout=20) as resp:
+                  return int(resp.status), json.loads(resp.read().decode("utf-8"))
+
+          failures = []
+          status, health = get_json(f"{middleware}/health")
+          if status != 200:
+              failures.append(f"/health status={status}")
+          if str(health.get("status")) != "ok":
+              failures.append(f"/health payload status={health.get('status')}")
+          backend_url = str(health.get("backend_url") or "").rstrip("/")
+          if backend_url != expected_backend:
+              failures.append(f"backend_url mismatch got={backend_url} expected={expected_backend}")
+          git_sha = str(health.get("git_sha") or "").strip()
+          if not git_sha:
+              failures.append("git_sha missing in /health")
+          if expected_sha and git_sha != expected_sha:
+              failures.append(f"git_sha mismatch got={git_sha} expected={expected_sha}")
+
+          v_status, version = get_json(f"{middleware}/version")
+          if v_status != 200:
+              failures.append(f"/version status={v_status}")
+          if str(version.get("backend_url") or "").rstrip("/") != expected_backend:
+              failures.append("/version backend_url mismatch")
+          if not str(version.get("git_sha") or "").strip():
+              failures.append("/version git_sha missing")
+
+          if failures:
+              print("FAIL")
+              for item in failures:
+                  print(f"- {item}")
+              sys.exit(1)
+          print("PASS middleware rollout contract")
+          PY
+
