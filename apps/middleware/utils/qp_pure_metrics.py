@@ -122,19 +122,18 @@ class QpPureMetrics:
             self._fallback_times.clear()
 
     def snapshot(self) -> dict[str, Any]:
-        with self._lock:
-            now = time.time()
-            self._prune(now)
-            return {
-                "attempts_total": self.attempts,
-                "hits_total": self.hits,
-                "fallbacks_total": self.fallbacks,
-                "fallback_ratio": self.fallback_ratio(),
-                "window_seconds": self.window_seconds,
-                "base_threshold": self.base_threshold,
-                "effective_threshold": self.effective_threshold(),
-                "relaxed": self.is_relaxed(),
-            }
+        # Call the locked helpers without holding the lock ourselves to avoid
+        # deadlocking on the non-reentrant mutex.
+        return {
+            "attempts_total": self.attempts,
+            "hits_total": self.hits,
+            "fallbacks_total": self.fallbacks,
+            "fallback_ratio": self.fallback_ratio(),
+            "window_seconds": self.window_seconds,
+            "base_threshold": self.base_threshold,
+            "effective_threshold": self.effective_threshold(),
+            "relaxed": self.is_relaxed(),
+        }
 
 
 # Singleton instance used by the orchestrator and health endpoint.
