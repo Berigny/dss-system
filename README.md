@@ -15,6 +15,54 @@ This is the official monorepo for the DSS control plane, middleware, chat surfac
 
 ---
 
+## Current Capabilities and Maturity
+
+DSS is an evolving framework. This is a transparent look at what is currently stable and where we are heading.
+
+| Feature | Maturity | Description |
+| --- | --- | --- |
+| Multi-model, provider-agnostic routing | High (stable) | Switch between AI models on the fly. An adapter pattern normalises payloads across providers, separating model-specific execution from session state. |
+| Threadless, coordinate-based coherence | Moderate (prototype) | Uses prime-lattice coordinate routing to maintain context without relying on a sidebar of past threads. Long-horizon recall on noisy, non-synthetic dialogue is still being benchmarked. |
+| Cryptographic data freedom and sharing | High (strong foundation) | Users hold the keys to their data. DSS leverages Decentralized Identifiers (DIDs) and authorisation wrappers so specific memories can be shared securely. |
+| Deep memory lineage | High (traceability exists) | Trace the exact context the model used to form an answer. The orchestrator logs how context was scored, selected, and linked back to recursive prime coordinates. |
+
+---
+
+## Benchmark Highlights 
+
+*Note: The following benchmarks are run on synthetic micro-corpora with deterministic evaluation to isolate architectural mechanics. They represent reproducible engineering checks, not yet generalized claims for noisy open-domain corpora.*
+
+### 1. Long-Context Needle Retrieval (517K Tokens)
+
+At massive context scales, standard semantic retrieval fails due to distributional noise. DSS's coordinate-guided retrieval locates exact memories deterministically.
+
+| Mode | Recall@1 | MRR | Avg Latency | Note |
+| --- | --- | --- | --- | --- |
+| **Semantic Only** | 0.00 | 0.0002 | 722.72 ms | Standard Vector-RAG fails completely. |
+| **Coordinate Guided** | **1.00** | **1.0000** | 771.60 ms | Prime-lattice path locates the needle exactly. |
+| **Full DSS** | **1.00** | **1.0000** | 916.47 ms | Includes strict AND-gated governance validation overhead. |
+
+### 2. Structural Coherence (Qp vs Vector-RAG)
+
+Vector-RAG often retrieves memories that are *semantically* similar but *structurally* wrong. DSS coordinates reject incoherent records before they reach the model.
+
+| System | Precision@1 | Precision@5 | Incoherent Retrieval Rate |
+| --- | --- | --- | --- |
+| **Vector-RAG** | 0.71 | 0.51 | **49%** (Nearly half of top-1 results violate a structural invariant). |
+| **Qp (DSS)** | **1.00** | **0.93** | **7%** (Highly strict structural compliance). |
+
+---
+
+## Standards & Governance Alignment
+
+DSS is built from the ground up to support modern decentralized identity and auditable AI compliance metrics:
+
+* **W3C Decentralized Identifiers (DIDs)**: Anchors human, model, and device identities natively within the memory ledger.
+* **UN Transparency Protocol (UNTP)**: Aligns memory tracking and cryptographic provenance trails with global digital supply chain transparency benchmarks.
+* **NIST AI Risk Management Framework**: Provides the systemic audit logs required to mitigate context drift and unverified data mutation.
+
+---
+
 ## Applications in this Monorepo
 
 This repository is managed as a monorepo. The core components live under `apps/`.
@@ -67,19 +115,6 @@ graph LR
 - **backend** — ledger storage, coordinate resolution, retrieval, ingestion, governance, and admin APIs.
 - **did-issuer** — walt.id-based `DssIdentity` credential issuance.
 - **shared-types** — reusable Pydantic models and clients imported by the Python apps.
-
----
-
-## Current Capabilities and Maturity
-
-DSS is an evolving framework. This is a transparent look at what is currently stable and where we are heading.
-
-| Feature | Maturity | Description |
-| --- | --- | --- |
-| Multi-model, provider-agnostic routing | High (stable) | Switch between AI models on the fly. An adapter pattern normalises payloads across providers, separating model-specific execution from session state. |
-| Threadless, coordinate-based coherence | Moderate (prototype) | Uses prime-lattice coordinate routing to maintain context without relying on a sidebar of past threads. Long-horizon recall on noisy, non-synthetic dialogue is still being benchmarked. |
-| Cryptographic data freedom and sharing | High (strong foundation) | Users hold the keys to their data. DSS leverages Decentralized Identifiers (DIDs) and authorisation wrappers so specific memories can be shared securely. |
-| Deep memory lineage | High (traceability exists) | Trace the exact context the model used to form an answer. The orchestrator logs how context was scored, selected, and linked back to recursive prime coordinates. |
 
 ---
 
@@ -196,6 +231,37 @@ See [`docs/staging.md`](docs/staging.md) and [`docs/production.md`](docs/product
 ├── Makefile
 └── .env.example
 ```
+
+---
+
+##  Open Source Roadmap & Call for Contributions
+
+We are actively looking for open-source contributors to help transition DSS from a mathematically proven prototype into an enterprise-scale runtime. If you are passionate about AI memory, cryptography, or database internals, we need your help with the following roadmap items:
+
+### Phase 1: External Dataset Connectors (Good First Issues)
+
+Currently, ingestion is limited to internal synthetic arrays and simple manual uploads.
+
+* **Help Wanted:** Build integration scripts/worker services to pull standard natural-language benchmarks (e.g., HotpotQA, MuSiQue) from Hugging Face directly into the DSS orchestrator to test the engine against real human language.
+
+### Phase 2: Persistent Prime Registry
+
+Token-to-prime assignment currently works perfectly for micro-corpora but lacks a persistent, high-throughput registry.
+
+* **Help Wanted:** Replace the in-memory token-to-prime assignment with a centralized registry backed by PostgreSQL or Redis. Must handle concurrent ingestion, atomic allocation, and prevent collisions at vocabulary scale.
+
+### Phase 3: Semantic Noise Filters
+
+Real-world data is noisy. If every stop word gets assigned a unique prime, the Qp-lattice will bloat.
+
+* **Help Wanted:** Build a lightweight NLP pipeline (e.g., using spaCy) prior to prime allocation to identify meaningful entities and aggregate/ignore low-signal tokens.
+
+### Phase 4: Database-Native Composite Factor Index (High Effort)
+
+The mathematically motivated $O(k \log n)$ composite lookup is currently performed in the Python application layer. To scale past micro-corpora, this arithmetic must be pushed down into the storage engine.
+
+* **Help Wanted (C/C++/Rust Developers):** * **Option A:** Build a PostgreSQL C-extension exposing a predicate like `is_divisible_by_prime(composite bigint, prime bigint)`.
+* **Option B:** Build a custom comparator/inverted index for RocksDB or LevelDB mapping prime factors to document IDs natively.
 
 ---
 
