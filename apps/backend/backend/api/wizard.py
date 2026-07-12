@@ -14,7 +14,7 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel, ConfigDict, Field
 
-from backend.api.auth import _create_wallet_verified_signup
+from backend.api.auth import _create_wallet_verified_signup, _load_pilot_signups, _pilot_next_route
 from backend.api.http import get_db
 
 router = APIRouter(prefix="/account/request", tags=["wizard"])
@@ -379,10 +379,10 @@ def submit_account_request(
         # Idempotency: if already submitted with same idempotency key, return existing signup
         existing_signup_id = record.get("signup_id")
         if existing_signup_id:
-            from backend.api.auth import _load_pilot_signups
             signups = _load_pilot_signups(db)
             signup = signups.get(existing_signup_id)
             if isinstance(signup, dict) and str(signup.get("idempotency_key") or "").strip() == payload.idempotency_key.strip():
+                next_route = _pilot_next_route(signup)
                 return {
                     "status": "ok",
                     "signup": {
@@ -392,9 +392,10 @@ def submit_account_request(
                         "primary_contact": signup.get("primary_contact", ""),
                         "verification_status": signup["verification_status"],
                         "onboarding_status": signup.get("onboarding_status", "not_started"),
-                        "next_route": "awaiting_operator_approval",
+                        "approval_status": signup.get("approval_status", "pending"),
+                        "next_route": next_route,
                     },
-                    "next_route": "awaiting_operator_approval",
+                    "next_route": next_route,
                 }
         raise HTTPException(
             status_code=409,
