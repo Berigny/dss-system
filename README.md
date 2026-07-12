@@ -101,7 +101,7 @@ DSS is an evolving framework. Below is a transparent look at what is currently s
 | **Cryptographic Data Freedom & Sharing** | **High** (Strong Foundation) | You hold the keys to your data. DSS leverages Decentralized Identifiers (DIDs) and authorization wrappers so you can securely share specific memories. |
 | **Deep Memory Lineage** | **High** (Traceability Exists) | Trace the exact pieces of context the model pulled to form its answer. The orchestrator explicitly logs how context was scored, selected, and linked back to recursive prime coordinates. |
 
---
+---
 
 ## Architecture
 
