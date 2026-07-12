@@ -7,10 +7,5 @@ __pycache__
 .pytest_cache
 .env.local
 .sesskey
-.openclaw*
-__write_test
-*.textClipping
-pyrightconfig.json
-memory/
 *.pyc
 .DS_Store

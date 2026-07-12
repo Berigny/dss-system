@@ -102,6 +102,8 @@ services:
     networks:
       - dss-network
     depends_on:
+      middleware:
+        condition: service_healthy
       backend:
         condition: service_healthy
     healthcheck:
