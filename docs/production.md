@@ -36,6 +36,8 @@ Ensure these repository secrets are set in **GitHub → Settings → Secrets and
 - `VERCEL_PROJECT_ID_CHAT_SURFACE`
 - `VERCEL_PROJECT_ID_COORD_DEMO`
 
+> **Current status:** The repository is still private and the GitHub Actions secrets (`FLY_API_TOKEN`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and the three Vercel project IDs) are not set — CI/CD will not trigger until those are configured.
+
 ## Pre-deploy checks
 
 Before promoting `develop` to `main`:
