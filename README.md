@@ -25,8 +25,6 @@ Instead of wrestling with context limits, black-box reasoning, and messy chat si
 
 ### How It Works
 
-### How It Works
-
 Most Large Language Model (LLM) applications rely on transient context windows, easily-confused semantic vector RAG, and mutable databases. DSS replaces these opaque, fragile systems with a **deterministic, mathematically motivated coordinate engine** (inspired by $p$-adic numbers and the $\mathbb{R} \times \mathbb{Q}_p$ dual substrate) and an **immutable cryptographic ledger**.
 
 ---
