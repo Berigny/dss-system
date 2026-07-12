@@ -1,0 +1,94 @@
+name: Rollout Contract And Latency (Middleware)
+
+on:
+  pull_request:
+    paths:
+      - "tests/**"
+      - "routes/orchestrator.py"
+      - "api/**"
+      - "requirements.txt"
+      - ".github/workflows/rollout-contract-latency.yml"
+  push:
+    branches: ["main", "master"]
+    paths:
+      - "tests/**"
+      - "routes/orchestrator.py"
+      - "api/**"
+      - "requirements.txt"
+      - ".github/workflows/rollout-contract-latency.yml"
+
+jobs:
+  middleware-rollout-suite:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Run rollout suites
+        run: |
+          mkdir -p artifacts
+          pytest -q \
+            tests/test_orchestrator_stream_contract.py \
+            tests/test_orchestrator_eq9_source.py \
+            tests/test_orchestrator_latency_smoke.py \
+            tests/test_anchor_time_window.py \
+            --junitxml=artifacts/middleware-rollout-junit.xml
+
+      - name: Emit latency baseline artifact
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          source = Path("routes/orchestrator.py").read_text(encoding="utf-8")
+
+          def read_int(name: str, default: int):
+              m = re.search(rf"^{name}\s*=\s*_env_int_const\([^,]+,\s*([0-9]+)\)", source, flags=re.M)
+              return int(m.group(1)) if m else default
+
+          baseline = {
+              "suite": "middleware_rollout",
+              "latency_policy": {
+                  "threshold_ms": read_int("LATENCY_ROUTE_THRESHOLD_MS", 4500),
+                  "k_limit": read_int("LATENCY_ROUTE_K_LIMIT", 2),
+                  "baseline_samples": read_int("LATENCY_BASELINE_SAMPLES", 6),
+                  "window_size": read_int("LATENCY_WINDOW_SIZE", 40),
+              },
+              "post_introspect": {
+                  "cache_ttl_sec": read_int("POST_INTROSPECT_CACHE_TTL_SEC", 8),
+                  "cache_max": read_int("POST_INTROSPECT_CACHE_MAX", 48),
+                  "patch_wait_ms": read_int("POST_INTROSPECT_PATCH_WAIT_MS", 1200),
+              },
+              "tests": [
+                  "tests/test_orchestrator_stream_contract.py",
+                  "tests/test_orchestrator_eq9_source.py",
+                  "tests/test_orchestrator_latency_smoke.py",
+                  "tests/test_anchor_time_window.py",
+              ],
+          }
+
+          out = Path("artifacts/middleware-latency-baseline.json")
+          out.write_text(json.dumps(baseline, indent=2) + "\n", encoding="utf-8")
+          print(out.read_text(encoding="utf-8"))
+          PY
+
+      - name: Upload rollout artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: middleware-rollout-artifacts
+          path: |
+            artifacts/middleware-rollout-junit.xml
+            artifacts/middleware-latency-baseline.json
