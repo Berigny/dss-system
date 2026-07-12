@@ -8,6 +8,8 @@
 [![Tests](https://github.com/berigny/dss-system/actions/workflows/ci.yml/badge.svg)](https://github.com/berigny/dss-system/actions)
 [![Fly.io](https://img.shields.io/badge/deployed-Fly.io-7B3FE4?logo=flydotio&logoColor=white)]()
 [![Vercel](https://img.shields.io/badge/deployed-Vercel-000000?logo=vercel&logoColor=white)]()
+[![Whitepaper](https://img.shields.io/badge/Whitepaper-ResearchGate-00CCBB?logo=researchgate&logoColor=white)](https://www.researchgate.net/publication/408995995_Beyond_the_Context_Window_A_Ledger-Oriented_Architecture_for_Provable_AI_Memory_Dual-Substrate_System)
+
 
 Welcome to the **Dual-Substrate System (DSS)** - an open-source framework built to fix how AI memory feels, functions, and is governed.
 
@@ -18,6 +20,10 @@ Instead of wrestling with context limits, black-box reasoning, and messy chat si
 * **Multi-Model, Seamless Context:** Switch between different AI models on the fly without losing a single beat of your ongoing conversation.
 * **Absolute Data Freedom & Secure Sharing:** Keep your conversation history and documents exactly where you want them—locally or in the cloud. You hold the cryptographic keys, meaning you can selectively share a single memory or your entire history with another person or model.
 * **Deep Memory Lineage:** Never wonder where the AI got its reasoning. Trace the exact pieces of context the model pulled to form its answer, and look backward to see how those memories were created.
+
+> **Read the Whitepaper:** For a complete deep dive into the mathematics, coordinate geometry, and distributed systems engineering behind DSS, read our open technical disclosure: **[Beyond the Context Window: A Ledger-Oriented Architecture for Provable AI Memory](https://www.researchgate.net/publication/408995995_Beyond_the_Context_Window_A_Ledger-Oriented_Architecture_for_Provable_AI_Memory_Dual-Substrate_System)**.
+
+### How It Works
 
 ### How It Works
 
