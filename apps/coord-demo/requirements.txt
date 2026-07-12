@@ -1,0 +1,4 @@
+python-fasthtml
+httpx
+uvicorn
+pytest
