@@ -16,6 +16,7 @@ import uuid
 from typing import Any, Coroutine
 
 import httpx
+from prometheus_client import Counter, Histogram
 from starlette.exceptions import HTTPException
 from starlette.requests import Request
 from starlette.responses import JSONResponse, StreamingResponse
@@ -26,9 +27,75 @@ from config.settings import DEFAULT_SESSION_ID, settings
 from utils.assurance import build_assurance_envelope, issue_assurance_challenge
 from utils.auth_envelope import build_backend_auth_envelope
 from utils.session import get_session, update_session
+from shared_types.coord_schema import parse_bigint
+from utils.qp_pure_metrics import qp_pure_metrics
 from utils.text_processing import COORD_PATTERN, extract_coords_from_text, normalize_coord_token
 
 LOGGER = logging.getLogger(__name__)
+
+CONTEXT_GATE_THRESHOLD = float(
+    os.getenv("ORCHESTRATOR_CONTEXT_GATE_THRESHOLD", "0.5")
+)
+
+
+def _meta_bigint(value: Any) -> int | None:
+    """Parse a coordinate metadata big-int value, tolerating int/str/float."""
+    if value is None:
+        return None
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, (int, float)):
+        return int(value)
+    if isinstance(value, str):
+        try:
+            return parse_bigint(value)
+        except (TypeError, ValueError):
+            return None
+    return None
+
+
+ORCHESTRATOR_ROUTE_DECISION = Counter(
+    "orchestrator_route_decisions_total",
+    "Route decisions emitted by the orchestrator",
+    ["route", "reason", "qp_pure"],
+)
+ORCHESTRATOR_CONTEXT_GATE = Counter(
+    "orchestrator_context_gate_total",
+    "Low-score context gate activations",
+    ["reason"],
+)
+ORCHESTRATOR_TOP_SCORE = Histogram(
+    "orchestrator_top_score",
+    "Distribution of top relevance scores at gate time",
+    buckets=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0],
+)
+
+
+def _record_route_decision(
+    route: str,
+    reason: str,
+    *,
+    qp_pure: bool,
+    top_score: float | None,
+) -> None:
+    ORCHESTRATOR_ROUTE_DECISION.labels(
+        route=route,
+        reason=reason,
+        qp_pure=str(qp_pure).lower(),
+    ).inc()
+    if top_score is not None:
+        ORCHESTRATOR_TOP_SCORE.observe(top_score)
+    LOGGER.info(
+        "orchestrator_route_decision",
+        extra={
+            "route": route,
+            "reason": reason,
+            "qp_pure": qp_pure,
+            "top_score": top_score,
+            "gate_threshold": CONTEXT_GATE_THRESHOLD,
+        },
+    )
+
 
 def _env_int_const(name: str, default: int) -> int:
     raw = os.getenv(name)
@@ -3312,8 +3379,8 @@ def _build_model_coord_catalog_entry(
                 ]
             },
             "coord_meta": {
-                "prime_multiplicative_value": decoded_meta.get("prime_multiplicative_value"),
-                "body_prime": decoded_meta.get("body_prime"),
+                "prime_multiplicative_value": _meta_bigint(decoded_meta.get("prime_multiplicative_value")),
+                "body_prime": _meta_bigint(decoded_meta.get("body_prime")),
                 "token_primes": decoded_meta.get("token_primes") if isinstance(decoded_meta.get("token_primes"), list) else [],
                 "taxonomy_topology_ref": decoded_meta.get("taxonomy_topology_ref"),
                 "taxonomy_mode": decoded_meta.get("taxonomy_mode"),
@@ -3342,8 +3409,8 @@ def _build_model_coord_catalog_entry(
             "governance": {},
             "interpretation": {"claims": []},
             "coord_meta": {
-                "prime_multiplicative_value": preview.get("token_prime_product"),
-                "body_prime": preview.get("body_prime"),
+                "prime_multiplicative_value": _meta_bigint(preview.get("token_prime_product")),
+                "body_prime": _meta_bigint(preview.get("body_prime")),
                 "token_primes": preview.get("token_primes") if isinstance(preview.get("token_primes"), list) else [],
                 "taxonomy_topology_ref": preview.get("taxonomy_topology_ref"),
                 "taxonomy_mode": preview.get("taxonomy_mode"),
@@ -3791,7 +3858,8 @@ def _candidate_skip_reason(
     if origin_attestation == "model_response_wx" and not bool(item.get("explicit") or item.get("explicit_mention")):
         return "assistant_output_demoted_to_continuity_lane"
     signal = p_adic_score if qp_pure else max(p_adic_score, search_score, recency_score)
-    if relevance_tier >= 4 and signal < 0.35:
+    threshold = qp_pure_metrics.effective_threshold() if qp_pure else 0.35
+    if relevance_tier >= 4 and signal < threshold:
         return "insufficient_p_adic_search_recency_signal"
     return None
 
@@ -7965,6 +8033,14 @@ def register_orchestrator_routes(rt):
             allow_attachment_parts=allow_attachment_parts,
             qp_pure=qp_pure,
         )
+        if qp_pure:
+            if candidate_trace and any(
+                isinstance(row, dict) and row.get("skip_reason") is None
+                for row in candidate_trace
+            ):
+                qp_pure_metrics.record_hit()
+            else:
+                qp_pure_metrics.record_fallback()
         if packed_review_blocked_coords:
             filtered_trace = [
                 item for item in candidate_trace
@@ -8279,22 +8355,26 @@ def register_orchestrator_routes(rt):
             route = "subject_history"
             reason = "subject_history_fallback"
 
+        _record_route_decision(route, reason, qp_pure=qp_pure, top_score=top_score)
+
         message_lower = message.lower()
         is_recent_query = any(term in message_lower for term in ("just", "last", "recent", "previous")) and any(
             term in message_lower for term in ("talk", "discuss", "conversation", "said", "say")
         )
         if (
             top_score is not None
-            and top_score < 0.5
+            and top_score < CONTEXT_GATE_THRESHOLD
             and not explicit_coords
             and not is_recent_query
             and not attachment_focus
         ):
+            ORCHESTRATOR_CONTEXT_GATE.labels(reason="low_top_score").inc()
             LOGGER.info(
                 "orchestrator_context_gate",
                 extra={
                     "reason": "low_top_score",
                     "top_score": top_score,
+                    "gate_threshold": CONTEXT_GATE_THRESHOLD,
                     "context_items": len(context_items),
                 },
             )
@@ -10503,15 +10583,15 @@ def register_orchestrator_routes(rt):
                 )
                 if admitted_text and (NO_CAPS or decoded_count < MAX_TOTAL_SNIPPETS):
                     decoded_meta = decoded.get("meta") if isinstance(decoded.get("meta"), dict) else {}
-                    prime_value = decoded_meta.get("prime_multiplicative_value")
+                    prime_value = _meta_bigint(decoded_meta.get("prime_multiplicative_value"))
                     topology_ref = (
                         str(decoded_meta.get("taxonomy_topology_ref")).strip()
                         if isinstance(decoded_meta.get("taxonomy_topology_ref"), str)
                         and str(decoded_meta.get("taxonomy_topology_ref")).strip()
                         else None
                     )
-                    if isinstance(prime_value, (int, float)):
-                        status_message = f"{coord} · Prime value: {int(prime_value)}"
+                    if isinstance(prime_value, int):
+                        status_message = f"{coord} · Prime value: {prime_value}"
                         if topology_ref:
                             status_message = f"{status_message} · Topology: {topology_ref}"
                         yield _ndjson_event(
@@ -10813,7 +10893,7 @@ def register_orchestrator_routes(rt):
                     else None
                 )
                 prime_value = (
-                    first_catalog_meta.get("prime_multiplicative_value")
+                    _meta_bigint(first_catalog_meta.get("prime_multiplicative_value"))
                     if isinstance(first_catalog_meta, dict)
                     else None
                 )
@@ -10825,8 +10905,8 @@ def register_orchestrator_routes(rt):
                     else None
                 )
                 prime_message = None
-                if first_coord and isinstance(prime_value, (int, float)):
-                    prime_message = f"{first_coord} · Prime value: {int(prime_value)}"
+                if first_coord and isinstance(prime_value, int):
+                    prime_message = f"{first_coord} · Prime value: {prime_value}"
                     if topology_ref:
                         prime_message = f"{prime_message} · Topology: {topology_ref}"
                 if prime_message:

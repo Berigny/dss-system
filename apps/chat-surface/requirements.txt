@@ -8,3 +8,6 @@ uvicorn[standard]>=0.24.0
 pywebview>=6.1
 fastcore==1.12.14
 pytest>=8.0.0
+
+# Monorepo shared types (bundled for Vercel)
+-e ./vendor/shared-types

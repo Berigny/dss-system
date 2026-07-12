@@ -1,14 +1,20 @@
 # fly.toml app configuration for dss-system/apps/middleware
 # See https://fly.io/docs/reference/configuration/
 
-app = 'dss-middleware'
+app = 'dss-system-middleware'
 primary_region = 'syd'
 
 [build]
+  dockerfile = "Dockerfile"
 
 [env]
   APP_MODE = "fastapi"
   QP_PURE_ENABLED = "true"
+  ORCHESTRATOR_CONTEXT_GATE_THRESHOLD = "0.5"
+  DUALSUBSTRATE_API = "https://dss-system-backend.fly.dev"
+  MIDDLEWARE_PUBLIC_BASE_URL = "https://dss-system-middleware.fly.dev"
+  WALT_ID_ISSUER_URL = "https://dss-system-did-issuer.fly.dev"
+  WALT_ID_ISSUER_DID = "did:web:id.dualsubstrate.com"
   PRINCIPAL_REGISTRY_PATH = "/app/data/principal_registry.json"
   PRINCIPAL_LINK_CHALLENGES_PATH = "/app/data/principal_link_challenges.json"
 

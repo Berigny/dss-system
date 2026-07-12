@@ -1,0 +1,12 @@
+{
+  "meta": {
+    "purpose": "Decay/activation/certainty weights for process validation.",
+    "source": "VALUE_NODE_BALANCE_RULES"
+  },
+  "rules": {
+    "decay_window": 10,
+    "max_dominance_ratio": 6.0,
+    "min_activation": 0.01,
+    "min_entropy": 0.5
+  }
+}

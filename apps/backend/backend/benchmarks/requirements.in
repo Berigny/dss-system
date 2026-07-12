@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+rocksdict
+openai
+requests
+httpx
+numpy
+pydantic
+prometheus_client
+python-multipart
+pypdf
+python-docx
+cryptography

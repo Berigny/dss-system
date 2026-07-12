@@ -1,0 +1,648 @@
+{
+  "practical_disciplines": {
+    "day_0": {
+      "design": {
+        "principle": "Ma — the Japanese concept of negative space as active void; emptiness as the generative ground from which all form emerges",
+        "pattern_language": "ALEXANDER-01-Quiet-Backs / The void as a living center preceding architectural definition",
+        "ux_concept": "Zero-state UX — the blank canvas moment before user interaction; empty-state design as ontological ground",
+        "architectural_parallel": "Louis Kahn's silence between walls; the space that asks 'what do you want, brick?'",
+        "design_movement": "Minimalism (John Pawson) — design by reduction to essential void"
+      },
+      "education": {
+        "learning_theory": "Tabula rasa (Locke) — the learner as blank slate; pre-reflective awareness before cognitive structuring",
+        "developmental_stage": "Sensorimotor substage 1 (Piaget) — reflexive practice; the infant's undifferentiated experience",
+        "pedagogical_approach": "Preparation of the environment (Montessori) — creating the void-space that invites discovery",
+        "blooms_taxonomy": "Pre-Remembering — latent receptivity before the first act of recognition",
+        "concept": "Readiness to receive — the educational void as necessary precondition for all learning"
+      },
+      "business": {
+        "strategic_concept": "Zero-to-One market creation (Thiel) — the void of non-consumption as entrepreneurial opportunity",
+        "organizational_model": "Pre-organization — the founder's vision before structural instantiation",
+        "economic_principle": "Creative potential energy — Schumpeterian entrepreneurial function at time-zero",
+        "management_theory": "Drucker's 'purpose of business' before the business exists — the idea as germinal force",
+        "concept": "Market void — the unmet need that precedes all value creation; the origin-point of business opportunity"
+      }
+    },
+    "day_1": {
+      "design": {
+        "principle": "Frame as first act of design — the bounding box that creates the design space by establishing edges",
+        "pattern_language": "ALEXANDER-95-Boundary-Wall / The first differentiation between inside and outside; enclosure as primitive pattern",
+        "ux_concept": "Viewport framing — the screen as bounded container that constrains and enables interaction simultaneously",
+        "architectural_parallel": "Le Corbusier's 'first sketch' — the parti as bounding gesture that defines architectural territory",
+        "design_movement": "De Stijl (Mondrian, van Doesburg) — design through the imposition of orthogonal boundaries"
+      },
+      "education": {
+        "learning_theory": "Object permanence emergence (Piaget) — the first boundary between self and not-self; subject/object differentiation",
+        "developmental_stage": "Sensorimotor substage 3 — secondary circular reactions; the learner begins distinguishing figure from ground",
+        "pedagogical_approach": "Setting learning boundaries — curriculum design as the art of defining what is in-scope and out-of-scope",
+        "blooms_taxonomy": "Remembering emerging — first distinction between known and unknown; the boundary of current knowledge",
+        "concept": "Learning frontier — the cognitive boundary that marks the edge of the known, creating the space for exploration"
+      },
+      "business": {
+        "strategic_concept": "Market segmentation (Smith) — drawing the first boundary to define addressable market territory",
+        "organizational_model": "Simple structure (Mintzberg) — the entrepreneurial startup with minimal differentiation; founder at center",
+        "economic_principle": "Property rights delineation (Coase/Alchian) — the economic value of clearly defined boundaries",
+        "management_theory": "First-mover boundary — establishing territorial claims before competitors arrive",
+        "concept": "Competitive frontier — the boundary that separates market incumbents from entrants; the edge of commercial territory"
+      }
+    },
+    "day_2": {
+      "design": {
+        "principle": "User journey mapping — the seed of experience design that grows through temporal unfolding",
+        "pattern_language": "ALEXANDER-34-Zen-View / The journey revealing vistas progressively; design as narrative path",
+        "ux_concept": "Onboarding flows — the first steps as seed that determines the trajectory of user growth",
+        "architectural_parallel": "Frank Lloyd Wright's approach paths — the journey to the house as prelude to dwelling",
+        "design_movement": "Organic Design (Wright) — form growing from seed-concept like a plant from acorn"
+      },
+      "education": {
+        "learning_theory": "Scaffolding initiation (Vygotsky) — the journey into the Zone of Proximal Development begins with a single supportive step",
+        "developmental_stage": "Sensorimotor substage 5 — tertiary circular reactions; active experimentation as journey",
+        "pedagogical_approach": "Learning path design — sequencing educational encounters from seed to mastery",
+        "blooms_taxonomy": "Remembering (activated) — the first encoded memory as seed of knowledge architecture",
+        "concept": "Learning journey — the educational trajectory from novice to expert; the seed of understanding germinating through stages"
+      },
+      "business": {
+        "strategic_concept": "Seed stage financing — the first capital injection that germinates the entrepreneurial journey",
+        "organizational_model": "Startup-as-journey (Blank/Ries) — customer discovery as navigational path through uncertainty",
+        "economic_principle": "Growth hypothesis (Ries) — the seed assumption that must be validated through empirical journey",
+        "management_theory": "Lean startup — the Build-Measure-Learn loop as iterative journey toward product-market fit",
+        "concept": "Customer journey — the path from awareness to advocacy; the business grows by guiding stakeholders on their journey"
+      }
+    },
+    "day_3": {
+      "design": {
+        "principle": "Threshold design — the deliberate creation of transitional moments between spaces or states",
+        "pattern_language": "ALEXANDER-112-Entrance-Transition / The door as psychological and spatial gateway; liminal design",
+        "ux_concept": "Gateway UX — login screens, paywalls, and onboarding gates as designed portals that filter and transform users",
+        "architectural_parallel": "Japanese genkan — the lowered entry platform as transitional zone between public and private",
+        "design_movement": "Transitional Architecture — buildings as portals between states of being (Steven Holl)"
+      },
+      "education": {
+        "learning_theory": "Threshold concepts (Meyer/Land) — troublesome knowledge that acts as a portal to transformed understanding",
+        "developmental_stage": "Transition between sensorimotor and preoperational — the doorway to representational thought",
+        "pedagogical_approach": "Gateway course design — the introductory threshold that filters and prepares learners for advanced study",
+        "blooms_taxonomy": "Understanding emerging — crossing the threshold from recall to comprehension",
+        "concept": "Conceptual gateway — the educational portal where transformation occurs; liminal learning spaces"
+      },
+      "business": {
+        "strategic_concept": "Entry barriers and market entry modes (Porter) — strategic doorways into competitive arenas",
+        "organizational_model": "Platform thresholds — the two-sided market gateway that connects producers and consumers",
+        "economic_principle": "Switching costs as portal toll — the economic design of thresholds that retain customers",
+        "management_theory": "Blue Ocean Strategy — creating uncontested market space by redesigning the strategic doorway",
+        "concept": "Pivot point — the critical threshold where strategy must change; the business doorway between old and new models"
+      }
+    },
+    "day_4": {
+      "design": {
+        "principle": "Living centers (Alexander) — the breath of life in designed spaces; organic connection between form and inhabitant",
+        "pattern_language": "ALEXANDER-128-Indoor-Sunlight / Light and breath as life-giving elements; spaces that breathe",
+        "ux_concept": "Breathing room — generous white space; interfaces that allow cognitive breathing and prevent overwhelm",
+        "architectural_parallel": "Le Corbusier's 'breathing' facades — the brise-soleil as the building's respiratory system",
+        "design_movement": "Organic/Natural Design — design that breathes; biophilic design connecting inhabitant to living systems"
+      },
+      "education": {
+        "learning_theory": "Assimilation and accommodation (Piaget) — the breathing rhythm of cognitive development: inhale new ideas, integrate, exhale understanding",
+        "developmental_stage": "Preoperational stage — symbolic thought emerging; the child's cognitive 'breathing' begins through pretend play",
+        "pedagogical_approach": "Responsive teaching — the pedagogical breath between instruction and listening; attunement to learner state",
+        "blooms_taxonomy": "Understanding — grasping meaning; the moment when knowledge becomes breathing, living comprehension",
+        "concept": "Cognitive respiration — the rhythmic cycle of taking in, processing, and expressing knowledge as fundamental learning metabolism"
+      },
+      "business": {
+        "strategic_concept": "Core competencies (Prahalad/Hamel) — the DNA and vital breath of organizational identity",
+        "organizational_model": "Learning organization (Senge) — the organization that breathes knowledge; adaptive capacity as respiration",
+        "economic_principle": "Organizational culture as life-force — the invisible breath that animates economic activity",
+        "management_theory": "Drucker's 'knowledge worker' — the human being as the breathing center of value creation",
+        "concept": "Corporate lifeforce — the essential spirit of the enterprise; culture as the breath that sustains commercial being"
+      }
+    },
+    "day_5": {
+      "design": {
+        "principle": "Connectedness — the design of relationships between elements; nothing exists in isolation",
+        "pattern_language": "ALEXANDER-79-Your-Own-Home / The network of connections that make a dwelling; hooking into place",
+        "ux_concept": "Hyperlink affordance — the Vav as original hyperlink; connections that create navigable information space",
+        "architectural_parallel": "Structural connections — the joint as the place where architecture happens; Kahn's 'what the joint wants to be'",
+        "design_movement": "Systems Design (Papanek) — design as interconnection; nothing exists apart from its relationships"
+      },
+      "education": {
+        "learning_theory": "Social constructivism (Vygotsky) — knowledge constructed through social connection; the hook of intersubjectivity",
+        "developmental_stage": "Preoperational relational play — the child connecting through parallel and cooperative play structures",
+        "pedagogical_approach": "Collaborative learning — designing educational connections between learners; the hook of peer interaction",
+        "blooms_taxonomy": "Applying (relational) — connecting knowledge to new contexts; the hook between theory and practice",
+        "concept": "Connection-making — the fundamental educational act of linking new knowledge to existing schema; neural and social hooks"
+      },
+      "business": {
+        "strategic_concept": "Network effects (Metcalfe) — value that grows with each new connection; the hook that creates compounding returns",
+        "organizational_model": "Platform business model (Parker/Van Alstyne) — connecting sides through designed hooks; value through linkage",
+        "economic_principle": "Transaction cost economics (Coase/Williamson) — the hook of economic organization; when to connect via market vs. hierarchy",
+        "management_theory": "Supply chain integration — the strategic design of connections from raw material to end consumer",
+        "concept": "Strategic alliance — the business connection as competitive weapon; partnership design as core capability"
+      }
+    },
+    "day_6": {
+      "design": {
+        "principle": "Form follows function (Sullivan/Greenough) — the weapon/tool as pure expression of purpose; utilitarian beauty",
+        "pattern_language": "ALEXANDER-143-Things-from-Your-Life / Tools as extensions of the hand; objects that serve as purposeful instruments",
+        "ux_concept": "Feature design — each feature as a tool/weapon serving user intent; the Swiss Army knife principle of product design",
+        "architectural_parallel": "Louis Sullivan's functional ornament — the tool-process made beautiful through honest expression",
+        "design_movement": "Bauhaus Functionalism (Gropius) — the union of art and technology; the tool elevated to aesthetic statement"
+      },
+      "education": {
+        "learning_theory": "Instrumental learning (Dewey) — learning as tool for problem-solving; knowledge as instrument for action",
+        "developmental_stage": "Concrete operations emerging — the child acquiring cognitive tools for systematic problem-solving",
+        "pedagogical_approach": "Project-based learning — the process as tool; learning through making and doing with purpose",
+        "blooms_taxonomy": "Applying (instrumental) — using procedures and methods as tools to execute, implement, and carry out",
+        "concept": "Procedural knowledge — skill-as-weapon; the learner's toolkit of methods, techniques, and operational know-how"
+      },
+      "business": {
+        "strategic_concept": "Operational excellence (Porter) — process as competitive weapon; the tool of superior execution",
+        "organizational_model": "Process organization (Hammer/Champy) — reengineering the enterprise around core processes as tools",
+        "economic_principle": "Operational leverage — fixed processes as weapons that amplify output disproportionately to input",
+        "management_theory": "Scientific management (Taylor) — the systematic design of work processes as management tool",
+        "concept": "Process optimization — continuous improvement (Kaizen) of organizational tools and weapons for competitive advantage"
+      }
+    },
+    "day_7": {
+      "design": {
+        "principle": "Safety through enclosure — the fence as protective boundary that creates the condition for freedom within",
+        "pattern_language": "ALEXANDER-94-Shape-of-Rooms / Bounded spaces that feel safe; the enclosure as psychological container",
+        "ux_concept": "Sandbox environments — safe containers for experimentation; the fenced playground of user exploration",
+        "architectural_parallel": "Christopher Alexander's alcoves — intimate enclosures within larger spaces; nested protective boundaries",
+        "design_movement": "Defensible Space Design (Newman/Oscar Newman) — architecture that creates secure territorial boundaries"
+      },
+      "education": {
+        "learning_theory": "Secure base (Bowlby/Ainsworth) — the safe enclosure from which learners explore; attachment as protective fence",
+        "developmental_stage": "Concrete operations secure phase — the child works confidently within known cognitive structures",
+        "pedagogical_approach": "Structured learning environment — the bounded classroom as safe container for intellectual risk-taking",
+        "blooms_taxonomy": "Understanding (secure) — comprehending within safe conceptual fences before venturing into analysis",
+        "concept": "Psychological safety (Edmondson) — the educational fence that makes learning possible; safe enough to risk being wrong"
+      },
+      "business": {
+        "strategic_concept": "Defensible moat (Buffett) — the protective fence around competitive advantage; barriers that preserve returns",
+        "organizational_model": "Silos and boundaries — the tradeoff between protective enclosure and cross-functional flow",
+        "economic_principle": "Barriers to entry (Bain) — structural fences that protect incumbent profitability from competitive erosion",
+        "management_theory": "IP and patent strategy — using intellectual property fences to protect innovation returns",
+        "concept": "Competitive fortress — the business enclosure that protects core value while allowing strategic expansion"
+      }
+    },
+    "day_8": {
+      "design": {
+        "principle": "Dark patterns (Brignull) — the serpentine descent into manipulative design; the shadow side of UX",
+        "pattern_language": "ALEXANDER-inverse / The breakdown of pattern; descent into anti-pattern as cautionary design space",
+        "ux_concept": "Sludge — friction deliberately added to discourage beneficial behavior; the dark descent of choice architecture",
+        "architectural_parallel": "Fallingwater's challenging descent — Wright's deliberate difficult path as experiential journey downward",
+        "design_movement": "Critical Design (Dunne/Raby) — design that descends into the problematic to provoke critical reflection"
+      },
+      "education": {
+        "learning_theory": "Productive failure (Kapur) — the intentional descent into struggle as prerequisite for deep learning",
+        "developmental_stage": "Cognitive disequilibrium (Piaget) — the moment of productive disruption where old schemas collapse",
+        "pedagogical_approach": "Desirable difficulties (Bjork) — the serpentine path of harder learning that produces better retention",
+        "blooms_taxonomy": "Breaking through Remembering — the descent from false confidence into genuine questioning",
+        "concept": "Productive struggle — the educational descent that feels like failure but catalyzes transformation"
+      },
+      "business": {
+        "strategic_concept": "Disruptive innovation (Christensen) — the market descent from high-end to low-end that destroys incumbents",
+        "organizational_model": "Creative destruction (Schumpeter) — the serpentine cycle of destruction and renewal as economic engine",
+        "economic_principle": "Boom-bust cycles — the macroeconomic descent that clears malinvestment and resets capital allocation",
+        "management_theory": "Turnaround management — the deliberate descent into crisis as prerequisite for organizational renewal",
+        "concept": "Valley of death — the business descent between innovation and commercialization; the chasm that kills most ventures"
+      }
+    },
+    "day_9": {
+      "design": {
+        "principle": "Tactile design — the hand-scale object; designing for the body's primary instrument of manipulation",
+        "pattern_language": "ALEXANDER-143-Things-from-Your-Life / Objects sized for the hand; the intimate scale of human grasp",
+        "ux_concept": "Direct manipulation (Shneiderman) — the hand on screen; interfaces that feel like physical manipulation",
+        "architectural_parallel": "Hand details in architecture — door handles, railings, the elements scaled to the hand (Alvar Aalto)",
+        "design_movement": "Arts and Crafts (Ruskin/Morris) — the hand as maker; craft as resistance to industrial dehumanization"
+      },
+      "education": {
+        "learning_theory": "Constructivism (Piaget) — knowledge built through active manipulation; learning by doing with the hands",
+        "developmental_stage": "Concrete operations — the child manipulating physical objects as primary mode of reasoning",
+        "pedagogical_approach": "Montessori practical life materials — hand-scale learning objects designed for independent manipulation",
+        "blooms_taxonomy": "Applying (physical) — hands-on application of knowledge through direct action and manipulation",
+        "concept": "Kinesthetic learning — the body as instrument of knowing; hand-action as primary educational modality"
+      },
+      "business": {
+        "strategic_concept": "Execution over strategy — the hand of management in the work; doing rather than planning",
+        "organizational_model": "Gemba walks (Ohno) — management by going to the actual place where hands do the work",
+        "economic_principle": "Labor theory of applied value — the hand-action that transforms raw material into economic good",
+        "management_theory": "Management by Walking Around (Peters/Waterman) — the executive hand touching operational reality",
+        "concept": "Operational excellence through doing — the primacy of execution; hands-on value creation as competitive differentiator"
+      }
+    },
+    "day_10": {
+      "design": {
+        "principle": "Coverage and shelter — the palm as protective canopy; design that covers and encompasses",
+        "pattern_language": "ALEXANDER-105-South-Facing-Outdoors / The roof as covering; the palm-shaped shelter that protects activity below",
+        "ux_concept": "Platform coverage — the broad interface that encompasses multiple user needs under one sheltering experience",
+        "architectural_parallel": "Le Corbusier's umbrella roof — the five points of architecture with the free roof as sheltering palm",
+        "design_movement": "Scandinavian Design (Aalto/Jacobsen) — the sheltering quality; design that protects and embraces the user"
+      },
+      "education": {
+        "learning_theory": "Scaffolding full deployment (Vygotsky/Wood) — the complete support structure covering the learner's entire ZPD",
+        "developmental_stage": "Concrete operations mastery — the child fully covered by operational thinking, applying logic systematically",
+        "pedagogical_approach": "Universal Design for Learning (CAST) — comprehensive coverage ensuring all learners can access content",
+        "blooms_taxonomy": "Applying (comprehensive) — broad deployment of knowledge across multiple contexts and situations",
+        "concept": "Learning umbrella — comprehensive educational support covering cognitive, emotional, and social dimensions"
+      },
+      "business": {
+        "strategic_concept": "Platform strategy (Parker/Van Alstyne) — the market coverage model that shelters multiple stakeholders",
+        "organizational_model": "Umbrella branding — the corporate palm covering multiple product lines under shared identity",
+        "economic_principle": "Economies of scope — coverage advantages from sharing resources across multiple products/markets",
+        "management_theory": "Portfolio management — the executive palm distributing protective coverage across business units",
+        "concept": "Market coverage strategy — the deliberate breadth of market shelter; covering segments comprehensively"
+      }
+    },
+    "day_11": {
+      "design": {
+        "principle": "Design mentorship — the teachable interface; products that instruct through their design",
+        "pattern_language": "ALEXANDER-139-Farmhouse-Kitchen / The teaching kitchen; spaces that instruct through use",
+        "ux_concept": "Progressive disclosure — the interface that teaches complexity gradually; onboarding as pedagogy",
+        "architectural_parallel": "The Didactic architecture of Schinkel — buildings that teach through their ordered rational structure",
+        "design_movement": "Universal Design (Mace) — design that teaches inclusively; interfaces that instruct without words"
+      },
+      "education": {
+        "learning_theory": "Pedagogical content knowledge (Shulman) — knowing how to teach specific content; the teacher's special knowledge",
+        "developmental_stage": "Guided learning transition — the shift from direct instruction toward mediated learning",
+        "pedagogical_approach": "Direct instruction (Rosenshine) — explicit teaching as the deliberate transmission of structured knowledge",
+        "blooms_taxonomy": "Understanding (pedagogical) — teaching others as the highest test of one's own understanding",
+        "concept": "Teaching as design — the deliberate construction of learning experiences; pedagogy as design practice"
+      },
+      "business": {
+        "strategic_concept": "Knowledge management (Nonaka/Takeuchi) — organizational teaching through SECI model; knowledge creation",
+        "organizational_model": "Mentoring culture — the business that teaches itself through structured knowledge transfer",
+        "economic_principle": "Human capital theory (Becker) — investing in employee knowledge as source of competitive advantage",
+        "management_theory": "Drucker's knowledge society — the manager as teacher; leadership through knowledge dissemination",
+        "concept": "Learning organization pedagogy — the enterprise that continuously teaches itself and its stakeholders"
+      }
+    },
+    "day_12": {
+      "design": {
+        "principle": "Flow state design — creating conditions for uninterrupted engagement; the fluid interface",
+        "pattern_language": "ALEXANDER-106-Positive-Outdoor-Space / The positive outdoor room; water-inspired spatial flow",
+        "ux_concept": "Flow in UX (Csikszentmihalyi) — interfaces that disappear, allowing users to be fully absorbed in task",
+        "architectural_parallel": "Alvar Aalto's wave walls — architecture that flows like water; the undulating surface as spatial flow",
+        "design_movement": "Fluid Design — responsive, adaptive interfaces that flow across contexts and devices"
+      },
+      "education": {
+        "learning_theory": "Flow theory (Csikszentmihalyi) — the state of complete absorption where challenge matches skill; optimal experience",
+        "developmental_stage": "Fluid intelligence peak — the ability to solve novel problems through reasoning independent of acquired knowledge",
+        "pedagogical_approach": "Immersive learning — designing educational experiences that achieve flow through optimal challenge calibration",
+        "blooms_taxonomy": "Analyzing (fluid) — breaking knowledge into its constituent elements as flowing decomposition",
+        "concept": "Optimal learning channel — the educational flow state where learner engagement peaks and resistance dissolves"
+      },
+      "business": {
+        "strategic_concept": "Cash flow management — the liquidity river that sustains enterprise; keeping the financial stream flowing",
+        "organizational_model": "Agile flow (Anderson) — Kanban and flow-based delivery; optimizing work-in-progress for throughput",
+        "economic_principle": "Liquidity preference (Keynes) — the flow of capital; maintaining sufficient liquid assets for operations",
+        "management_theory": "Workflow optimization — Taylor's scientific management applied to knowledge work flow",
+        "concept": "Business flow — the smooth movement of value from inputs through processes to customers; operational liquidity"
+      }
+    },
+    "day_13": {
+      "design": {
+        "principle": "Mediating artifacts — design that translates between worlds; the interface as fish swimming between domains",
+        "pattern_language": "ALEXANDER-107-Paths-and-Goals / The path as mediator between intention and destination",
+        "ux_concept": "Interface mediation — the screen as fish that swims between user intent and system capability",
+        "architectural_parallel": "Louis Kahn's servant spaces — the mediating corridors and utilities that connect served spaces",
+        "design_movement": "Interaction Design — the discipline of mediating between human and machine; translating intent to action"
+      },
+      "education": {
+        "learning_theory": "Mediated learning experience (Feuerstein) — the teacher as mediator between learner and material",
+        "developmental_stage": "Formal operations emerging — the mediator between concrete and abstract reasoning",
+        "pedagogical_approach": "Peer mediation — students as fish that swim between levels of understanding, mediating for each other",
+        "blooms_taxonomy": "Analyzing (mediating) — distinguishing between component parts and their relationships; mediating complexity",
+        "concept": "Educational mediation — the process of making the abstract concrete and the distant near; the fish that bridges depths"
+      },
+      "business": {
+        "strategic_concept": "Platform mediation — two-sided markets as business fish that mediate between supply and demand",
+        "organizational_model": "Middleman platforms (Parker/Van Alstyne) — the broker model that thrives on mediating transactions",
+        "economic_principle": "Transaction cost intermediary — the economic function of reducing costs through mediating exchange",
+        "management_theory": "Boundary-spanning roles (Aldrich/Herden) — organizational fish that swim between internal and external environments",
+        "concept": "Business mediation — the core function of reducing friction between market sides; value through connection"
+      }
+    },
+    "day_14": {
+      "design": {
+        "principle": "Accessibility as foundational support — design that holds up all users regardless of ability",
+        "pattern_language": "ALEXANDER-99-Anticipated-Repair / The design that supports future modification; support as forward-looking pattern",
+        "ux_concept": "Accessible UX — the support structure that makes digital spaces usable by people of all abilities",
+        "architectural_parallel": "Universal Design (Mace) — buildings that support all users without adaptation or specialized design",
+        "design_movement": "Inclusive Design (Microsoft/Holmes) — design that extends its support to the margins, benefiting all"
+      },
+      "education": {
+        "learning_theory": "Universal Design for Learning (Rose/Meyer) — the supporting framework that provides multiple means of engagement, representation, and action",
+        "developmental_stage": "Support-sensitive period — the learner's need for stable support during times of cognitive growth",
+        "pedagogical_approach": "Differentiated instruction (Tomlinson) — tailoring support to individual readiness, interest, and learning profile",
+        "blooms_taxonomy": "Analyzing (supported) — examining information with adequate scaffolding to deconstruct complex wholes",
+        "concept": "Educational support architecture — the multi-layered system of assistance that enables every learner to reach potential"
+      },
+      "business": {
+        "strategic_concept": "Support infrastructure strategy — investing in foundational capabilities that enable competitive positioning",
+        "organizational_model": "Shared services — centralized support functions that underpin business unit operations",
+        "economic_principle": "Public goods as support foundation — infrastructure and institutions that support private enterprise",
+        "management_theory": "Operations as competitive support (Hayes/Wheelwright) — the support foundation enabling strategic flexibility",
+        "concept": "Business foundation — the supportive infrastructure (legal, financial, operational) that allows the enterprise to stand"
+      }
+    },
+    "day_15": {
+      "design": {
+        "principle": "Visibility — the design principle that what matters must be seen; information architecture as visual sense",
+        "pattern_language": "ALEXANDER-126-Something-Roughly-in-the-Middle / The visual anchor; the eye drawn to meaningful centers",
+        "ux_concept": "Visibility of system status (Nielsen heuristics) — the eye that always knows what the system is doing",
+        "architectural_parallel": "Sight lines in urban design — the deliberate creation of visual axes that orient and inform (Haussmann/Cerdà)",
+        "design_movement": "Visual Communication Design — the Bauhaus eye; design that sees and is seen"
+      },
+      "education": {
+        "learning_theory": "Observational learning (Bandura) — learning through the eye; modeling and vicarious experience",
+        "developmental_stage": "Visual-perceptual development — the eye's maturation from basic detection to complex pattern recognition",
+        "pedagogical_approach": "Visual learning strategies — teaching through the eye; graphic organizers, visual thinking, infographics",
+        "blooms_taxonomy": "Analyzing (visual) — examining through observation; the discerning eye that decomposes visual information",
+        "concept": "Visual literacy — the educated eye; the ability to read, interpret, and create visual information as cognitive competence"
+      },
+      "business": {
+        "strategic_concept": "Market visibility — the strategic imperative of being seen; brand visibility as competitive necessity",
+        "organizational_model": "Transparent organization — the enterprise with nothing to hide; radical transparency as operational model",
+        "economic_principle": "Information visibility (Hayek) — the market as distributed eye; price signals making distributed knowledge visible",
+        "management_theory": "Management by sight (Ohno) — the visual management system where problems become immediately visible",
+        "concept": "Strategic transparency — the deliberate design of organizational visibility; seeing and being seen as competitive tool"
+      }
+    },
+    "day_16": {
+      "design": {
+        "principle": "Voice as interface — conversational design; the mouth as portal for linguistic interaction with systems",
+        "pattern_language": "ALEXANDER-181-The-Fire / The hearth as speaking circle; the mouth as center of communal discourse",
+        "ux_concept": "Voice User Interface (VUI) — speech as interaction modality; designing for the mouth as input device",
+        "architectural_parallel": "Acoustic design — the space that speaks; concert halls and lecture theaters shaped for vocal clarity",
+        "design_movement": "Conversational Design — the shift from visual to oral interfaces; the return of speech as primary UI"
+      },
+      "education": {
+        "learning_theory": "Dialogic learning (Bakhtin/Freire) — knowledge constructed through dialogue; the mouth as instrument of thought",
+        "developmental_stage": "Language explosion — the rapid vocabulary acquisition of early childhood; the mouth finding words",
+        "pedagogical_approach": "Socratic method — teaching through oral dialogue; the mouth as primary pedagogical instrument",
+        "blooms_taxonomy": "Evaluating (verbal) — articulating judgments and justifying positions through spoken discourse",
+        "concept": "Oral communication competence — the ability to articulate, persuade, and explain through speech as educational outcome"
+      },
+      "business": {
+        "strategic_concept": "Brand voice — the distinctive verbal identity that speaks to customers; tone as strategic differentiator",
+        "organizational_model": "Open communication culture — the organization that speaks freely; flat hierarchies encouraging voice",
+        "economic_principle": "Signaling theory (Spence) — the mouth as signaler; credible communication in markets with information asymmetry",
+        "management_theory": "Management communication (Mintzberg) — the manager as mouthpiece; information transmission as core role",
+        "concept": "Stakeholder dialogue — the business mouth as two-way communicator; listening and speaking as strategic capability"
+      }
+    },
+    "day_17": {
+      "design": {
+        "principle": "Search and discovery design — the hunt for information; wayfinding in complex information ecologies",
+        "pattern_language": "ALEXANDER-13-Subculture-Boundary / The edge where hunters gather; the boundary as zone of discovery",
+        "ux_concept": "Search UX — designing for the information hunt; filters, facets, and findability as core design challenges",
+        "architectural_parallel": "Wayfinding design (Lynch) — the hunter navigating the city; mental maps and environmental cues for wayfinding",
+        "design_movement": "Information Architecture (Morville/Rosenfeld) — the structural design of shared information environments for findability"
+      },
+      "education": {
+        "learning_theory": "Inquiry-based learning (Bruner/Dewey) — the learner as hunter of knowledge; discovery as pedagogical method",
+        "developmental_stage": "Information-seeking behavior — the maturing learner's intentional hunt for specific knowledge",
+        "pedagogical_approach": "Problem-based learning — presenting the hunt as pedagogical engine; students chasing real problems",
+        "blooms_taxonomy": "Evaluating (investigative) — critiquing and testing through active inquiry; the hunter's discerning eye",
+        "concept": "Intellectual curiosity — the educational hunt as intrinsic motivation; the drive to discover, track, and capture knowledge"
+      },
+      "business": {
+        "strategic_concept": "Customer acquisition — the hunt for customers; marketing as strategic pursuit of target segments",
+        "organizational_model": "Business development — the deal hunter role; opportunity identification and pursuit as organizational function",
+        "economic_principle": "Search theory (Stigler) — the economics of information hunting; optimal search duration and cost",
+        "management_theory": "Entrepreneurial opportunity recognition (Shane/Venkataraman) — the hunter's eye for unexploited market gaps",
+        "concept": "Market hunting — the active pursuit of business opportunities; sales and business development as organizational hunt"
+      }
+    },
+    "day_18": {
+      "design": {
+        "principle": "Playful design — the monkey as trickster-designer; curiosity-driven interfaces that delight and surprise",
+        "pattern_language": "ALEXANDER-58-Carnival / The playful mask; spaces of transformation where normal rules are suspended",
+        "ux_concept": "Gamification — the monkey principle of playful engagement; points, badges, and leaderboards as behavioral hooks",
+        "architectural_parallel": "Cedric Price's Fun Palace — the monkey as architect of playful, constantly changing, experimental spaces",
+        "design_movement": "Critical Design / Speculative Design (Dunne/Raby) — the monkey that provokes through absurd and playful objects"
+      },
+      "education": {
+        "learning_theory": "Play-based learning (Vygotsky) — the monkey as learner; imaginary play as the highest form of preschool development",
+        "developmental_stage": "Exploratory play — the child-monkey's systematic investigation of object properties and possibilities",
+        "pedagogical_approach": "Discovery learning (Bruner) — the monkey's path; learning through self-directed exploration and hypothesis testing",
+        "blooms_taxonomy": "Creating (playful) — generating novel ideas through playful recombination; the monkey mind at creative work",
+        "concept": "Curiosity-driven inquiry — the educational monkey; the playful exploration that precedes structured learning"
+      },
+      "business": {
+        "strategic_concept": "Blue Ocean Strategy (Kim/Mauborgne) — the monkey that refuses to compete in red oceans; creating new market space",
+        "organizational_model": "Innovation lab / Skunk works — the protected monkey-space where normal rules don't apply; Lockheed's Advanced Development Projects",
+        "economic_principle": "Radical innovation — the monkey disruption that creates new markets rather than improving existing ones",
+        "management_theory": "Ambidextrous organization (Tushman/O'Reilly) — balancing the monkey (exploration) with the administrator (exploitation)",
+        "concept": "Innovation as play — the business monkey that experiments, fails, and discovers; playfulness as innovation engine"
+      }
+    },
+    "day_19": {
+      "design": {
+        "principle": "Design thinking — the head as center of strategic design cognition; empathy-define-ideate-prototype-test",
+        "pattern_language": "ALEXANDER-129-Common-Areas-at-the-Heart / The head/heart at center; the gathering place as organizational consciousness",
+        "ux_concept": "Strategic UX — moving from tactical interface design to systemic thinking about user experience as competitive weapon",
+        "architectural_parallel": "Louis Kahn's servant and served — the head that discerns between primary and secondary architectural purpose",
+        "design_movement": "Design Thinking (Brown/IDEO) — the head as design instrument; empathy, synthesis, and strategic ideation"
+      },
+      "education": {
+        "learning_theory": "Metacognition (Flavell) — thinking about thinking; the head aware of its own cognitive processes",
+        "developmental_stage": "Formal operations (Piaget) — abstract hypothetical-deductive reasoning; the mature cognitive head",
+        "pedagogical_approach": "Cognitive apprenticeship (Collins/Brown/Newman) — modeling expert thinking processes; making the head's work visible",
+        "blooms_taxonomy": "Evaluating (systematic) — making judgments based on criteria and standards through reasoned analysis",
+        "concept": "Critical thinking — the educated head; the capacity for disciplined analysis, synthesis, and evaluation as highest educational aim"
+      },
+      "business": {
+        "strategic_concept": "Strategic thinking (Mintzberg) — the executive head moving from analysis to synthesis; seeing the whole",
+        "organizational_model": "Adhocracy (Mintzberg) — the organizational head that coordinates through mutual adjustment and organic adaptation",
+        "economic_principle": "Bounded rationality (Simon) — the limits of the managerial head; satisficing rather than optimizing",
+        "management_theory": "Drucker's effective executive — the head that knows where time goes, focuses on contribution, and makes effective decisions",
+        "concept": "Executive function — the business head's capacity for strategic foresight, systems thinking, and adaptive leadership"
+      }
+    },
+    "day_20": {
+      "design": {
+        "principle": "Transformation through iteration — the tooth that bites, chews, and transforms; redesign as digestive process",
+        "pattern_language": "ALEXANDER-130-Entrance-Room / The threshold transformed; spaces that change their character through use over time",
+        "ux_concept": "Iterative design — the chewing process of UX; each iteration breaks down and reconstitutes the user experience",
+        "architectural_parallel": "Renovation and adaptive reuse — the tooth that transforms old buildings for new purposes; continuous architectural change",
+        "design_movement": "Evolutionary Design — design that transforms through successive iterations; the Bauhaus principle of continuous refinement"
+      },
+      "education": {
+        "learning_theory": "Transformative learning (Mezirow) — the fundamental change in perspective through critical reflection; paradigm mastication",
+        "developmental_stage": "Cognitive restructuring — the tooth that breaks old mental models to enable new ways of knowing",
+        "pedagogical_approach": "Experiential learning cycle (Kolb) — the iterative loop of concrete experience, reflection, conceptualization, and experimentation",
+        "blooms_taxonomy": "Creating (transformative) — putting elements together to form a novel, coherent whole; synthesis as transformative act",
+        "concept": "Paradigm shift (Kuhn) — the educational transformation that occurs when existing frameworks can no longer accommodate new evidence"
+      },
+      "business": {
+        "strategic_concept": "Strategic transformation — the deliberate organizational change that reconstitutes business model and identity",
+        "organizational_model": "Organizational change management (Kotter) — the 8-step process for leading transformational business change",
+        "economic_principle": "Creative destruction (Schumpeter) — the economic tooth that destroys old structures to create new productive combinations",
+        "management_theory": "Breakthrough innovation (Christensen) — the disruptive tooth that transforms industry structure through new value propositions",
+        "concept": "Business transformation — the continuous chewing of organizational form; adaptation and renewal as perpetual strategic necessity"
+      }
+    },
+    "day_21": {
+      "design": {
+        "principle": "Signifiers and affordances (Norman) — the mark that communicates what actions are possible; design as sign",
+        "pattern_language": "ALEXANDER-252-Different-Chairs / The chair as sign of sitting; objects as marks indicating their use",
+        "ux_concept": "Design tokens — the systematic marks of a design system; the sign language of consistent interfaces",
+        "architectural_parallel": "Louis Kahn's sign-bearing walls — the mark that distinguishes 'served' from 'servant' spaces; architecture as readable text",
+        "design_movement": "Semiotics in Design (Eco/Barthes) — the study of signs and meaning in designed objects; design as communication system"
+      },
+      "education": {
+        "learning_theory": "Feedback as sign — the formative mark that signals progress; assessment as communication channel",
+        "developmental_stage": "Symbolic representation mastery — the child's capacity to use marks, signs, and symbols to represent reality",
+        "pedagogical_approach": "Assessment design — the deliberate creation of marks, rubrics, and feedback systems that guide learning",
+        "blooms_taxonomy": "Creating (marked) — producing work that bears the mark of original thought; the signature of creative achievement",
+        "concept": "Educational assessment — the sign system of education; marks, grades, and feedback as communication about learning"
+      },
+      "business": {
+        "strategic_concept": "KPIs and metrics — the strategic marks that indicate organizational health; the dashboard as business sign-system",
+        "organizational_model": "OKR framework (Doerr) — the marking system that aligns organizational action through visible objectives and key results",
+        "economic_principle": "Signaling in markets (Akerlof/Spence) — the mark that communicates quality; credentials, brands, and guarantees as economic signs",
+        "management_theory": "Management by Objectives (Drucker) — the deliberate marking of targets against which performance is measured",
+        "concept": "Business metrics — the organizational sign language; the marks and measures that make business performance visible and actionable"
+      }
+    },
+    "day_22": {
+      "design": {
+        "principle": "Design system maturity — the final palm as complete coverage of design tokens, patterns, and principles",
+        "pattern_language": "ALEXANDER-250-Warm-Colors / The mature palette; the final comprehensive expression of the pattern language fully realized",
+        "ux_concept": "Design system at scale — the complete covering of all interface states, components, and variants under systematic governance",
+        "architectural_parallel": "Complete architectural grammar — the fully developed style that covers all building types and scales (Palladian mastery)",
+        "design_movement": "Systematic Design — the mature design language that covers all eventualities; Dieter Rams' complete Braun design system"
+      },
+      "education": {
+        "learning_theory": "Mastery learning (Bloom) — the comprehensive achievement of all learning objectives; the final covering of the curriculum",
+        "developmental_stage": "Formal operations mastery — the fully developed cognitive capacity covering abstract, hypothetical, and systematic reasoning",
+        "pedagogical_approach": "Capstone design — the culminating educational experience that demonstrates comprehensive coverage of domain knowledge",
+        "blooms_taxonomy": "Creating (mastery) — the highest level demonstrated through comprehensive original work; the creative synthesis of all prior levels",
+        "concept": "Educational completion — the final palm that covers all learning territory; comprehensive mastery as the endpoint of structured education"
+      },
+      "business": {
+        "strategic_concept": "Maturity model — the organization's final palm covering all capability levels; CMMI or similar staged development frameworks",
+        "organizational_model": "Professional bureaucracy (Mintzberg) — the mature organization with standardized skills and complete process coverage",
+        "economic_principle": "Mature market strategy — harvesting in markets with complete coverage; managing decline through efficiency rather than growth",
+        "management_theory": "Portfolio maturity — the complete covering of the business lifecycle from startup to harvest across all business units",
+        "concept": "Business endgame — the final stage of market coverage; the mature palm that has touched all segments and now sustains position"
+      }
+    },
+    "day_23": {
+      "design": {
+        "principle": "Information architecture at oceanic scale — the final water as the total context in which all design floats",
+        "pattern_language": "ALEXANDER-104-Site-Repair / The water that heals all sites; the oceanic context that encompasses every local design decision",
+        "ux_concept": "Contextual design (Beyer/Holtzblatt) — understanding the total ocean of user context before designing any single feature",
+        "architectural_parallel": "Situationist urbanism — the city as ocean of experience; total environmental context as design substrate (Constant Nieuwenhuys)",
+        "design_movement": "Contextual Design — the Scandinavian understanding that all design floats in the ocean of human context and social practice"
+      },
+      "education": {
+        "learning_theory": "Lifelong learning (UNESCO/Faure) — the ocean of knowledge that has no shore; education as continuous flow throughout life",
+        "developmental_stage": "Post-formal operations (Sinnott/Commons) — mature wisdom that navigates the ocean of adult complexity and contradiction",
+        "pedagogical_approach": "Heutagogy (Hase/Kenyon) — self-determined learning in the ocean of knowledge; the learner as autonomous navigator",
+        "blooms_taxonomy": "Creating (oceanic) — producing at the highest level with full awareness of the ocean of knowledge in which one swims",
+        "concept": "Wisdom — the educational ocean; the final water that encompasses all knowledge and produces understanding beyond information"
+      },
+      "business": {
+        "strategic_concept": "Blue Ocean Strategy (Kim/Mauborgne) — the final water as uncontested market space; creating oceans where none existed",
+        "organizational_model": "Ecosystem strategy (Iansiti/Levien) — the business as fish in an ocean of interdependent stakeholders",
+        "economic_principle": "Market saturation and renewal — the economic cycle of filling and refilling the ocean of market demand",
+        "management_theory": "Liquidity event — the final flow of capital; exit strategies as the culmination of the business water journey",
+        "concept": "Market ecosystem — the business ocean; understanding that every enterprise floats in a larger context of interdependent flows"
+      }
+    },
+    "day_24": {
+      "design": {
+        "principle": "Deep structure — the foundational pattern beneath surface form; the fish that swims at the root of all design",
+        "pattern_language": "ALEXANDER-253-Things-from-Your-Life (deep) / The invariant pattern beneath cultural variation; the universal design grammar",
+        "ux_concept": "Mental models — the deep structure of user cognition that all surface interface design must align with",
+        "architectural_parallel": "Archetypal space — the primordial room configurations that persist across all cultures and eras (Alexander's 'Nature of Order')",
+        "design_movement": "Deep Design — the search for invariant patterns beneath cultural variation; Alexander's timeless way of building"
+      },
+      "education": {
+        "learning_theory": "Deep learning (Marton/Saljo) — the fish that swims beneath surface memorization; understanding underlying structure and meaning",
+        "developmental_stage": "Post-formal dialectical thinking — the capacity to hold contradictions and see beneath polarized positions",
+        "pedagogical_approach": "Socratic questioning — the deep fish that never stops swimming; perpetual inquiry into foundational assumptions",
+        "blooms_taxonomy": "Creating (foundational) — generating new knowledge that reshapes the deep structure of a domain",
+        "concept": "Foundational knowledge — the educational bedrock; the deep competencies that persist when surface skills become obsolete"
+      },
+      "business": {
+        "strategic_concept": "Core competencies (Prahalad/Hamel) — the deep fish that competitors cannot replicate; root capabilities as competitive bedrock",
+        "organizational_model": "Organizational DNA — the invariant cultural patterns that persist through leadership changes and strategic pivots",
+        "economic_principle": "Ricardian rents from deep resources — lasting competitive advantage rooted in structural, hard-to-replicate assets",
+        "management_theory": "First principles thinking (Musk) — the fish that questions all assumptions; reasoning from foundational truths",
+        "concept": "Lasting competitive advantage — the business fish that endures; sustainable differentiation rooted in structural position"
+      }
+    },
+    "day_25": {
+      "design": {
+        "principle": "Legacy design language — the final voice that speaks across generations; the design statement that outlives its maker",
+        "pattern_language": "ALEXANDER-248-Soft-Inside-Wall / The design voice that persists; the lasting pattern that continues to generate living centers",
+        "ux_concept": "Design legacy systems — the final voice of established design languages; maintaining and honoring canonical interface patterns",
+        "architectural_parallel": "The Pantheon — the final voice of Roman architecture; the definitive statement that has spoken for two millennia",
+        "design_movement": "Enduring Design — the final mouth that speaks forever; Rams' 10 principles as the lasting voice of product design"
+      },
+      "education": {
+        "learning_theory": "Perennial questions — the eternal curriculum; the final mouth that asks the same fundamental questions across millennia",
+        "developmental_stage": "Wisdom transmission — the elder's voice; the final stage of passing accumulated understanding to next generations",
+        "pedagogical_approach": "Socratic legacy — teaching through the eternal question; the mouth that never stops asking what matters most",
+        "blooms_taxonomy": "Creating (legacy) — producing work that becomes part of the disciplinary canon; the voice that endures",
+        "concept": "Educational legacy — the final voice of the teacher; the lasting impact that continues speaking through students' lives"
+      },
+      "business": {
+        "strategic_concept": "Founder's legacy — the enduring voice of the organization's origin; values and vision that outlast the founder",
+        "organizational_model": "Institutional voice — the organization's mouth that speaks with authority earned over decades of existence",
+        "economic_principle": "Brand equity as voice — the accumulated goodwill that speaks for the enterprise; the mouth of market reputation",
+        "management_theory": "Drucker's lasting voice — the management wisdom that transcends its era; the definitive statement that endures",
+        "concept": "Enduring brand voice — the final mouth of market identity; the distinctive expression that competitors cannot replicate"
+      }
+    },
+    "day_26": {
+      "design": {
+        "principle": "The ultimate user quest — the completion of the design journey; the hunt that reaches its purpose",
+        "pattern_language": "ALEXANDER-111-Half-Hidden-Garden / The final destination of the architectural hunt; the garden found at journey's end",
+        "ux_concept": "End-to-end journey completion — the final hunt that closes the user experience loop; task completion as design destination",
+        "architectural_parallel": "The pilgrimage route's end — the final threshold after the long hunt; Santiago de Compostela as architectural destination",
+        "design_movement": "Purpose-Driven Design — the final hunt that seeks meaning beyond function; design in service of human purpose"
+      },
+      "education": {
+        "learning_theory": "Self-actualization (Maslow) — the final hunt for one's full potential; autonomous learning as ultimate educational quest",
+        "developmental_stage": "Autonomous learning — the fully self-directed learner who hunts knowledge independently without external guidance",
+        "pedagogical_approach": "Heutagogy — the final hunt as self-determined inquiry; the learner who pursues questions no curriculum contains",
+        "blooms_taxonomy": "Creating (autonomous) — generating original knowledge through self-directed inquiry; the independent scholarly hunt",
+        "concept": "Lifelong inquiry — the final educational hunt that never ends; autonomous curiosity as the enduring motivation to learn"
+      },
+      "business": {
+        "strategic_concept": "Purpose-driven strategy (Sinek) — the hunt for why; the organization's ultimate quest beyond profit",
+        "organizational_model": "Entrepreneurial autonomy — the final hunt as self-directed enterprise; the business that pursues its own deepest purpose",
+        "economic_principle": "Eudaimonic economics — business that hunts for human flourishing; moving beyond hedonic utility to purpose",
+        "management_theory": "Self-actualizing organization — the enterprise that hunts its own potential; continuous self-transcendence as management goal",
+        "concept": "Business purpose — the final hunt for meaning; the organization's ultimate reason for being beyond financial return"
+      }
+    },
+    "day_27": {
+      "design": {
+        "principle": "Design reset — the return to void that precedes new creation; the moment of dissolution before reconstitution",
+        "pattern_language": "ALEXANDER-249-Ornament / The final pattern that contains all patterns; the ornament as recursive microcosm of the whole",
+        "ux_concept": "Redesign from zero — the courageous reset that strips away accumulated complexity to begin fresh",
+        "architectural_parallel": "Palimpsest — the architectural reset; the building that contains its own erasure and rewriting through time",
+        "design_movement": "Deconstructivism (Tschumi/Koolhaas) — the designed reset; architecture that dissolves and reconstructs simultaneously"
+      },
+      "education": {
+        "learning_theory": "Beginner's mind (Shoshin) — the Zen reset; returning to not-knowing as the condition for genuine learning",
+        "developmental_stage": "Recursive learning — the capacity to return to fundamentals with deeper understanding; spiral curriculum (Bruner)",
+        "pedagogical_approach": "Unlearning — the educational reset; deliberately releasing obsolete knowledge to make room for new understanding",
+        "blooms_taxonomy": "Meta-creating — awareness of the creative process itself; the recursive capacity to reset one's own thinking",
+        "concept": "Recursive education — the spiral return to origins with transformed understanding; the curriculum that revisits and deepens"
+      },
+      "business": {
+        "strategic_concept": "Creative destruction (Schumpeter) — the economic reset; the perpetual dissolution and reconstitution of market structure",
+        "organizational_model": "Ambidextrous renewal — the organizational reset; the capacity to dissolve and rebuild while maintaining operations",
+        "economic_principle": "Kondratiev waves — the long-wave economic reset; cycles of technological destruction and renewal",
+        "management_theory": "Reengineering (Hammer/Champy) — the deliberate organizational reset; radical process redesign from first principles",
+        "concept": "Regenerative business — the enterprise that cyclically resets, dissolves, and renews itself as a living system"
+      }
+    }
+  }
+}

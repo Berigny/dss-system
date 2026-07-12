@@ -10,6 +10,7 @@ from typing import Any
 import json
 
 import httpx
+from shared_types.coord_schema import normalize_coordinate_metadata
 
 # Ensure these settings exist in your config.settings
 from config.settings import API_BASE, API_KEY, DEFAULT_LEDGER, HTTP_TIMEOUT
@@ -51,7 +52,9 @@ class ChatResponse:
             knowledge_tree=payload.get("knowledge_tree") or [],
             coordinate=payload.get("coordinate"),
             web4_key=payload.get("web4_key"),
-            metadata=payload["metadata"] if "metadata" in payload else {},
+            metadata=normalize_coordinate_metadata(
+                payload["metadata"] if "metadata" in payload else {}
+            ),
             appraisal=payload.get("appraisal"),
             tokens=payload.get("tokens"),
             model=payload.get("model"),

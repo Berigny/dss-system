@@ -8,7 +8,7 @@ import json
 import os
 
 import httpx
-from fasthtml.common import Button, Container, Div, Form, H1, P, Pre, Textarea, Titled, fast_app
+from fasthtml.common import Button, Div, Form, H1, P, Pre, Textarea, Titled, fast_app
 
 MIDDLEWARE_URL = (
     os.getenv("MIDDLEWARE_URL")
@@ -24,13 +24,13 @@ app, rt = fast_app(secret_key=os.getenv("FASTHTML_SECRET_KEY", "coord-demo-secre
 def index():
     return Titled(
         "COORD Demo",
-        Container(
+        Div(
             H1("Resolve COORD"),
             P("Paste a COORD JSON payload and submit it to the middleware resolver."),
             Form(
                 Textarea(
-                    name="coord",
-                    placeholder='{"coord": "chat-demo:WX-1"}',
+                    name="coordinate",
+                    placeholder='chat-demo:WX-1',
                     rows=10,
                     style="width:100%;",
                 ),
@@ -44,14 +44,11 @@ def index():
 
 
 @rt("/resolve", methods=["post"])
-def resolve(coord: str):
-    try:
-        payload = json.loads(coord)
-    except json.JSONDecodeError as exc:
-        return Pre(f"Invalid JSON: {exc}", id="result")
+def resolve(coordinate: str):
+    payload = {"coordinate": coordinate.strip()}
     try:
         response = httpx.post(
-            f"{MIDDLEWARE_URL}/resolve",
+            f"{MIDDLEWARE_URL}/api/decode_coordinate",
             json=payload,
             timeout=30.0,
         )

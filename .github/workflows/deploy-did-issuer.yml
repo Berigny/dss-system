@@ -2,7 +2,7 @@ name: Deploy did-issuer
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
     paths:
       - 'apps/did-issuer/**'
       - '.github/workflows/deploy-did-issuer.yml'
@@ -12,7 +12,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Deploy to Fly.io
-        run: echo "Fly.io deploy step for apps/did-issuer/ (TBD)"
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Install Flyctl
+        run: curl -L https://fly.io/install.sh | sh
+
+      - name: Deploy to Fly.io (production)
+        if: github.ref == 'refs/heads/main'
+        run: |
+          export FLYCTL_INSTALL="$HOME/.fly"
+          export PATH="$FLYCTL_INSTALL/bin:$PATH"
+          flyctl deploy ./apps/did-issuer --app dss-system-did-issuer --access-token ${{ secrets.FLY_API_TOKEN }}
+
+      - name: Deploy to Fly.io (staging)
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          export FLYCTL_INSTALL="$HOME/.fly"
+          export PATH="$FLYCTL_INSTALL/bin:$PATH"
+          flyctl deploy ./apps/did-issuer --app dss-system-did-issuer-staging --access-token ${{ secrets.FLY_API_TOKEN }}

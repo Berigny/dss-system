@@ -170,9 +170,45 @@ def render_relationship_filter_tabs(
     return f'<nav class="page-tabs" aria-label="Relationship types">{"".join(controls)}</nav>'
 
 
-def render_action_cards() -> str:
-    return """
+def render_action_cards(
+    *,
+    chat_url: str,
+    decode_url: str,
+    telegram_url: str | None = None,
+) -> str:
+    chat_link = (
+        f'<a class="btn primary" href="{html.escape(chat_url)}" target="_blank" rel="noreferrer noopener">Open Chat</a>'
+        if chat_url
+        else '<button class="btn primary" disabled>Chat not configured</button>'
+    )
+    decode_link = (
+        f'<a class="btn primary" href="{html.escape(decode_url)}" target="_blank" rel="noreferrer noopener">Open Decode</a>'
+        if decode_url
+        else '<button class="btn primary" disabled>Decode not configured</button>'
+    )
+    if telegram_url:
+        telegram_link = f'<a class="btn" href="{html.escape(telegram_url)}" target="_blank" rel="noreferrer noopener">Open Telegram</a>'
+        telegram_badge = ""
+    else:
+        telegram_link = '<button class="btn" disabled>Coming soon</button>'
+        telegram_badge = '<span class="badge" style="margin-left:8px;">Coming soon</span>'
+    return f"""
     <section class="action-card-grid" aria-label="Primary tasks">
+      <article class="action-card action-card-primary">
+        <h2>Chat</h2>
+        <p>Start a governed conversation on the DSS Chat surface.</p>
+        {chat_link}
+      </article>
+      <article class="action-card action-card-primary">
+        <h2>Decode</h2>
+        <p>Explore coordinates, decodings, and benchmark results.</p>
+        {decode_link}
+      </article>
+      <article class="action-card action-card-secondary{'' if telegram_url else ' action-card-disabled'}">
+        <h2>Telegram{telegram_badge}</h2>
+        <p>Connect the planned Telegram surface for notifications and quick interactions.</p>
+        {telegram_link}
+      </article>
       <article class="action-card action-card-secondary">
         <h2>Manage existing connections</h2>
         <p>Browse, filter, and adjust governed connections across ledgers, principals, and surfaces.</p>

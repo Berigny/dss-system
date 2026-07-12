@@ -7,6 +7,33 @@
 
 const HISTORY_ENTITY_ALL = '__all__';
 
+// DSS-245: BigInt-safe coordinate fields. These are emitted as decimal strings
+// by the backend when they exceed the JS safe integer range.
+const _BIGINT_COORDINATE_KEYS = new Set([
+    'prime_multiplicative_value',
+    'token_prime_product',
+    'body_prime',
+    'numerator',
+    'denominator',
+]);
+
+function parseCoordinateJson(text) {
+    return JSON.parse(text, (key, value) => {
+        if (
+            _BIGINT_COORDINATE_KEYS.has(key)
+            && typeof value === 'string'
+            && /^-?\d+$/.test(value)
+        ) {
+            try {
+                return BigInt(value);
+            } catch (_) {
+                return value;
+            }
+        }
+        return value;
+    });
+}
+
 const threadlessMetrics = {
     isGhostState: false,
     sessionCost: 0,
@@ -1734,7 +1761,7 @@ async function readStream(response, onEvent) {
             if (!trimmed) continue;
             let payload;
             try {
-                payload = JSON.parse(trimmed);
+                payload = parseCoordinateJson(trimmed);
             } catch (err) {
                 continue;
             }
@@ -1747,7 +1774,7 @@ async function readStream(response, onEvent) {
     const trailing = buffer.trim();
     if (trailing) {
         try {
-            const payload = JSON.parse(trailing);
+            const payload = parseCoordinateJson(trailing);
             if (onEvent) {
                 onEvent(payload);
             }

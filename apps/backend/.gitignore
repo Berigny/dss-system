@@ -1,0 +1,32 @@
+
+# local runtime ledger/state
+data/
+\!data/.gitkeep
+
+# local env/config
+.env.local
+
+# Python virtualenv/cache artifacts
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# test/tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# benchmark run artifacts
+backend/benchmarks/output/
+backend/benchmarks/*/phase1-v1/**/*.json
+
+# offline sync artifacts
+backend/utils/ref/artifacts/offline_sync/
+
+# OS/editor noise
+.DS_Store
+.aider*

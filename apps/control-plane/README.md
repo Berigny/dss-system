@@ -85,3 +85,8 @@ The runtime port defaults to `3000` and can be overridden with `PORT`.
 - `src/main.py` imports and re-exports the Starlette application defined in
   `app.py`.  This keeps the migration non-invasive while giving Vercel and
   Docker a stable entrypoint path.
+
+## See also
+
+- [Root README](../../README.md) — monorepo quick start, architecture, and CI/CD secrets
+- [docs/staging.md](../../docs/staging.md) and [docs/production.md](../../docs/production.md) — deployment runbooks

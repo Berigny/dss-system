@@ -82,3 +82,8 @@ Key variables (see root `.env.example` for the full set):
 - `src/main.py` imports and re-exports the FastAPI application defined in
   `fastapi_app.py` for a stable Vercel/Docker/Fly entrypoint path.
 - `GET /health` returns `{"status": "ok"}` for healthchecks.
+
+## See also
+
+- [Root README](../../README.md) — monorepo quick start, architecture, and CI/CD secrets
+- [docs/staging.md](../../docs/staging.md) and [docs/production.md](../../docs/production.md) — deployment runbooks

@@ -24,6 +24,7 @@ from urllib.parse import quote, urlencode, urlparse
 import httpx
 import jwt
 import qrcode
+from shared_types.did_models import DIDDocument, Service, VerificationMethod
 from starlette.applications import Starlette
 from starlette.datastructures import UploadFile
 from starlette.middleware import Middleware
@@ -88,6 +89,10 @@ MIDDLEWARE_ADMIN_TOKEN = str(
 ).strip()
 FRONTEND_TENANT_ID = str(os.getenv("FRONTEND_TENANT_ID") or "tenant:demo").strip()
 CHAT_BASE_URL = (os.getenv("CHAT_BASE_URL") or "").rstrip("/")
+COORD_DEMO_BASE_URL = (
+    os.getenv("COORD_DEMO_BASE_URL") or "https://coord-demo.vercel.app"
+).rstrip("/")
+TELEGRAM_BASE_URL = (os.getenv("TELEGRAM_BASE_URL") or "").rstrip("/")
 BENCHMARK_DECODER_BASE_URL = (os.getenv("BENCHMARK_DECODER_BASE_URL") or "").rstrip("/")
 LOCAL_CHAT_BASE_URL = (os.getenv("LOCAL_CHAT_BASE_URL") or "").rstrip("/")
 LOCAL_CHAT_LABEL = str(os.getenv("LOCAL_CHAT_LABEL") or "Local Offline Chat").strip()
@@ -121,6 +126,7 @@ _openid_vp_sessions: dict[str, dict[str, Any]] = {}
 
 # Generate an ephemeral P-256 key pair for signing OpenID4VP presentation requests.
 # In production this should be a persisted key (env var / secret).
+ECAlgorithm: Any = None
 try:
     from cryptography.hazmat.primitives.asymmetric.ec import generate_private_key, SECP256R1
     from jwt.algorithms import ECAlgorithm
@@ -2936,7 +2942,7 @@ def _render_settings_account_content(*, shortcuts_html: str = "") -> str:
 
 
 def _render_settings_connection_shortcuts(
-    context: dict[str, Any],
+    context: _ConnectionLookupContext | dict[str, Any],
     identity_card: dict[str, Any],
 ) -> str:
     """Render quick links from Settings back into the add/edit wizard."""
@@ -3835,7 +3841,7 @@ def _surface_control_plane_payload(record: dict[str, Any], *, existing: dict[str
 async def _update_principal_ledger_metadata(
     principal_id: str,
     ledger_ids: list[str],
-    context: dict[str, Any],
+    context: _ConnectionLookupContext | dict[str, Any],
     request: Request,
 ) -> None:
     """Backfill the principal's canonical ledger_id when its ledger links change."""
@@ -3871,7 +3877,7 @@ async def _update_principal_ledger_metadata(
 async def _update_surface_canonical_metadata(
     surface_id: str,
     links: dict[str, list[str]],
-    context: dict[str, Any],
+    context: _ConnectionLookupContext | dict[str, Any],
     request: Request,
 ) -> None:
     """Backfill a surface's canonical ledger_id/principal_did when its links change."""
@@ -6372,6 +6378,9 @@ def _layout(
       .action-card h2 {{ font-size: 1.2rem; margin-bottom: 8px; }}
       .action-card p {{ color: var(--text-muted); margin-bottom: 12px; }}
       .action-card-primary {{ border-top: 3px solid var(--accent); }}
+      .action-card-disabled {{ opacity: 0.65; }}
+      .action-card-disabled .btn {{ cursor: not-allowed; }}
+      .badge {{ display:inline-block; padding:2px 8px; border-radius:999px; background:var(--surface-muted); color:var(--text-muted); font-size:0.75rem; vertical-align:middle; }}
       .inline-actions {{ display:flex; gap: 8px; flex-wrap: wrap; }}
       .card.compact {{ padding: 16px 18px; }}
       .setup-prompt-banner {{
@@ -8200,6 +8209,7 @@ async def _process_principal_provider_models(
     state: dict[str, str],
     identity_card: dict[str, Any],
     auth_headers: dict[str, str] | None = None,
+    request: Request | None = None,
 ) -> tuple[dict[str, str], str | None]:
     updated = dict(state)
     provider_type = str(updated.get("provider_type") or "OpenRouter").strip() or "OpenRouter"
@@ -8821,7 +8831,12 @@ async def connections_add_page(request: Request) -> Response:
     }.get(entity_kind, "Principal details")
     step = str(state.get("step") or default_step).strip() or default_step
     if request.method.upper() == "POST" and entity_kind == "principal" and str(state.get("wizard_action") or "").strip().lower() == "load_models":
-        state, error = await _process_principal_provider_models(state=state, identity_card=identity_card, auth_headers=_auth_headers_from_request(request))
+        state, error = await _process_principal_provider_models(
+            state=state,
+            identity_card=identity_card,
+            auth_headers=_auth_headers_from_request(request),
+            request=request,
+        )
         if error:
             state["model_lookup_error"] = error
         state["step"] = "Principal details"
@@ -8936,7 +8951,7 @@ def _source_status_class(value: str) -> str:
     return "pending"
 
 
-def _format_file_size(bytes_value: int) -> str:
+def _format_file_size(bytes_value: int | None = None) -> str:
     value = int(bytes_value or 0)
     if value >= 1024 * 1024:
         return f"{value / (1024 * 1024):.1f} MB"
@@ -9384,7 +9399,7 @@ async def connections_page(request: Request) -> Response:
             except Exception:
                 attachment_results = []
         for attachments in attachment_results:
-            if isinstance(attachments, Exception):
+            if isinstance(attachments, BaseException):
                 continue
             for attachment in attachments:
                 if not isinstance(attachment, dict):
@@ -10417,7 +10432,7 @@ def _record_visible_to_principal(
         if user_principal and created_by == user_principal:
             return True
 
-    if related_ids and entity_id and entity_id in related_ids.get(entity_type, set()):
+    if related_ids and entity_id and entity_type and entity_id in related_ids.get(entity_type, set()):
         return True
 
     if actor_type == "model":
@@ -11903,7 +11918,7 @@ def _access_status_from_settings(settings: dict[str, Any]) -> str:
     return "Access enabled"
 
 
-def _trust_class_blurb(entity_type: str, entity_id: str, context: dict[str, Any]) -> str:
+def _trust_class_blurb(entity_type: str, entity_id: str, context: _ConnectionLookupContext | dict[str, Any]) -> str:
     """Return a plain-English trust-class sentence for a related entity."""
     record_map = _as_dict(context.get(f"{entity_type}_map") or {})
     record = _as_dict(record_map.get(entity_id))
@@ -13872,7 +13887,11 @@ def render_home_page(snapshot: dict[str, Any]) -> str:
             title="Home",
             description="DSS Control Plane is the front door for governing memory layers (Ledgers), identity and access for people, AI, or organisations (Principals), and connecting apps or interfaces (Surfaces).",
         ),
-        actions_html=render_action_cards(),
+        actions_html=render_action_cards(
+            chat_url=CHAT_BASE_URL,
+            decode_url=COORD_DEMO_BASE_URL,
+            telegram_url=TELEGRAM_BASE_URL or None,
+        ),
         support_html="",
     )
 
@@ -15562,34 +15581,25 @@ async def did_document_options(_: Request) -> Response:
 def build_principal_did_document(principal_id: str) -> dict[str, Any]:
     principal_did = f"did:web:{os.getenv('DEFAULT_DID_HOST', '')}:principals:{principal_id}"
     verification_method, _ = load_verification_method()
-    principal_vm = dict(verification_method)
-    principal_vm["controller"] = principal_did
-    vm_id = str(principal_vm.get("id") or f"{principal_did}#v1")
-    principal_vm["id"] = vm_id
-    return {
-        "@context": ["https://www.w3.org/ns/did/v1"],
-        "id": principal_did,
-        "verificationMethod": [principal_vm],
-        "assertionMethod": [vm_id],
-        "authentication": [vm_id],
-        "service": [
-            {
-                "id": f"{principal_did}#resolver",
-                "type": "DSSResolverService",
-                "serviceEndpoint": PUBLIC_BASE_URL + "/v1/resolve",
-            },
-            {
-                "id": f"{principal_did}#profile",
-                "type": "DSSProfileService",
-                "serviceEndpoint": PUBLIC_BASE_URL + f"/v1/principals/{principal_id}/profile",
-            },
-            {
-                "id": f"{principal_did}#status",
-                "type": "CredentialStatusService",
-                "serviceEndpoint": PUBLIC_BASE_URL + "/v1/status",
-            },
-        ],
-    }
+    vm_id = str(verification_method.get("id") or f"{principal_did}#v1")
+    principal_vm = VerificationMethod(
+        id=vm_id,
+        type=str(verification_method.get("type") or "JsonWebKey2020"),
+        controller=principal_did,
+        public_key_jwk=dict(verification_method.get("publicKeyJwk") or {}),
+    )
+    services = [
+        Service(id=f"{principal_did}#resolver", type="DSSResolverService", service_endpoint=PUBLIC_BASE_URL + "/v1/resolve"),
+        Service(id=f"{principal_did}#profile", type="DSSProfileService", service_endpoint=PUBLIC_BASE_URL + f"/v1/principals/{principal_id}/profile"),
+        Service(id=f"{principal_did}#status", type="CredentialStatusService", service_endpoint=PUBLIC_BASE_URL + "/v1/status"),
+    ]
+    return DIDDocument(
+        id=principal_did,
+        verification_method=[principal_vm],
+        authentication=[vm_id],
+        assertion_method=[vm_id],
+        service=services,
+    ).model_dump(by_alias=True)
 
 
 async def principal_did_document(request: Request) -> JSONResponse:
@@ -20299,7 +20309,29 @@ async def account_setup_page(request: Request) -> Response:
     has_account = status_code < 400 and isinstance(body, dict) and body.get("status") == "ok"
 
     if not has_account:
-        # Authenticated but no account yet — show wizard CTA
+        # Authenticated but no account yet — distinguish approved signups from pending/wizard entry
+        setup_checklist = await _fetch_setup_checklist(principal_did)
+        signup_state = str(setup_checklist.get("signup_state") or "").strip().lower()
+        if signup_state == "approved_pending_onboarding":
+            return HTMLResponse(
+                _layout(
+                    "Account Setup | DSS Control Plane",
+                    f"""
+                    <div class="page-header" style="text-align:center; max-width:560px; margin:0 auto;">
+                        <h1>Account Setup</h1>
+                        <p class="muted">Your request has been approved.</p>
+                    </div>
+                    <div class="card" style="max-width:520px; margin:0 auto; text-align:center;">
+                        <h2>Finish Account Setup</h2>
+                        <p>Your identity is approved. Complete the onboarding checklist to provision your workspace.</p>
+                        <a class="btn primary" href="/settings?section=account#account-setup-checklist" style="margin:8px;">Complete Account Setup</a>
+                        <a class="btn" href="/" style="margin:8px;">Return Home</a>
+                    </div>
+                    """,
+                    profile_name=_profile_name_from_identity_card(identity_vc),
+                ),
+                status_code=200,
+            )
         return HTMLResponse(
             _layout(
                 "Account Setup | DSS Control Plane",
@@ -20673,11 +20705,11 @@ def render_wizard_page(*, banner: str = "", banner_kind: str = "ok") -> str:
             <!-- Confirmation -->
             <div class="wizard-step" data-step="confirm" hidden>
                 <div class="card" style="text-align:center;">
-                    <h2 style="color:var(--ok);">✓ Request Submitted</h2>
-                    <p>Your account setup request has been received and is awaiting operator approval.</p>
-                    <p class="muted">You will receive an email at <strong id="w_confirm_email"></strong> once your request has been reviewed. The email will contain a link to complete wallet authentication and access the Control Plane.</p>
+                    <h2 id="w_confirm_title" style="color:var(--ok);">✓ Request Submitted</h2>
+                    <p id="w_confirm_body">Your account setup request has been received and is awaiting operator approval.</p>
+                    <p class="muted">You will receive updates at <strong id="w_confirm_email"></strong>.</p>
                     <div style="margin-top:24px;">
-                        <a class="btn primary" href="/login">Go to Sign In</a>
+                        <a id="w_confirm_primary_btn" class="btn primary" href="/login">Go to Sign In</a>
                         <a class="btn" href="/">Return Home</a>
                     </div>
                 </div>
@@ -20890,6 +20922,19 @@ def render_wizard_page(*, banner: str = "", banner_kind: str = "ok") -> str:
                     const data = await api(`/api/wizard/submit/${{state.request_id}}`, 'POST', {{ idempotency_key: idempotency }});
                     clearState();
                     document.getElementById('w_confirm_email').textContent = state.data.email || '';
+                    const nextRoute = String(data.next_route || 'awaiting_operator_approval');
+                    if (nextRoute === 'awaiting_operator_approval') {{
+                        document.getElementById('w_confirm_title').textContent = '✓ Request Submitted';
+                        document.getElementById('w_confirm_body').textContent = 'Your account setup request has been received and is awaiting operator approval.';
+                        document.getElementById('w_confirm_primary_btn').textContent = 'Go to Sign In';
+                        document.getElementById('w_confirm_primary_btn').setAttribute('href', '/login');
+                    }} else {{
+                        document.getElementById('w_confirm_title').textContent = '✓ Request Approved';
+                        document.getElementById('w_confirm_body').textContent = 'Your request has been approved. Sign in to finish account setup.';
+                        const primaryBtn = document.getElementById('w_confirm_primary_btn');
+                        primaryBtn.textContent = 'Sign in to finish setup';
+                        primaryBtn.setAttribute('href', '/login?next=/account/setup');
+                    }}
                     showStep('confirm');
                 }} catch (err) {{
                     document.getElementById('w_submit_status').textContent = 'Error: ' + err.message;
@@ -21232,6 +21277,8 @@ def _verify_openid_vp_token(vp_token: str) -> dict[str, Any] | None:
     try:
         issuer_key = json.loads(issuer_key_json)
         # Use PyJWT to verify with the P-256 public key
+        if ECAlgorithm is None:
+            raise RuntimeError("ECAlgorithm not available")
         public_key = ECAlgorithm.from_jwk(json.dumps(issuer_key))
         pyjwt.decode(vc_jwt, key=public_key, algorithms=["ES256"])
     except Exception:
@@ -22680,7 +22727,7 @@ async def api_control_plane_entities_remove(request: Request) -> JSONResponse:
     entity_id = str(payload.get("entity_id") or "").strip()
     if entity_type not in {"ledger", "principal", "surface"} or not entity_id:
         return JSONResponse({"error": "entity_type_and_entity_id_required"}, status_code=400)
-    current_principal_did = str(_as_dict(session.get("identity_vc")).get("principal_did") or "").strip()
+    current_principal_did = str(_as_dict(_as_dict(session).get("identity_vc")).get("principal_did") or "").strip()
     remove_payload: dict[str, Any] = {
         "entity_type": entity_type,
         "entity_id": entity_id,

@@ -1,0 +1,892 @@
+{
+  "lattice_registry": {
+    "version": "1.2",
+    "cube_id": "K0",
+    "lattice_type": "3x3x3_ternary",
+    "total_nodes": 27,
+    "centroid_coordinate": "111",
+    "reset_coordinate": "000",
+    "centroid": {
+      "kernel": "C",
+      "eq_nodes": [
+        "Eq8",
+        "Eq9"
+      ],
+      "law_prime": 137,
+      "grace_prime": 139,
+      "hebrew_letter": "Nun",
+      "day": 13,
+      "note": "Mediator / body centre; Law/Grace switch at coherence 0.98"
+    },
+    "reset_node": {
+      "coordinate": "000",
+      "kernel": "C_reset",
+      "eq_node": "Eq9",
+      "structural_prime": 1,
+      "hebrew_letter": "Centroid",
+      "day": 27,
+      "note": "Closure / recursion reset; K7→C→K0 bridge closure"
+    },
+    "corner_map": {
+      "000": {
+        "kernel": "K0",
+        "eq_node": "Eq0",
+        "structural_prime": 2,
+        "role": "S1_sink",
+        "hebrew_letter": "Aleph",
+        "day": 0,
+        "tetrahedron": "S1",
+        "esoteric": "Origin/Void",
+        "dual_complement": "K4",
+        "dual_gap": 9,
+        "i_ching_trigram": "☷ Kun"
+      },
+      "022": {
+        "kernel": "K1",
+        "eq_node": "Eq1",
+        "structural_prime": 3,
+        "role": "S1_branch",
+        "hebrew_letter": "Tet",
+        "day": 8,
+        "tetrahedron": "S1",
+        "esoteric": "Descent/Branch",
+        "dual_complement": "K5",
+        "dual_gap": 10,
+        "i_ching_trigram": "☱ Dui"
+      },
+      "202": {
+        "kernel": "K2",
+        "eq_node": "Eq2",
+        "structural_prime": 5,
+        "role": "S1_sink",
+        "hebrew_letter": "Shin",
+        "day": 20,
+        "tetrahedron": "S1",
+        "esoteric": "Change/Sink",
+        "dual_complement": "K6",
+        "dual_gap": 12,
+        "i_ching_trigram": "☲ Li"
+      },
+      "220": {
+        "kernel": "K3",
+        "eq_node": "Eq3",
+        "structural_prime": 7,
+        "role": "S1_terminal",
+        "hebrew_letter": "Nun Sofit",
+        "day": 24,
+        "tetrahedron": "S1",
+        "esoteric": "Terminal/Closure",
+        "dual_complement": "K7",
+        "dual_gap": 12,
+        "i_ching_trigram": "☴ Xun"
+      },
+      "002": {
+        "kernel": "K4",
+        "eq_node": "Eq4",
+        "structural_prime": 11,
+        "role": "S2_sink",
+        "hebrew_letter": "Gimel",
+        "day": 2,
+        "tetrahedron": "S2",
+        "esoteric": "Journey/Seed",
+        "dual_complement": "K0",
+        "dual_gap": 9,
+        "i_ching_trigram": "☳ Zhen"
+      },
+      "020": {
+        "kernel": "K5",
+        "eq_node": "Eq5",
+        "structural_prime": 13,
+        "role": "S2_branch",
+        "hebrew_letter": "Zayin",
+        "day": 6,
+        "tetrahedron": "S2",
+        "esoteric": "Water/Process",
+        "dual_complement": "K1",
+        "dual_gap": 10,
+        "i_ching_trigram": "☵ Kan"
+      },
+      "200": {
+        "kernel": "K6",
+        "eq_node": "Eq6",
+        "structural_prime": 17,
+        "role": "S2_sink",
+        "hebrew_letter": "Qof",
+        "day": 18,
+        "tetrahedron": "S2",
+        "esoteric": "Audit/Sink",
+        "dual_complement": "K2",
+        "dual_gap": 12,
+        "i_ching_trigram": "☶ Gen"
+      },
+      "222": {
+        "kernel": "K7",
+        "eq_node": "Eq7",
+        "structural_prime": 19,
+        "role": "S2_terminal",
+        "hebrew_letter": "Tsade Sofit",
+        "day": 26,
+        "tetrahedron": "S2",
+        "esoteric": "Justice/Terminal",
+        "dual_complement": "K3",
+        "dual_gap": 12,
+        "i_ching_trigram": "☰ Qian"
+      }
+    },
+    "bridge_edges": [
+      {
+        "from": "K0",
+        "to": "K4",
+        "ternary": "001",
+        "day": 1,
+        "letter": "Bet",
+        "axis": "B",
+        "dual_pair": "0_4"
+      },
+      {
+        "from": "K0",
+        "to": "K5",
+        "ternary": "010",
+        "day": 3,
+        "letter": "Dalet",
+        "axis": "M",
+        "dual_pair": "1_5"
+      },
+      {
+        "from": "K0",
+        "to": "K6",
+        "ternary": "100",
+        "day": 9,
+        "letter": "Yod",
+        "axis": "L",
+        "dual_pair": "2_6"
+      },
+      {
+        "from": "K4",
+        "to": "K1",
+        "ternary": "012",
+        "day": 5,
+        "letter": "Vav",
+        "axis": "M",
+        "dual_pair": "0_4"
+      },
+      {
+        "from": "K5",
+        "to": "K1",
+        "ternary": "021",
+        "day": 7,
+        "letter": "Chet",
+        "axis": "B",
+        "dual_pair": "1_5"
+      },
+      {
+        "from": "K4",
+        "to": "K2",
+        "ternary": "102",
+        "day": 11,
+        "letter": "Lamed",
+        "axis": "L",
+        "dual_pair": "2_6"
+      },
+      {
+        "from": "K5",
+        "to": "K3",
+        "ternary": "120",
+        "day": 15,
+        "letter": "Ayin",
+        "axis": "L",
+        "dual_pair": "3_7"
+      },
+      {
+        "from": "K1",
+        "to": "K7",
+        "ternary": "122",
+        "day": 17,
+        "letter": "Tsade",
+        "axis": "L",
+        "dual_pair": "3_7"
+      },
+      {
+        "from": "K6",
+        "to": "K2",
+        "ternary": "201",
+        "day": 19,
+        "letter": "Resh",
+        "axis": "B",
+        "dual_pair": "2_6"
+      },
+      {
+        "from": "K6",
+        "to": "K3",
+        "ternary": "210",
+        "day": 21,
+        "letter": "Tav",
+        "axis": "M",
+        "dual_pair": "3_7"
+      },
+      {
+        "from": "K2",
+        "to": "K7",
+        "ternary": "212",
+        "day": 23,
+        "letter": "Mem Sofit",
+        "axis": "M",
+        "dual_pair": "3_7"
+      },
+      {
+        "from": "K3",
+        "to": "K7",
+        "ternary": "221",
+        "day": 25,
+        "letter": "Pe Sofit",
+        "axis": "B",
+        "dual_pair": "3_7"
+      }
+    ],
+    "face_centers": [
+      {
+        "ternary": "011",
+        "day": 4,
+        "letter": "He",
+        "prime": 7,
+        "element": "Fire",
+        "cube_face": "L=0"
+      },
+      {
+        "ternary": "101",
+        "day": 10,
+        "letter": "Kaf",
+        "prime": 29,
+        "element": "Air",
+        "cube_face": "M=0"
+      },
+      {
+        "ternary": "110",
+        "day": 12,
+        "letter": "Mem",
+        "prime": 37,
+        "element": "Water",
+        "cube_face": "B=0"
+      },
+      {
+        "ternary": "112",
+        "day": 14,
+        "letter": "Samekh",
+        "prime": 43,
+        "element": "Earth",
+        "cube_face": "B=2"
+      },
+      {
+        "ternary": "121",
+        "day": 16,
+        "letter": "Pe",
+        "prime": 53,
+        "element": "Aether",
+        "cube_face": "M=2"
+      },
+      {
+        "ternary": "211",
+        "day": 22,
+        "letter": "Kaf Sofit",
+        "prime": 79,
+        "element": "Matter",
+        "cube_face": "L=2"
+      }
+    ],
+    "traversal_sequence": [
+      {
+        "day": 0,
+        "coordinate": "000",
+        "prime": 1,
+        "kernel": "K0",
+        "layer": 0,
+        "hebrew_letter": "Aleph",
+        "node_type": "corner"
+      },
+      {
+        "day": 1,
+        "coordinate": "001",
+        "prime": 2,
+        "kernel": null,
+        "layer": 0,
+        "hebrew_letter": "Bet",
+        "node_type": "edge"
+      },
+      {
+        "day": 2,
+        "coordinate": "002",
+        "prime": 3,
+        "kernel": "K4",
+        "layer": 0,
+        "hebrew_letter": "Gimel",
+        "node_type": "corner"
+      },
+      {
+        "day": 3,
+        "coordinate": "010",
+        "prime": 5,
+        "kernel": null,
+        "layer": 0,
+        "hebrew_letter": "Dalet",
+        "node_type": "edge"
+      },
+      {
+        "day": 4,
+        "coordinate": "011",
+        "prime": 7,
+        "kernel": null,
+        "layer": 0,
+        "hebrew_letter": "He",
+        "node_type": "face"
+      },
+      {
+        "day": 5,
+        "coordinate": "012",
+        "prime": 11,
+        "kernel": null,
+        "layer": 0,
+        "hebrew_letter": "Vav",
+        "node_type": "edge"
+      },
+      {
+        "day": 6,
+        "coordinate": "020",
+        "prime": 13,
+        "kernel": "K5",
+        "layer": 0,
+        "hebrew_letter": "Zayin",
+        "node_type": "corner"
+      },
+      {
+        "day": 7,
+        "coordinate": "021",
+        "prime": 17,
+        "kernel": null,
+        "layer": 0,
+        "hebrew_letter": "Chet",
+        "node_type": "edge"
+      },
+      {
+        "day": 8,
+        "coordinate": "022",
+        "prime": 19,
+        "kernel": "K1",
+        "layer": 0,
+        "hebrew_letter": "Tet",
+        "node_type": "corner"
+      },
+      {
+        "day": 9,
+        "coordinate": "100",
+        "prime": 23,
+        "kernel": null,
+        "layer": 1,
+        "hebrew_letter": "Yod",
+        "node_type": "edge"
+      },
+      {
+        "day": 10,
+        "coordinate": "101",
+        "prime": 29,
+        "kernel": null,
+        "layer": 1,
+        "hebrew_letter": "Kaf",
+        "node_type": "face"
+      },
+      {
+        "day": 11,
+        "coordinate": "102",
+        "prime": 31,
+        "kernel": null,
+        "layer": 1,
+        "hebrew_letter": "Lamed",
+        "node_type": "edge"
+      },
+      {
+        "day": 12,
+        "coordinate": "110",
+        "prime": 37,
+        "kernel": null,
+        "layer": 1,
+        "hebrew_letter": "Mem",
+        "node_type": "face"
+      },
+      {
+        "day": 13,
+        "coordinate": "111",
+        "prime": 41,
+        "kernel": "C",
+        "layer": 1,
+        "hebrew_letter": "Nun",
+        "node_type": "body"
+      },
+      {
+        "day": 14,
+        "coordinate": "112",
+        "prime": 43,
+        "kernel": null,
+        "layer": 1,
+        "hebrew_letter": "Samekh",
+        "node_type": "face"
+      },
+      {
+        "day": 15,
+        "coordinate": "120",
+        "prime": 47,
+        "kernel": null,
+        "layer": 1,
+        "hebrew_letter": "Ayin",
+        "node_type": "edge"
+      },
+      {
+        "day": 16,
+        "coordinate": "121",
+        "prime": 53,
+        "kernel": null,
+        "layer": 1,
+        "hebrew_letter": "Pe",
+        "node_type": "face"
+      },
+      {
+        "day": 17,
+        "coordinate": "122",
+        "prime": 59,
+        "kernel": null,
+        "layer": 1,
+        "hebrew_letter": "Tsade",
+        "node_type": "edge"
+      },
+      {
+        "day": 18,
+        "coordinate": "200",
+        "prime": 61,
+        "kernel": "K6",
+        "layer": 2,
+        "hebrew_letter": "Qof",
+        "node_type": "corner"
+      },
+      {
+        "day": 19,
+        "coordinate": "201",
+        "prime": 67,
+        "kernel": null,
+        "layer": 2,
+        "hebrew_letter": "Resh",
+        "node_type": "edge"
+      },
+      {
+        "day": 20,
+        "coordinate": "202",
+        "prime": 71,
+        "kernel": "K2",
+        "layer": 2,
+        "hebrew_letter": "Shin",
+        "node_type": "corner"
+      },
+      {
+        "day": 21,
+        "coordinate": "210",
+        "prime": 73,
+        "kernel": null,
+        "layer": 2,
+        "hebrew_letter": "Tav",
+        "node_type": "edge"
+      },
+      {
+        "day": 22,
+        "coordinate": "211",
+        "prime": 79,
+        "kernel": null,
+        "layer": 2,
+        "hebrew_letter": "Kaf Sofit",
+        "node_type": "face"
+      },
+      {
+        "day": 23,
+        "coordinate": "212",
+        "prime": 83,
+        "kernel": null,
+        "layer": 2,
+        "hebrew_letter": "Mem Sofit",
+        "node_type": "edge"
+      },
+      {
+        "day": 24,
+        "coordinate": "220",
+        "prime": 89,
+        "kernel": "K3",
+        "layer": 2,
+        "hebrew_letter": "Nun Sofit",
+        "node_type": "corner"
+      },
+      {
+        "day": 25,
+        "coordinate": "221",
+        "prime": 97,
+        "kernel": null,
+        "layer": 2,
+        "hebrew_letter": "Pe Sofit",
+        "node_type": "edge"
+      },
+      {
+        "day": 26,
+        "coordinate": "222",
+        "prime": 101,
+        "kernel": "K7",
+        "layer": 2,
+        "hebrew_letter": "Tsade Sofit",
+        "node_type": "corner"
+      },
+      {
+        "day": 27,
+        "coordinate": "000",
+        "prime": 1,
+        "kernel": "C_reset",
+        "layer": "reset",
+        "hebrew_letter": "Centroid",
+        "node_type": "reset"
+      }
+    ],
+    "flow_rules": [
+      "Even sinks route to the centroid through edge/face intermediates.",
+      "Centroid routes only to odd branches (K1, K3, K5, K7).",
+      "Non-terminal odd branches emit forward along the active layer.",
+      "Terminal branches fork (stay in tier or cross via a bridge edge).",
+      "Backflow is illegal except terminal wrap resets."
+    ],
+    "seven_cube_expansion": {
+      "description": "Seven-cube Metatron/Merkaba topology: one kernel cube (K0) plus six surrounding multimodal cubes (M1-M6). Each cube has identical directed flow law with distinct prime assignments.",
+      "kernel_cube": {
+        "cube_id": "K0",
+        "position": "center",
+        "modality": "identity / ledger / control",
+        "s1_primes": [
+          2,
+          3,
+          5,
+          7
+        ],
+        "s2_primes": [
+          11,
+          13,
+          17,
+          19
+        ],
+        "law_prime": 137,
+        "grace_prime": 139,
+        "s1_roles": [
+          "novelty/kernel_seed",
+          "uniqueness/kernel_selection",
+          "connection/kernel_binding",
+          "action/kernel_terminal"
+        ],
+        "s2_roles": [
+          "potential/kernel_integration_seed",
+          "autonomy/kernel_integration_branch",
+          "context/kernel_integration_binding",
+          "mastery/kernel_integration_terminal"
+        ]
+      },
+      "peripheral_cubes": [
+        {
+          "cube_id": "M1",
+          "position": "+X",
+          "modality": "language",
+          "s1_primes": [
+            149,
+            151,
+            157,
+            163
+          ],
+          "s2_primes": [
+            167,
+            173,
+            179,
+            181
+          ],
+          "law_prime": 191,
+          "grace_prime": 193,
+          "s1_roles": [
+            "language_seed",
+            "language_token_phrase_branch",
+            "language_semantic_binding",
+            "language_utterance_terminal"
+          ],
+          "s2_roles": [
+            "language_interpretation_seed",
+            "language_discourse_autonomy",
+            "language_context_integration",
+            "language_mastered_claim_terminal"
+          ]
+        },
+        {
+          "cube_id": "M2",
+          "position": "-X",
+          "modality": "vision",
+          "s1_primes": [
+            197,
+            199,
+            211,
+            223
+          ],
+          "s2_primes": [
+            227,
+            229,
+            233,
+            239
+          ],
+          "law_prime": 241,
+          "grace_prime": 251,
+          "s1_roles": [
+            "visual_seed",
+            "visual_feature_branch",
+            "visual_form_binding",
+            "visual_detection_terminal"
+          ],
+          "s2_roles": [
+            "visual_interpretation_seed",
+            "visual_object_autonomy",
+            "visual_scene_context",
+            "visual_mastered_claim_terminal"
+          ]
+        },
+        {
+          "cube_id": "M3",
+          "position": "+Y",
+          "modality": "audio",
+          "s1_primes": [
+            257,
+            263,
+            269,
+            271
+          ],
+          "s2_primes": [
+            277,
+            281,
+            283,
+            293
+          ],
+          "law_prime": 307,
+          "grace_prime": 311,
+          "s1_roles": [
+            "audio_seed",
+            "acoustic_feature_branch",
+            "acoustic_binding",
+            "audio_event_terminal"
+          ],
+          "s2_roles": [
+            "audio_interpretation_seed",
+            "speaker_source_autonomy",
+            "audio_context_integration",
+            "audio_mastered_claim_terminal"
+          ]
+        },
+        {
+          "cube_id": "M4",
+          "position": "-Y",
+          "modality": "motion",
+          "s1_primes": [
+            313,
+            317,
+            331,
+            337
+          ],
+          "s2_primes": [
+            347,
+            349,
+            353,
+            359
+          ],
+          "law_prime": 367,
+          "grace_prime": 373,
+          "s1_roles": [
+            "motion_seed",
+            "frame_gesture_branch",
+            "motion_binding",
+            "motion_action_terminal"
+          ],
+          "s2_roles": [
+            "motion_interpretation_seed",
+            "actor_autonomy_branch",
+            "temporal_context_integration",
+            "motion_mastered_claim_terminal"
+          ]
+        },
+        {
+          "cube_id": "M5",
+          "position": "+Z",
+          "modality": "sensor",
+          "s1_primes": [
+            379,
+            383,
+            389,
+            397
+          ],
+          "s2_primes": [
+            401,
+            409,
+            419,
+            421
+          ],
+          "law_prime": 431,
+          "grace_prime": 433,
+          "s1_roles": [
+            "sensor_seed",
+            "measurement_branch",
+            "signal_binding",
+            "sensor_event_terminal"
+          ],
+          "s2_roles": [
+            "sensor_interpretation_seed",
+            "source_device_autonomy",
+            "environmental_context",
+            "sensor_mastered_claim_terminal"
+          ]
+        },
+        {
+          "cube_id": "M6",
+          "position": "-Z",
+          "modality": "action",
+          "s1_primes": [
+            439,
+            443,
+            449,
+            457
+          ],
+          "s2_primes": [
+            461,
+            463,
+            467,
+            479
+          ],
+          "law_prime": 487,
+          "grace_prime": 491,
+          "s1_roles": [
+            "action_seed",
+            "tool_choice_branch",
+            "tool_binding",
+            "tool_invocation_terminal"
+          ],
+          "s2_roles": [
+            "action_result_seed",
+            "device_service_autonomy",
+            "result_context_integration",
+            "action_mastered_claim_terminal"
+          ]
+        }
+      ],
+      "inter_cube_rules": {
+        "kernel_gated_transitions": "Peripheral cube to peripheral cube must route: Mi terminal -> Mi centroid -> K0 intake -> K0 centroid -> Mj centroid -> Mj branch",
+        "allowed_exit_points": "Only terminal branches (node 3, node 7) may request inter-cube promotion",
+        "required_entry_points": "Receiving cube must enter at sink nodes (node 0 or node 4), not odd branches",
+        "bridge_metadata_required": [
+          "source_cube",
+          "source_prime",
+          "target_cube",
+          "target_prime",
+          "bridge_reason",
+          "law_mediator_prime",
+          "grace_mediator_prime",
+          "eq6_commit_allowed",
+          "eq6_lawfulness_level",
+          "eq7_unity",
+          "eq8_ethics",
+          "eq9_viability",
+          "ledger_coord"
+        ],
+        "retention_tiers": {
+          "sand": "high-velocity transient frames, audio windows, token streams, sensor samples",
+          "silt": "active working context, recent multimodal summaries, bounded recognition state",
+          "clay": "governed ledger commitments, consent/revocation records, durable identity bindings, verified claims"
+        },
+        "promotion_rule": "Peripheral cubes default to Sand. Promotion to Silt or Clay requires Law/Grace and Eq6-Eq9 gates. Kernel cube owns durable Library mutation authority."
+      },
+      "universal_flow_rules": {
+        "rule_1_even_sinks_to_centroid": "Nodes 0,2,4,6 must route to centroid C",
+        "rule_2_centroid_to_odd_branches": "C routes only to odd branches 1,3,5,7 (substrate-context-restricted in strict mode)",
+        "rule_3_non_terminal_forward": "Non-terminal odd branches emit forward: 1->2, 5->6",
+        "rule_4_terminal_fork": "Terminal branches fork: 3->{0,4}, 7->{4,0}",
+        "rule_5_no_backflow": "Backflow illegal except terminal wraps: 2->1 illegal, 6->5 illegal, 3->0 allowed, 7->4 allowed"
+      }
+    },
+    "checksum_336": {
+      "value": 336,
+      "formula": "eq6_awareness * eq7_unity * eq8_ethics",
+      "required_dimensions": [
+        {
+          "prime": 5,
+          "valuation": 6,
+          "kernel_node": "K2",
+          "hebrew_letter": "Shin",
+          "day": 20,
+          "dual_pair": [
+            "K2",
+            "K6"
+          ],
+          "semantic": "Awareness at full operationalization"
+        },
+        {
+          "prime": 7,
+          "valuation": 7,
+          "kernel_node": "K3",
+          "hebrew_letter": "Nun Sofit",
+          "day": 24,
+          "dual_pair": [
+            "K3",
+            "K7"
+          ],
+          "semantic": "Life at full operationalization; 4D container sealed"
+        },
+        {
+          "prime": 11,
+          "valuation": 8,
+          "kernel_node": "K4",
+          "hebrew_letter": "Gimel",
+          "day": 2,
+          "dual_pair": [
+            "K0",
+            "K4"
+          ],
+          "semantic": "Grace/Law at full operationalization; coupling stabilized"
+        }
+      ],
+      "dual_sync_tolerance": 1,
+      "centroid_active": [
+        137,
+        139
+      ],
+      "coherence_conditions": [
+        "All three operational dimensions (Awareness p=5, Life p=7, Grace/Law p=11) have accumulated sufficient hysteresis depth",
+        "All four dual pairs are synchronized (|delta_v| <= 1)",
+        "The centroid has active Law (137) and Grace (139) traces",
+        "The 27-letter traversal has completed at least one full circulation pass"
+      ],
+      "dual_pair_checks": [
+        {
+          "pair": "K0_K4",
+          "s1_node": "K0",
+          "s2_node": "K4",
+          "sync_check": "abs(v_K4 - v_K0) <= 1"
+        },
+        {
+          "pair": "K1_K5",
+          "s1_node": "K1",
+          "s2_node": "K5",
+          "sync_check": "abs(v_K5 - v_K1) <= 1"
+        },
+        {
+          "pair": "K2_K6",
+          "s1_node": "K2",
+          "s2_node": "K6",
+          "sync_check": "abs(v_K6 - v_K2) <= 1"
+        },
+        {
+          "pair": "K3_K7",
+          "s1_node": "K3",
+          "s2_node": "K7",
+          "sync_check": "abs(v_K7 - v_K3) <= 1"
+        }
+      ]
+    }
+  }
+}

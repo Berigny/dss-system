@@ -6,3 +6,6 @@ qrcode[pil]
 PyJWT
 cryptography
 pytest
+
+# Monorepo shared types (bundled for Vercel)
+-e ./vendor/shared-types

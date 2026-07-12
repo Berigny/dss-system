@@ -1,0 +1,60 @@
+name: Governance Integrity (Backend)
+
+on:
+  pull_request:
+    paths:
+      - "backend/tests/**"
+      - "backend/fieldx_kernel/substrate/ledger_store_v2.py"
+      - "backend/fieldx_kernel/ledger.py"
+      - "backend/api/http.py"
+      - "requirements.txt"
+      - ".github/workflows/governance-integrity.yml"
+  push:
+    branches: ["main", "master"]
+    paths:
+      - "backend/tests/**"
+      - "backend/fieldx_kernel/substrate/ledger_store_v2.py"
+      - "backend/fieldx_kernel/ledger.py"
+      - "backend/api/http.py"
+      - "requirements.txt"
+      - ".github/workflows/governance-integrity.yml"
+
+jobs:
+  backend-governance-suite:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Run governance integrity suites
+        env:
+          PYTHONPATH: .
+        run: |
+          mkdir -p artifacts
+          pytest -q \
+            backend/tests/test_ledger_chain_verification.py \
+            backend/tests/test_memory_ledger_overlay.py \
+            backend/tests/test_feedback_rollup.py \
+            backend/tests/test_http_web4_decode_feedback_meta.py \
+            backend/tests/test_chat_web4_decode_feedback_meta.py \
+            backend/tests/test_feedback_auto_rate_endpoint.py \
+            --junitxml=artifacts/backend-governance-junit.xml
+
+      - name: Upload governance artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-governance-artifacts
+          path: |
+            artifacts/backend-governance-junit.xml

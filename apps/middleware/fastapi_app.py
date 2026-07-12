@@ -242,6 +242,22 @@ async def health_check(request: Request) -> Response:
     return Response(content=resp.content, status_code=resp.status_code, media_type=_content_type(resp))
 
 
+@app.get("/metrics", tags=["meta"])
+async def metrics_check(request: Request) -> Response:
+    resp = await _send_to_legacy(request, "GET", "/metrics")
+    return Response(content=resp.content, status_code=resp.status_code, media_type=_content_type(resp))
+
+
+@app.get("/prometheus", tags=["meta"])
+async def prometheus_metrics(request: Request) -> Response:
+    resp = await _send_to_legacy(request, "GET", "/prometheus")
+    return Response(
+        content=resp.content,
+        status_code=resp.status_code,
+        media_type=resp.headers.get("content-type", "text/plain"),
+    )
+
+
 @app.get("/", tags=["meta"], include_in_schema=False)
 async def root() -> dict[str, str]:
     return {"service": "ds-middleware-fastapi", "docs": "/docs", "openapi": "/openapi.json"}
@@ -714,11 +730,20 @@ async def principals_enable(principal_did: str, request: Request) -> Response:
 async def verified_id_issuance_requests(request: Request) -> Response:
     resp = await _send_to_legacy(request, "POST", "/api/verified-id/issuance-requests")
     if resp.status_code >= 400:
-        return JSONResponse(
-            json.loads(resp.text) if resp.text else {"detail": resp.text},
-            status_code=resp.status_code,
-        )
+        body = _safe_json_body(resp)
+        return JSONResponse(body, status_code=resp.status_code)
     return Response(content=resp.content, status_code=resp.status_code, media_type=_content_type(resp))
+
+
+def _safe_json_body(resp: httpx.Response) -> dict[str, Any]:
+    text = resp.text or ""
+    try:
+        parsed = json.loads(text)
+        if isinstance(parsed, dict):
+            return parsed
+        return {"detail": parsed}
+    except Exception:
+        return {"detail": text[:2000] or "upstream error"}
 
 
 @app.post(
@@ -729,10 +754,8 @@ async def verified_id_issuance_requests(request: Request) -> Response:
 async def verified_id_presentation_requests(request: Request) -> Response:
     resp = await _send_to_legacy(request, "POST", "/api/verified-id/presentation-requests")
     if resp.status_code >= 400:
-        return JSONResponse(
-            json.loads(resp.text) if resp.text else {"detail": resp.text},
-            status_code=resp.status_code,
-        )
+        body = _safe_json_body(resp)
+        return JSONResponse(body, status_code=resp.status_code)
     return Response(content=resp.content, status_code=resp.status_code, media_type=_content_type(resp))
 
 

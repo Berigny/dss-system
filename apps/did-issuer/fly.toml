@@ -1,0 +1,31 @@
+app = 'dss-system-did-issuer'
+primary_region = 'syd'
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  WEB_PORT = '8080'
+  WALT_ID_BASE_URL = 'https://dss-system-did-issuer.fly.dev'
+  WALT_ID_ISSUER_DID = 'did:web:id.dualsubstrate.com'
+  BACKEND_URL = 'https://dss-system-backend.fly.dev'
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ['app']
+
+  [[http_service.checks]]
+    grace_period = '15s'
+    interval = '15s'
+    method = 'GET'
+    path = '/livez'
+    protocol = 'http'
+    timeout = '5s'
+
+[[vm]]
+  size = 'shared-cpu-1x'
+  memory = '512mb'

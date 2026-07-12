@@ -7,6 +7,45 @@ on:
     branches: [main, develop]
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      middleware: ${{ steps.filter.outputs.middleware }}
+      control-plane: ${{ steps.filter.outputs.control-plane }}
+      chat-surface: ${{ steps.filter.outputs.chat-surface }}
+      coord-demo: ${{ steps.filter.outputs.coord-demo }}
+      shared-types: ${{ steps.filter.outputs.shared-types }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'apps/backend/**'
+              - 'packages/shared-types/**'
+              - '.github/workflows/ci.yml'
+            middleware:
+              - 'apps/middleware/**'
+              - 'packages/shared-types/**'
+              - '.github/workflows/ci.yml'
+            control-plane:
+              - 'apps/control-plane/**'
+              - 'packages/shared-types/**'
+              - '.github/workflows/ci.yml'
+            chat-surface:
+              - 'apps/chat-surface/**'
+              - 'packages/shared-types/**'
+              - '.github/workflows/ci.yml'
+            coord-demo:
+              - 'apps/coord-demo/**'
+              - 'packages/shared-types/**'
+              - '.github/workflows/ci.yml'
+            shared-types:
+              - 'packages/shared-types/**'
+              - '.github/workflows/ci.yml'
+
   scaffold-check:
     runs-on: ubuntu-latest
     steps:
@@ -34,3 +73,140 @@ jobs:
 
       - name: Validate docker-compose syntax
         run: docker compose config
+
+  shared-types:
+    needs: changes
+    if: ${{ needs.changes.outputs.shared-types == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install shared-types
+        run: |
+          pip install -e ./packages/shared-types
+          pip install pytest
+      - name: Lint
+        run: |
+          pip install ruff
+          ruff check packages/shared-types/shared_types || true
+      - name: Test
+        run: |
+          cd packages/shared-types
+          pytest -q
+
+  backend:
+    needs: changes
+    if: ${{ needs.changes.outputs.backend == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          pip install -e ./packages/shared-types
+          pip install -r apps/backend/requirements.txt
+          pip install pytest
+      - name: Lint
+        run: |
+          pip install ruff
+          ruff check apps/backend/backend || true
+      - name: Test
+        run: |
+          cd apps/backend
+          pytest -q
+
+  middleware:
+    needs: changes
+    if: ${{ needs.changes.outputs.middleware == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          pip install -e ./packages/shared-types
+          pip install -r apps/middleware/requirements.txt
+          pip install pytest
+      - name: Lint
+        run: |
+          pip install ruff
+          ruff check apps/middleware || true
+      - name: Test
+        run: |
+          cd apps/middleware
+          pytest -q
+
+  control-plane:
+    needs: changes
+    if: ${{ needs.changes.outputs.control-plane == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          pip install -e ./packages/shared-types
+          pip install -r apps/control-plane/requirements.txt
+          pip install pytest
+      - name: Lint
+        run: |
+          pip install ruff
+          ruff check apps/control-plane || true
+      - name: Test
+        run: |
+          cd apps/control-plane
+          pytest -q
+
+  chat-surface:
+    needs: changes
+    if: ${{ needs.changes.outputs.chat-surface == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          pip install -e ./packages/shared-types
+          pip install -r apps/chat-surface/requirements.txt
+          pip install pytest
+      - name: Lint
+        run: |
+          pip install ruff
+          ruff check apps/chat-surface || true
+      - name: Test
+        run: |
+          cd apps/chat-surface
+          pytest -q
+
+  coord-demo:
+    needs: changes
+    if: ${{ needs.changes.outputs.coord-demo == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          pip install -e ./packages/shared-types
+          pip install -r apps/coord-demo/requirements.txt
+          pip install pytest
+      - name: Lint
+        run: |
+          pip install ruff
+          ruff check apps/coord-demo || true
+      - name: Test
+        run: |
+          cd apps/coord-demo
+          pytest -q

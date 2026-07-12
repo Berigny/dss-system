@@ -1,0 +1,80 @@
+{
+  "artefact_schema_version": "1.0.0",
+  "run_id": "dual_retrieval_benchmark-20260423T120000Z",
+  "suite_id": "dual_retrieval_benchmark",
+  "suite_version": "v1",
+  "executed_at": "2026-04-23T12:00:00Z",
+  "mode": "semantic_only",
+  "status": "partial",
+  "repos": [
+    {
+      "name": "ds-backend-local",
+      "commit_sha": "local-dev",
+      "role": "canonical_benchmark_engine",
+      "required_for_run": true
+    }
+  ],
+  "datasets": [
+    {
+      "name": "benchmark_dataset",
+      "version": "local-v1",
+      "split": "benchmark",
+      "record_count": 3
+    }
+  ],
+  "metrics": {
+    "retrieval": {
+      "status": "present",
+      "metrics": {
+        "recall_at_10": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Fraction of benchmark queries with a relevant memory in the top 10 results."
+        },
+        "mrr": {
+          "value": 0.8333,
+          "unit": "ratio",
+          "description": "Mean reciprocal rank across benchmark queries."
+        },
+        "queries": {
+          "value": 6,
+          "unit": "count",
+          "description": "Number of evaluated benchmark queries."
+        }
+      }
+    },
+    "traceability": {
+      "status": "absent",
+      "absence_reason": "dual_retrieval_runner_does_not_measure_traceability_yet"
+    },
+    "governance": {
+      "status": "absent",
+      "absence_reason": "dual_retrieval_runner_does_not_measure_governance_yet"
+    },
+    "latency": {
+      "status": "present",
+      "metrics": {
+        "avg_latency_ms": {
+          "value": 14.2,
+          "unit": "ms",
+          "description": "Average end-to-end benchmark query latency."
+        }
+      }
+    },
+    "cost": {
+      "status": "absent",
+      "absence_reason": "dual_retrieval_runner_does_not_measure_cost_yet"
+    }
+  },
+  "freshness": {
+    "status": "fresh",
+    "checked_at": "2026-04-23T12:00:00Z",
+    "max_age_hours": 24,
+    "age_hours": 0
+  },
+  "run_config": {
+    "mode_label": "Deterministic lexical retrieval baseline.",
+    "top_k": 10,
+    "dataset_name": "benchmark_dataset.jsonl"
+  }
+}

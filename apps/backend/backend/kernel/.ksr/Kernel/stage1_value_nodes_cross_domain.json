@@ -1,0 +1,1604 @@
+{
+  "value_node_registry": {
+    "version": "1.0",
+    "nodes": {
+      "novelty": {
+        "label": "novelty",
+        "dimension": "interest",
+        "prime_affinity": 2,
+        "diagnostic_role": "exploration_signal",
+        "kernel_node": "K0"
+      },
+      "uniqueness": {
+        "label": "uniqueness",
+        "dimension": "interest",
+        "prime_affinity": 3,
+        "diagnostic_role": "differentiation_signal",
+        "kernel_node": "K1"
+      },
+      "connection": {
+        "label": "connection",
+        "dimension": "relatedness",
+        "prime_affinity": 5,
+        "diagnostic_role": "belonging_signal",
+        "kernel_node": "K2"
+      },
+      "action": {
+        "label": "action",
+        "dimension": "context",
+        "prime_affinity": 7,
+        "diagnostic_role": "expression_signal",
+        "kernel_node": "K3"
+      },
+      "potential": {
+        "label": "potential",
+        "dimension": "context",
+        "prime_affinity": 11,
+        "diagnostic_role": "growth_signal",
+        "kernel_node": "K4"
+      },
+      "autonomy": {
+        "label": "autonomy",
+        "dimension": "context",
+        "prime_affinity": 13,
+        "diagnostic_role": "agency_signal",
+        "kernel_node": "K5"
+      },
+      "relatedness": {
+        "label": "relatedness",
+        "dimension": "context",
+        "prime_affinity": 17,
+        "diagnostic_role": "relationship_signal",
+        "kernel_node": "K6"
+      },
+      "mastery": {
+        "label": "mastery",
+        "dimension": "context",
+        "prime_affinity": 19,
+        "diagnostic_role": "competence_signal",
+        "kernel_node": "K7"
+      },
+      "centroid": {
+        "label": "centroid",
+        "dimension": "integration",
+        "prime_affinity": 137,
+        "diagnostic_role": "balance_anchor",
+        "kernel_node": "C"
+      }
+    },
+    "balance_rules": {
+      "min_activation": 0.01,
+      "max_dominance_ratio": 0.6,
+      "min_entropy": 0.5,
+      "decay_window": 10
+    }
+  },
+  "cross_domain_mappings": {
+    "version": "1.0",
+    "traversal_nodes": {
+      "day_0": {
+        "hebrew": {
+          "letter": "Aleph",
+          "char": "א",
+          "transliteration": "Aleph"
+        },
+        "kernel": {
+          "node": "K0",
+          "eq_node": "Eq0",
+          "prime": 2,
+          "coordinate": "000",
+          "tetrahedron": "S1"
+        },
+        "i_ching": {
+          "trigram": "☷",
+          "name": "Kun",
+          "pinyin": "Kun",
+          "english": "Earth/Receptive",
+          "element": "Earth"
+        },
+        "psychology": {
+          "domain": "Potential (S1)",
+          "jungian_function": "Intuition (N)",
+          "cognitive_domain": "Pre-conscious, latent, possibility"
+        },
+        "hindu": {
+          "chakra": "Muladhara",
+          "chakra_english": "Root",
+          "tattva": "Prithvi",
+          "guna": "Tamas",
+          "trimurti_aspect": "Brahma"
+        },
+        "taoist": {
+          "trigram_name": "Di",
+          "chinese": "地",
+          "english": "Earth",
+          "concept": "Wu (non-being)",
+          "wu_xing": "Earth"
+        },
+        "aboriginal": {
+          "concept": "Dream tail — the void",
+          "songline": "Creation",
+          "rainbow_serpent_aspect": "Tail"
+        },
+        "entrainment": {
+          "mode": "Latent",
+          "csi_role": "Soi (Intent Emitter)",
+          "fresh_facet": "Focus"
+        },
+        "cognitive_typology": {
+          "jts_function": "Intuitive resonance",
+          "dominant_type": "Ni"
+        },
+        "science": "Vacuum state, quantum foam, zero-point energy, empty set",
+        "art": "Malevich's Black Square, John Cage's 4'33\", minimalism",
+        "philosophy": "Taoist Wu, Buddhist Sunyata, Heidegger's Nothing"
+      },
+      "day_1": {
+        "hebrew": {
+          "letter": "Bet",
+          "char": "ב",
+          "transliteration": "Bet"
+        },
+        "kernel": {
+          "node": null,
+          "eq_node": null,
+          "prime": 2,
+          "coordinate": "001",
+          "tetrahedron": "bridge"
+        },
+        "i_ching": {
+          "trigram": null,
+          "transition": "Kun→Zhen"
+        },
+        "psychology": {
+          "domain": "Local bridge",
+          "jungian_function": "Thinking (T)",
+          "cognitive_domain": "Birth trauma, first boundary"
+        },
+        "hindu": {
+          "chakra": null,
+          "tattva": null,
+          "guna": null,
+          "trimurti_aspect": null
+        },
+        "taoist": {
+          "trigram_name": null,
+          "chinese": null,
+          "english": null,
+          "concept": "First distinction",
+          "wu_xing": null
+        },
+        "aboriginal": {
+          "concept": "First songline step",
+          "songline": "Creation",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Reactive",
+          "csi_role": "Moi~Ego (Witness)",
+          "fresh_facet": "Embodiment"
+        },
+        "cognitive_typology": {
+          "jts_function": "Perception anchor",
+          "dominant_type": null
+        },
+        "science": "Quantum tunneling, wave function collapse, phase transition, first bifurcation",
+        "art": "Rothko's color fields, Lucio Fontana's slashed canvas, emergence",
+        "philosophy": "Aristotle's archê, Leibniz's 'why is there something rather than nothing?', the Cut (Lacan)"
+      },
+      "day_2": {
+        "hebrew": {
+          "letter": "Gimel",
+          "char": "ג",
+          "transliteration": "Gimel"
+        },
+        "kernel": {
+          "node": "K4",
+          "eq_node": "Eq4",
+          "prime": 3,
+          "coordinate": "002",
+          "tetrahedron": "S2"
+        },
+        "i_ching": {
+          "trigram": "☳",
+          "name": "Zhen",
+          "pinyin": "Zhen",
+          "english": "Thunder/Arousing",
+          "element": "Thunder"
+        },
+        "psychology": {
+          "domain": "Potential (S2)",
+          "jungian_function": "Intuition (N) — extraverted",
+          "cognitive_domain": "Shock, trauma response, epiphany"
+        },
+        "hindu": {
+          "chakra": "Manipura",
+          "chakra_english": "Solar Plexus",
+          "tattva": "Tejas",
+          "guna": "Rajas",
+          "trimurti_aspect": "Brahma"
+        },
+        "taoist": {
+          "trigram_name": "Lei",
+          "chinese": "雷",
+          "english": "Thunder",
+          "concept": "Qi arousal",
+          "wu_xing": "Wood"
+        },
+        "aboriginal": {
+          "concept": "Lightning flash",
+          "songline": "Creation",
+          "rainbow_serpent_aspect": "First surge"
+        },
+        "entrainment": {
+          "mode": "Latent",
+          "csi_role": "Soi (Creative)",
+          "fresh_facet": "Focus"
+        },
+        "cognitive_typology": {
+          "jts_function": "Ne possibility scanning",
+          "dominant_type": "Ne"
+        },
+        "science": "Exothermic reaction, lightning discharge, neural spike, Big Bang nucleosynthesis, symmetry breaking",
+        "art": "Futurism (Boccioni), action painting (Pollock), performance art (Abramović), the happening",
+        "philosophy": "Heraclitus' flux, Nietzsche's Dionysian, revolutionary moment (Marx), the Event (Badiou), kairos"
+      },
+      "day_3": {
+        "hebrew": {
+          "letter": "Dalet",
+          "char": "ד",
+          "transliteration": "Dalet"
+        },
+        "kernel": {
+          "node": null,
+          "eq_node": null,
+          "prime": 5,
+          "coordinate": "010",
+          "tetrahedron": "bridge"
+        },
+        "i_ching": {
+          "trigram": null,
+          "transition": "Kun→Kan"
+        },
+        "psychology": {
+          "domain": "Local bridge",
+          "jungian_function": "Thinking (T)",
+          "cognitive_domain": "Defense mechanisms, approach-avoidance conflict, threshold anxiety"
+        },
+        "hindu": {
+          "chakra": null,
+          "tattva": null,
+          "guna": null,
+          "trimurti_aspect": null
+        },
+        "taoist": {
+          "trigram_name": null,
+          "chinese": "門",
+          "english": "Gate",
+          "concept": "The gateless gate",
+          "wu_xing": null
+        },
+        "aboriginal": {
+          "concept": "Passage into form",
+          "songline": "Creation",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Reactive",
+          "csi_role": "Moi~Ego (Boundary)",
+          "fresh_facet": "Embodiment"
+        },
+        "cognitive_typology": {
+          "jts_function": "Sensation gateway",
+          "dominant_type": null
+        },
+        "science": "Diffusion gradient, osmotic pressure, information flow, selective membrane",
+        "art": "Duchamp's door, installation art thresholds, liminal spaces",
+        "philosophy": "Kierkegaard's angst at the threshold, Sartre's freedom as burden, liminality (Turner)"
+      },
+      "day_4": {
+        "hebrew": {
+          "letter": "He",
+          "char": "ה",
+          "transliteration": "He"
+        },
+        "kernel": {
+          "node": null,
+          "eq_node": null,
+          "prime": 7,
+          "coordinate": "011",
+          "tetrahedron": "face"
+        },
+        "i_ching": {
+          "trigram": null,
+          "transition": "Composite: Kun+Dui+Kan+Li"
+        },
+        "psychology": {
+          "domain": "Thinking (S1)",
+          "jungian_function": "Thinking (T)",
+          "cognitive_domain": "Passion, eros, emotional intensity, the hearth as psychic center"
+        },
+        "hindu": {
+          "chakra": null,
+          "tattva": "Tejas",
+          "guna": "Rajas",
+          "trimurti_aspect": null
+        },
+        "taoist": {
+          "trigram_name": null,
+          "chinese": "火",
+          "english": "Fire",
+          "concept": "Elemental fire",
+          "wu_xing": "Fire"
+        },
+        "aboriginal": {
+          "concept": "Fire in the earth",
+          "songline": "Creation",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Reactive",
+          "csi_role": "Moi~Ego (Evaluate)",
+          "fresh_facet": "Salience"
+        },
+        "cognitive_typology": {
+          "jts_function": "Thinking judgment",
+          "dominant_type": null
+        },
+        "science": "Fire element, combustion, oxidation, energy release, plasma state",
+        "art": "Color field painting (warm palettes), Fauvism, fire in Turner, Yves Klein's fire paintings",
+        "philosophy": "Heraclitus' fire as arche, eros as cosmic force (Plato), Hegelian passion in history, desire (Spinoza)"
+      },
+      "day_5": {
+        "hebrew": {
+          "letter": "Vav",
+          "char": "ו",
+          "transliteration": "Vav"
+        },
+        "kernel": {
+          "node": null,
+          "eq_node": null,
+          "prime": 11,
+          "coordinate": "012",
+          "tetrahedron": "bridge"
+        },
+        "i_ching": {
+          "trigram": null,
+          "transition": "Zhen→Dui"
+        },
+        "psychology": {
+          "domain": "Thinking bridge",
+          "jungian_function": "Thinking (T)",
+          "cognitive_domain": "Attachment, object relations, relational binding"
+        },
+        "hindu": {
+          "chakra": null,
+          "tattva": null,
+          "guna": null,
+          "trimurti_aspect": null
+        },
+        "taoist": {
+          "trigram_name": null,
+          "chinese": "鉤",
+          "english": "Hook",
+          "concept": "Connection established",
+          "wu_xing": null
+        },
+        "aboriginal": {
+          "concept": "Connection",
+          "songline": "Creation",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Reactive",
+          "csi_role": "Moi~Ego (Structure)",
+          "fresh_facet": "Salience"
+        },
+        "cognitive_typology": {
+          "jts_function": "Te organization",
+          "dominant_type": null
+        },
+        "science": "Covalent bond, orbital overlap, molecular binding, structural coupling",
+        "art": "String art, Calder's wire sculptures, the line as connector",
+        "philosophy": "Buber I-Thou relation, Aristophanes' split souls (Plato), relational ontology, Levinas' face-to-face"
+      },
+      "day_6": {
+        "hebrew": {
+          "letter": "Zayin",
+          "char": "ז",
+          "transliteration": "Zayin"
+        },
+        "kernel": {
+          "node": "K5",
+          "eq_node": "Eq5",
+          "prime": 13,
+          "coordinate": "020",
+          "tetrahedron": "S2"
+        },
+        "i_ching": {
+          "trigram": "☵",
+          "name": "Kan",
+          "pinyin": "Kan",
+          "english": "Water/Dangerous",
+          "element": "Water"
+        },
+        "psychology": {
+          "domain": "Thinking (S2)",
+          "jungian_function": "Thinking (T) — introverted",
+          "cognitive_domain": "The unconscious depths, fluid intelligence, adaptive flow"
+        },
+        "hindu": {
+          "chakra": "Svadhisthana",
+          "chakra_english": "Sacral",
+          "tattva": "Apas",
+          "guna": "Rajas",
+          "trimurti_aspect": "Shiva"
+        },
+        "taoist": {
+          "trigram_name": "Shui",
+          "chinese": "水",
+          "english": "Water",
+          "concept": "The Tao as water",
+          "wu_xing": "Water"
+        },
+        "aboriginal": {
+          "concept": "Waterhole approach",
+          "songline": "Law",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Associative",
+          "csi_role": "Moi~Ego (Logic)",
+          "fresh_facet": "Salience"
+        },
+        "cognitive_typology": {
+          "jts_function": "Ti internal logic",
+          "dominant_type": "Ti"
+        },
+        "science": "Fluid dynamics, turbulence, deep ocean currents, hydrogen bonding, the solvent of life",
+        "art": "Water Lilies (Monet), Hokusai's Great Wave, immersive installations (teamLab)",
+        "philosophy": "Tao Te Ching on water, Heraclitus' river, Thales' water as arche, fluidity of self (Deleuze)"
+      },
+      "day_7": {
+        "hebrew": {
+          "letter": "Chet",
+          "char": "ח",
+          "transliteration": "Chet"
+        },
+        "kernel": {
+          "node": null,
+          "eq_node": null,
+          "prime": 17,
+          "coordinate": "021",
+          "tetrahedron": "bridge"
+        },
+        "i_ching": {
+          "trigram": null,
+          "transition": "Kan→Dui"
+        },
+        "psychology": {
+          "domain": "Feeling bridge",
+          "jungian_function": "Feeling (F)",
+          "cognitive_domain": "Ego boundary, defensive perimeter, territoriality"
+        },
+        "hindu": {
+          "chakra": null,
+          "tattva": null,
+          "guna": null,
+          "trimurti_aspect": null
+        },
+        "taoist": {
+          "trigram_name": null,
+          "chinese": "簼",
+          "english": "Fence",
+          "concept": "Boundary enacted",
+          "wu_xing": null
+        },
+        "aboriginal": {
+          "concept": "Boundary",
+          "songline": "Law",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Associative",
+          "csi_role": "Soi~Moi (Harmonize)",
+          "fresh_facet": "Relation"
+        },
+        "cognitive_typology": {
+          "jts_function": "Fe relational",
+          "dominant_type": null
+        },
+        "science": "Boundary layer, cell membrane, semi-permeable boundary, domain walls",
+        "art": "Christo's wrapped fences, land art boundaries, Richard Serra's torqued walls",
+        "philosophy": "Freud's repression barrier, Kant's limits of reason, the bounded self (Locke), walls and exclusion (Foucault)"
+      },
+      "day_8": {
+        "hebrew": {
+          "letter": "Tet",
+          "char": "ט",
+          "transliteration": "Tet"
+        },
+        "kernel": {
+          "node": "K1",
+          "eq_node": "Eq1",
+          "prime": 19,
+          "coordinate": "022",
+          "tetrahedron": "S1"
+        },
+        "i_ching": {
+          "trigram": "☱",
+          "name": "Dui",
+          "pinyin": "Dui",
+          "english": "Lake/Joyful",
+          "element": "Lake"
+        },
+        "psychology": {
+          "domain": "Relational (S1)",
+          "jungian_function": "Feeling (F) — extraverted",
+          "cognitive_domain": "Joy/play, social pleasure, aesthetic enjoyment, the lake as mirror of self"
+        },
+        "hindu": {
+          "chakra": "Svadhisthana",
+          "chakra_english": "Sacral",
+          "tattva": "Apas",
+          "guna": "Rajas",
+          "trimurti_aspect": "Brahma"
+        },
+        "taoist": {
+          "trigram_name": "Ze",
+          "chinese": "泽",
+          "english": "Lake",
+          "concept": "Reflection, joyful opening",
+          "wu_xing": null
+        },
+        "aboriginal": {
+          "concept": "First waterhole",
+          "songline": "Creation",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Associative",
+          "csi_role": "Soi (Emotional)",
+          "fresh_facet": "Relation"
+        },
+        "cognitive_typology": {
+          "jts_function": "Fi values",
+          "dominant_type": "Fi"
+        },
+        "science": "Surface tension, reflection physics, standing waves, echo/feedback systems",
+        "art": "Narcissus myth in art, Velázquez's Las Meninas, water reflections in Impressionism, Yayoi Kusama's infinity rooms",
+        "philosophy": "Epicurean pleasure, Nietzsche's amor fati, play as fundamental (Huizinga), Lacan's mirror stage"
+      },
+      "day_9": {
+        "hebrew": {
+          "letter": "Yod",
+          "char": "י",
+          "transliteration": "Yod"
+        },
+        "kernel": {
+          "node": null,
+          "eq_node": null,
+          "prime": 23,
+          "coordinate": "100",
+          "tetrahedron": "bridge"
+        },
+        "i_ching": {
+          "trigram": null,
+          "transition": "Kun→Gen"
+        },
+        "psychology": {
+          "domain": "Feeling bridge",
+          "jungian_function": "Feeling (F)",
+          "cognitive_domain": "Agency, sense of agency, executive function, grasping (upadana)"
+        },
+        "hindu": {
+          "chakra": null,
+          "tattva": null,
+          "guna": null,
+          "trimurti_aspect": null
+        },
+        "taoist": {
+          "trigram_name": null,
+          "chinese": "手",
+          "english": "Hand",
+          "concept": "The first gesture of creation",
+          "wu_xing": null
+        },
+        "aboriginal": {
+          "concept": "The reach",
+          "songline": "Law",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Associative",
+          "csi_role": "Soi (Initiate)",
+          "fresh_facet": "Focus"
+        },
+        "cognitive_typology": {
+          "jts_function": "Intuitive gesture",
+          "dominant_type": null
+        },
+        "science": "Force vector, directional impulse, action at a distance, applied force",
+        "art": "Micangelo's Creation (the hand), Rodin's hands, Da Vinci hand studies, magicians' hands",
+        "philosophy": "Free will as directed force, Aristotle's efficient cause, Marx's laboring hand, Arendt's fabrication"
+      },
+      "day_10": {
+        "hebrew": {
+          "letter": "Kaf",
+          "char": "כ",
+          "transliteration": "Kaf"
+        },
+        "kernel": {
+          "node": null,
+          "eq_node": null,
+          "prime": 29,
+          "coordinate": "101",
+          "tetrahedron": "face"
+        },
+        "i_ching": {
+          "trigram": null,
+          "transition": "Composite: Kun+Zhen+Gen+Qian"
+        },
+        "psychology": {
+          "domain": "Relational (S1)",
+          "jungian_function": "Feeling (F)",
+          "cognitive_domain": "Intellect as airy, mental space, the breath in meditation, intellectualization defense"
+        },
+        "hindu": {
+          "chakra": null,
+          "tattva": "Vayu",
+          "guna": "Sattva",
+          "trimurti_aspect": null
+        },
+        "taoist": {
+          "trigram_name": null,
+          "chinese": "风",
+          "english": "Wind",
+          "concept": "Breath of change",
+          "wu_xing": "Wood"
+        },
+        "aboriginal": {
+          "concept": "Breath of change",
+          "songline": "Law",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Analytical",
+          "csi_role": "Moi~Ego (Balance)",
+          "fresh_facet": "Salience"
+        },
+        "cognitive_typology": {
+          "jts_function": "Feeling evaluation",
+          "dominant_type": null
+        },
+        "science": "Air element, gas laws, atmospheric pressure, aerodynamics, Bernoulli principle",
+        "art": "Wind in art (Turner's storms), sky in Constable, inflatable art, kinetic wind sculptures",
+        "philosophy": "Anaximenes' air as arche, pneuma in Stoicism, Hegel's Geist, breath as life (Genesis)"
+      },
+      "day_11": {
+        "hebrew": {
+          "letter": "Lamed",
+          "char": "ל",
+          "transliteration": "Lamed"
+        },
+        "kernel": {
+          "node": null,
+          "eq_node": null,
+          "prime": 31,
+          "coordinate": "102",
+          "tetrahedron": "bridge"
+        },
+        "i_ching": {
+          "trigram": null,
+          "transition": "Zhen→Li"
+        },
+        "psychology": {
+          "domain": "Feeling bridge",
+          "jungian_function": "Feeling (F)",
+          "cognitive_domain": "Superego, conscience, guilt as correction, the inner critic"
+        },
+        "hindu": {
+          "chakra": null,
+          "tattva": null,
+          "guna": null,
+          "trimurti_aspect": null
+        },
+        "taoist": {
+          "trigram_name": null,
+          "chinese": "轸",
+          "english": "Ox-goad",
+          "concept": "Teaching, directed learning",
+          "wu_xing": null
+        },
+        "aboriginal": {
+          "concept": "Teaching",
+          "songline": "Law",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Analytical",
+          "csi_role": "Moi~Ego (Guide)",
+          "fresh_facet": "Salience"
+        },
+        "cognitive_typology": {
+          "jts_function": "Judgment direction",
+          "dominant_type": null
+        },
+        "science": "Feedback loop, correction mechanism, steering dynamics, negative feedback",
+        "art": "Instructional art (Fluxus), didactic art, art as teacher (Beuys), corrective interventions",
+        "philosophy": "Socratic midwifery, Plato's philosopher-king, Rousseau's Emile, Dewey's progressive education"
+      },
+      "day_12": {
+        "hebrew": {
+          "letter": "Mem",
+          "char": "מ",
+          "transliteration": "Mem"
+        },
+        "kernel": {
+          "node": null,
+          "eq_node": null,
+          "prime": 37,
+          "coordinate": "110",
+          "tetrahedron": "face"
+        },
+        "i_ching": {
+          "trigram": null,
+          "transition": "Composite: Kun+Dui+Xun+Qian"
+        },
+        "psychology": {
+          "domain": "Experiential (S1)",
+          "jungian_function": "Sensation (S)",
+          "cognitive_domain": "Mother archetype, oceanic feeling, pre-Oedipal state, nurturance"
+        },
+        "hindu": {
+          "chakra": null,
+          "tattva": "Apas",
+          "guna": "Sattva",
+          "trimurti_aspect": null
+        },
+        "taoist": {
+          "trigram_name": null,
+          "chinese": "海",
+          "english": "Sea",
+          "concept": "The amniotic deep",
+          "wu_xing": "Water"
+        },
+        "aboriginal": {
+          "concept": "Amniotic deep",
+          "songline": "Law",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Analytical",
+          "csi_role": "Soi (Memory)",
+          "fresh_facet": "Holding"
+        },
+        "cognitive_typology": {
+          "jts_function": "Sensation memory",
+          "dominant_type": null
+        },
+        "science": "Water as life medium, amniotic fluid, primordial soup, hydrophilic/hydrophobic interaction",
+        "art": "Birth of Venus (Botticelli), maternal madonnas, sea in Friedrich, underwater photography",
+        "philosophy": "Thales' water as origin, maternal metaphysics (Irigaray), birthing as philosophical event"
+      },
+      "day_13": {
+        "hebrew": {
+          "letter": "Nun",
+          "char": "נ",
+          "transliteration": "Nun"
+        },
+        "kernel": {
+          "node": "C",
+          "eq_node": "Eq8/Eq9",
+          "prime": 41,
+          "coordinate": "111",
+          "tetrahedron": "C"
+        },
+        "i_ching": {
+          "trigram": "☯",
+          "name": "Taiji",
+          "pinyin": "Taiji",
+          "english": "Supreme Ultimate",
+          "element": null
+        },
+        "psychology": {
+          "domain": "Ego-Self axis",
+          "jungian_function": "Transcendent function",
+          "cognitive_domain": "Individuation midpoint"
+        },
+        "hindu": {
+          "chakra": "Anahata",
+          "chakra_english": "Heart",
+          "tattva": "Akasha",
+          "guna": "Sattva",
+          "trimurti_aspect": "Vishnu"
+        },
+        "taoist": {
+          "trigram_name": "Taiji",
+          "chinese": "太極",
+          "english": "Supreme Ultimate",
+          "concept": "The switch point",
+          "wu_xing": null
+        },
+        "aboriginal": {
+          "concept": "Sacred waterhole",
+          "songline": "All",
+          "rainbow_serpent_aspect": "Meeting place"
+        },
+        "entrainment": {
+          "mode": "All modes",
+          "csi_role": "Recursion Kernel (Blueprint)",
+          "fresh_facet": "Holding"
+        },
+        "cognitive_typology": {
+          "jts_function": "Transcendent function",
+          "dominant_type": null
+        },
+        "science": "Phase transition critical point, superposition, quantum entanglement",
+        "art": "Mona Lisa's smile, Rothko chapel, mandalas",
+        "philosophy": "Aristotle's golden mean, Hegel's dialectical synthesis"
+      },
+      "day_14": {
+        "hebrew": {
+          "letter": "Samekh",
+          "char": "ס",
+          "transliteration": "Samekh"
+        },
+        "kernel": {
+          "node": null,
+          "eq_node": null,
+          "prime": 43,
+          "coordinate": "112",
+          "tetrahedron": "face"
+        },
+        "i_ching": {
+          "trigram": null,
+          "transition": "Composite: Zhen+Kan+Gen+Qian"
+        },
+        "psychology": {
+          "domain": "Experiential (S2)",
+          "jungian_function": "Sensation (S)",
+          "cognitive_domain": "Support system, dependency vs interdependency, holding environment (Winnicott)"
+        },
+        "hindu": {
+          "chakra": null,
+          "tattva": "Prithvi",
+          "guna": "Sattva",
+          "trimurti_aspect": null
+        },
+        "taoist": {
+          "trigram_name": null,
+          "chinese": "柱",
+          "english": "Prop",
+          "concept": "The prop holds the structure",
+          "wu_xing": "Earth"
+        },
+        "aboriginal": {
+          "concept": "Support",
+          "songline": "Law",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Analytical",
+          "csi_role": "Moi~Ego (Process)",
+          "fresh_facet": "Salience"
+        },
+        "cognitive_typology": {
+          "jts_function": "Abstractive stabilization",
+          "dominant_type": null
+        },
+        "science": "Support structure, truss, arch, load distribution, scaffolding, bridge engineering",
+        "art": "Scaffolding as art (Christo), support structures in sculpture, the crutch in Giacometti",
+        "philosophy": "Relational support (ethics of care), Rawls' social support structures, Heidegger's Geworfenheit, scaffolding (Vygotsky)"
+      },
+      "day_15": {
+        "hebrew": {
+          "letter": "Ayin",
+          "char": "ע",
+          "transliteration": "Ayin"
+        },
+        "kernel": {
+          "node": null,
+          "eq_node": null,
+          "prime": 47,
+          "coordinate": "120",
+          "tetrahedron": "bridge"
+        },
+        "i_ching": {
+          "trigram": null,
+          "transition": "Kan→Xun"
+        },
+        "psychology": {
+          "domain": "Experiential bridge",
+          "jungian_function": "Sensation (S) — extraverted",
+          "cognitive_domain": "The gaze, visual perception, witness consciousness, surveillance anxiety"
+        },
+        "hindu": {
+          "chakra": null,
+          "tattva": null,
+          "guna": null,
+          "trimurti_aspect": null
+        },
+        "taoist": {
+          "trigram_name": null,
+          "chinese": "眼",
+          "english": "Eye",
+          "concept": "Perception clarifies",
+          "wu_xing": null
+        },
+        "aboriginal": {
+          "concept": "The seeing",
+          "songline": "Law",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Analytical",
+          "csi_role": "Moi~Ego (Perceive)",
+          "fresh_facet": "Salience"
+        },
+        "cognitive_typology": {
+          "jts_function": "Sensation perception",
+          "dominant_type": null
+        },
+        "science": "Photoreception, visual processing, observer effect in quantum mechanics, sight as data gathering",
+        "art": "The eye in surrealism (Magritte), perspective as discovery (Renaissance), surveillance art",
+        "philosophy": "Sartre's look (the gaze of the Other), Foucault's panopticon, Merleau-Ponty's eye and mind"
+      },
+      "day_16": {
+        "hebrew": {
+          "letter": "Pe",
+          "char": "פ",
+          "transliteration": "Pe"
+        },
+        "kernel": {
+          "node": null,
+          "eq_node": null,
+          "prime": 53,
+          "coordinate": "121",
+          "tetrahedron": "face"
+        },
+        "i_ching": {
+          "trigram": null,
+          "transition": "Composite: Dui+Li+Xun+Kun"
+        },
+        "psychology": {
+          "domain": "Experiential (S2)",
+          "jungian_function": "Sensation (S)",
+          "cognitive_domain": "Speech function, verbalization of the unconscious, speech anxiety, the voice"
+        },
+        "hindu": {
+          "chakra": null,
+          "tattva": "Akasha",
+          "guna": "Sattva",
+          "trimurti_aspect": null
+        },
+        "taoist": {
+          "trigram_name": null,
+          "chinese": "口",
+          "english": "Mouth",
+          "concept": "Speech as creative act",
+          "wu_xing": null
+        },
+        "aboriginal": {
+          "concept": "Speech",
+          "songline": "Life",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Analytical",
+          "csi_role": "Moi~Ego (Express)",
+          "fresh_facet": "Salience"
+        },
+        "cognitive_typology": {
+          "jts_function": "Ego formation",
+          "dominant_type": null
+        },
+        "science": "Speech acoustics, phonon physics, information theory (Shannon), communication channels",
+        "art": "Spoken word art, sound poetry (Dada), the scream (Munch), text art, voice as instrument",
+        "philosophy": "Locke's word as sign, Wittgenstein's language games, Austin's speech acts, Derrida's differance"
+      },
+      "day_17": {
+        "hebrew": {
+          "letter": "Tsade",
+          "char": "צ",
+          "transliteration": "Tsade"
+        },
+        "kernel": {
+          "node": null,
+          "eq_node": null,
+          "prime": 59,
+          "coordinate": "122",
+          "tetrahedron": "bridge"
+        },
+        "i_ching": {
+          "trigram": null,
+          "transition": "Dui→Qian"
+        },
+        "psychology": {
+          "domain": "Experiential bridge",
+          "jungian_function": "Sensation (S)",
+          "cognitive_domain": "Moral rooting, conscience formation, the 'rooted' personality (Fromm)"
+        },
+        "hindu": {
+          "chakra": null,
+          "tattva": null,
+          "guna": null,
+          "trimurti_aspect": null
+        },
+        "taoist": {
+          "trigram_name": null,
+          "chinese": "根",
+          "english": "Root",
+          "concept": "Deep rooting",
+          "wu_xing": null
+        },
+        "aboriginal": {
+          "concept": "Deep rooting",
+          "songline": "Life",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Latent",
+          "csi_role": "Moi~Ego (Ground)",
+          "fresh_facet": "Focus"
+        },
+        "cognitive_typology": {
+          "jts_function": "Inferior function pressure",
+          "dominant_type": null
+        },
+        "science": "Root system, tree as network, branching algorithms, decision trees",
+        "art": "Tree of life (Klimt), Yggdrasil in Norse art, tree in Caspar David Friedrich, bonsai as art",
+        "philosophy": "Heidegger's rootedness in earth (Bodenständigkeit), arboreal thought (Deleuze), justice as rooted (Rawls)"
+      },
+      "day_18": {
+        "hebrew": {
+          "letter": "Qof",
+          "char": "ק",
+          "transliteration": "Qof"
+        },
+        "kernel": {
+          "node": "K6",
+          "eq_node": "Eq6",
+          "prime": 61,
+          "coordinate": "200",
+          "tetrahedron": "S2"
+        },
+        "i_ching": {
+          "trigram": "☶",
+          "name": "Gen",
+          "pinyin": "Gen",
+          "english": "Mountain/Still",
+          "element": "Mountain"
+        },
+        "psychology": {
+          "domain": "Experiential (S2)",
+          "jungian_function": "Sensation (S) — introverted",
+          "cognitive_domain": "Contemplation, meditation state, the witness, apatheia (Stoic stillness)"
+        },
+        "hindu": {
+          "chakra": "Ajna",
+          "chakra_english": "Third Eye",
+          "tattva": "Akasha",
+          "guna": "Sattva",
+          "trimurti_aspect": "Shiva"
+        },
+        "taoist": {
+          "trigram_name": "Shan",
+          "chinese": "山",
+          "english": "Mountain",
+          "concept": "Zhi (stopping)",
+          "wu_xing": null
+        },
+        "aboriginal": {
+          "concept": "Still point",
+          "songline": "Life",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Latent",
+          "csi_role": "Soi (Witness)",
+          "fresh_facet": "Focus"
+        },
+        "cognitive_typology": {
+          "jts_function": "Ni symbolic synthesis",
+          "dominant_type": "Ni"
+        },
+        "science": "Inertia, potential energy, geological time, mountain as accumulator, tectonic stress",
+        "art": "Rothko's late dark paintings, zen ink painting (suibokuga), Friedrich's monk on mountain, Tarkovsky stillness",
+        "philosophy": "Stoic apatheia, Epicurean ataraxia, Heidegger's Gelassenheit (releasement), Zhuangzi's fasting of the mind"
+      },
+      "day_19": {
+        "hebrew": {
+          "letter": "Resh",
+          "char": "ר",
+          "transliteration": "Resh"
+        },
+        "kernel": {
+          "node": null,
+          "eq_node": null,
+          "prime": 67,
+          "coordinate": "201",
+          "tetrahedron": "bridge"
+        },
+        "i_ching": {
+          "trigram": null,
+          "transition": "Gen→Li"
+        },
+        "psychology": {
+          "domain": "Relational bridge",
+          "jungian_function": "Intuition (N)",
+          "cognitive_domain": "Executive function, metacognition, the observing ego, consciousness"
+        },
+        "hindu": {
+          "chakra": null,
+          "tattva": null,
+          "guna": null,
+          "trimurti_aspect": null
+        },
+        "taoist": {
+          "trigram_name": null,
+          "chinese": "首",
+          "english": "Head",
+          "concept": "The turning point",
+          "wu_xing": null
+        },
+        "aboriginal": {
+          "concept": "Vision",
+          "songline": "Life",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Latent",
+          "csi_role": "Soi (Vision)",
+          "fresh_facet": "Focus"
+        },
+        "cognitive_typology": {
+          "jts_function": "Intuitive depth",
+          "dominant_type": null
+        },
+        "science": "Neuroprocessing, the skull as protective vault, cephalization in evolution, cognitive command",
+        "art": "Head sculptures (Giacometti), portrait as power, the disembodied head in surrealism, crowned figures",
+        "philosophy": "Cartesian cogito, mind-body problem, consciousness studies (Chalmers), extended mind (Clark)"
+      },
+      "day_20": {
+        "hebrew": {
+          "letter": "Shin",
+          "char": "ש",
+          "transliteration": "Shin"
+        },
+        "kernel": {
+          "node": "K2",
+          "eq_node": "Eq2",
+          "prime": 71,
+          "coordinate": "202",
+          "tetrahedron": "S1"
+        },
+        "i_ching": {
+          "trigram": "☲",
+          "name": "Li",
+          "pinyin": "Li",
+          "english": "Fire/Clinging",
+          "element": "Fire"
+        },
+        "psychology": {
+          "domain": "Relational (S2)",
+          "jungian_function": "Feeling (F) — introverted",
+          "cognitive_domain": "Insight ('aha!' moment), illumination, brightness of consciousness, passion"
+        },
+        "hindu": {
+          "chakra": "Vishuddha",
+          "chakra_english": "Throat",
+          "tattva": "Tejas",
+          "guna": "Rajas",
+          "trimurti_aspect": "Vishnu"
+        },
+        "taoist": {
+          "trigram_name": "Huo",
+          "chinese": "火",
+          "english": "Fire",
+          "concept": "Radiance without heat",
+          "wu_xing": "Fire"
+        },
+        "aboriginal": {
+          "concept": "Radiance",
+          "songline": "Sacred",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Latent",
+          "csi_role": "Soi (Radiate)",
+          "fresh_facet": "Relation"
+        },
+        "cognitive_typology": {
+          "jts_function": "Fi emotional coherence",
+          "dominant_type": "Fi"
+        },
+        "science": "Electromagnetic radiation, light as wave/particle, combustion chemistry, stellar fusion",
+        "art": "Caravaggio's chiaroscuro, Turner on fire, neon art (Flavin), the flame as subject",
+        "philosophy": "Plato's sun allegory, Enlightenment metaphor, Nietzsche's 'lightning of the concept', Heidegger's Lichtung"
+      },
+      "day_21": {
+        "hebrew": {
+          "letter": "Tav",
+          "char": "ת",
+          "transliteration": "Tav"
+        },
+        "kernel": {
+          "node": null,
+          "eq_node": null,
+          "prime": 73,
+          "coordinate": "210",
+          "tetrahedron": "bridge"
+        },
+        "i_ching": {
+          "trigram": null,
+          "transition": "Gen→Xun"
+        },
+        "psychology": {
+          "domain": "Experiential bridge",
+          "jungian_function": "Sensation (S)",
+          "cognitive_domain": "The mark as identity, signature psychology, branding as self-extension, stigma"
+        },
+        "hindu": {
+          "chakra": null,
+          "tattva": null,
+          "guna": null,
+          "trimurti_aspect": null
+        },
+        "taoist": {
+          "trigram_name": null,
+          "chinese": "印",
+          "english": "Mark",
+          "concept": "Inscription of the descending pattern",
+          "wu_xing": null
+        },
+        "aboriginal": {
+          "concept": "The sign",
+          "songline": "Life",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Latent",
+          "csi_role": "Moi~Ego (Seal)",
+          "fresh_facet": "Salience"
+        },
+        "cognitive_typology": {
+          "jts_function": "Judgment completion",
+          "dominant_type": null
+        },
+        "science": "DNA marking, epigenetic markers, inscription physics, the mark as trace",
+        "art": "Signature in art, branded art (Koons, Warhol), tattoo as art, the mark of the maker",
+        "philosophy": "The trace (Derrida), marking as original violence, sign as mark (Peirce), branded self (Fromm)"
+      },
+      "day_22": {
+        "hebrew": {
+          "letter": "Kaf Sofit",
+          "char": "ך",
+          "transliteration": "Kaf Sofit"
+        },
+        "kernel": {
+          "node": null,
+          "eq_node": null,
+          "prime": 79,
+          "coordinate": "211",
+          "tetrahedron": "face"
+        },
+        "i_ching": {
+          "trigram": null,
+          "transition": "Composite: Zhen+Li+Gen+Kan"
+        },
+        "psychology": {
+          "domain": "Experiential (S2)",
+          "jungian_function": "Thinking (T)",
+          "cognitive_domain": "Final form psychology, acceptance of limitation, completion satisfaction"
+        },
+        "hindu": {
+          "chakra": null,
+          "tattva": "Buddhi",
+          "guna": "Sattva",
+          "trimurti_aspect": null
+        },
+        "taoist": {
+          "trigram_name": null,
+          "chinese": "堅",
+          "english": "Firm",
+          "concept": "Final form bending",
+          "wu_xing": null
+        },
+        "aboriginal": {
+          "concept": "Final form",
+          "songline": "Sacred",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Reactive",
+          "csi_role": "Moi~Ego (Discriminate)",
+          "fresh_facet": "Salience"
+        },
+        "cognitive_typology": {
+          "jts_function": "Intellectual wisdom",
+          "dominant_type": null
+        },
+        "science": "Solid-state physics, crystallography, final form as lowest energy state",
+        "art": "Late style (Adorno/Said), the bent form in sculpture (Moore), final works of artists, wabi-sabi",
+        "philosophy": "Entelechy (Aristotle), completion vs perfection, the crooked timber (Kant), finitude (Heidegger)"
+      },
+      "day_23": {
+        "hebrew": {
+          "letter": "Mem Sofit",
+          "char": "ם",
+          "transliteration": "Mem Sofit"
+        },
+        "kernel": {
+          "node": null,
+          "eq_node": null,
+          "prime": 83,
+          "coordinate": "212",
+          "tetrahedron": "bridge"
+        },
+        "i_ching": {
+          "trigram": null,
+          "transition": "Li→Qian"
+        },
+        "psychology": {
+          "domain": "Experiential bridge",
+          "jungian_function": "Sensation (S)",
+          "cognitive_domain": "Oceanic feeling, terminal tranquility, the 'deep' unconscious, final peace"
+        },
+        "hindu": {
+          "chakra": null,
+          "tattva": "Apas",
+          "guna": "Sattva",
+          "trimurti_aspect": null
+        },
+        "taoist": {
+          "trigram_name": null,
+          "chinese": "渊",
+          "english": "Abyss",
+          "concept": "Transition through the material",
+          "wu_xing": "Water"
+        },
+        "aboriginal": {
+          "concept": "Deep water",
+          "songline": "Sacred",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Reactive",
+          "csi_role": "Soi (Depth)",
+          "fresh_facet": "Relation"
+        },
+        "cognitive_typology": {
+          "jts_function": "Unconscious access",
+          "dominant_type": null
+        },
+        "science": "Terminal deposition, entropy maximum, heat death (as water metaphor), the deep as terminus",
+        "art": "The sea as death (Friedrich), underwater art (Hockney), the abyss in Romanticism, drowning imagery",
+        "philosophy": "Schopenhauer's will as blind sea, existential depth, the abyss (Nietzsche), water as death metaphor (Bachelard)"
+      },
+      "day_24": {
+        "hebrew": {
+          "letter": "Nun Sofit",
+          "char": "ן",
+          "transliteration": "Nun Sofit"
+        },
+        "kernel": {
+          "node": "K3",
+          "eq_node": "Eq3",
+          "prime": 89,
+          "coordinate": "220",
+          "tetrahedron": "S1"
+        },
+        "i_ching": {
+          "trigram": "☴",
+          "name": "Xun",
+          "pinyin": "Xun",
+          "english": "Wind/Gentle",
+          "element": "Wind/Wood"
+        },
+        "psychology": {
+          "domain": "Behaviour (S1)",
+          "jungian_function": "Sensation (S) — extraverted",
+          "cognitive_domain": "Gentle influence, suggestibility, permeation of ideas, subtle persuasion"
+        },
+        "hindu": {
+          "chakra": "Anahata",
+          "chakra_english": "Heart",
+          "tattva": "Vayu",
+          "guna": "Sattva",
+          "trimurti_aspect": "Vishnu"
+        },
+        "taoist": {
+          "trigram_name": "Feng",
+          "chinese": "风",
+          "english": "Wind",
+          "concept": "Gentle penetration",
+          "wu_xing": "Wood"
+        },
+        "aboriginal": {
+          "concept": "Gentle penetration",
+          "songline": "Sacred",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Reactive",
+          "csi_role": "Soi (Penetrate)",
+          "fresh_facet": "Relation"
+        },
+        "cognitive_typology": {
+          "jts_function": "Se sensation adaptation",
+          "dominant_type": "Se"
+        },
+        "science": "Fluid dynamics (laminar flow), diffusion, osmosis, gas exchange, the gentle force",
+        "art": "Whistler's atmospheric effects, wind in Japanese painting (Ma Yuan), gentle brushwork (xieyi), scent art",
+        "philosophy": "Wu wei (effortless action), soft power (Nye), gentle persuasion (Gorgias), the subtle (Laozi), care ethics"
+      },
+      "day_25": {
+        "hebrew": {
+          "letter": "Pe Sofit",
+          "char": "ף",
+          "transliteration": "Pe Sofit"
+        },
+        "kernel": {
+          "node": null,
+          "eq_node": null,
+          "prime": 97,
+          "coordinate": "221",
+          "tetrahedron": "bridge"
+        },
+        "i_ching": {
+          "trigram": null,
+          "transition": "Xun→Qian"
+        },
+        "psychology": {
+          "domain": "Behaviour bridge",
+          "jungian_function": "Sensation (S)",
+          "cognitive_domain": "Closure (psychological), sealed memory, container as security"
+        },
+        "hindu": {
+          "chakra": null,
+          "tattva": null,
+          "guna": null,
+          "trimurti_aspect": null
+        },
+        "taoist": {
+          "trigram_name": null,
+          "chinese": "封",
+          "english": "Seal",
+          "concept": "Descent begins",
+          "wu_xing": null
+        },
+        "aboriginal": {
+          "concept": "Closure",
+          "songline": "Sacred",
+          "rainbow_serpent_aspect": null
+        },
+        "entrainment": {
+          "mode": "Reactive",
+          "csi_role": "Moi~Ego (Complete)",
+          "fresh_facet": "Salience"
+        },
+        "cognitive_typology": {
+          "jts_function": "Function integration",
+          "dominant_type": null
+        },
+        "science": "Containment boundary, sealed system, closure in thermodynamics, irreversible process",
+        "art": "The sealed letter in art, locked doors as motif, the container as sculpture (Judd), sealed spaces (Turrell)",
+        "philosophy": "Death as final seal (Heidegger), closure as narrative need, sealed book of life, irreversibility (Prigogine)"
+      },
+      "day_26": {
+        "hebrew": {
+          "letter": "Tsade Sofit",
+          "char": "ץ",
+          "transliteration": "Tsade Sofit"
+        },
+        "kernel": {
+          "node": "K7",
+          "eq_node": "Eq7",
+          "prime": 101,
+          "coordinate": "222",
+          "tetrahedron": "S2"
+        },
+        "i_ching": {
+          "trigram": "☰",
+          "name": "Qian",
+          "pinyin": "Qian",
+          "english": "Heaven/Creative",
+          "element": "Heaven"
+        },
+        "psychology": {
+          "domain": "Behaviour (S2)",
+          "jungian_function": "Sensation (S) — extraverted",
+          "cognitive_domain": "Self-actualization complete, sovereign psyche, the 'I' as pure consciousness"
+        },
+        "hindu": {
+          "chakra": "Sahasrara",
+          "chakra_english": "Crown",
+          "tattva": "Akasha",
+          "guna": "Sattva",
+          "trimurti_aspect": "Shiva"
+        },
+        "taoist": {
+          "trigram_name": "Tian",
+          "chinese": "天",
+          "english": "Heaven",
+          "concept": "You (manifestation)",
+          "wu_xing": null
+        },
+        "aboriginal": {
+          "concept": "Dream head — creative source",
+          "songline": "Sacred",
+          "rainbow_serpent_aspect": "Head"
+        },
+        "entrainment": {
+          "mode": "Reactive",
+          "csi_role": "Soi (Crown)",
+          "fresh_facet": null
+        },
+        "cognitive_typology": {
+          "jts_function": "Intuitive unity",
+          "dominant_type": "Ni"
+        },
+        "science": "The laws of physics, fundamental forces, universal constants, mathematical structure of reality, pure information",
+        "art": "The sublime (Burke/Kant), abstract expressionism, Rothko's chapel (transcendence), infinity in art (Escher)",
+        "philosophy": "Hegel's absolute spirit, Spinoza's Deus sive Natura, the One (Plotinus), Advaita Vedanta, telos as completion"
+      },
+      "day_27": {
+        "hebrew": {
+          "letter": "Centroid",
+          "char": null,
+          "transliteration": "Centroid"
+        },
+        "kernel": {
+          "node": "C_reset",
+          "eq_node": "Eq9",
+          "prime": 1,
+          "coordinate": "000",
+          "tetrahedron": "reset"
+        },
+        "i_ching": {
+          "trigram": null,
+          "name": null,
+          "transition": "Completion→Renewal"
+        },
+        "psychology": {
+          "domain": "Full coherence",
+          "jungian_function": "Transcendent function",
+          "cognitive_domain": "The Dreamer = The Dream"
+        },
+        "hindu": {
+          "chakra": null,
+          "tattva": null,
+          "guna": null,
+          "trimurti_aspect": null,
+          "state": "Turiya",
+          "concept": "Moksha"
+        },
+        "taoist": {
+          "trigram_name": null,
+          "chinese": "自然",
+          "english": "Self-so",
+          "concept": "Ziran (self-so)",
+          "wu_xing": null
+        },
+        "aboriginal": {
+          "concept": "The Dreaming — Dreamer and Dream are one",
+          "songline": "All",
+          "rainbow_serpent_aspect": "Whole serpent"
+        },
+        "entrainment": {
+          "mode": "Daat",
+          "csi_role": "Full Recursion",
+          "fresh_facet": "Holding"
+        },
+        "cognitive_typology": {
+          "jts_function": "Moksha / Liberation",
+          "dominant_type": null
+        },
+        "science": "Cosmic cycle, eternal return, Big Crunch/Big Bang oscillation, conservation of information",
+        "art": "Ouroboros, mandala as completion, the circle in art (Kandinsky), eternal return symbolism",
+        "philosophy": "Nietzsche's eternal recurrence, Spinoza's intellectual love of God, Advaita Vedanta's non-duality"
+      }
+    }
+  }
+}

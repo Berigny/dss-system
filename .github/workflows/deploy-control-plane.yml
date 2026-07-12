@@ -2,7 +2,7 @@ name: Deploy control-plane
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
     paths:
       - 'apps/control-plane/**'
       - 'packages/shared-types/**'
@@ -13,9 +13,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Deploy to Vercel
-        run: echo "Vercel deploy step for apps/control-plane/ (TBD)"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Deploy to Vercel (production)
+        if: github.ref == 'refs/heads/main'
+        working-directory: ./apps/control-plane
+        run: vercel --token ${{ secrets.VERCEL_TOKEN }} --yes --prod
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CONTROL_PLANE }}
+
+      - name: Deploy to Vercel (preview)
+        if: github.ref == 'refs/heads/develop'
+        working-directory: ./apps/control-plane
+        run: vercel --token ${{ secrets.VERCEL_TOKEN }} --yes
+        env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CONTROL_PLANE }}
