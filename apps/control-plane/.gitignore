@@ -6,3 +6,4 @@ __pycache__/
 scripts/node_modules/
 scripts/package-lock.json
 data/control_plane_state.json
+.env*

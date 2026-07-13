@@ -68,10 +68,6 @@ DSS is under active development. The core engine is stable and has been tested o
 - Q4 2026: Multi-modal support (text + structured data)
 - Q1 2027: Distributed retrieval cluster
 
-## License
-
-DSS is available under the AGPLv3 licence with a Commons Clause. This means it is free for research and non-commercial use. For commercial licensing, please contact the maintainer.
-
 ## Contributing
 
 Contributions are welcome. We particularly need help with:
@@ -96,4 +92,7 @@ Berigny, D. (2025). A Dual-Substrate Field Model: A Computational Exploration of
 
 ## License
 
-Apache 2.0 — see [LICENSE](LICENSE).
+DSS is available under a custom non-commercial license — see [LICENSE](LICENSE). It is free for research and non-commercial use. 
+
+For commercial licensing inquiries, please contact the maintainer via [Google Forms](forms.gle/hV4ejmk3i5J411am9).
+
