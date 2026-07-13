@@ -15673,7 +15673,29 @@ async def ledgers_page(request: Request) -> Response:
         return redirect
     profile_name = _profile_name_from_identity_card(identity_card)
     snapshot = await build_dashboard_snapshot(request)
-    ledgers = [item for item in _ledger_records_from_snapshot(snapshot) if isinstance(item, dict) and _is_valid_material_ledger_id(item.get("ledger_id"))]
+    connection_context = await _load_connection_lookup_context(request, identity_card=identity_card)
+    ledgers: list[dict[str, Any]] = []
+    for item in connection_context.get("ledger_map", {}).values():
+        if not isinstance(item, dict):
+            continue
+        ledger_id = str(item.get("ledger_id") or "").strip()
+        if not _is_valid_material_ledger_id(ledger_id):
+            continue
+        display_label = _display_label_for_entity("ledger", ledger_id, item)
+        name, operational_id = _ledger_display_parts(display_label, ledger_id)
+        canonical_subject = str(item.get("canonical_subject") or "").strip() or name
+        ledgers.append(
+            {
+                "ledger_id": ledger_id,
+                "ledger_name": name,
+                "canonical_subject": canonical_subject,
+                "namespace": str(item.get("namespace") or ledger_id).strip(),
+                "tenant_id": str(item.get("tenant_id") or "").strip(),
+                "status": str(item.get("status") or "unknown").strip().title(),
+                "ledger_access_ready": str(item.get("status") or "").strip().lower() == "active",
+                "display_name": name,
+            }
+        )
     view = str(request.query_params.get("view") or "card").strip().lower()
     if view not in {"card", "list"}:
         view = "card"
