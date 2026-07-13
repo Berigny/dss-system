@@ -6,3 +6,4 @@ qrcode[pil]
 PyJWT
 cryptography
 pytest
+pydantic>=2.0
