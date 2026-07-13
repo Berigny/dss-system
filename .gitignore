@@ -60,3 +60,5 @@ pyrightconfig.json
 *.tfstate.*
 .terraform/
 .terraform.lock.hcl
+.vercel
+.env*

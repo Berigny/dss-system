@@ -8298,7 +8298,6 @@ async def _apply_connections_add_flow(
 ) -> Response:
     control_plane_state = _load_control_plane_state()
     current_principal_did = _principal_did_from_identity_card(identity_card)
-    context = await _load_connection_lookup_context(request, identity_card=identity_card)
 
     if entity_kind == "ledger":
         state = _hydrate_add_ledger_state(request, state, identity_card=identity_card)
@@ -8364,6 +8363,19 @@ async def _apply_connections_add_flow(
         created_ledger = _as_dict(body.get("ledger"))
         canonical_ledger_id = str(created_ledger.get("ledger_id") or ledger_id).strip() or ledger_id
         ledger_id = canonical_ledger_id
+
+        control_plane_state["manual_ledgers"] = _upsert_control_plane_record(
+            _as_dict_list(control_plane_state.get("manual_ledgers")),
+            "ledger_id",
+            created_ledger or payload,
+        )
+        _save_control_plane_state(control_plane_state)
+        # --- END OF ADDITION ---
+
+        for principal_id in linked_principal_ids:
+            rel_status, rel_body = await _control_plane_post(
+                "/api/control-plane/relationships",
+
         for principal_id in linked_principal_ids:
             rel_status, rel_body = await _control_plane_post(
                 "/api/control-plane/relationships",
