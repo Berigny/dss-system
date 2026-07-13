@@ -1,8 +1,6 @@
 # DSS: Non-Vector Retrieval with 100% Recall
 
-**A retrieval engine based on structural constraints, not similarity search.**
-
-**Supported By:**
+**A retrieval engine based on structural constraints, not similarity search. Supported By:**
 
 [![GitHub](https://img.shields.io/badge/GitHub-berigny%2Fdss--system-181717?logo=github)](https://github.com/berigny/dss-system)
 [![License](https://img.shields.io/github/license/berigny/dss-system)](LICENSE)
@@ -14,7 +12,7 @@
 
 
 
-DSS (Dual-Substrate System) is the first practical implementation of constraint-based retrieval. It solves the problem that vector search has struggled with for years, namely that similarity is not the same as logical coherence.
+* DSS (Dual-Substrate System) is the first practical implementation of constraint-based retrieval. It solves the problem that vector search has struggled with for years, namely that similarity is not the same as logical coherence.
 
 ## What is the problem?
 
