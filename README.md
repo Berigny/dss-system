@@ -12,7 +12,7 @@
 
 
 
-* DSS (Dual-Substrate System) is the first practical implementation of constraint-based retrieval. It solves the problem that vector search has struggled with for years, namely that similarity is not the same as logical coherence.
+> DSS (Dual-Substrate System) is the first practical implementation of constraint-based retrieval. It solves the problem that vector search has struggled with for years, namely that similarity is not the same as logical coherence.
 
 ## What is the problem?
 
