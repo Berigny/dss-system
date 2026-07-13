@@ -117,6 +117,8 @@ jobs:
           pip install ruff
           ruff check apps/backend/backend || true
       - name: Test
+        env:
+          OPENAI_API_KEY: "dummy-key-for-ci-tests"
         run: |
           cd apps/backend
           pytest -q
