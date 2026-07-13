@@ -21,7 +21,7 @@ Vector search finds things that are near each other. This works for many tasks, 
 ## How does DSS solve it?
 DSS does not rank by similarity. It filters by structural invariants. In practical terms, it enforces the logical rules that the data must obey, and only then retrieves the most relevant results. This is like checking that a sentence is grammatical before you translate it, rather than simply matching words from a dictionary.
 
-## What does it matter?
+## Why does it matter?
 
 Instead of wrestling with context limits, black-box reasoning, and messy chat sidebars, DSS provides a fundamentally different user experience:
 
