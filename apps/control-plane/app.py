@@ -10,6 +10,7 @@ import html
 import hashlib
 import hmac
 import json
+import logging
 import os
 import re
 import secrets
@@ -78,7 +79,8 @@ BACKEND_ADMIN_BASE_URL = (
 ).rstrip("/")
 ACCOUNT_SETUP_PATH = "/account/setup"
 BACKEND_ADMIN_TOKEN = str(
-    os.getenv("TRUST_ANCHOR_ADMIN_TOKEN")
+    os.getenv("BACKEND_ADMIN_TOKEN")
+    or os.getenv("TRUST_ANCHOR_ADMIN_TOKEN")
     or os.getenv("ADMIN_TOKEN")
     or ""
 ).strip()
@@ -9314,23 +9316,22 @@ async def connections_page(request: Request) -> Response:
     identity_card = _identity_card_with_control_plane_ledger(identity_card, raw_principals_data)
     user_ledger_id = _user_ledger_id_from_identity_card(identity_card) or ""
     is_operator = _is_operator_identity_card(identity_card)
+    
     ledgers = _merged_control_plane_records(
         _ledger_records_from_snapshot(snapshot),
         _as_dict_list(ledgers_body.get("ledgers")) if ledgers_status < 400 and isinstance(ledgers_body, dict) else [],
         "ledger_id",
     )
+    
+    # ADD THESE LINES TO LOAD THE LOCAL STATE FALLBACKS:
     control_plane_state = _load_control_plane_state()
     ledgers = _merged_control_plane_records(
         ledgers,
         _as_dict_list(control_plane_state.get("manual_ledgers")),
         "ledger_id",
     )
-    local_state = _load_control_plane_state()
-    ledgers = _merged_control_plane_records(
-        ledgers,
-        _as_dict_list(local_state.get("manual_ledgers")),
-        "ledger_id",
-    )
+    # END OF ADDITION
+
     ledgers = [item for item in ledgers if isinstance(item, dict) and _is_valid_material_ledger_id(item.get("ledger_id"))]
     # Normalize the identity card ledger id to the canonical backend id before
     # visibility filtering so related_ids uses the ledger the caller actually
@@ -9360,6 +9361,10 @@ async def connections_page(request: Request) -> Response:
         for item in principals_data
         if isinstance(item, dict)
     ]
+    
+    # ADD THIS LINE:
+    principals_data = _merged_control_plane_records(principals_data, _as_dict_list(control_plane_state.get("manual_principals")), "principal_did")
+    
     principals_data = [item for item in principals_data if not _is_deprecated_model_record(item)]
     unfiltered_principals_data = list(principals_data)
     principals_data = _filter_records_by_tenant(principals_data, tenant_id, current_principal_did, user_ledger_id, related_ids, is_operator=is_operator)
@@ -9817,6 +9822,14 @@ def render_authenticated_setup_guide_page(profile_name: str = "") -> str:
             .wizard-step-line.completed {{ background:var(--ok); }}
             .wizard-step[hidden] {{ display:none !important; }}
             .wizard-container label {{ display:block; margin:14px 0 6px; font-weight:500; font-size:0.9rem; }}
+            .wizard-container label.wizard-option {{ display:flex; align-items:flex-start; gap:10px; cursor:pointer; padding:12px; border:1px solid var(--border); border-radius:10px; margin-bottom:10px; width:100%; box-sizing:border-box; }}
+            .wizard-container label.wizard-option input[type="radio"], .wizard-container label.wizard-option input[type="checkbox"] {{ width:auto; margin-top:4px; flex-shrink:0; }}
+            .wizard-container label.wizard-option > div {{ flex:1; min-width:0; }}
+            .wizard-container label.wizard-option strong {{ display:block; font-weight:600; }}
+            .wizard-container label.wizard-option p {{ margin:4px 0 0; font-size:0.85rem; overflow-wrap:break-word; word-break:break-word; }}
+            .wizard-container label.wizard-checkbox {{ display:flex; align-items:flex-start; gap:10px; cursor:pointer; margin:14px 0; width:100%; box-sizing:border-box; }}
+            .wizard-container label.wizard-checkbox input[type="checkbox"] {{ width:auto; margin-top:4px; flex-shrink:0; }}
+            .wizard-container label.wizard-checkbox > span {{ flex:1; min-width:0; font-weight:normal; }}
             .wizard-container input, .wizard-container select {{ width:100%; padding:10px 12px; border:1px solid var(--border-strong); border-radius:8px; background:var(--surface); font-size:0.95rem; }}
             .wizard-container input:focus, .wizard-container select:focus {{ outline:none; border-color:var(--accent); }}
             @media (max-width:520px) {{ .wizard-step-dot {{ width:26px; height:26px; font-size:0.75rem; }} }}
@@ -14058,12 +14071,13 @@ def render_wallet_login_page(request: Request, *, banner: str = "", banner_kind:
     """ if simple_mode else ""
     record = _as_dict(request_record)
     state = str(record.get("state") or "").strip()
+    initial_flipped_class = '' if state else ' flipped'
     return _layout(
         "Wallet Login | DSS Control Plane",
         f"""
         <div class="entry-shell">
           <div class="entry-grid" style="grid-template-columns:minmax(340px,560px); justify-content:center;">
-            <div class="flip-card" id="login_flip_card">
+            <div class="flip-card{initial_flipped_class}" id="login_flip_card">
               <div class="flip-card-inner">
                 <!-- Front: Entra -->
                 <div class="flip-card-front">
@@ -14218,15 +14232,6 @@ def render_wallet_login_page(request: Request, *, banner: str = "", banner_kind:
             updateWalletStatus('That sign-in attempt did not complete. Start a fresh attempt or request a DSS Identity.', false);
           }}
         }};
-        if (walletLoginState) {{
-          renderWalletRequest({json.dumps(record)});
-          updateWalletStatus({json.dumps(_wallet_status_copy(str(record.get("status") or "")))}, ['request_retrieved', 'presentation_verified'].includes(String(initialWalletStatus || '').toLowerCase()));
-          startWalletPolling();
-          walletPoll();
-        }} else {{
-          startWalletLogin();
-        }}
-
         // ── OpenID4VP side ──
         let openidVpState = '';
         const openidVpQrPanel = document.getElementById('openid_vp_qr_panel');
@@ -14306,6 +14311,10 @@ def render_wallet_login_page(request: Request, *, banner: str = "", banner_kind:
               stopOpenIdVpPolling();
               updateOpenIdVpStatus('This sign-in request has expired. Flip back to Entra or start again.', false);
               return;
+            }} else if (['verification_failed', 'subject_missing'].includes(normalized)) {{
+              stopOpenIdVpPolling();
+              updateOpenIdVpStatus('The credential in your wallet did not match this login request. Make sure you selected the DSS Identity card issued by id.dualsubstrate.com.', false);
+              return;
             }} else {{
               updateOpenIdVpStatus('Waiting for scan...', false);
             }}
@@ -14314,6 +14323,16 @@ def render_wallet_login_page(request: Request, *, banner: str = "", banner_kind:
             updateOpenIdVpStatus('That sign-in attempt did not complete. Try again or use Entra.', false);
           }}
         }};
+
+        // Bootstrap: start the appropriate sign-in flow once all helpers are defined
+        if (walletLoginState) {{
+          renderWalletRequest({json.dumps(record)});
+          updateWalletStatus({json.dumps(_wallet_status_copy(str(record.get("status") or "")))}, ['request_retrieved', 'presentation_verified'].includes(String(initialWalletStatus || '').toLowerCase()));
+          startWalletPolling();
+          walletPoll();
+        }} else {{
+          startOpenIdVp();
+        }}
         </script>
         """,
     )
@@ -14681,6 +14700,8 @@ def render_verified_id_page(
 ) -> str:
     banner_html = f'<div class="banner {banner_kind}">{html.escape(banner)}</div>' if banner else ''
     principal_hint = principal_did.strip() or str(request.query_params.get('principal_did') or '').strip() or str(request.cookies.get(PRINCIPAL_DID_COOKIE) or '').strip()
+    query_string = str(request.query_params)
+    query_suffix = '?' + html.escape(query_string) if query_string else ''
     record = _as_dict(request_record)
     identity_data = _as_dict(identity_card)
     identity_vc = _as_dict(identity_data.get("identity_vc"))
@@ -14691,12 +14712,14 @@ def render_verified_id_page(
     status = str(record.get('status') or '').strip() or 'not_started'
     request_json = html.escape(json.dumps(record, indent=2)) if record else ''
     qr_html = f'<img src="{html.escape(qr_code)}" alt="Credential QR" style="max-width:320px; width:100%; border:1px solid var(--border); border-radius:12px; background:var(--surface); padding:12px;" />' if qr_code.startswith('data:image/') else '<p class="muted">Start the flow to generate a credential QR code.</p>'
-    # Detect wallet provider from request record or default to generic
+    # Detect wallet provider from request record, query param, or default to generic
     wallet_provider = str(record.get('mode') or '').strip()
-    if wallet_provider == 'walt_id_issuance':
-        wallet_name = 'MATTR Wallet (OpenID4VCI)'
-        deep_link_label = 'Open in MATTR Wallet'
-        wallet_instructions = 'Scan the QR code with your MATTR wallet, or copy the link below and paste it into the wallet\'s "Receive Credential" screen.'
+    request_wallet_provider = str(_as_dict(record.get('request_payload')).get('wallet_provider') or '').strip()
+    wallet_provider_hint = str(request.query_params.get('wallet_provider') or '').strip().lower()
+    if wallet_provider == 'walt_id_issuance' or request_wallet_provider in {'openid4vci', 'altme'} or wallet_provider_hint in {'openid4vci', 'altme'}:
+        wallet_name = 'Altme / OpenID4VCI wallet'
+        deep_link_label = 'Open in wallet'
+        wallet_instructions = 'Scan the QR code with Altme or any OpenID4VCI wallet, or copy the link below and paste it into the wallet\'s "Receive Credential" screen.'
     else:
         wallet_name = 'Microsoft Authenticator'
         deep_link_label = 'Open in Microsoft Authenticator'
@@ -14731,13 +14754,13 @@ def render_verified_id_page(
         <div class="grid">
           <div class="card">
             <h2>Start Request</h2>
-            <form id="verified_id_form" action="/verified-id/start" method="post">
+            <form id="verified_id_form" action="/verified-id/start{query_suffix}" method="post">
               <input type="hidden" name="_entra_auth" value="{html.escape(str(request.query_params.get('_entra_auth') or ''))}" />
               <label for="principal_did">Principal DID</label>
               <input id="principal_did" name="principal_did" value="{html.escape(principal_hint)}" placeholder="did:key:..." required />
               <div class="row" style="margin-top:14px;">
-                <button class="btn primary" formaction="/verified-id/issue/start" type="submit">Issue Wallet Card</button>
-                <button class="btn" formaction="/verified-id/start" type="submit">Start Wallet Proof Check</button>
+                <button class="btn primary" formaction="/verified-id/issue/start{query_suffix}" type="submit">Issue Wallet Card</button>
+                <button class="btn" formaction="/verified-id/start{query_suffix}" type="submit">Start Wallet Proof Check</button>
                 <a class="btn" href="/login/wallet">Go To Wallet Login</a>
                 <a class="btn" href="/login/passkey{('?principal_did=' + quote(principal_hint, safe='')) if principal_hint else ''}">Go To Passkey</a>
               </div>
@@ -20628,18 +20651,18 @@ def render_wizard_page(*, banner: str = "", banner_kind: str = "ok") -> str:
                     <h2>DID Configuration</h2>
                     <p class="muted">Choose how your Decentralised Identifier (DID) will be created.</p>
                     <div style="margin-bottom:14px;">
-                        <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer; padding:12px; border:1px solid var(--border); border-radius:10px; margin-bottom:10px;">
-                            <input type="radio" name="did_choice" value="issuer_assigned" checked style="margin-top:4px;" onchange="wizardToggleDidInput()" />
+                        <label class="wizard-option">
+                            <input type="radio" name="did_choice" value="issuer_assigned" checked onchange="wizardToggleDidInput()" />
                             <div>
                                 <strong>Issue me a new DID</strong>
-                                <p class="muted" style="margin:4px 0 0; font-size:0.85rem;">DSS will generate a DID for you on <code>{{os.getenv("DEFAULT_DID_HOST", "")}}</code>.</p>
+                                <p class="muted">DSS will generate a DID for you on <code>{html.escape(os.getenv("DEFAULT_DID_HOST", "id.dualsubstrate.com"))}</code>.</p>
                             </div>
                         </label>
-                        <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer; padding:12px; border:1px solid var(--border); border-radius:10px;">
-                            <input type="radio" name="did_choice" value="use_existing" style="margin-top:4px;" onchange="wizardToggleDidInput()" />
+                        <label class="wizard-option">
+                            <input type="radio" name="did_choice" value="use_existing" onchange="wizardToggleDidInput()" />
                             <div>
                                 <strong>I already have a DID</strong>
-                                <p class="muted" style="margin:4px 0 0; font-size:0.85rem;">Provide your existing DID (e.g., <code>did:web:...</code>).</p>
+                                <p class="muted">Provide your existing DID (e.g., <code>did:web:...</code>).</p>
                             </div>
                         </label>
                     </div>
@@ -20660,18 +20683,18 @@ def render_wizard_page(*, banner: str = "", banner_kind: str = "ok") -> str:
                     <h2>Wallet Setup</h2>
                     <p class="muted">Select the wallet you will use for DSS authentication.</p>
                     <div style="margin-bottom:14px;">
-                        <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer; padding:12px; border:1px solid var(--border); border-radius:10px; margin-bottom:10px;">
-                            <input type="radio" name="wallet_provider" value="altme" checked style="margin-top:4px;" />
+                        <label class="wizard-option">
+                            <input type="radio" name="wallet_provider" value="altme" checked />
                             <div>
                                 <strong>Altme (Recommended)</strong>
-                                <p class="muted" style="margin:4px 0 0; font-size:0.85rem;">OpenID4VP / OpenID4VCI compatible. Works out of the box with DSS.</p>
+                                <p class="muted">OpenID4VP / OpenID4VCI compatible. Works out of the box with DSS.</p>
                             </div>
                         </label>
-                        <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer; padding:12px; border:1px solid var(--border); border-radius:10px;">
-                            <input type="radio" name="wallet_provider" value="microsoft_entra" style="margin-top:4px;" />
+                        <label class="wizard-option">
+                            <input type="radio" name="wallet_provider" value="microsoft_entra" />
                             <div>
                                 <strong>Microsoft Entra Verified ID</strong>
-                                <p class="muted" style="margin:4px 0 0; font-size:0.85rem;">Requires MS Authenticator. <span style="color:var(--error)">Known issue: middleware callback may fail.</span></p>
+                                <p class="muted">Requires MS Authenticator. <span style="color:var(--error)">Known issue: middleware callback may fail.</span></p>
                             </div>
                         </label>
                     </div>
@@ -20690,8 +20713,8 @@ def render_wizard_page(*, banner: str = "", banner_kind: str = "ok") -> str:
                     <div id="w_review_content" style="margin:14px 0; padding:14px; background:var(--surface-muted); border-radius:10px; font-size:0.9rem;">
                         <!-- Populated by JS -->
                     </div>
-                    <label style="display:flex; align-items:flex-start; gap:10px; cursor:pointer; margin:14px 0;">
-                        <input type="checkbox" id="w_terms" style="margin-top:4px;" />
+                    <label class="wizard-checkbox">
+                        <input type="checkbox" id="w_terms" />
                         <span>I agree to the terms of service and understand that my request will be reviewed by a DSS operator.</span>
                     </label>
                     <div class="row" style="margin-top:18px; justify-content:space-between;">
@@ -20725,6 +20748,14 @@ def render_wizard_page(*, banner: str = "", banner_kind: str = "ok") -> str:
             .wizard-step-line.completed {{ background:var(--ok); }}
             .wizard-step[hidden] {{ display:none !important; }}
             .wizard-container label {{ display:block; margin:14px 0 6px; font-weight:500; font-size:0.9rem; }}
+            .wizard-container label.wizard-option {{ display:flex; align-items:flex-start; gap:10px; cursor:pointer; padding:12px; border:1px solid var(--border); border-radius:10px; margin-bottom:10px; width:100%; box-sizing:border-box; }}
+            .wizard-container label.wizard-option input[type="radio"], .wizard-container label.wizard-option input[type="checkbox"] {{ width:auto; margin-top:4px; flex-shrink:0; }}
+            .wizard-container label.wizard-option > div {{ flex:1; min-width:0; }}
+            .wizard-container label.wizard-option strong {{ display:block; font-weight:600; }}
+            .wizard-container label.wizard-option p {{ margin:4px 0 0; font-size:0.85rem; overflow-wrap:break-word; word-break:break-word; }}
+            .wizard-container label.wizard-checkbox {{ display:flex; align-items:flex-start; gap:10px; cursor:pointer; margin:14px 0; width:100%; box-sizing:border-box; }}
+            .wizard-container label.wizard-checkbox input[type="checkbox"] {{ width:auto; margin-top:4px; flex-shrink:0; }}
+            .wizard-container label.wizard-checkbox > span {{ flex:1; min-width:0; font-weight:normal; }}
             .wizard-container input, .wizard-container select {{ width:100%; padding:10px 12px; border:1px solid var(--border-strong); border-radius:8px; background:var(--surface); font-size:0.95rem; }}
             .wizard-container input:focus, .wizard-container select:focus {{ outline:none; border-color:var(--accent); }}
             @media (max-width:520px) {{ .wizard-step-dot {{ width:26px; height:26px; font-size:0.75rem; }} }}
@@ -20930,10 +20961,12 @@ def render_wizard_page(*, banner: str = "", banner_kind: str = "ok") -> str:
                         document.getElementById('w_confirm_primary_btn').setAttribute('href', '/login');
                     }} else {{
                         document.getElementById('w_confirm_title').textContent = '✓ Request Approved';
-                        document.getElementById('w_confirm_body').textContent = 'Your request has been approved. Sign in to finish account setup.';
+                        document.getElementById('w_confirm_body').textContent = 'Your request has been approved. Add the DSS Identity card to your wallet, then sign in with your wallet.';
                         const primaryBtn = document.getElementById('w_confirm_primary_btn');
-                        primaryBtn.textContent = 'Sign in to finish setup';
-                        primaryBtn.setAttribute('href', '/login?next=/account/setup');
+                        const principalDid = data.signup?.principal_did || '';
+                        const walletProvider = encodeURIComponent(state.data.wallet_provider || '');
+                        primaryBtn.textContent = 'Add DSS Identity to your wallet';
+                        primaryBtn.setAttribute('href', principalDid ? ('/verified-id?principal_did=' + encodeURIComponent(principalDid) + '&wallet_provider=' + walletProvider) : ('/verified-id?wallet_provider=' + walletProvider));
                     }}
                     showStep('confirm');
                 }} catch (err) {{
@@ -21006,6 +21039,79 @@ async def wizard_api_verify_email_confirm(request: Request) -> Response:
     return JSONResponse(body, status_code=status_code)
 
 
+async def _wizard_sync_principal_to_middleware(
+    request_id: str,
+    token: str,
+    signup: dict[str, Any],
+) -> None:
+    """Sync an auto-approved wizard signup to the middleware principal registry.
+
+    Verified-ID issuance and wallet proof require the principal to exist in the
+    middleware registry with an approved wallet-proof state. The backend
+    auto-approve path only activates the backend principal, so we mirror the
+    record here using the public /api/principals upsert endpoint.
+    """
+    principal_did = str(signup.get("principal_did") or "").strip()
+    if not principal_did:
+        return
+    try:
+        req_status, req_body = await _auth_proxy_get(
+            f"/account/request/{quote(request_id, safe='')}",
+            headers={"x-anonymous-token": token} if token else {},
+        )
+        if req_status >= 400:
+            return
+        record = _as_dict(req_body.get("request"))
+        display_name = str(record.get("display_name") or "").strip() or principal_did
+        email = str(record.get("email") or "").strip().lower()
+        wallet_provider = str(record.get("wallet_provider") or "altme").strip().lower() or "altme"
+        # Middleware issues via walt.id for openid4vci and via Entra for microsoft_authenticator.
+        mw_wallet_provider = "openid4vci" if wallet_provider in {"altme", "openid4vci"} else "microsoft_authenticator"
+        operator_payload = {
+            "requested_identity": {
+                "suggested_principal_did": principal_did,
+                "display_name": display_name,
+                "contact_email": email,
+            },
+            "requested_binding": {"wallet_provider": mw_wallet_provider},
+        }
+        provisioning = _profile_provisioning_defaults(operator_payload)
+        metadata: dict[str, Any] = {
+            "actor_type": "human",
+            "email": email,
+            "email_normalized": email,
+            "wallet_capable": True,
+            "wallet_provider": mw_wallet_provider,
+            "wallet_proof_state": "pending_verified_id",
+            "profile_approval_state": "approved_pending_wallet_proof",
+            "provisioning_state": "pending_onboarding",
+            "vc_status": "none",
+            "issuer_did": str(os.getenv("DEFAULT_ISSUER_DID") or os.getenv("ISSUER_DID", "")).strip(),
+        }
+        principal_payload = {
+            "principal_did": principal_did,
+            "display_name": display_name,
+            "tenant_id": provisioning.get("tenant_id") or "tenant:dss",
+            "status": "active",
+            "metadata": metadata,
+        }
+        sync_status, sync_body = await _middleware_json_request(
+            method="POST",
+            path="/api/principals",
+            payload=principal_payload,
+            timeout=20.0,
+            error_prefix="wizard_principal_sync",
+        )
+        if sync_status >= 400:
+            logging.getLogger(__name__).warning(
+                "Wizard principal sync to middleware failed: status=%s body=%s",
+                sync_status,
+                sync_body,
+            )
+    except Exception as exc:
+        logging.getLogger(__name__).warning("Wizard principal sync to middleware error: %s", exc)
+
+
 async def wizard_api_submit(request: Request) -> Response:
     """Proxy: POST /account/request/{request_id}/submit"""
     request_id = request.path_params.get("request_id", "")
@@ -21019,6 +21125,10 @@ async def wizard_api_submit(request: Request) -> Response:
         payload,
         headers={"x-anonymous-token": token} if token else {},
     )
+    if status_code < 400:
+        signup = _as_dict(body.get("signup"))
+        if str(signup.get("approval_status") or "").strip().lower() == "approved":
+            await _wizard_sync_principal_to_middleware(request_id, token, signup)
     return JSONResponse(body, status_code=status_code)
 
 
@@ -21195,19 +21305,26 @@ def _openid_vp_presentation_request(state: str, nonce: str, response_uri: str) -
                     "name": "DSS Identity",
                     "purpose": "Authenticate to DSS Control Plane",
                     "format": {
-                        "jwt_vc": {
-                            "alg": ["ES256"],
-                        },
+                        "jwt_vc_json": {"alg": ["ES256"]},
+                        "jwt_vc": {"alg": ["ES256"]},
                     },
                     "constraints": {
                         "fields": [
                             {
-                                "path": ["$.type"],
+                                "path": ["$.vc.type", "$.type", "$.verifiableCredential.type"],
                                 "filter": {
                                     "type": "array",
                                     "contains": {"type": "string", "const": "DssIdentity"},
                                 },
-                            }
+                            },
+                            {
+                                "path": ["$.vc.credentialSubject.principal_did", "$.credentialSubject.principal_did"],
+                                "filter": {"type": "string", "minLength": 3},
+                            },
+                            {
+                                "path": ["$.vc.issuer.id", "$.issuer.id", "$.iss"],
+                                "filter": {"type": "string", "const": ISSUER_DID},
+                            },
                         ]
                     },
                 }
@@ -21418,11 +21535,11 @@ async def login_openidvp_response(request: Request) -> JSONResponse:
     else:
         record["status"] = "verification_failed"
 
-    # Return a minimal success response.  The original browser that
-    # displayed the QR code is polling /api/login/openidvp/status and
-    # will redirect itself to /login/openidvp/complete when it sees
-    # "verified".  We intentionally do NOT return a redirect_uri here
-    # so that the wallet does not open its own browser frame.
+    # Return a minimal success response.  In a cross-device QR-code flow
+    # the original browser is polling /api/login/openidvp/status and will
+    # redirect itself to /login/openidvp/complete when it sees "verified".
+    # We intentionally do NOT return a redirect_uri here so the wallet does
+    # not open the site in its own browser frame.
     return JSONResponse({"status": "ok"}, status_code=200)
 
 
