@@ -3270,8 +3270,25 @@ def test_did_first_collection_pages_render_canonical_subjects(monkeypatch) -> No
             "approval_lookup": {},
         }
 
+    async def fake_load_connection_lookup_context(_request, identity_card=None):
+        return {
+            "ledger_map": {
+                "chat-demo": {
+                    "ledger_id": "chat-demo",
+                    "display_name": "Chat Demo",
+                    "canonical_subject": "did:web:id.dualsubstrate.com:ledgers:chat-demo",
+                    "status": "active",
+                    "tenant_id": "tenant:test",
+                }
+            },
+            "principal_map": {},
+            "surface_map": {},
+            "relationships": [],
+        }
+
     monkeypatch.setattr(dashboard_app, "_require_control_plane_auth", fake_require_control_plane_auth)
     monkeypatch.setattr(dashboard_app, "build_dashboard_snapshot", fake_build_dashboard_snapshot)
+    monkeypatch.setattr(dashboard_app, "_load_connection_lookup_context", fake_load_connection_lookup_context)
     monkeypatch.setattr(dashboard_app, "_principal_registry_get", fake_principal_registry_get)
     monkeypatch.setattr(dashboard_app, "_load_permissions_lookup", fake_load_permissions_lookup)
 
