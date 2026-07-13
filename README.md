@@ -57,6 +57,7 @@ Then open your browser at `http://localhost:8000`. The demo includes the benchma
 
 For a more installation information, please see the [a more detailed README](README_long_form.md).
 
+---
 
 ## Project Status
 

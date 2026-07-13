@@ -271,6 +271,9 @@ The mathematically motivated $O(k \log n)$ composite lookup is currently perform
 
 ---
 
+
 ## License
 
-Apache 2.0 — see [LICENSE](LICENSE).
+DSS is available under a custom non-commercial license — see [LICENSE](LICENSE). It is free for research and non-commercial use. 
+
+For commercial licensing inquiries, please contact the maintainer via [Google Forms](forms.gle/hV4ejmk3i5J411am9).
