@@ -1,31 +1,20 @@
-"""Vercel / Docker entrypoint shim for the DSS chat surface."""
+"""Vercel / Docker entrypoint shim for the DSS chat surface.
+
+The legacy application lives in `app.py` at the component root.  This module
+imports and re-exports the FastHTML/Starlette application so that deployment
+platforms can point at a predictable `src/main.py` path without restructuring
+thousands of lines of working code.
+"""
 
 import sys
-import traceback
 from pathlib import Path
 
+# Make the vendored shared-types package importable on Vercel without an
+# editable install (uv + rootDirectory can mis-resolve relative editable paths).
 _vendor = Path(__file__).resolve().parent.parent / "vendor" / "shared-types"
 if str(_vendor) not in sys.path:
     sys.path.insert(0, str(_vendor))
 
-app = None  # noqa: F841
+import app as _app  # noqa: E402
 
-try:
-    import app as _app  # noqa: E402
-    app = _app.app
-except Exception as _exc:  # pragma: no cover - debugging helper for Vercel cold-start
-    _tb = traceback.format_exc()
-    _exc_str = str(_exc)
-
-    async def _debug_app(scope, receive, send):
-        await send(
-            {
-                "type": "http.response.start",
-                "status": 500,
-                "headers": [[b"content-type", b"text/plain; charset=utf-8"]],
-            }
-        )
-        body = f"Import error in chat-surface: {_exc_str}\n\n{_tb}".encode("utf-8")
-        await send({"type": "http.response.body", "body": body})
-
-    app = _debug_app
+app = _app.app
