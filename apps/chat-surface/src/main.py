@@ -8,6 +8,8 @@ _vendor = Path(__file__).resolve().parent.parent / "vendor" / "shared-types"
 if str(_vendor) not in sys.path:
     sys.path.insert(0, str(_vendor))
 
+app = None  # noqa: F841  # placeholder for Vercel static detection
+
 try:
     import app as _app  # noqa: E402
     app = _app.app
