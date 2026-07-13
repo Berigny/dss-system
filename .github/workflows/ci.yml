@@ -72,8 +72,9 @@ jobs:
           test -d docs
 
       - name: Validate docker-compose syntax
-        run: docker compose config
-
+        run: |
+          cp .env.example .env
+          docker compose config
   shared-types:
     needs: changes
     if: ${{ needs.changes.outputs.shared-types == 'true' }}
