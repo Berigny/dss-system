@@ -109,7 +109,8 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -e ./packages/shared-types
-          pip install -r apps/backend/requirements.txt
+          cd apps/backend
+          pip install -r requirements.txt
           pip install pytest
       - name: Lint
         run: |
@@ -132,7 +133,8 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -e ./packages/shared-types
-          pip install -r apps/middleware/requirements.txt
+          cd apps/middleware
+          pip install -r requirements.txt
           pip install pytest
       - name: Lint
         run: |
@@ -155,7 +157,8 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -e ./packages/shared-types
-          pip install -r apps/control-plane/requirements.txt
+          cd apps/control-plane
+          pip install -r requirements.txt
           pip install pytest
       - name: Lint
         run: |
@@ -178,7 +181,8 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -e ./packages/shared-types
-          pip install -r apps/chat-surface/requirements.txt
+          cd apps/chat-surface
+          pip install -r requirements.txt
           pip install pytest
       - name: Lint
         run: |
@@ -201,7 +205,8 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -e ./packages/shared-types
-          pip install -r apps/coord-demo/requirements.txt
+          cd apps/coord-demo
+          pip install -r requirements.txt
           pip install pytest
       - name: Lint
         run: |
