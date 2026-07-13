@@ -18,8 +18,8 @@ spec.loader.exec_module(dashboard_app)
 def test_wizard_page_contains_auto_approved_confirmation_branch() -> None:
     html = dashboard_app.render_wizard_page()
     assert "Request Approved" in html
-    assert "Sign in to finish setup" in html
-    assert "/login?next=/account/setup" in html
+    assert "Add DSS Identity to your wallet" in html
+    assert "/verified-id?principal_did=" in html
 
 
 def test_wizard_page_keeps_awaiting_approval_branch() -> None:
