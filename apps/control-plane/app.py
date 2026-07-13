@@ -7970,7 +7970,7 @@ def _hydrate_add_ledger_state(
         existing_meta.get("provisioned_verified_id"),
         f"did:web:{host}:ledgers:{ledger_slug}",
     )
-    current_principal_did = str(_as_dict(identity_card).get("principal_did") or "").strip()
+    current_principal_did = _principal_did_from_identity_card(identity_card)
     linked_principals = _split_flow_values(hydrated.get("linked_principal_ids"))
     linked_surfaces = _split_flow_values(hydrated.get("linked_surface_ids"))
     if context and ledger_id:
@@ -8297,7 +8297,7 @@ async def _apply_connections_add_flow(
     identity_card: dict[str, Any],
 ) -> Response:
     control_plane_state = _load_control_plane_state()
-    current_principal_did = str(_as_dict(identity_card).get("principal_did") or "").strip()
+    current_principal_did = _principal_did_from_identity_card(identity_card)
     context = await _load_connection_lookup_context(request, identity_card=identity_card)
 
     if entity_kind == "ledger":
@@ -8696,7 +8696,7 @@ async def _apply_connections_modal_add(
     modal_entity_kind = str(state.get("modal_entity_kind") or "").strip().lower()
     target_field = str(state.get("modal_target_field") or "").strip()
     multi = str(state.get("modal_target_mode") or "").strip().lower() == "multi"
-    current_principal_did = str(_as_dict(identity_card).get("principal_did") or "").strip()
+    current_principal_did = _principal_did_from_identity_card(identity_card)
     redirect_state = dict(state)
 
     if modal_entity_kind == "ledger":
@@ -8883,7 +8883,7 @@ async def connections_add_page(request: Request) -> Response:
             state=state,
             principals=context.get("principals", []),
             surfaces=context.get("surfaces", []),
-            current_principal_did=str(_as_dict(identity_card).get("principal_did") or "").strip(),
+            current_principal_did=_principal_did_from_identity_card(identity_card),
             binding_records=binding_records,
         )
     else:
@@ -13334,7 +13334,7 @@ async def ledger_detail_page(request: Request) -> Response:
     if redirect is not None:
         return redirect
     profile_name = _profile_name_from_identity_card(identity_card)
-    current_principal_did = str(_as_dict(identity_card).get("principal_did") or "").strip()
+    current_principal_did = _principal_did_from_identity_card(identity_card)
     ledger_id = str(request.path_params.get("ledger_id") or "").strip()
     context = await _load_connection_lookup_context(request, identity_card=identity_card)
     detail = _lookup_ledger_detail_data(ledger_id, context)
@@ -13398,7 +13398,7 @@ async def principal_detail_page(request: Request) -> Response:
     if redirect is not None:
         return redirect
     profile_name = _profile_name_from_identity_card(identity_card)
-    current_principal_did = str(_as_dict(identity_card).get("principal_did") or "").strip()
+    current_principal_did = _principal_did_from_identity_card(identity_card)
     principal_id = str(request.path_params.get("principal_id") or "").strip()
     context = await _load_connection_lookup_context(request, identity_card=identity_card)
     detail = _lookup_principal_detail_data(principal_id, context)
@@ -13507,7 +13507,7 @@ async def surface_detail_page(request: Request) -> Response:
     if redirect is not None:
         return redirect
     profile_name = _profile_name_from_identity_card(identity_card)
-    current_principal_did = str(_as_dict(identity_card).get("principal_did") or "").strip()
+    current_principal_did = _principal_did_from_identity_card(identity_card)
     surface_id = str(request.path_params.get("surface_id") or "").strip()
     context = await _load_connection_lookup_context(request, identity_card=identity_card)
     detail = _lookup_surface_detail_data(surface_id, context)
@@ -20385,7 +20385,7 @@ async def account_setup_documents_page(request: Request) -> Response:
     if redirect is not None:
         return redirect
     profile_name = _profile_name_from_identity_card(identity_card)
-    current_principal_did = str(_as_dict(identity_card).get("principal_did") or "").strip()
+    current_principal_did = _principal_did_from_identity_card(identity_card)
     context = await _load_connection_lookup_context(request, identity_card=identity_card)
     ledgers = context.get("ledgers") or []
     user_ledgers = [
