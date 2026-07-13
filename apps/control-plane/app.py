@@ -8356,31 +8356,11 @@ async def _apply_connections_add_flow(
             "founding_constitution_purpose": str(state.get("founding_constitution_purpose") or "").strip() or None,
         }
         status_code, body = await _control_plane_post("/api/control-plane/ledgers", payload, request)
+        # --- START OF REPLACED BLOCK ---
         if status_code >= 400:
-            # Local fallback: backend ledger endpoint is not available, so create a
-            # manual ledger record in the dashboard's local state and continue.
-            manual_ledger = {
-                "ledger_id": ledger_id,
-                "namespace": ledger_id,
-                "ledger_name": payload["name"],
-                "name": payload["name"],
-                "tenant_id": payload["tenant_id"],
-                "status": "pending",
-                "owner_principal_id": current_principal_did or "ops-admin",
-                "owner_principal_type": "admin",
-                "provisioning_source": "control_plane_wizard_local_fallback",
-                "metadata": payload["metadata"],
-                "canonical_subject": _canonical_entity_subject("ledger", ledger_id),
-                "canonical_subject_source": "did:web:ledger",
-            }
-            local_state = _load_control_plane_state()
-            local_state["manual_ledgers"] = _upsert_control_plane_record(
-                _as_dict_list(local_state.get("manual_ledgers")),
-                "ledger_id",
-                manual_ledger,
-            )
-            _save_control_plane_state(local_state)
-            body = {"ledger": manual_ledger}
+            error_detail = body.get("detail") or body.get("error") or "Unknown backend error"
+            return _wizard_banner_redirect("ledger", state, message=f"Backend creation failed ({status_code}): {error_detail}")
+        # --- END OF REPLACED BLOCK ---
         created_ledger = _as_dict(body.get("ledger"))
         canonical_ledger_id = str(created_ledger.get("ledger_id") or ledger_id).strip() or ledger_id
         ledger_id = canonical_ledger_id
