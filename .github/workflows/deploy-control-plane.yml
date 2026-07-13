@@ -21,10 +21,15 @@ jobs:
       - name: Install Vercel CLI
         run: npm install --global vercel@latest
 
+      - name: Configure Vercel CLI auth
+        run: |
+          mkdir -p "$HOME/.vercel-cli-auth"
+          echo '${{ secrets.VERCEL_AUTH_JSON }}' > "$HOME/.vercel-cli-auth/auth.json"
+
       - name: Deploy to Vercel (production)
         if: github.ref == 'refs/heads/main'
         working-directory: ./apps/control-plane
-        run: vercel --token ${{ secrets.VERCEL_TOKEN }} --yes --prod
+        run: vercel --global-config "$HOME/.vercel-cli-auth" --yes --prod
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CONTROL_PLANE }}
@@ -32,7 +37,7 @@ jobs:
       - name: Deploy to Vercel (preview)
         if: github.ref == 'refs/heads/develop'
         working-directory: ./apps/control-plane
-        run: vercel --token ${{ secrets.VERCEL_TOKEN }} --yes
+        run: vercel --global-config "$HOME/.vercel-cli-auth" --yes
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CONTROL_PLANE }}
