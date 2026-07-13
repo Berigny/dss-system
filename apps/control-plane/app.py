@@ -9292,7 +9292,7 @@ async def connections_page(request: Request) -> Response:
     )
     # Backfill ledger_id from control-plane principal metadata when the middleware
     # identity card does not provide it, so ledger tenant scoping uses the real
-    # assigned ledger.
+    # assigned ledger. Updated
     identity_card = _identity_card_with_control_plane_ledger(identity_card, raw_principals_data)
     user_ledger_id = _user_ledger_id_from_identity_card(identity_card) or ""
     is_operator = _is_operator_identity_card(identity_card)
