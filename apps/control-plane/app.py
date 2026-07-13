@@ -4376,11 +4376,18 @@ async def _principal_registry_post(path: str, payload: dict[str, Any]) -> tuple[
 
 
 def _auth_headers_from_request(request: Request | None) -> dict[str, str]:
-    """Extract the session token from the incoming request for upstream auth."""
+    """Extract the session token and principal hint from the incoming request for upstream auth."""
     if request is None:
         return {}
+    headers: dict[str, str] = {}
     token = str(request.cookies.get(BACKEND_SESSION_TOKEN_COOKIE) or "").strip()
-    return {"x-session-token": token} if token else {}
+    if token:
+        headers["x-session-token"] = token
+    principal_did = str(request.cookies.get(PRINCIPAL_DID_COOKIE) or "").strip()
+    if principal_did:
+        headers["x-principal-did"] = principal_did
+        headers["x-principal-type"] = "human"
+    return headers
 
 
 async def _control_plane_get(
@@ -8297,7 +8304,10 @@ async def _apply_connections_add_flow(
     identity_card: dict[str, Any],
 ) -> Response:
     control_plane_state = _load_control_plane_state()
-    current_principal_did = _principal_did_from_identity_card(identity_card)
+    current_principal_did = _principal_did_from_identity_card(identity_card) or str(
+        request.cookies.get(PRINCIPAL_DID_COOKIE) or ""
+    ).strip()
+    context = await _load_connection_lookup_context(request, identity_card=identity_card)
 
     if entity_kind == "ledger":
         state = _hydrate_add_ledger_state(request, state, identity_card=identity_card)
@@ -8355,26 +8365,22 @@ async def _apply_connections_add_flow(
             "founding_constitution_purpose": str(state.get("founding_constitution_purpose") or "").strip() or None,
         }
         status_code, body = await _control_plane_post("/api/control-plane/ledgers", payload, request)
-        # --- START OF REPLACED BLOCK ---
-        if status_code >= 400:
-            error_detail = body.get("detail") or body.get("error") or "Unknown backend error"
-            return _wizard_banner_redirect("ledger", state, message=f"Backend creation failed ({status_code}): {error_detail}")
-        # --- END OF REPLACED BLOCK ---
-        created_ledger = _as_dict(body.get("ledger"))
+        created_ledger = _as_dict(body.get("ledger")) if status_code < 400 else {}
         canonical_ledger_id = str(created_ledger.get("ledger_id") or ledger_id).strip() or ledger_id
         ledger_id = canonical_ledger_id
 
+        # Always keep a local copy so the dashboard can fall back when the
+        # backend is temporarily unavailable or the write is pending approval.
         control_plane_state["manual_ledgers"] = _upsert_control_plane_record(
             _as_dict_list(control_plane_state.get("manual_ledgers")),
             "ledger_id",
             created_ledger or payload,
         )
         _save_control_plane_state(control_plane_state)
-        # --- END OF ADDITION ---
 
-        for principal_id in linked_principal_ids:
-            rel_status, rel_body = await _control_plane_post(
-                "/api/control-plane/relationships",
+        if status_code >= 400:
+            error_detail = body.get("detail") or body.get("error") or "Unknown backend error"
+            return _wizard_banner_redirect("ledger", state, message=f"Backend creation failed ({status_code}): {error_detail}")
 
         for principal_id in linked_principal_ids:
             rel_status, rel_body = await _control_plane_post(
