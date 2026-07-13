@@ -2,7 +2,7 @@ name: Deploy coord-demo
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
     paths:
       - 'apps/coord-demo/**'
       - 'packages/shared-types/**'
@@ -14,30 +14,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
-
-      - name: Configure Vercel CLI auth
+      - name: Trigger Vercel production deploy hook
         run: |
-          mkdir -p "$HOME/.vercel-cli-auth"
-          echo '${{ secrets.VERCEL_AUTH_JSON }}' > "$HOME/.vercel-cli-auth/auth.json"
-
-      - name: Deploy to Vercel (production)
-        if: github.ref == 'refs/heads/main'
-        working-directory: ./apps/coord-demo
-        run: vercel --global-config "$HOME/.vercel-cli-auth" --yes --prod
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_COORD_DEMO }}
-
-      - name: Deploy to Vercel (preview)
-        if: github.ref == 'refs/heads/develop'
-        working-directory: ./apps/coord-demo
-        run: vercel --global-config "$HOME/.vercel-cli-auth" --yes
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_COORD_DEMO }}
+          HTTP_CODE=$(curl -sS -X POST "${{ secrets.VERCEL_DEPLOY_HOOK_COORD_DEMO }}" \
+            -o /tmp/vercel-response.json \
+            -w "%{http_code}")
+          cat /tmp/vercel-response.json
+          if [ "$HTTP_CODE" != "200" ] && [ "$HTTP_CODE" != "201" ]; then
+            echo "Deploy hook failed with HTTP $HTTP_CODE"
+            exit 1
+          fi
