@@ -16206,6 +16206,17 @@ def _entity_trust_identifier(entity_type: str, entity_id: str, record: dict[str,
     return _canonical_entity_subject(entity_key, identifier)
 
 
+def _principal_event_display_label(principal: dict[str, Any], fallback_id: str) -> str:
+    """Return a human label for a principal in activity event rows."""
+    display_name = str(principal.get("display_name") or "").strip()
+    if display_name:
+        return display_name
+    did = str(fallback_id or "").strip()
+    if did.startswith("did:key:") and len(did) > 16:
+        return f"Principal ({did[-12:]})"
+    return did or "Unknown"
+
+
 def _display_name_from_binding_id(binding_id: str) -> str | None:
     """Convert a binding id such as 'binding:chat:anthropic-claude-fable-5'
     into an OpenRouter-style label like 'Anthropic: Claude Fable 5'.
@@ -18999,7 +19010,7 @@ def _normalize_record_rows(
         if not ledger_id:
             continue
         canonical_subject = _entity_trust_identifier("ledger", ledger_id, ledger)
-        display_label = str(ledger.get("ledger_name") or ledger.get("display_name") or ledger_id).strip() or ledger_id
+        display_label = _display_label_for_entity("ledger", ledger_id, ledger)
         coord = str(ledger.get("coord") or "").strip()
         reference = _activity_reference(coord=coord, entity_id=ledger_id, ledger_id=ledger_id)
         rows.append(
@@ -19032,7 +19043,7 @@ def _normalize_record_rows(
             continue
         metadata = _as_dict(principal.get("metadata"))
         canonical_subject = _entity_trust_identifier("principal", principal_did, principal)
-        display_label = str(principal.get("display_name") or principal_did).strip() or principal_did
+        display_label = _principal_event_display_label(principal, principal_did)
         coord = str(metadata.get("coord") or "").strip()
         ledger_id = str(metadata.get("ledger_id") or "").strip()
         reference = _activity_reference(coord=coord, entity_id=principal_did, principal_did=principal_did, ledger_id=ledger_id)
@@ -19068,7 +19079,7 @@ def _normalize_record_rows(
         if not surface_id:
             continue
         canonical_subject = _entity_trust_identifier("surface", surface_id, surface)
-        display_label = str(surface.get("label") or surface.get("name") or surface_id).strip() or surface_id
+        display_label = _display_label_for_entity("surface", surface_id, surface)
         coord = str(surface.get("coord") or "").strip()
         ledger_id = str(surface.get("ledger_id") or "").strip()
         reference = _activity_reference(coord=coord, entity_id=surface_id, ledger_id=ledger_id)
@@ -19133,7 +19144,7 @@ def _normalize_record_rows(
         if not binding_id:
             continue
         canonical_subject = _entity_trust_identifier("binding", binding_id, binding)
-        display_label = str(binding.get("name") or binding_id).strip() or binding_id
+        display_label = _display_label_for_entity("binding", binding_id, binding)
         coord = str(binding.get("coord") or "").strip()
         reference = _activity_reference(coord=coord, entity_id=binding_id)
         rows.append(
@@ -19434,6 +19445,7 @@ def _normalize_event_stream(
     if lookup and selected_principal:
         principal = _as_dict(lookup.get("principal"))
         principal_metadata = _as_dict(principal.get("metadata"))
+        principal_label = _principal_event_display_label(principal, selected_principal)
         ledger_id = str(principal_metadata.get("ledger_id") or "")
         subject_events = _as_dict_list(lookup.get("subject_events"))
         for subject_event in subject_events:
@@ -19450,6 +19462,7 @@ def _normalize_event_stream(
                     "coord": str(subject_event.get("coord") or selected_principal),
                     "status": str(subject_event.get("status") or "observed"),
                     "summary": f"Subject event {subject_event.get('event_type') or 'event'} {(': ' + reason) if reason else ''}",
+                    "display_label": principal_label,
                     "details": subject_event,
                 }
             )
@@ -19467,6 +19480,7 @@ def _normalize_event_stream(
                     "coord": str(standing_event.get("coord") or selected_principal),
                     "status": str(standing_event.get("reason_code") or "updated"),
                     "summary": f"Permission set update: {standing_event.get('reason_code') or 'standing-event'}",
+                    "display_label": principal_label,
                     "details": standing_event,
                 }
             )
@@ -19484,6 +19498,7 @@ def _normalize_event_stream(
                     "coord": str(provisioning.get("coord") or selected_principal),
                     "status": str(provisioning.get("provisioning_state") or "unknown"),
                     "summary": f"Provisioning state: {provisioning.get('provisioning_state') or 'unknown'}",
+                    "display_label": principal_label,
                     "details": provisioning,
                 }
             )

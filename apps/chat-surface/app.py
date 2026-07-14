@@ -4609,7 +4609,9 @@ async def list_models(request: Request):
     if not local_models and not online_models and models_data:
         for item in models_data:
             mid = str(item.get("id") or "").strip()
-            if "/" in mid and not mid.startswith("ollama/"):
+            if mid.startswith("ollama/"):
+                local_models.append(item)
+            elif mid.startswith("binding:") or "/" in mid:
                 online_models.append(item)
             else:
                 local_models.append(item)
