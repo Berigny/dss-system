@@ -1820,8 +1820,9 @@ async def api_chat_commit_answer(request: Request):
             auth_claims=claims if claims else None,
         )
 
+    commit_result: dict[str, Any] | None = None
     try:
-        await _try_commit(headers=auth_headers, claims=auth_claims)
+        commit_result = await _try_commit(headers=auth_headers, claims=auth_claims)
     except httpx.HTTPStatusError as exc:
         # If the user's authenticated principal is blocked from writing (e.g.
         # incomplete onboarding / paused trial), retry as an anonymous session
@@ -1829,7 +1830,7 @@ async def api_chat_commit_answer(request: Request):
         # still preserved in the payload's runtime_identity block.
         if exc.response.status_code == 403:
             try:
-                await _try_commit(headers=None, claims=None)
+                commit_result = await _try_commit(headers=None, claims=None)
             except httpx.HTTPStatusError as anonymous_exc:
                 detail: Any
                 try:
@@ -1851,7 +1852,15 @@ async def api_chat_commit_answer(request: Request):
                 status_code=exc.response.status_code,
             )
 
-    return JSONResponse({"status": "ok"})
+    if commit_result is None:
+        return JSONResponse({"status": "ok"})
+    return JSONResponse(
+        {
+            "status": commit_result.get("status", "ok"),
+            "coordinate": commit_result.get("coordinate"),
+            "metadata": commit_result.get("metadata"),
+        }
+    )
 
 
 @rt("/stats/global")

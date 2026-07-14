@@ -7259,9 +7259,19 @@ def register_orchestrator_routes(rt):
             auth_claims=auth_claims if isinstance(auth_claims, dict) else None,
         )
         turn_count = int(session.get("turn_count", 0)) + 1
-        ledger_id = session.get("ledger_id", settings.DEFAULT_LEDGER_ID)
+        ledger_id = (
+            str(payload.get("ledger_id") or session.get("ledger_id") or settings.DEFAULT_LEDGER_ID or "").strip()
+            or settings.DEFAULT_LEDGER_ID
+        )
+        entity = (
+            str(payload.get("entity") or session.get("entity") or f"chat-{session_id}").strip()
+            or f"chat-{session_id}"
+        )
+        if session.get("ledger_id") != ledger_id or session.get("entity") != entity:
+            session["ledger_id"] = ledger_id
+            session["entity"] = entity
+            update_session(session_id, session)
         api.set_ledger(ledger_id)
-        entity = payload.get("entity") or session.get("entity") or f"chat-{session_id}"
         anchor_cache_raw = session.get("anchor_cache")
         anchor_cache: dict[str, Any] = anchor_cache_raw if isinstance(anchor_cache_raw, dict) else {}
         post_introspect_cache_raw = session.get("post_introspect_cache")
