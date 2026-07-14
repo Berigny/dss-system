@@ -1,6 +1,6 @@
-# Dual-Substrate System (DSS)
+# DSS: Non-Vector Retrieval with 100% Recall
 
-**Supported By:**
+**A retrieval engine based on structural constraints, not similarity search. Supported By:**
 
 [![GitHub](https://img.shields.io/badge/GitHub-berigny%2Fdss--system-181717?logo=github)](https://github.com/berigny/dss-system)
 [![License](https://img.shields.io/github/license/berigny/dss-system)](LICENSE)
@@ -11,7 +11,17 @@
 [![Whitepaper](https://img.shields.io/badge/Whitepaper-ResearchGate-00CCBB?logo=researchgate&logoColor=white)](https://www.researchgate.net/publication/408995995_Beyond_the_Context_Window_A_Ledger-Oriented_Architecture_for_Provable_AI_Memory_Dual-Substrate_System)
 
 
-Welcome to the **Dual-Substrate System (DSS)** - an open-source framework built to fix how AI memory feels, functions, and is governed.
+
+> DSS (Dual-Substrate System) is the first practical implementation of constraint-based retrieval. It solves the problem that vector search has struggled with for years, namely that similarity is not the same as logical coherence.
+
+## What is the problem?
+
+Vector search finds things that are near each other. This works for many tasks, but it breaks when you need to follow a chain of reasoning or find a specific fact buried in noise. Retrieval-Augmented Generation (RAG) systems that rely on vector search frequently hallucinate, lose context, and fail on multi-step queries.
+
+## How does DSS solve it?
+DSS does not rank by similarity. It filters by structural invariants. In practical terms, it enforces the logical rules that the data must obey, and only then retrieves the most relevant results. This is like checking that a sentence is grammatical before you translate it, rather than simply matching words from a dictionary.
+
+## Why does it matter?
 
 Instead of wrestling with context limits, black-box reasoning, and messy chat sidebars, DSS provides a fundamentally different user experience:
 
@@ -23,9 +33,6 @@ Instead of wrestling with context limits, black-box reasoning, and messy chat si
 
 > **Read the Whitepaper:** For a complete deep dive into the mathematics, coordinate geometry, and distributed systems engineering behind DSS, read our open technical disclosure: **[Beyond the Context Window: A Ledger-Oriented Architecture for Provable AI Memory](https://www.researchgate.net/publication/408995995_Beyond_the_Context_Window_A_Ledger-Oriented_Architecture_for_Provable_AI_Memory_Dual-Substrate_System)**.
 
-### How It Works
-
-Most Large Language Model (LLM) applications rely on transient context windows, easily-confused semantic vector RAG, and mutable databases. DSS replaces these opaque, fragile systems with a **deterministic, mathematically motivated coordinate engine** (inspired by $p$-adic numbers and the $\mathbb{R} \times \mathbb{Q}_p$ dual substrate) and an **immutable cryptographic ledger**.
 
 ---
 
