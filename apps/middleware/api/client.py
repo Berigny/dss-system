@@ -347,6 +347,12 @@ class APIClient:
             "assistant_reply": reply,
             "metadata": metadata or {},
         }
+        ledger_id = (self.ledger_id or "").strip()
+        if ledger_id:
+            payload["ledger_id"] = ledger_id
+        context_id = (self.context_id or "").strip()
+        if context_id:
+            payload["context_id"] = context_id
         if precomputed_appraisal is not None:
             payload["precomputed_appraisal"] = precomputed_appraisal
             payload["metadata"]["precomputed_appraisal"] = precomputed_appraisal
