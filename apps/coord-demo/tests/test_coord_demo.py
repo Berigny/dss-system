@@ -25,7 +25,9 @@ def _stub_session_verification(monkeypatch: pytest.MonkeyPatch):
 def test_health_returns_ok(client: TestClient) -> None:
     response = client.get("/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    payload = response.json()
+    assert payload["status"] == "ok"
+    assert "commit_sha" in payload
 
 
 def test_index_redirects_when_unauthenticated(
@@ -95,3 +97,23 @@ def test_resolve_renders_upstream_error(
     )
     assert response.status_code == 200
     assert "Resolver error" in response.text
+
+
+def test_auth_callback_sets_session_cookie(client: TestClient) -> None:
+    response = client.get("/auth/callback?ds_session_token=token-123", follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers["location"] == "/"
+    cookies = response.cookies
+    assert app.BACKEND_SESSION_TOKEN_COOKIE in cookies
+    assert cookies[app.BACKEND_SESSION_TOKEN_COOKIE] == "token-123"
+
+
+def test_middleware_accepts_session_token_in_query_string(
+    client: TestClient,
+) -> None:
+    response = client.get("/?ds_session_token=token-456", follow_redirects=False)
+    assert response.status_code == 303
+    assert "://" in response.headers["location"]
+    cookies = response.cookies
+    assert app.BACKEND_SESSION_TOKEN_COOKIE in cookies
+    assert cookies[app.BACKEND_SESSION_TOKEN_COOKIE] == "token-456"

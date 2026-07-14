@@ -2108,6 +2108,7 @@ def health_check():
         "status": "ok",
         "llm_configured": llm is not None,
         "backend_url": settings.API_BASE,
+        "commit_sha": (os.getenv("VERCEL_GIT_COMMIT_SHA") or "").strip() or "unknown",
     }
     if llm is not None:
         status["llm_model"] = settings.LLM_PROVIDER 
@@ -4217,8 +4218,14 @@ def _dedupe_models(models: list[dict[str, str]]) -> list[dict[str, str]]:
             continue
         seen.add(mid)
         name = str(item.get("name") or "").strip()
+        # The binding id may live in the id field or in the name field.
+        binding_id = mid if mid.startswith("binding:") else (name if name.startswith("binding:") else "")
         if not name or name == mid or name.startswith("binding:"):
-            name = _display_name_from_binding_id(mid) or name or mid
+            if binding_id:
+                generated = _display_name_from_binding_id(binding_id)
+                if generated:
+                    name = generated
+            name = name or mid
         deduped.append({"id": mid, "name": name})
     return deduped
 
@@ -4603,11 +4610,11 @@ async def list_models(request: Request):
     timeout = settings.HTTP_TIMEOUT if settings.HTTP_TIMEOUT > 30 else 60.0
 
     payload = await _fetch_middleware_models(mode, timeout, request)
-    models_data, local_models, online_models = _split_models_from_middleware(payload)
+    models, local_models, online_models = _split_models_from_middleware(payload)
     fallback_used = bool(payload.get("fallback")) if isinstance(payload, dict) else False
 
-    if not local_models and not online_models and models_data:
-        for item in models_data:
+    if not local_models and not online_models and models:
+        for item in models:
             mid = str(item.get("id") or "").strip()
             if mid.startswith("ollama/"):
                 local_models.append(item)
@@ -4631,10 +4638,10 @@ async def list_models(request: Request):
 
         # Only rescue a saved model when the middleware itself could not be reached.
         # When the middleware responds, the control-plane relationship gate is authoritative.
-        if current_model and payload.get("unavailable") and all(item.get("id") != current_model for item in models_data):
-            models_data = [{"id": current_model, "name": f"{current_model} (Saved)"}, *models_data]
-        if not current_model and models_data:
-            current_model = str(models_data[0].get("id") or "").strip()
+        if current_model and payload.get("unavailable") and all(item.get("id") != current_model for item in models):
+            models = [{"id": current_model, "name": f"{current_model} (Saved)"}, *models]
+        if not current_model and models:
+            current_model = str(models[0].get("id") or "").strip()
 
         local_options = tuple(
             Option(model["name"], value=model["id"], selected=(model["id"] == current_model))
@@ -4652,7 +4659,7 @@ async def list_models(request: Request):
         )
 
     return {
-        "models": models_data,
+        "models": models,
         "local_models": local_models,
         "online_models": online_models,
         "fallback": fallback_used,

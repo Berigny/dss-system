@@ -9562,14 +9562,16 @@ async def connections_page(request: Request) -> Response:
     # from control-plane metadata.
     snapshot_with_identity = dict(snapshot)
     snapshot_with_identity["identity_card"] = identity_card
-    surfaces_data = _merged_control_plane_records(
-        _derive_control_plane_app_surfaces(
-            snapshot_with_identity,
-            unfiltered_principals_data,
-            stored_app_surfaces=stored_app_surfaces,
-        ),
-        stored_app_surfaces,
-        "surface_id",
+    surfaces_data = _dedupe_chat_surfaces(
+        _merged_control_plane_records(
+            _derive_control_plane_app_surfaces(
+                snapshot_with_identity,
+                unfiltered_principals_data,
+                stored_app_surfaces=stored_app_surfaces,
+            ),
+            stored_app_surfaces,
+            "surface_id",
+        )
     )
     surfaces_data = _filter_records_by_tenant(surfaces_data, tenant_id, current_principal_did, user_ledger_id, related_ids, is_operator=is_operator)
     # Canonicalise ledger ids on stored surfaces so derived runtime relationships
@@ -11265,15 +11267,17 @@ async def _load_connection_lookup_context(
     # from control-plane metadata.
     snapshot_with_identity = dict(snapshot)
     snapshot_with_identity["identity_card"] = identity_card
-    surfaces_data = _merged_control_plane_records(
-        _derive_control_plane_app_surfaces(
-            snapshot_with_identity,
-            unfiltered_principals_data,
-            stored_bindings=binding_records,
-            stored_app_surfaces=stored_app_surfaces,
-        ),
-        stored_app_surfaces,
-        "surface_id",
+    surfaces_data = _dedupe_chat_surfaces(
+        _merged_control_plane_records(
+            _derive_control_plane_app_surfaces(
+                snapshot_with_identity,
+                unfiltered_principals_data,
+                stored_bindings=binding_records,
+                stored_app_surfaces=stored_app_surfaces,
+            ),
+            stored_app_surfaces,
+            "surface_id",
+        )
     )
     surfaces_data = _filter_records_by_tenant(surfaces_data, tenant_id, current_principal_did, user_ledger_id, related_ids, is_operator=is_operator)
     # Canonicalise ledger ids on surfaces so derived runtime relationships point
@@ -15446,6 +15450,7 @@ async def health(_: Request) -> JSONResponse:
         'middleware_base_url': MIDDLEWARE_BASE_URL,
         'auth_base_url': AUTH_BASE_URL,
         'chat_base_url': CHAT_BASE_URL,
+        'commit_sha': (os.getenv('VERCEL_GIT_COMMIT_SHA') or '').strip() or 'unknown',
     })
 
 
@@ -16204,6 +16209,14 @@ def _entity_trust_identifier(entity_type: str, entity_id: str, record: dict[str,
         if principal_did.startswith("did:"):
             return principal_did
     return _canonical_entity_subject(entity_key, identifier)
+
+
+def _principal_lookup(principals: list[dict[str, Any]], principal_did: str) -> dict[str, Any]:
+    """Return the principal record matching principal_did, or an empty dict."""
+    for principal in principals or []:
+        if str(principal.get("principal_did") or "").strip() == principal_did:
+            return principal
+    return {}
 
 
 def _principal_event_display_label(principal: dict[str, Any], fallback_id: str) -> str:
@@ -17500,10 +17513,12 @@ async def apps_page(request: Request) -> Response:
         stored_bindings,
         "binding_id",
     )
-    app_surfaces = _merged_control_plane_records(
-        _control_plane_app_surface_records(snapshot, binding_records),
-        stored_app_surfaces,
-        "surface_id",
+    app_surfaces = _dedupe_chat_surfaces(
+        _merged_control_plane_records(
+            _control_plane_app_surface_records(snapshot, binding_records),
+            stored_app_surfaces,
+            "surface_id",
+        )
     )
     selected_surface = str(request.query_params.get("surface_id") or "").strip()
     if not selected_surface and app_surfaces:
@@ -19206,7 +19221,10 @@ def _normalize_record_rows(
     return rows
 
 
-def _normalize_submission_rows(submissions: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _normalize_submission_rows(
+    submissions: list[dict[str, Any]],
+    principals: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for submission in submissions:
         submission_ref = str(submission.get("submission_ref") or "").strip()
@@ -19214,10 +19232,18 @@ def _normalize_submission_rows(submissions: list[dict[str, Any]]) -> list[dict[s
             continue
         target_entity_type = str(submission.get("target_entity_type") or "submission").strip().lower() or "submission"
         target_entity_id = str(submission.get("target_entity_id") or "").strip()
+        actor_id = str(submission.get("reviewed_by_principal_id") or submission.get("submitted_by_principal_id") or submission.get("created_by_principal_id") or "control-plane").strip()
+        actor_label = actor_id
+        if actor_id != "control-plane":
+            actor_label = _principal_event_display_label(_principal_lookup(principals or [], actor_id), actor_id)
+        display_label = ""
+        if target_entity_type == "principal" and target_entity_id:
+            display_label = _principal_event_display_label(_principal_lookup(principals or [], target_entity_id), target_entity_id)
         details = dict(submission)
         applied_result = _as_dict(submission.get("applied_result"))
         if applied_result:
             details["applied_result"] = applied_result
+        details["display_label"] = display_label
         reference = _activity_reference(
             submission_ref=submission_ref,
             entity_id=target_entity_id or submission_ref,
@@ -19232,9 +19258,11 @@ def _normalize_submission_rows(submissions: list[dict[str, Any]]) -> list[dict[s
                 "entity_type": target_entity_type or "submission",
                 "entity_id": target_entity_id or submission_ref,
                 "entity_label": "Submission",
+                "display_label": display_label,
                 "reference": reference,
                 "preferred_reference": reference,
-                "actor": str(submission.get("reviewed_by_principal_id") or submission.get("submitted_by_principal_id") or submission.get("created_by_principal_id") or "control-plane"),
+                "actor": actor_label,
+                "actor_did": actor_id if actor_id != "control-plane" else "",
                 "status": str(submission.get("submission_status") or submission.get("status") or "submitted").strip() or "submitted",
                 "coord": "",
                 "ledger_id": str(submission.get("ledger_id") or "").strip(),
@@ -19280,7 +19308,7 @@ def _normalize_activity_rows(
     )
     ledger_rows = _normalize_ledger_entry_rows(ledger_entries or [])
     record_rows = _normalize_record_rows(principals, connection_context, control_plane_state)
-    governance_rows = _normalize_submission_rows(submissions)
+    governance_rows = _normalize_submission_rows(submissions, principals)
     rows = _collapse_activity_rows(event_rows + ledger_rows + record_rows + governance_rows)
     rows.sort(key=_activity_row_timestamp, reverse=True)
     return rows
@@ -22134,6 +22162,26 @@ async def api_auth_session_refresh(request: Request) -> JSONResponse:
     return response
 
 
+async def api_auth_session_verify(request: Request) -> JSONResponse:
+    """Verify a session token for cross-domain SSO callbacks.
+
+    The endpoint accepts the token either as a cookie or as an
+    ``x-session-token`` header so satellite apps such as coord-demo can
+    confirm a token before setting their own first-party cookie.
+    """
+    token = str(request.query_params.get("token") or request.cookies.get(BACKEND_SESSION_TOKEN_COOKIE) or request.headers.get("x-session-token") or "").strip()
+    if not token:
+        return JSONResponse({"valid": False, "error": "token_required"}, status_code=400)
+    status_code, body = await _auth_proxy_get("/auth/session/verify", headers={"x-session-token": token})
+    payload = dict(body if isinstance(body, dict) else {})
+    if status_code >= 400:
+        return JSONResponse({"valid": False, "error": payload.get("error") or "verification_failed"}, status_code=200)
+    return JSONResponse({
+        "valid": bool(payload.get("valid") or payload.get("principal_did")),
+        "principal_did": str(payload.get("principal_did") or "").strip() or None,
+    }, status_code=200)
+
+
 async def api_control_plane_benchmark_publication_jobs(request: Request) -> JSONResponse:
     _, auth_error = await _control_plane_json_session(request)
     if auth_error is not None:
@@ -23535,6 +23583,7 @@ app = Starlette(
         Route("/login/passkey/login/finish", login_passkey_login_finish, methods=["POST"]),
         Route("/api/auth/identity_card", api_auth_identity_card, methods=["GET", "HEAD"]),
         Route("/api/auth/session/refresh", api_auth_session_refresh, methods=["POST"]),
+        Route("/api/auth/session/verify", api_auth_session_verify, methods=["GET", "HEAD"]),
         Route("/api/benchmarks/performance", api_benchmarks_performance, methods=["GET", "HEAD"]),
         Route("/api/control-plane/benchmarks/publication-jobs", api_control_plane_benchmark_publication_jobs, methods=["POST"]),
         Route("/api/control-plane/benchmarks/publication-jobs/{job_id}", api_control_plane_benchmark_publication_job_status, methods=["GET", "HEAD"]),
