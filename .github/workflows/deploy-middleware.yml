@@ -11,9 +11,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/middleware
     steps:
       - uses: actions/checkout@v4
 
@@ -25,11 +22,11 @@ jobs:
         run: |
           export FLYCTL_INSTALL="$HOME/.fly"
           export PATH="$FLYCTL_INSTALL/bin:$PATH"
-          flyctl deploy --app dss-system-middleware --access-token ${{ secrets.FLY_API_TOKEN }}
+          flyctl deploy . --app dss-system-middleware --dockerfile apps/middleware/Dockerfile --access-token ${{ secrets.FLY_API_TOKEN }}
 
       - name: Deploy to Fly.io (staging)
         if: github.ref == 'refs/heads/develop'
         run: |
           export FLYCTL_INSTALL="$HOME/.fly"
           export PATH="$FLYCTL_INSTALL/bin:$PATH"
-          flyctl deploy --app dss-system-middleware-staging --access-token ${{ secrets.FLY_API_TOKEN }}
+          flyctl deploy . --app dss-system-middleware-staging --dockerfile apps/middleware/Dockerfile --access-token ${{ secrets.FLY_API_TOKEN }}
