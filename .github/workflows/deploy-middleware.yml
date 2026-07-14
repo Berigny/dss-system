@@ -17,16 +17,19 @@ jobs:
       - name: Install Flyctl
         run: curl -L https://fly.io/install.sh | sh
 
+      - name: Link root Dockerfile for Fly build context
+        run: ln -sf apps/middleware/Dockerfile Dockerfile
+
       - name: Deploy to Fly.io (production)
         if: github.ref == 'refs/heads/main'
         run: |
           export FLYCTL_INSTALL="$HOME/.fly"
           export PATH="$FLYCTL_INSTALL/bin:$PATH"
-          flyctl deploy . --app dss-system-middleware --dockerfile apps/middleware/Dockerfile --access-token ${{ secrets.FLY_API_TOKEN }}
+          flyctl deploy . --app dss-system-middleware --access-token ${{ secrets.FLY_API_TOKEN }}
 
       - name: Deploy to Fly.io (staging)
         if: github.ref == 'refs/heads/develop'
         run: |
           export FLYCTL_INSTALL="$HOME/.fly"
           export PATH="$FLYCTL_INSTALL/bin:$PATH"
-          flyctl deploy . --app dss-system-middleware-staging --dockerfile apps/middleware/Dockerfile --access-token ${{ secrets.FLY_API_TOKEN }}
+          flyctl deploy . --app dss-system-middleware-staging --access-token ${{ secrets.FLY_API_TOKEN }}
