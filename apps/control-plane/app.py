@@ -7674,53 +7674,56 @@ def _layout(
             }});
           }});
           editor.querySelectorAll('input[type="checkbox"][data-is-model="true"]').forEach((input) => {{
-            input.addEventListener("change", async () => {{
+            input.addEventListener('change', async () => {{
               const label = input.parentElement.nextElementSibling;
               const checked = input.checked;
-              if (label) label.textContent = checked ? "On" : "Off";
-              const bindingId = input.getAttribute("data-binding-id") || "";
-              const modelId = input.getAttribute("data-model-id") || "";
-              const linkedPrincipal = input.getAttribute("data-linked-principal") || "";
-              const defaultLedgerId = editor.getAttribute("data-default-ledger-id") || "";
-              const defaultChatSurfaceId = editor.getAttribute("data-default-chat-surface-id") || "surface:chat:primary";
+              if (label) label.textContent = checked ? 'On' : 'Off';
+              
+              const bindingId = input.getAttribute('data-binding-id') || '';
+              const modelId = input.getAttribute('data-model-id') || '';
+              const linkedPrincipal = input.getAttribute('data-linked-principal') || '';
+              const defaultLedgerId = editor.getAttribute('data-default-ledger-id') || '';
+              const defaultChatSurfaceId = editor.getAttribute('data-default-chat-surface-id') || 'surface:chat:primary';
+         
               let appSurfaces = [defaultChatSurfaceId];
               let ledgerId = ownerLedgerId || defaultLedgerId;
-              if (ownerType === "surface") {{
+              if (ownerType === 'surface') {{
                 appSurfaces = [ownerId];
               }}
+              
               input.disabled = true;
               try {{
-                const response = await fetch("/api/control-plane/model-bindings", {{
-                  method: "POST",
-                  headers: {{ "content-type": "application/json" }},
-                  credentials: "same-origin",
+                const response = await fetch('/api/control-plane/model-bindings', {{
+                  method: 'POST',
+                  headers: {{ 'content-type': 'application/json' }},
+                  credentials: 'same-origin',
                   body: JSON.stringify({{
                     binding_id: bindingId,
-                    provider_type: "OpenRouter",
+                    provider_type: 'OpenRouter',
                     model_id: modelId,
                     linked_model_principal: linkedPrincipal,
-                    status: checked ? "active" : "disabled",
+                    status: checked ? 'active' : 'disabled',
                     app_surfaces: appSurfaces,
-                    scope: "shared",
-                    source: "connection-link-editor",
+                    scope: 'shared',
+                    source: 'connection-link-editor',
                     ledger_id: ledgerId || undefined,
                   }}),
                 }});
                 if (!response.ok) {{
                   const body = await response.json().catch(() => ({{}}));
-                  window.alert(body.error || "Failed to update model connection.");
+                  window.alert(body.error || 'Failed to update model connection.');
                   input.checked = !checked;
-                  if (label) label.textContent = input.checked ? "On" : "Off";
+                  if (label) label.textContent = input.checked ? 'On' : 'Off';
                 }}
               }} catch (_error) {{
-                window.alert("Failed to update model connection.");
+                window.alert('Failed to update model connection.');
                 input.checked = !checked;
-                if (label) label.textContent = input.checked ? "On" : "Off";
+                if (label) label.textContent = input.checked ? 'On' : 'Off';
               }} finally {{
                 input.disabled = false;
               }}
             }});
-          }});
+          }});  
           if (updateBtn && modal) {{
             updateBtn.addEventListener("click", async (event) => {{
               event.preventDefault();
