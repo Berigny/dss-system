@@ -4216,7 +4216,9 @@ def _dedupe_models(models: list[dict[str, str]]) -> list[dict[str, str]]:
         if not mid or mid in seen:
             continue
         seen.add(mid)
-        name = str(item.get("name") or mid).strip()
+        name = str(item.get("name") or "").strip()
+        if not name or name == mid or name.startswith("binding:"):
+            name = _display_name_from_binding_id(mid) or name or mid
         deduped.append({"id": mid, "name": name})
     return deduped
 
@@ -4232,6 +4234,23 @@ _MODEL_DISPLAY_NAMES = {
 
 def _display_name_for_model_id(model_id: str) -> str:
     return _MODEL_DISPLAY_NAMES.get(model_id, model_id)
+
+
+def _display_name_from_binding_id(model_id: str) -> str | None:
+    """Convert a binding id such as 'binding:chat:anthropic-claude-fable-5'
+    into an OpenRouter-style label like 'Anthropic: Claude Fable 5'.
+    """
+    if not str(model_id or "").strip().startswith("binding:"):
+        return None
+    tail = model_id.split(":")[-1]
+    if "-" not in tail:
+        return None
+    provider_slug, _, model_slug = tail.partition("-")
+    provider = provider_slug.replace("_", " ").strip().title()
+    model_name = model_slug.replace("-", " ").strip().title()
+    if provider and model_name:
+        return f"{provider}: {model_name}"
+    return None
 
 
 def _migrate_model_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:

@@ -982,18 +982,17 @@ function renderResolveDebugList(container, snippets) {
 
 function _prependChatNode(node) {
     ensureChatStreamPlacement();
-    const historyList = document.getElementById('history-list');
-    if (historyList) {
-        if (historyList.contains(node)) return;
-        historyList.prepend(node);
-        initializeUserPromptTruncation(node);
-        return;
-    }
     const chatStream = document.getElementById('chat-stream');
-    if (!chatStream) return;
-    if (chatStream.contains(node)) return;
-    chatStream.prepend(node);
-    initializeUserPromptTruncation(node);
+    const historyList = document.getElementById('history-list');
+    if (chatStream) {
+        if (chatStream.contains(node)) return;
+        if (historyList && chatStream.contains(historyList)) {
+            chatStream.insertBefore(node, historyList);
+        } else {
+            chatStream.prepend(node);
+        }
+        initializeUserPromptTruncation(node);
+    }
 }
 
 const USER_PROMPT_MAX_LINES = 5;
@@ -1941,6 +1940,7 @@ async function handleStreamedChatSubmit(event) {
     const msgId = Date.now();
     const turn = document.createElement('div');
     turn.className = 'chat-turn';
+    turn.dataset.streamedTurn = 'true';
     const userNode = _createUserBubble(message, msgId);
     const assistant = _createAssistantBubble(msgId + 1);
     const pushThinking = createThinkingTickerUpdater({
@@ -2645,6 +2645,7 @@ async function handleStreamedChatSubmit(event) {
                     enqueueOverlayStatus('Warning: response was not persisted.');
                 }
             }
+            await finalizeStreamedHistory();
         } else {
             throw new Error(deriveExplicitStreamFailure({
                 finalMetaPayload,
@@ -3103,13 +3104,17 @@ async function loadHistory() {
     }
 }
 
+let historySwapGeneration = 0;
+
 async function fetchAndSwapHistory(entityValue, limitValue) {
     const current = document.getElementById('history-list');
     if (!current) return false;
+    const gen = ++historySwapGeneration;
     const encodedEntity = encodeURIComponent(entityValue);
     const response = await fetch(`/ui/history/${encodedEntity}?limit=${limitValue}`, {
         headers: { Accept: 'text/html' },
     });
+    if (gen !== historySwapGeneration) return false;
     if (response.redirected && String(response.url || '').includes('/login')) {
         window.location.href = response.url;
         return false;
@@ -3127,6 +3132,23 @@ async function fetchAndSwapHistory(entityValue, limitValue) {
     current.replaceWith(next);
     renderAssistantMarkdown(next);
     return true;
+}
+
+async function finalizeStreamedHistory() {
+    const loader = getHistoryLoader();
+    if (!loader) return;
+    const entity = getActiveHistoryEntity();
+    const limit = Number(loader.dataset.historyLimit || '5');
+    const streamed = document.querySelector('[data-streamed-turn="true"]');
+    try {
+        await fetchAndSwapHistory(entity, limit);
+    } catch (error) {
+        console.warn('Unable to refresh history after stream', error);
+        return;
+    }
+    if (streamed && streamed.parentElement) {
+        streamed.remove();
+    }
 }
 
 async function persistStreamedTurn({ message, reply, latencyMs, metadata, precomputedAppraisal }) {

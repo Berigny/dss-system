@@ -41,8 +41,8 @@ app, rt = fast_app(secret_key=os.getenv("FASTHTML_SECRET_KEY", "coord-demo-secre
 
 
 def _login_url(request: Request) -> str:
-    return f"{CONTROL_PLANE_BASE}/login?next={quote(str(request.url), safe='')}"
-
+    callback_url = f"{(os.getenv('COORD_DEMO_BASE_URL') or request.url.scheme + '://' + str(request.url.netloc)).rstrip('/')}/auth/callback"
+    return f"{CONTROL_PLANE_BASE}/login/wallet?next={quote(callback_url, safe='/?:&=')}"
 
 async def _verify_session_token(token: str) -> str | None:
     """Ask the control-plane to validate the shared backend session token."""
@@ -71,7 +71,7 @@ class CoordAuthMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
-        if path in {"/health", "/favicon.ico"} or path.startswith("/static/"):
+        if path in {"/health", "/favicon.ico", "/auth/callback"} or path.startswith("/static/"):
             return await call_next(request)
 
         token = str(request.cookies.get(BACKEND_SESSION_TOKEN_COOKIE) or "").strip()
@@ -135,6 +135,28 @@ def resolve(coordinate: str):
         return Pre(json.dumps(response.json(), indent=2), id="result")
     except httpx.HTTPError as exc:
         return Pre(f"Resolver error: {exc}", id="result")
+
+
+@rt("/auth/callback")
+async def auth_callback(request: Request):
+    """Receive a cross-domain session token from the control-plane login flow."""
+    token = str(request.query_params.get("ds_session_token") or "").strip()
+    if not token:
+        return RedirectResponse(url=_login_url(request), status_code=303)
+    principal_did = await _verify_session_token(token)
+    if not principal_did:
+        return RedirectResponse(url=_login_url(request), status_code=303)
+    response = RedirectResponse(url="/", status_code=303)
+    response.set_cookie(
+        BACKEND_SESSION_TOKEN_COOKIE,
+        token,
+        httponly=True,
+        secure=request.url.scheme == "https",
+        samesite="lax",
+        max_age=3600,
+        path="/",
+    )
+    return response
 
 
 @rt("/health")
