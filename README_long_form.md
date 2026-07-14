@@ -69,20 +69,30 @@ DSS is built from the ground up to support modern decentralized identity and aud
 This repository is managed as a monorepo. The core components live under `apps/`.
 
 ### 1. Chat Surface
+![Chat Surface](https://github.com/user-attachments/assets/da1b5706-c4d9-4893-8fb7-ff39f1d53e43)
+
+<img width="1098" height="720" alt="03" src="" />
+
 
 A lightweight, threadless conversational front-end. Users converse in a single continuous interface, trusting the underlying DSS coordinate engine to bridge current context with past memories regardless of when they occurred.
 
 ### 2. Orchestrator Middleware
+![Orchestrator Middleware](https://github.com/user-attachments/assets/29dca725-b368-4e92-9fe2-c1657397149f)
 
 The brain of the Dual-Substrate routing system. Handles Qp-pure coordinate resolution and structural coherence validation before any data reaches the LLM. It also acts as a multi-model adapter, allowing users to switch AI providers without breaking session context.
 
 ### 3. Governance Control Plane
+
+![Governance Control Plane](https://github.com/user-attachments/assets/5d2bc446-4542-4d2b-843c-df717227903d)
 
 Cryptographic identity and memory auditing. Manages Principal Registries, W3C Decentralized Identifiers (DIDs), and the hash-chain memory ledger. Users control exactly what data is shared and inspect the lineage of how the AI formed its memories.
 
 ### 4. Coordinate Sandbox (Coord-Demo)
 
 A developer sandbox and demonstration environment for testing, visualising, and pushing the limits of the prime-lattice coordinate routing math that powers DSS coherence.
+
+![Coordinate Sandbox (Coord-Demo)](https://github.com/user-attachments/assets/7d497156-fb15-43f2-9e8e-fc7a0af024ea)
+
 
 ---
 
