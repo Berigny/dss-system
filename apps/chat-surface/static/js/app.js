@@ -3327,7 +3327,11 @@ function ensureChatStreamPlacement() {
 function handleInputKeydown(event) {
     if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
         event.preventDefault();
-        event.target.form?.requestSubmit();
+        if (window?.dsChatStreamEnabled === true && event.target.form?.id === 'chat-form') {
+            handleStreamedChatSubmit(event);
+        } else {
+            event.target.form?.requestSubmit();
+        }
     }
 }
 

@@ -24,3 +24,19 @@ jobs:
             echo "Deploy hook failed with HTTP $HTTP_CODE"
             exit 1
           fi
+
+      - name: Wait for Vercel deployment to propagate
+        run: |
+          EXPECTED="${GITHUB_SHA}"
+          URL="https://coord-demo.vercel.app/health"
+          for i in $(seq 1 30); do
+            SHA=$(curl -sS --fail "$URL" | python -c "import sys,json; print(json.load(sys.stdin).get('commit_sha',''))" 2>/dev/null || true)
+            if [ "$SHA" = "$EXPECTED" ]; then
+              echo "Deployment propagated: $SHA"
+              exit 0
+            fi
+            echo "Waiting for deployment... attempt $i, got commit_sha='${SHA:-unknown}'"
+            sleep 10
+          done
+          echo "Deployment did not propagate within timeout"
+          exit 1

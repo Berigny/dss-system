@@ -44,6 +44,10 @@ def _login_url(request: Request) -> str:
     callback_url = f"{(os.getenv('COORD_DEMO_BASE_URL') or request.url.scheme + '://' + str(request.url.netloc)).rstrip('/')}/auth/callback"
     return f"{CONTROL_PLANE_BASE}/login/wallet?next={quote(callback_url, safe='/?:&=')}"
 
+def _is_https_request(request: Request) -> bool:
+    return str(request.headers.get("x-forwarded-proto") or request.url.scheme).lower() == "https"
+
+
 async def _verify_session_token(token: str) -> str | None:
     """Ask the control-plane to validate the shared backend session token."""
     if not token:
@@ -66,6 +70,18 @@ async def _verify_session_token(token: str) -> str | None:
         return None
 
 
+def _set_session_cookie(response: RedirectResponse, request: Request, token: str) -> None:
+    response.set_cookie(
+        BACKEND_SESSION_TOKEN_COOKIE,
+        token,
+        httponly=True,
+        secure=_is_https_request(request),
+        samesite="lax",
+        max_age=3600,
+        path="/",
+    )
+
+
 class CoordAuthMiddleware(BaseHTTPMiddleware):
     """Require a valid control-plane session; otherwise redirect to login."""
 
@@ -74,13 +90,21 @@ class CoordAuthMiddleware(BaseHTTPMiddleware):
         if path in {"/health", "/favicon.ico", "/auth/callback"} or path.startswith("/static/"):
             return await call_next(request)
 
-        token = str(request.cookies.get(BACKEND_SESSION_TOKEN_COOKIE) or "").strip()
+        token = str(request.cookies.get(BACKEND_SESSION_TOKEN_COOKIE) or request.query_params.get("ds_session_token") or "").strip()
         if not token:
             return RedirectResponse(url=_login_url(request), status_code=303)
 
         principal_did = await _verify_session_token(token)
         if not principal_did:
             return RedirectResponse(url=_login_url(request), status_code=303)
+
+        # If the token arrived in the URL, establish a first-party cookie and
+        # strip the query parameter to keep URLs clean.
+        if request.query_params.get("ds_session_token"):
+            clean_url = str(request.url).split("?")[0]
+            response = RedirectResponse(url=clean_url, status_code=303)
+            _set_session_cookie(response, request, token)
+            return response
 
         request.state.principal_did = principal_did
         return await call_next(request)
@@ -147,18 +171,13 @@ async def auth_callback(request: Request):
     if not principal_did:
         return RedirectResponse(url=_login_url(request), status_code=303)
     response = RedirectResponse(url="/", status_code=303)
-    response.set_cookie(
-        BACKEND_SESSION_TOKEN_COOKIE,
-        token,
-        httponly=True,
-        secure=request.url.scheme == "https",
-        samesite="lax",
-        max_age=3600,
-        path="/",
-    )
+    _set_session_cookie(response, request, token)
     return response
 
 
 @rt("/health")
 def health():
-    return {"status": "ok"}
+    return {
+        "status": "ok",
+        "commit_sha": (os.getenv("VERCEL_GIT_COMMIT_SHA") or "").strip() or "unknown",
+    }
