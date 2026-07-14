@@ -16951,21 +16951,16 @@ def _build_chat_launch_url(
     ledger_id: str,
     tenant_id: str,
 ) -> str:
-    """Return a chat launch URL scoped to the active principal and ledger."""
+    """Return the canonical chat surface URL.
+
+    The chat surface reads the active principal/ledger from the shared
+    control-plane session cookie, so query parameters are unnecessary and
+    create duplicate-surface noise.
+    """
     base = base_url.rstrip("/")
     if not base or base.startswith("offline://") or not base.startswith(("http://", "https://")):
         return base or "#"
-    params: dict[str, str] = {}
-    if principal_did:
-        params["principal_did"] = principal_did
-    if ledger_id:
-        params["ledger_id"] = ledger_id
-    if tenant_id and tenant_id != "tenant:unknown":
-        params["tenant_id"] = tenant_id
-    if not params:
-        return base
-    separator = "&" if "?" in base else "?"
-    return f"{base}{separator}{urlencode(params)}"
+    return base
 
 
 def _chat_surface_display_name(identity_card: dict[str, Any] | None, fallback: str = os.getenv("DEFAULT_CHAT_HOST", "")) -> str:
