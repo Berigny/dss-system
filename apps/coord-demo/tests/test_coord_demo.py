@@ -52,7 +52,7 @@ def test_resolve_forwards_coordinate_to_middleware(
 
     assert response.status_code == 200
     assert captured["url"] == f"{app.MIDDLEWARE_URL}/api/decode_coordinate"
-    assert captured["json"] == {"coordinate": "chat-demo:WX-1"}
+    assert captured["json"] == {"coordinate": "chat-demo:WX-1", "ledger_id": app.DEFAULT_LEDGER_ID}
     assert "resolved" in response.text
 
 

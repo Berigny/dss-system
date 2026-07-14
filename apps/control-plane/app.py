@@ -3277,6 +3277,36 @@ def _normalized_principal_record(record: dict[str, Any]) -> dict[str, Any]:
     return normalized
 
 
+def _is_rejected_or_noisy_principal(record: dict[str, Any]) -> bool:
+    """Hide stale / rejected signups from the connections list.
+
+    Wallet-proof signups that were rejected, failed, or revoked, plus known
+    test/demo personas, should not clutter the dashboard. Model principals are
+    never filtered here.
+    """
+    if not isinstance(record, dict):
+        return True
+    metadata = _as_dict(record.get("metadata"))
+    actor_type = str(metadata.get("actor_type") or record.get("principal_type") or "").strip().lower()
+    if actor_type == "model":
+        return False
+    display_name = str(record.get("display_name") or record.get("name") or "").strip().lower()
+    email = str(record.get("email") or "").strip().lower()
+    status = str(record.get("status") or "").strip().lower()
+    signup_state = str(metadata.get("signup_state") or metadata.get("approval_status") or "").strip().lower()
+    if status in {"rejected", "failed", "revoked"}:
+        return True
+    if signup_state in {"rejected", "failed", "revoked"}:
+        return True
+    if "wizard smoke" in display_name:
+        return True
+    if display_name == "kaoru ichikawa":
+        return True
+    if "@example.com" in email or "@test.com" in email:
+        return True
+    return False
+
+
 def _canonical_subject_for_record(entity_type: str, entity_id: str, candidate: Any) -> str:
     value = str(candidate or "").strip()
     if value and not value.startswith("did:web:legacy.local:"):
@@ -3612,6 +3642,67 @@ def _relationship_record(
     if label and not str(record.get("label") or "").strip():
         record["label"] = label
     return record
+
+
+def _default_ledger_id(identity_card: dict[str, Any] | None = None) -> str:
+    configured = str(os.getenv("DEFAULT_LEDGER_ID") or "").strip()
+    if configured:
+        return configured
+    if identity_card is not None:
+        ledger = _user_ledger_id_from_identity_card(identity_card)
+        if ledger:
+            return ledger
+    return "LOAM"
+
+
+def _default_chat_surface_id(ledger_id: str | None = None) -> str:
+    configured = str(os.getenv("CHAT_SURFACE_ID") or "").strip()
+    if configured:
+        return configured
+    return "surface:chat:primary"
+
+
+async def _sync_model_binding_relationships(
+    request: Request,
+    *,
+    linked_model_principal: str,
+    ledger_id: str,
+    app_surfaces: list[str],
+    active: bool,
+) -> None:
+    """Ensure a model principal is linked to its ledger and app surfaces.
+
+    The backend model-binding registry stores the binding record, but the
+    control-plane visibility graph relies on explicit relationship records.
+    Create (or retire) the principal->ledger and principal->surface relationships
+    whenever a model binding is toggled on or off.
+    """
+    if not linked_model_principal:
+        return
+    target_status = "active" if active else "retired"
+    target_enabled = "enabled" if active else "disabled"
+    updated_at = datetime.now(timezone.utc).isoformat()
+    desired_rels: list[dict[str, Any]] = []
+    if ledger_id:
+        rel = _relationship_defaults(
+            "principal", linked_model_principal, "ledger", ledger_id, "member_of_ledger"
+        )
+        rel["status"] = target_status
+        rel["enabled_state"] = target_enabled
+        rel["updated_at"] = updated_at
+        desired_rels.append(rel)
+    for surface_id in app_surfaces:
+        if not surface_id:
+            continue
+        rel = _relationship_defaults(
+            "principal", linked_model_principal, "surface", surface_id, "can_access_surface"
+        )
+        rel["status"] = target_status
+        rel["enabled_state"] = target_enabled
+        rel["updated_at"] = updated_at
+        desired_rels.append(rel)
+    for rel in desired_rels:
+        await _control_plane_post("/api/control-plane/relationships", rel, request)
 
 
 def _relationship_to_settings_projection(record: dict[str, Any], *, entity_type: str = "", entity_id: str = "", label: str = "") -> dict[str, Any]:
@@ -7590,8 +7681,10 @@ def _layout(
               const bindingId = input.getAttribute("data-binding-id") || "";
               const modelId = input.getAttribute("data-model-id") || "";
               const linkedPrincipal = input.getAttribute("data-linked-principal") || "";
-              let appSurfaces = ["surface:chat:primary"];
-              let ledgerId = ownerLedgerId;
+              const defaultLedgerId = editor.getAttribute("data-default-ledger-id") || "";
+              const defaultChatSurfaceId = editor.getAttribute("data-default-chat-surface-id") || "surface:chat:primary";
+              let appSurfaces = [defaultChatSurfaceId];
+              let ledgerId = ownerLedgerId || defaultLedgerId;
               if (ownerType === "surface") {{
                 appSurfaces = [ownerId];
               }}
@@ -11060,6 +11153,9 @@ async def _load_connection_lookup_context(
     online_model_ids = {mid for mid in online_model_ids if mid not in _DEPRECATED_MODEL_IDS}
     principals_data = [item for item in principals_data if not _is_deprecated_model_record(item)]
     unfiltered_principals_data = [item for item in unfiltered_principals_data if not _is_deprecated_model_record(item)]
+    # Drop rejected / stale signups so they do not clutter the connections list.
+    principals_data = [item for item in principals_data if not _is_rejected_or_noisy_principal(item)]
+    unfiltered_principals_data = [item for item in unfiltered_principals_data if not _is_rejected_or_noisy_principal(item)]
 
     model_principals = []
     for item in principals_data:
@@ -11741,6 +11837,11 @@ def _render_entity_link_editor_modal(
     elif owner_type == "surface":
         surface_record = connection_context.get("surface_map", {}).get(owner_id, {})
         owner_ledger_id = str(_as_dict(surface_record).get("ledger_id") or "").strip()
+    elif owner_type == "principal":
+        principal_record = connection_context.get("principal_map", {}).get(owner_id, {})
+        owner_ledger_id = str(_as_dict(principal_record).get("ledger_id") or "").strip()
+    default_ledger_id = _default_ledger_id()
+    default_chat_surface_id = _default_chat_surface_id(default_ledger_id)
     model_bindings = connection_context.get("model_bindings", [])
     base_model_ids = {
         str(b.get("model_id") or "").strip().lower()
@@ -11751,7 +11852,7 @@ def _render_entity_link_editor_modal(
     }
     initial_links = json.dumps({k: sorted(v) for k, v in current_links.items()})
     body = f"""
-    <div class="entity-link-editor" data-owner-type="{html.escape(owner_type)}" data-owner-id="{html.escape(owner_id)}" data-owner-ledger-id="{html.escape(owner_ledger_id)}" data-initial-links="{html.escape(initial_links)}">
+    <div class="entity-link-editor" data-owner-type="{html.escape(owner_type)}" data-owner-id="{html.escape(owner_id)}" data-owner-ledger-id="{html.escape(owner_ledger_id)}" data-default-ledger-id="{html.escape(default_ledger_id)}" data-default-chat-surface-id="{html.escape(default_chat_surface_id)}" data-initial-links="{html.escape(initial_links)}">
       <p class="muted">Toggle items On to link them to <strong>{html.escape(owner_name)}</strong>. Toggle Off to remove the link. New entities can be created from Manage Connections.</p>
       {_link_editor_checkbox_list(owner_type, owner_id, items, current_links, model_bindings, base_model_ids, owner_ledger_id)}
       <p class="muted" style="margin-top:10px;"><span id="entity-link-editor-summary"></span></p>
@@ -17005,6 +17106,8 @@ async def models_page(request: Request) -> Response:
     if redirect is not None:
         return redirect
     profile_name = _profile_name_from_identity_card(identity_card)
+    default_ledger_id = html.escape(_default_ledger_id(identity_card))
+    default_chat_surface_id = html.escape(_default_chat_surface_id(default_ledger_id))
     snapshot = await build_dashboard_snapshot(request)
     auth_headers = _auth_headers_from_request(request)
     principal_status, principal_rows_body = await _principal_registry_get("/api/principals?limit=100", headers=auth_headers)
@@ -17190,6 +17293,8 @@ async def models_page(request: Request) -> Response:
       </div>
     </div>
     <script>
+      const defaultLedgerId = '{default_ledger_id}';
+      const defaultChatSurfaceId = '{default_chat_surface_id}';
       async function toggleModelVisibility(input) {{
         const label = input.parentElement.nextElementSibling;
         const checked = input.checked;
@@ -17208,7 +17313,8 @@ async def models_page(request: Request) -> Response:
               model_id: modelId,
               linked_model_principal: linkedPrincipal,
               status: checked ? 'active' : 'disabled',
-              app_surfaces: ['surface:chat:primary'],
+              app_surfaces: [defaultChatSurfaceId],
+              ledger_id: defaultLedgerId,
               scope: 'shared',
               source: 'model-toggle',
             }}),
@@ -22256,7 +22362,7 @@ async def api_control_plane_model_bindings(request: Request) -> JSONResponse:
 
 
 async def api_control_plane_model_bindings_upsert(request: Request) -> JSONResponse:
-    _, auth_error = await _control_plane_json_session(request)
+    session, auth_error = await _control_plane_json_session(request)
     if auth_error is not None:
         return auth_error
     payload = _as_dict(await request.json())
@@ -22265,6 +22371,14 @@ async def api_control_plane_model_bindings_upsert(request: Request) -> JSONRespo
     model_id = str(payload.get("model_id") or "").strip()
     if not binding_id or not provider_type or not model_id:
         return JSONResponse({"error": "binding_id_provider_type_and_model_id_required"}, status_code=400)
+    ledger_id = str(payload.get("ledger_id") or "").strip() or _default_ledger_id(session)
+    app_surfaces_raw = (
+        [str(item).strip() for item in _as_list(payload.get("app_surfaces")) if str(item).strip()]
+        if isinstance(payload.get("app_surfaces"), list)
+        else [part.strip() for part in str(payload.get("app_surfaces") or "").split(",") if part.strip()]
+    )
+    if not app_surfaces_raw:
+        app_surfaces_raw = [_default_chat_surface_id(ledger_id)]
     record = {
         "binding_id": binding_id,
         "name": str(payload.get("name") or binding_id).strip(),
@@ -22276,10 +22390,8 @@ async def api_control_plane_model_bindings_upsert(request: Request) -> JSONRespo
         "linked_model_principal": str(payload.get("linked_model_principal") or "").strip(),
         "scope": str(payload.get("scope") or "shared").strip() or "shared",
         "status": str(payload.get("status") or "planned").strip() or "planned",
-        "app_surfaces": [str(item).strip() for item in _as_list(payload.get("app_surfaces")) if str(item).strip()]
-        if isinstance(payload.get("app_surfaces"), list)
-        else [part.strip() for part in str(payload.get("app_surfaces") or "").split(",") if part.strip()],
-        "ledger_id": str(payload.get("ledger_id") or "").strip() or None,
+        "app_surfaces": app_surfaces_raw,
+        "ledger_id": ledger_id,
         "policy_profile": str(payload.get("policy_profile") or "default").strip() or "default",
         "source": str(payload.get("source") or "control-plane").strip() or "control-plane",
         "canonical_subject": str(payload.get("canonical_subject") or _canonical_entity_subject("binding", binding_id)).strip(),
@@ -22292,6 +22404,20 @@ async def api_control_plane_model_bindings_upsert(request: Request) -> JSONRespo
     response_payload["status"] = "ok"
     response_payload["model_binding"] = _as_dict(body.get("model_binding")) or record
     response_payload["saved"] = True
+    linked_model_principal = str(
+        _as_dict(response_payload.get("model_binding")).get("linked_model_principal")
+        or record.get("linked_model_principal")
+        or ""
+    ).strip()
+    if linked_model_principal:
+        active = str(record.get("status") or "").strip().lower() not in {"disabled", "retired", "inactive"}
+        await _sync_model_binding_relationships(
+            request,
+            linked_model_principal=linked_model_principal,
+            ledger_id=ledger_id,
+            app_surfaces=app_surfaces_raw,
+            active=active,
+        )
     return JSONResponse(response_payload, status_code=200)
 
 
