@@ -5669,6 +5669,12 @@ def control_plane_remove_connection(request: Request, payload: ConnectionRemoveR
     if len(filtered) != len(explicit_relationships):
         _persist_control_plane_relationships_v1(db, filtered)
 
+    if entity_type == "surface":
+        surfaces_v1 = _load_control_plane_surfaces_v1(db)
+        if entity_id in surfaces_v1:
+            del surfaces_v1[entity_id]
+            _persist_control_plane_surfaces_v1(db, surfaces_v1)
+
     return JSONResponse(
         {
             "status": "ok",

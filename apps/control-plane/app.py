@@ -20,7 +20,7 @@ import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence, TypedDict
-from urllib.parse import quote, urlencode, urlparse
+from urllib.parse import quote, urlencode, urlparse, urlunparse, parse_qs
 
 import httpx
 import jwt
@@ -3300,8 +3300,6 @@ def _is_rejected_or_noisy_principal(record: dict[str, Any]) -> bool:
         return True
     if "wizard smoke" in display_name:
         return True
-    if display_name == "kaoru ichikawa":
-        return True
     if "@example.com" in email or "@test.com" in email:
         return True
     return False
@@ -4276,6 +4274,8 @@ def _safe_next_path(value: str) -> str:
         }
         if LOCAL_CHAT_BASE_URL:
             allowed_hosts.add(str(urlparse(LOCAL_CHAT_BASE_URL).hostname or "").strip().lower())
+        if COORD_DEMO_BASE_URL:
+            allowed_hosts.add(str(urlparse(COORD_DEMO_BASE_URL).hostname or "").strip().lower())
         host = str(parsed.hostname or "").strip().lower()
         if host and host in {candidate for candidate in allowed_hosts if candidate}:
             return next_path
@@ -4283,6 +4283,26 @@ def _safe_next_path(value: str) -> str:
     if not next_path.startswith("/") or next_path.startswith("//"):
         return "/"
     return next_path
+
+
+def _append_session_token_to_url(next_url: str, token: str, request_host: str) -> str:
+    """Append a short-lived session token to a cross-domain redirect URL.
+
+    Same-domain redirects keep the HttpOnly cookie, but third-party/demo hosts
+    (e.g. coord-demo.vercel.app) cannot read it.  The token is added as a query
+    parameter so the target can establish its own first-party session.
+    """
+    if not token or not next_url:
+        return next_url or "/"
+    parsed = urlparse(next_url)
+    if not parsed.scheme or not parsed.netloc:
+        return next_url
+    if parsed.hostname and parsed.hostname.lower() == (request_host or "").lower():
+        return next_url
+    query_parts = parse_qs(parsed.query)
+    query_parts["ds_session_token"] = [token]
+    new_query = urlencode(query_parts, doseq=True)
+    return urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, new_query, parsed.fragment))
 
 
 def _frontdoor_cookie_signature() -> str:
@@ -9461,6 +9481,9 @@ async def connections_page(request: Request) -> Response:
     
     principals_data = [item for item in principals_data if not _is_deprecated_model_record(item)]
     unfiltered_principals_data = list(principals_data)
+    # Drop rejected / stale signups so they do not clutter the connections list.
+    principals_data = [item for item in principals_data if not _is_rejected_or_noisy_principal(item)]
+    unfiltered_principals_data = [item for item in unfiltered_principals_data if not _is_rejected_or_noisy_principal(item)]
     principals_data = _filter_records_by_tenant(principals_data, tenant_id, current_principal_did, user_ledger_id, related_ids, is_operator=is_operator)
     if current_principal_did and not any(
         str(item.get("principal_did") or "").strip() == current_principal_did
@@ -16183,6 +16206,23 @@ def _entity_trust_identifier(entity_type: str, entity_id: str, record: dict[str,
     return _canonical_entity_subject(entity_key, identifier)
 
 
+def _display_name_from_binding_id(binding_id: str) -> str | None:
+    """Convert a binding id such as 'binding:chat:anthropic-claude-fable-5'
+    into an OpenRouter-style label like 'Anthropic: Claude Fable 5'.
+    """
+    if not str(binding_id or "").strip().startswith("binding:"):
+        return None
+    tail = binding_id.split(":")[-1]
+    if "-" not in tail:
+        return None
+    provider_slug, _, model_slug = tail.partition("-")
+    provider = provider_slug.replace("_", " ").strip().title()
+    model_name = model_slug.replace("-", " ").strip().title()
+    if provider and model_name:
+        return f"{provider}: {model_name}"
+    return None
+
+
 def _display_label_for_entity(
     entity_type: str,
     entity_id: str,
@@ -16228,6 +16268,16 @@ def _display_label_for_entity(
             or str(row.get("canonical_subject") or "").strip()
             or identifier
         )
+    if entity_key == "binding":
+        label = (
+            str(row.get("name") or "").strip()
+            or str(row.get("display_name") or "").strip()
+            or str(row.get("label") or "").strip()
+            or str(row.get("canonical_subject") or "").strip()
+        )
+        if not label or label == identifier or label.startswith("binding:"):
+            label = _display_name_from_binding_id(identifier) or label
+        return label or identifier
     if entity_key == "source":
         return (
             str(row.get("file_name") or "").strip()
@@ -16908,11 +16958,8 @@ def _build_chat_launch_url(
 
 
 def _chat_surface_display_name(identity_card: dict[str, Any] | None, fallback: str = os.getenv("DEFAULT_CHAT_HOST", "")) -> str:
-    """Return a principal-scoped display name for the primary chat surface."""
-    profile_name = _profile_name_from_identity_card(identity_card)
-    if profile_name and profile_name not in {"Profile", ""}:
-        return f"{profile_name} — chat"
-    return fallback
+    """Return a stable display name for the primary chat surface."""
+    return CHAT_BASE_URL or fallback
 
 
 def _control_plane_app_surface_records(
@@ -17112,11 +17159,36 @@ def _derive_control_plane_app_surfaces(
         resolved_bindings,
         "binding_id",
     )
-    return _merged_control_plane_records(
+    records = _merged_control_plane_records(
         _control_plane_app_surface_records(snapshot, binding_records),
         resolved_app_surfaces,
         "surface_id",
     )
+    return _dedupe_chat_surfaces(records)
+
+
+def _url_base(value: str) -> str:
+    parsed = urlparse(str(value or "").strip())
+    path = parsed.path or "/"
+    return f"{parsed.netloc.lower()}{path.rstrip('/')}".rstrip("/")
+
+
+def _dedupe_chat_surfaces(records: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Collapse stored surfaces whose endpoint matches the primary chat URL."""
+    if not CHAT_BASE_URL:
+        return records
+    primary_base = _url_base(CHAT_BASE_URL)
+    result: list[dict[str, Any]] = []
+    for item in records:
+        if not isinstance(item, dict):
+            continue
+        surface_id = str(item.get("surface_id") or "").strip()
+        item_base = _url_base(item.get("endpoint"))
+        if item_base == primary_base and surface_id != "surface:chat:primary":
+            # Skip duplicate deep-link surfaces; primary remains.
+            continue
+        result.append(item)
+    return result
 
 
 def _snapshot_control_plane_records(
@@ -18052,10 +18124,10 @@ def _prompt_principal_label(metadata: dict[str, Any]) -> str:
 def _response_model_label(metadata: dict[str, Any]) -> str:
     model_id = str(metadata.get("model_id") or "").strip()
     if model_id:
-        return model_id
+        return _display_name_from_binding_id(model_id) or model_id
     provider_id = str(metadata.get("provider_id") or "").strip()
     if provider_id:
-        return provider_id
+        return _display_name_from_binding_id(provider_id) or provider_id
     return ""
 
 
@@ -21401,7 +21473,8 @@ async def login_wallet_complete(request: Request) -> Response:
         token = str(session.get("token") or "").strip()
         refresh_token = str(refresh_session.get("token") or "").strip()
         if request.method.upper() == "GET":
-            response: Response = RedirectResponse(url=next_path, status_code=303)
+            redirect_url = _append_session_token_to_url(next_path, token, str(getattr(request.url, "hostname", "") or ""))
+            response: Response = RedirectResponse(url=redirect_url, status_code=303)
         else:
             response = JSONResponse({"status": "ok", "redirect_to": next_path, "principal_did": principal_did}, status_code=200)
         if token:
@@ -23068,11 +23141,15 @@ async def api_control_plane_connection_remove(request: Request) -> JSONResponse:
     if status_code >= 400:
         return JSONResponse(body if isinstance(body, dict) else {"error": "connection_remove_failed"}, status_code=status_code)
     removed_ids = _as_dict(body).get("removed_relationship_ids") or []
-    if removed_ids:
+    if removed_ids or entity_type == "surface":
         state = _load_control_plane_state()
-        relationships = _as_dict_list(state.get("relationships"))
-        removed_set = set(str(rid) for rid in removed_ids)
-        state["relationships"] = [r for r in relationships if str(r.get("relationship_id") or "").strip() not in removed_set]
+        if removed_ids:
+            relationships = _as_dict_list(state.get("relationships"))
+            removed_set = set(str(rid) for rid in removed_ids)
+            state["relationships"] = [r for r in relationships if str(r.get("relationship_id") or "").strip() not in removed_set]
+        if entity_type == "surface":
+            app_surfaces = _as_dict_list(state.get("app_surfaces"))
+            state["app_surfaces"] = [s for s in app_surfaces if str(s.get("surface_id") or "").strip() != entity_id]
         _save_control_plane_state(state)
     response_payload = dict(body if isinstance(body, dict) else {})
     response_payload["status"] = "ok"
