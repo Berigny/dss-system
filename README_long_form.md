@@ -71,9 +71,6 @@ This repository is managed as a monorepo. The core components live under `apps/`
 ### 1. Chat Surface
 ![Chat Surface](https://github.com/user-attachments/assets/da1b5706-c4d9-4893-8fb7-ff39f1d53e43)
 
-<img width="1098" height="720" alt="03" src="" />
-
-
 A lightweight, threadless conversational front-end. Users converse in a single continuous interface, trusting the underlying DSS coordinate engine to bridge current context with past memories regardless of when they occurred.
 
 ### 2. Orchestrator Middleware
