@@ -17,6 +17,12 @@ MIDDLEWARE_URL = (
     or "http://middleware:8001"
 ).rstrip("/")
 
+DEFAULT_LEDGER_ID = (
+    os.getenv("DEFAULT_LEDGER_ID")
+    or os.getenv("LEDGER_ID")
+    or "LOAM"
+)
+
 app, rt = fast_app(secret_key=os.getenv("FASTHTML_SECRET_KEY", "coord-demo-secret"))
 
 
@@ -45,7 +51,7 @@ def index():
 
 @rt("/resolve", methods=["post"])
 def resolve(coordinate: str):
-    payload = {"coordinate": coordinate.strip()}
+    payload = {"coordinate": coordinate.strip(), "ledger_id": DEFAULT_LEDGER_ID}
     try:
         response = httpx.post(
             f"{MIDDLEWARE_URL}/api/decode_coordinate",
