@@ -12164,6 +12164,25 @@ def _codex_provision_defaults(identity_card: dict[str, Any] | None, snapshot: di
     }
 
 
+def _kimi_principal_did() -> str:
+    return os.getenv("KIMI_PRINCIPAL_DID", "")
+
+
+def _kimi_provision_defaults(identity_card: dict[str, Any] | None, snapshot: dict[str, Any]) -> dict[str, str]:
+    identity_vc = _as_dict(_as_dict(identity_card).get("identity_vc"))
+    tenant_id = str(identity_vc.get("tenant_id") or FRONTEND_TENANT_ID).strip() or FRONTEND_TENANT_ID
+    delegated_by_principal_did = str(identity_vc.get("principal_did") or "").strip()
+    active_ledger_id = str(identity_vc.get("ledger_id") or "").strip()
+    active_surface_id = _snapshot_active_surface_id(snapshot, active_ledger_id) if active_ledger_id else ""
+    return {
+        "tenant_id": tenant_id,
+        "delegated_by_principal_did": delegated_by_principal_did,
+        "active_ledger_id": active_ledger_id,
+        "active_surface_id": active_surface_id,
+        "delegation_mode": "delegated_only",
+    }
+
+
 def _recent_events_for_entity(
     entity_type: str,
     entity_id: str,
@@ -13627,6 +13646,52 @@ async def codex_principal_provision_submit(request: Request) -> Response:
     principal_id = str(principal.get("principal_did") or codex_did).strip() or codex_did
     return RedirectResponse(
         url=f"/principals/{quote(principal_id, safe='')}?{urlencode({'banner': 'Codex principal provisioned.', 'banner_kind': 'ok'})}",
+        status_code=303,
+    )
+
+
+async def kimi_principal_provision_submit(request: Request) -> Response:
+    identity_card, redirect = await _require_control_plane_auth(request)
+    if redirect is not None:
+        return redirect
+    form = await request.form()
+    if str(form.get("confirm_delegated_only") or "").strip().lower() != "yes":
+        return RedirectResponse(
+            url="/principals?banner=Confirm+delegated-only+posture+before+provisioning+Kimi.&banner_kind=warn",
+            status_code=303,
+        )
+    snapshot = await build_dashboard_snapshot(request)
+    defaults = _kimi_provision_defaults(identity_card, snapshot)
+    active_ledger_id = str(form.get("ledger_id") or defaults.get("active_ledger_id") or "").strip()
+    if not active_ledger_id:
+        return RedirectResponse(
+            url="/principals?banner=Unable+to+provision+Kimi+without+an+active+ledger+scope.&banner_kind=warn",
+            status_code=303,
+        )
+    active_surface_id = str(form.get("surface_id") or defaults.get("active_surface_id") or "").strip()
+    if not active_surface_id:
+        return RedirectResponse(
+            url="/principals?banner=Unable+to+provision+Kimi+without+an+active+chat+surface+scope.&banner_kind=warn",
+            status_code=303,
+        )
+    payload: dict[str, Any] = {
+        "tenant_id": defaults.get("tenant_id") or FRONTEND_TENANT_ID,
+        "delegated_by_principal_did": defaults.get("delegated_by_principal_did") or None,
+        "ledger_id": active_ledger_id,
+        "surface_ids": [active_surface_id],
+    }
+    status_code, body = await _control_plane_post("/api/control-plane/principals/kimi/provision", payload)
+    kimi_did = _kimi_principal_did()
+    if status_code >= 400:
+        detail = str(_as_dict(body).get("detail") or _as_dict(body).get("error") or "Unable to provision Kimi principal.").strip()
+        return RedirectResponse(
+            url=f"/principals?{urlencode({'banner': f'Unable to provision Kimi principal: {detail}', 'banner_kind': 'warn'})}",
+            status_code=303,
+        )
+    principal = _as_dict(_as_dict(body).get("principal"))
+    principal_id = str(principal.get("principal_did") or kimi_did).strip() or kimi_did
+    return RedirectResponse(
+        url=f"/principals/{quote(principal_id, safe='')}?{urlencode({'banner': 'Kimi principal provisioned.', 'banner_kind': 'ok'})}",
         status_code=303,
     )
 
@@ -15950,6 +16015,18 @@ async def principals_page(request: Request) -> Response:
     codex_defaults = _codex_provision_defaults(identity_card, snapshot)
     codex_active_ledger_id = str(codex_defaults.get("active_ledger_id") or "").strip()
     codex_active_surface_id = str(codex_defaults.get("active_surface_id") or "").strip()
+    kimi_did = _kimi_principal_did()
+    kimi_principal = next(
+        (
+            item
+            for item in principals
+            if isinstance(item, dict) and str(item.get("principal_did") or "").strip() == kimi_did
+        ),
+        None,
+    )
+    kimi_defaults = _kimi_provision_defaults(identity_card, snapshot)
+    kimi_active_ledger_id = str(kimi_defaults.get("active_ledger_id") or "").strip()
+    kimi_active_surface_id = str(kimi_defaults.get("active_surface_id") or "").strip()
     if not selected_principal and principals:
         selected_principal = str(principals[0].get("principal_did") or "").strip()
     lookup: dict[str, Any] = await _load_permissions_lookup(selected_principal, auth_headers=auth_headers) if selected_principal else {}
@@ -16087,6 +16164,25 @@ async def principals_page(request: Request) -> Response:
                   <button class="btn primary" type="submit">{"Re-provision Codex Principal" if isinstance(codex_principal, dict) else "Provision Codex Principal"}</button>
                 </form>
                 <p class="mini-note">The resulting principal contract remains the same delegated-only Codex identity frozen by DSS. Provisioning is blocked if active ledger or active surface defaults are missing.</p>
+              </div>
+              <div class="card">
+                <h2>Kimi Code Principal</h2>
+                <p class="muted">Provision the stable delegated Kimi Code principal directly from Control Plane. This creates or refreshes the governed <code>agent</code> principal for the Kimi Code CLI.</p>
+                <p><strong>Expected DID:</strong> {html.escape(kimi_did)}</p>
+                <p><strong>Current state:</strong> {html.escape(str(_as_dict(kimi_principal).get('status') or 'not provisioned'))}</p>
+                <p><strong>Default ledger scope:</strong> {html.escape(kimi_active_ledger_id or 'missing')}</p>
+                <p><strong>Default surface scope:</strong> {html.escape(kimi_active_surface_id or 'missing')}</p>
+                <p><strong>Delegation mode:</strong> {html.escape(str(kimi_defaults.get('delegation_mode') or 'delegated_only'))}</p>
+                <form action="/principals/kimi/provision" method="post" class="stack" style="margin-top:12px;">
+                  <input type="hidden" name="ledger_id" value="{html.escape(kimi_active_ledger_id)}" />
+                  <input type="hidden" name="surface_id" value="{html.escape(kimi_active_surface_id)}" />
+                  <label class="checkbox" style="display:flex; align-items:flex-start; gap:10px; margin-bottom:12px;">
+                    <input type="checkbox" name="confirm_delegated_only" value="yes" required />
+                    <span><strong>Confirm delegated-only posture</strong><br /><span class="muted">Provision Kimi Code only as a delegated scoped agent, not as a human or runtime model principal.</span></span>
+                  </label>
+                  <button class="btn primary" type="submit">{"Re-provision Kimi Principal" if isinstance(kimi_principal, dict) else "Provision Kimi Principal"}</button>
+                </form>
+                <p class="mini-note">The resulting principal contract remains the same delegated-only Kimi Code identity frozen by DSS. Provisioning is blocked if active ledger or active surface defaults are missing.</p>
               </div>
             </div>
             <div class="card">
@@ -17242,7 +17338,12 @@ async def models_page(request: Request) -> Response:
         if not isinstance(item, dict):
             continue
         metadata = _as_dict(item.get("metadata"))
-        if str(metadata.get("actor_type") or "").strip().lower() == "model":
+        actor_type = str(metadata.get("actor_type") or "").strip().lower()
+        if actor_type == "model":
+            model_principals.append(item)
+        elif actor_type == "agent" and str(metadata.get("agent_runtime") or "").strip().lower() == "external_cli":
+            # Surface delegated CLI agents (e.g. Kimi Code) alongside models so they
+            # can be managed as connection endpoints.
             model_principals.append(item)
     models_debug = await fetch_json('/api/models/debug', headers=auth_headers)
     models_debug_data = _migrated_models_debug(models_debug)
@@ -17290,6 +17391,8 @@ async def models_page(request: Request) -> Response:
             continue
         metadata = _as_dict(principal.get("metadata"))
         model_id = str(metadata.get("model_id") or metadata.get("model_name") or "").strip().lower()
+        if not model_id and str(metadata.get("actor_type") or "").strip().lower() == "agent":
+            model_id = str(metadata.get("agent_id") or "").strip().lower()
         if model_id:
             principal_by_model_id[model_id] = principal
 
@@ -17326,6 +17429,8 @@ async def models_page(request: Request) -> Response:
             continue
         metadata = _as_dict(principal.get("metadata"))
         model_id = str(metadata.get("model_id") or metadata.get("model_name") or "").strip()
+        if not model_id and str(metadata.get("actor_type") or "").strip().lower() == "agent":
+            model_id = str(metadata.get("agent_id") or "").strip()
         if model_id and model_id.lower() not in seen_ids:
             seen_ids.add(model_id.lower())
             binding = _as_dict(binding_by_model_id.get(model_id.lower()))
@@ -23533,6 +23638,7 @@ app = Starlette(
         Route("/ledgers/{ledger_id}", ledger_detail_page, methods=["GET", "HEAD"]),
         Route("/principals/{principal_id}", principal_detail_page, methods=["GET", "HEAD"]),
         Route("/principals/codex/provision", codex_principal_provision_submit, methods=["POST"]),
+        Route("/principals/kimi/provision", kimi_principal_provision_submit, methods=["POST"]),
         Route("/principals/{principal_id}/delegated-access", principal_delegated_access_update, methods=["POST"]),
         Route("/surfaces/{surface_id}", surface_detail_page, methods=["GET", "HEAD"]),
         Route("/sources/{source_id}", source_detail_page, methods=["GET", "HEAD"]),

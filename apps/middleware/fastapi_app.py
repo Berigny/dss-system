@@ -478,6 +478,16 @@ async def control_plane_codex_principal_provision(request: Request) -> Response:
 
 
 @app.post(
+    "/api/control-plane/principals/kimi/provision",
+    tags=["control-plane"],
+    summary="Provision or refresh the governed Kimi Code delegated principal",
+)
+async def control_plane_kimi_principal_provision(request: Request) -> Response:
+    resp = await _send_to_legacy(request, "POST", "/api/control-plane/principals/kimi/provision")
+    return Response(content=resp.content, status_code=resp.status_code, media_type=_content_type(resp))
+
+
+@app.post(
     "/api/control-plane/principals/{principal_did:path}/status",
     tags=["control-plane"],
     summary="Update control-plane principal status",

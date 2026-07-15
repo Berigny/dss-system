@@ -12,6 +12,8 @@ Auto-generated during DSS-232 pre-migration cleanup.
 | `BASIC_AUTH_USER` | "" | app.py |
 | `CHAT_SURFACE_ID` | "surface:chat:primary" | config/settings.py |
 | `CLOUD_API` | "https://ds-backend-new.fly.dev", "https://your-fly-app.fly.dev" | app.py, sync_daemon.py |
+| `CODEX_PRINCIPAL_DID` | "" | app.py |
+| `KIMI_PRINCIPAL_DID` | "" | app.py |
 | `CONTROL_PLANE_BASE` | os.getenv("DUALSUBSTRATE_CONTROL_PLANE_BASE", "https://id... | config/settings.py |
 | `DEFAULT_LEDGER_ID` | (required / no default) | config/settings.py |
 | `DEFAULT_SESSION_ID` | "demo-session" | config/settings.py |

@@ -2997,11 +2997,14 @@ function buildStreamRequestPayload({
 } = {}) {
     const entity = getCurrentSessionEntity();
     provider = normalizeModelId(provider);
+    const delegatedModeMatch = String(provider || '').match(/^delegated:([a-z0-9_-]+)$/i);
+    const delegatedMode = delegatedModeMatch ? delegatedModeMatch[1].toLowerCase() : '';
+    const activeProvider = delegatedMode ? '' : provider;
     const payload = {
         message,
-        provider,
-        agent: provider,
-        model: provider,
+        provider: activeProvider || undefined,
+        agent: activeProvider || undefined,
+        model: activeProvider || undefined,
         entity: entity || undefined,
         session_id: sessionId || undefined,
         enable_ledger: true,
@@ -3014,6 +3017,9 @@ function buildStreamRequestPayload({
         include_post_introspect_snapshot: true,
         request_id: `req-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`,
     };
+    if (delegatedMode) {
+        payload.prompt_principal_mode = delegatedMode;
+    }
     return payload;
 }
 
