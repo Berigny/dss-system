@@ -126,6 +126,8 @@ class PrincipalRegistry:
             "ollama:model:",
             "ollama:agent:",
             "openai:agent:",
+            "moonshot:model:",
+            "moonshot:agent:",
             "mcp:server:",
             "node:key:",
         ):

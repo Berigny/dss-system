@@ -285,6 +285,22 @@ class CodexPrincipalProvisionRequest(BaseModel):
     submission_ref: str | None = Field(None, description="Optional submission reference for governed writes.")
 
 
+class KimiPrincipalProvisionRequest(BaseModel):
+    """Provision the stable Kimi Code delegated principal with explicit delegated authority scope."""
+
+    model_config = ConfigDict(extra="ignore")
+
+    tenant_id: str | None = Field(None, description="Tenant scope for the Kimi principal")
+    ledger_id: str | None = Field(None, description="Optional governed ledger scope for delegated prompting")
+    surface_ids: list[str] = Field(default_factory=list, description="Optional governed surface scope for delegated prompting")
+    display_name: str | None = Field(None, description="Optional display label override for the Kimi principal")
+    delegated_by_principal_did: str | None = Field(None, description="Optional explicit delegating principal DID")
+    delegated_by_principal_id: str | None = Field(None, description="Optional explicit delegating principal id")
+    metadata: dict[str, Any] = Field(default_factory=dict, description="Optional additional metadata to merge into the principal record")
+    idempotency_key: str | None = Field(None, description="Optional idempotency key for retry-safe writes.")
+    submission_ref: str | None = Field(None, description="Optional submission reference for governed writes.")
+
+
 class BenchmarkPublicationJobRequest(BaseModel):
     domain_key: str = Field(..., description="Operator benchmark publication domain key.")
 
@@ -2452,6 +2468,8 @@ def _normalize_principal_key_reference(value: Any) -> str:
         "openrouter:model:",
         "openrouter:provider:",
         "ollama:model:",
+        "moonshot:model:",
+        "moonshot:agent:",
         "mcp:server:",
         "node:key:",
     ):
@@ -3518,6 +3536,112 @@ def _ensure_codex_principal(
         metadata=metadata,
         status="active",
         provisioning_source="control_plane_codex_principal_v1",
+        idempotency_key=payload.idempotency_key,
+        submission_ref=payload.submission_ref,
+    )
+
+    stable_existing = registry.get(stable_did)
+    key_ref_existing = _find_principal_by_key_ref(registry, principal_key_ref=key_ref, tenant_id=tenant_scope)
+    legacy_did = str(key_ref_existing.get("principal_did") or "").strip() if isinstance(key_ref_existing, dict) else ""
+    source_existing = stable_existing if isinstance(stable_existing, dict) else key_ref_existing if isinstance(key_ref_existing, dict) else None
+
+    mutated = False
+    target_record = _upsert_principal_record(
+        existing=source_existing if isinstance(source_existing, dict) else None,
+        principal_did=stable_did,
+        payload=provision_payload,
+    )
+
+    if source_existing is not stable_existing and isinstance(source_existing, dict):
+        legacy_source_did = str(source_existing.get("principal_did") or legacy_did).strip()
+        if legacy_source_did and legacy_source_did != stable_did and legacy_source_did in registry:
+            registry.pop(legacy_source_did, None)
+            mutated = True
+
+    if legacy_did and legacy_did != stable_did and legacy_did in registry:
+        registry.pop(legacy_did, None)
+        mutated = True
+
+    _ensure_principal_registry_uniqueness(
+        registry,
+        principal_did=stable_did,
+        tenant_id=str(target_record.get("tenant_id") or tenant_scope).strip(),
+        key_references=target_record.get("principal_key_refs")
+        if isinstance(target_record.get("principal_key_refs"), list)
+        else target_record.get("key_references")
+        if isinstance(target_record.get("key_references"), list)
+        else [],
+        canonical_subject=str(target_record.get("canonical_subject") or "").strip(),
+    )
+    if not isinstance(stable_existing, dict) or dict(stable_existing) != dict(target_record):
+        mutated = True
+    registry[stable_did] = target_record
+    return registry, target_record, mutated
+
+
+def _stable_kimi_principal_did(*, request: Request | None) -> str:
+    """Stable DID for the Moonshot Kimi Code delegated CLI agent.
+
+    Uses KIMI_PRINCIPAL_HOST if set (e.g. chat.dualsubstrate.com), otherwise
+    falls back to the request host so the principal is bound to the chat surface.
+    """
+    host = os.getenv("KIMI_PRINCIPAL_HOST", "").strip()
+    if not host:
+        base_url = _control_plane_public_base_url(request)
+        host = str(urlsplit(base_url).hostname or "").strip().lower() or os.getenv("DEFAULT_HOST", "")
+    provider_key = _canonical_model_provider_namespace("moonshot")
+    agent_key = re.sub(r"[^a-z0-9]+", "-", "kimi-code").strip("-") or "kimi-code"
+    return f"did:web:{host}:principals:agent:{provider_key}:{agent_key}"
+
+
+def _ensure_kimi_principal(
+    *,
+    request: Request,
+    registry: dict[str, dict[str, Any]],
+    payload: KimiPrincipalProvisionRequest,
+) -> tuple[dict[str, dict[str, Any]], dict[str, Any], bool]:
+    stable_did = _stable_kimi_principal_did(request=request)
+    key_ref = _canonical_agent_key_ref("moonshot", "kimi-code")
+    tenant_scope = _normalize_principal_tenant_id(payload.tenant_id)
+    normalized_ledger_id = _normalize_related_ledger_id(payload.ledger_id)
+    normalized_surface_ids = sorted({str(item).strip() for item in payload.surface_ids if str(item).strip()})
+    delegated_by_principal_did = (
+        str(payload.delegated_by_principal_did or principal_from_request(request).principal_did or "").strip() or None
+    )
+    delegated_by_principal_id = (
+        str(payload.delegated_by_principal_id or principal_from_request(request).principal_id or "").strip() or None
+    )
+    metadata = dict(payload.metadata or {})
+    metadata.update(
+        {
+            "actor_type": "agent",
+            "wallet_capable": False,
+            "provider_type": "moonshot",
+            "agent_id": "kimi-code",
+            "agent_runtime": "external_cli",
+            "delegated_authority": {
+                "delegation_mode": "delegated_only",
+                "delegated_prompt_execution": "explicit_cli_request_required",
+                "hidden_operator_alias": False,
+                "revocable": True,
+                "revocation_mode": "control_plane_operator",
+                "ledger_scope": [normalized_ledger_id] if normalized_ledger_id else [],
+                "surface_scope": normalized_surface_ids,
+                "delegated_by_principal_did": delegated_by_principal_did,
+                "delegated_by_principal_id": delegated_by_principal_id,
+            },
+        }
+    )
+    if normalized_ledger_id:
+        metadata["ledger_id"] = normalized_ledger_id
+    provision_payload = PrincipalCreateRequest(
+        principal_did=stable_did,
+        tenant_id=tenant_scope,
+        display_name=str(payload.display_name or "Moonshot: Kimi-code").strip() or "Moonshot: Kimi-code",
+        principal_key_refs=[key_ref],
+        metadata=metadata,
+        status="active",
+        provisioning_source="control_plane_kimi_principal_v1",
         idempotency_key=payload.idempotency_key,
         submission_ref=payload.submission_ref,
     )
@@ -5272,6 +5396,45 @@ def control_plane_provision_codex_principal(request: Request, payload: CodexPrin
     principals_v1 = _load_registered_principals_v1(db)
     existing = principals_v1.get(stable_did)
     principals_v1, record, _ = _ensure_codex_principal(request=request, registry=principals_v1, payload=payload)
+    if isinstance(existing, dict):
+        record["created_by_principal_id"] = str(existing.get("created_by_principal_id") or "").strip() or None
+    else:
+        record["created_by_principal_id"] = str(principal_from_request(request).principal_id or "").strip() or None
+    record["last_changed_by_principal_id"] = str(principal_from_request(request).principal_id or "").strip() or None
+    principals_v1[stable_did] = record
+    canonical = _persist_registered_principals_v1(db, principals_v1)
+    persisted = canonical.get(stable_did)
+    response = _build_control_plane_response(
+        resource_key="principal",
+        record=persisted or record,
+        entity_type="principal",
+        previous_status=str(existing.get("status") or "").strip().lower() if isinstance(existing, dict) else None,
+        idempotency_key=payload.idempotency_key,
+    )
+    _store_control_plane_mutation(db, idempotency_key=payload.idempotency_key, fingerprint=fingerprint, response=response)
+    return response
+
+
+@control_plane_router.post("/principals/kimi/provision")
+def control_plane_provision_kimi_principal(request: Request, payload: KimiPrincipalProvisionRequest, db=Depends(get_db)):
+    _require_control_plane_operator(request)
+    _authorize_admin_scope(request, ledger_id="default", action="ledger.write")
+
+    stable_did = _stable_kimi_principal_did(request=request)
+    fingerprint = _payload_fingerprint(
+        "control_plane_provision_kimi_principal",
+        {
+            "principal_did": stable_did,
+            "payload": payload.model_dump(mode="json"),
+        },
+    )
+    replay = _replay_control_plane_mutation(db, idempotency_key=payload.idempotency_key, fingerprint=fingerprint)
+    if replay is not None:
+        return replay
+
+    principals_v1 = _load_registered_principals_v1(db)
+    existing = principals_v1.get(stable_did)
+    principals_v1, record, _ = _ensure_kimi_principal(request=request, registry=principals_v1, payload=payload)
     if isinstance(existing, dict):
         record["created_by_principal_id"] = str(existing.get("created_by_principal_id") or "").strip() or None
     else:

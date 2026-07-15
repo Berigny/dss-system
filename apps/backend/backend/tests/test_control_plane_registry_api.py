@@ -967,6 +967,80 @@ def test_control_plane_provision_codex_principal_uses_public_identity_domain_wit
     assert principal["principal_did"] == "did:web:id.dualsubstrate.com:principals:agent:openai:codex"
 
 
+def test_control_plane_provision_kimi_principal_freezes_stable_agent_identity(monkeypatch) -> None:
+    monkeypatch.setenv("ADMIN_TOKEN", "test-admin-token")
+    monkeypatch.setenv("LEDGER_AUTHZ_MODE", "registry")
+    monkeypatch.setenv("LEDGER_AUTHZ_UNKNOWN_LEDGER_POLICY", "deny")
+    monkeypatch.setenv("PUBLIC_BASE_URL", "https://id.dualsubstrate.com")
+    monkeypatch.setenv("KIMI_PRINCIPAL_HOST", "chat.dualsubstrate.com")
+
+    client = _make_client()
+    headers = {"x-principal-id": "ops-admin", "x-principal-type": "admin"}
+
+    response = client.post(
+        "/api/control-plane/principals/kimi/provision",
+        json={
+            "tenant_id": "tenant:demo",
+            "ledger_id": "chat-demo",
+            "surface_ids": ["surface:chat:primary"],
+            "idempotency_key": "kimi-principal-1",
+        },
+        headers=headers,
+    )
+    assert response.status_code == 200
+    principal = response.json()["principal"]
+    assert principal["principal_did"] == "did:web:chat.dualsubstrate.com:principals:agent:moonshot:kimi-code"
+    assert principal["canonical_subject"] == "did:web:chat.dualsubstrate.com:principals:agent:moonshot:kimi-code"
+    assert principal["actor_type"] == "agent"
+    assert principal["status"] == "active"
+    assert principal["display_name"] == "Moonshot: Kimi-code"
+    assert principal["metadata"]["actor_type"] == "agent"
+    assert principal["metadata"]["provider_type"] == "moonshot"
+    assert principal["metadata"]["agent_id"] == "kimi-code"
+    assert principal["metadata"]["agent_runtime"] == "external_cli"
+    assert principal["metadata"]["ledger_id"] == "chat-demo"
+    delegated = principal["metadata"]["delegated_authority"]
+    assert delegated["delegation_mode"] == "delegated_only"
+    assert delegated["delegated_prompt_execution"] == "explicit_cli_request_required"
+    assert delegated["hidden_operator_alias"] is False
+    assert delegated["revocable"] is True
+    assert delegated["revocation_mode"] == "control_plane_operator"
+    assert delegated["ledger_scope"] == ["chat-demo"]
+    assert delegated["surface_scope"] == ["surface:chat:primary"]
+    assert delegated["delegated_by_principal_id"] == "ops-admin"
+    assert principal["principal_key_refs"] == ["moonshot:agent:kimi-code"]
+
+    list_response = client.get("/api/control-plane/principals", headers=headers)
+    assert list_response.status_code == 200
+    principals = list_response.json()["principals"]
+    assert any(p["principal_did"] == "did:web:chat.dualsubstrate.com:principals:agent:moonshot:kimi-code" for p in principals)
+
+
+def test_control_plane_provision_kimi_principal_uses_request_host_without_env(monkeypatch) -> None:
+    monkeypatch.setenv("ADMIN_TOKEN", "test-admin-token")
+    monkeypatch.setenv("LEDGER_AUTHZ_MODE", "registry")
+    monkeypatch.setenv("LEDGER_AUTHZ_UNKNOWN_LEDGER_POLICY", "deny")
+    monkeypatch.delenv("PUBLIC_BASE_URL", raising=False)
+    monkeypatch.delenv("KIMI_PRINCIPAL_HOST", raising=False)
+
+    client = _make_client(base_url="https://chat.example.com")
+    headers = {"x-principal-id": "ops-admin", "x-principal-type": "admin"}
+
+    response = client.post(
+        "/api/control-plane/principals/kimi/provision",
+        json={
+            "tenant_id": "tenant:demo",
+            "ledger_id": "chat-demo",
+            "surface_ids": ["surface:chat:primary"],
+            "idempotency_key": "kimi-principal-no-env",
+        },
+        headers=headers,
+    )
+    assert response.status_code == 200
+    principal = response.json()["principal"]
+    assert principal["principal_did"] == "did:web:chat.example.com:principals:agent:moonshot:kimi-code"
+
+
 def test_control_plane_relationships_include_derived_material_connections(monkeypatch) -> None:
     monkeypatch.setenv("ADMIN_TOKEN", "test-admin-token")
     monkeypatch.setenv("LEDGER_AUTHZ_MODE", "registry")

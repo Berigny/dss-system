@@ -81,6 +81,9 @@ OPENAI_COMPAT_POLICY_ALLOW_CLIENT_OVERRIDES = os.getenv(
 CODEX_PRINCIPAL_DID = os.getenv("CODEX_PRINCIPAL_DID", "")
 CODEX_PRINCIPAL_KEY_ID = "openai:agent:codex"
 CODEX_PRINCIPAL_ID = "openai:codex"
+KIMI_PRINCIPAL_DID = os.getenv("KIMI_PRINCIPAL_DID", "")
+KIMI_PRINCIPAL_KEY_ID = "moonshot:agent:kimi-code"
+KIMI_PRINCIPAL_ID = "moonshot:kimi-code"
 OPENAI_COMPAT_INCLUDE_PIPELINE_EVENTS = os.getenv("OPENAI_COMPAT_INCLUDE_PIPELINE_EVENTS", "").strip().lower() in {
     "1",
     "true",
@@ -1459,7 +1462,7 @@ async def _prepare_middleware_chat_proxy(
         or forwarded.pop("prompt_as_principal", "")
         or ""
     ).strip().lower()
-    if prompt_principal_mode == "codex" and not isinstance(forwarded.get("delegated_principal"), dict):
+    if prompt_principal_mode in {"codex", "kimi"} and not isinstance(forwarded.get("delegated_principal"), dict):
         resolved_identity = _resolved_human_principal_identity(
             identity_vc=identity_vc,
             fallback_principal_did=str(
@@ -1489,29 +1492,46 @@ async def _prepare_middleware_chat_proxy(
         if not operator_principal_did or not session_jti or not session_token:
             raise HTTPException(
                 status_code=400,
-                detail="codex_prompt_requires_authenticated_delegation_context",
+                detail=f"{prompt_principal_mode}_prompt_requires_authenticated_delegation_context",
             )
         operator_principal_id = str(
             resolved_identity.get("principal_id")
             or settings.FRONTEND_PRINCIPAL_ID
             or "demo-user"
         ).strip()
-        forwarded["delegated_principal"] = {
-            "principal_did": CODEX_PRINCIPAL_DID,
-            "principal_key_id": CODEX_PRINCIPAL_KEY_ID,
-            "principal_id": CODEX_PRINCIPAL_ID,
-            "principal_display_name": "openai/codex",
-            "prompt_principal_display_name": "openai/codex",
-            "principal_type": "agent",
-            # Reuse the existing delegated middleware path and fail closed if it cannot apply.
-            "explicit_cli_request": True,
-            "delegation_mode": "delegated_only",
-            "delegated_by_principal_did": operator_principal_did,
-            "delegated_by_principal_id": operator_principal_id,
-            "ledger_scope": [ledger_id],
-            "surface_scope": [settings.CHAT_SURFACE_ID],
-            "surface_id": settings.CHAT_SURFACE_ID,
-        }
+        if prompt_principal_mode == "codex":
+            forwarded["delegated_principal"] = {
+                "principal_did": CODEX_PRINCIPAL_DID,
+                "principal_key_id": CODEX_PRINCIPAL_KEY_ID,
+                "principal_id": CODEX_PRINCIPAL_ID,
+                "principal_display_name": "openai/codex",
+                "prompt_principal_display_name": "openai/codex",
+                "principal_type": "agent",
+                # Reuse the existing delegated middleware path and fail closed if it cannot apply.
+                "explicit_cli_request": True,
+                "delegation_mode": "delegated_only",
+                "delegated_by_principal_did": operator_principal_did,
+                "delegated_by_principal_id": operator_principal_id,
+                "ledger_scope": [ledger_id],
+                "surface_scope": [settings.CHAT_SURFACE_ID],
+                "surface_id": settings.CHAT_SURFACE_ID,
+            }
+        elif prompt_principal_mode == "kimi":
+            forwarded["delegated_principal"] = {
+                "principal_did": KIMI_PRINCIPAL_DID,
+                "principal_key_id": KIMI_PRINCIPAL_KEY_ID,
+                "principal_id": KIMI_PRINCIPAL_ID,
+                "principal_display_name": "Moonshot: Kimi-code",
+                "prompt_principal_display_name": "Moonshot: Kimi-code",
+                "principal_type": "agent",
+                "explicit_cli_request": True,
+                "delegation_mode": "delegated_only",
+                "delegated_by_principal_did": operator_principal_did,
+                "delegated_by_principal_id": operator_principal_id,
+                "ledger_scope": [ledger_id],
+                "surface_scope": [settings.CHAT_SURFACE_ID],
+                "surface_id": settings.CHAT_SURFACE_ID,
+            }
 
     outbound_headers = dict(api.headers)
     session_token = str(request.cookies.get(BACKEND_SESSION_TOKEN_COOKIE) or "").strip()
@@ -4338,6 +4358,8 @@ async def set_agent(request: Request):
     middleware_payload = await _fetch_middleware_models("full", timeout, request)
     models_data, _, _ = _split_models_from_middleware(middleware_payload)
     available_ids = {item.get("id") for item in models_data if item.get("id")}
+    if KIMI_PRINCIPAL_DID:
+        available_ids.add("delegated:kimi")
 
     if not selected_agent:
         preferred = str(settings.LLM_MODEL or "").strip()
@@ -4624,6 +4646,11 @@ async def list_models(request: Request):
             else:
                 local_models.append(item)
 
+    # Surface the Kimi Code delegated agent as a selectable option when configured.
+    delegated_models: list[dict[str, str]] = []
+    if KIMI_PRINCIPAL_DID:
+        delegated_models.append({"id": "delegated:kimi", "name": "Moonshot: Kimi-code"})
+
     accept_header = (request.headers.get("accept") or "").lower()
     is_htmx = (request.headers.get("hx-request") or "").lower() == "true"
     wants_json = "application/json" in accept_header and not is_htmx
@@ -4654,15 +4681,24 @@ async def list_models(request: Request):
             for model in online_models
         ) or (Option("No online models configured", value="", disabled=True),)
 
-        return (
+        delegated_options = tuple(
+            Option(model["name"], value=model["id"], selected=(model["id"] == current_model))
+            for model in delegated_models
+        ) or (Option("No delegated agents configured", value="", disabled=True),)
+
+        groups = [
             Optgroup(*local_options, label="Ollama (local)"),
             Optgroup(*online_options, label="OpenRouter (online)"),
-        )
+        ]
+        if delegated_models:
+            groups.append(Optgroup(*delegated_options, label="Delegated agents"))
+        return tuple(groups)
 
     return {
         "models": models,
         "local_models": local_models,
         "online_models": online_models,
+        "delegated_models": delegated_models,
         "fallback": fallback_used,
         "unavailable": bool(payload.get("unavailable")) if isinstance(payload, dict) else False,
         "reason": str(payload.get("reason") or "").strip() or None if isinstance(payload, dict) else None,

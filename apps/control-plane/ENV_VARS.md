@@ -26,6 +26,7 @@ Auto-generated during DSS-232 pre-migration cleanup.
 | `GITHUB_OAUTH_CLIENT_ID` | (required / no default) | app.py |
 | `GITHUB_OAUTH_CLIENT_SECRET` | (required / no default) | app.py |
 | `ISSUER_DID` | (required / no default) | app.py |
+| `KIMI_PRINCIPAL_DID` | "" | app.py |
 | `LLM_BASE_URL` | (required / no default) | app.py |
 | `LLM_MODEL` | (required / no default) | app.py |
 | `LLM_PROVIDER` | (required / no default) | app.py |

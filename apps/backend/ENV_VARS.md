@@ -113,6 +113,7 @@ Auto-generated during DSS-232 pre-migration cleanup.
 | `GUARDIAN_REASONING_MAX_CHARS` | "320" | backend/fieldx_kernel/guardian.py |
 | `INGEST_DEFAULT_COHERENCE` | "0.9999" | backend/api/ingest.py |
 | `KERNEL_CHUNK_MAX_TOKENS` | str(DEFAULT_CHUNK_MAX_TOKENS | backend/ingestion/chunker.py |
+| `KIMI_PRINCIPAL_HOST` | "" | backend/api/admin.py |
 | `KNOWLEDGE_TREE_LIMIT` | "50" | backend/api/chat.py, backend/fieldx_kernel/orchestrator.py |
 | `LEDGER_ADMIN_INCLUDE_DISCOVERED` | "false" | backend/api/admin.py |
 | `LEDGER_AUTHZ_ADMIN_PRINCIPAL_TYPES` | "admin,service" | backend/api/admin.py, backend/services/authz.py |
