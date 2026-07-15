@@ -1686,7 +1686,16 @@ def auth_session_refresh(request: Request, db=Depends(get_db)):
             detail={"error": "principal_not_active", "principal_status": principal_status or "unknown"},
         )
 
-    token_bundle = refresh_surface_session_bundle(claims)
+    metadata = principal_record.get("metadata") if isinstance(principal_record.get("metadata"), dict) else {}
+    refreshed_ledger_id = (
+        str(metadata.get("provisioned_ledger_id") or "").strip()
+        or str(metadata.get("ledger_id") or "").strip()
+    )
+    refreshed_ledger_ids = [refreshed_ledger_id] if refreshed_ledger_id else []
+    token_bundle = refresh_surface_session_bundle(
+        claims,
+        ledger_ids=refreshed_ledger_ids,
+    )
     session_token = token_bundle["session"]
     refresh_token = token_bundle["refresh_session"]
     return {

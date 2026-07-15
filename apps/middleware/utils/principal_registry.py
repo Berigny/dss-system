@@ -122,7 +122,10 @@ class PrincipalRegistry:
             "github:user:",
             "openrouter:model:",
             "openrouter:provider:",
+            "openrouter:agent:",
             "ollama:model:",
+            "ollama:agent:",
+            "openai:agent:",
             "mcp:server:",
             "node:key:",
         ):

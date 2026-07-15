@@ -904,6 +904,42 @@ def test_api_auth_session_refresh_returns_login_url_on_401(monkeypatch):
     assert payload["login_url"].startswith("https://id.dualsubstrate.com/login?next=")
 
 
+def test_api_auth_session_refresh_is_exempt_from_frontdoor_auth(monkeypatch):
+    monkeypatch.setenv("FRONTDOOR_AUTH_MODE", "form")
+    client.cookies.clear()
+
+    async def fake_refresh(request):
+        return (
+            200,
+            {
+                "status": "ok",
+                "principal_did": "did:key:z6MkRefreshExempt",
+                "session": {
+                    "token": "access-exempt",
+                    "token_type": "bearer",
+                    "expires_at": 1,
+                    "issued_at": 0,
+                    "jti": "jti-access",
+                },
+                "refresh_session": {
+                    "token": "refresh-exempt",
+                    "token_type": "bearer",
+                    "expires_at": 1,
+                    "issued_at": 0,
+                    "jti": "jti-refresh",
+                },
+            },
+        )
+
+    monkeypatch.setattr(app_module, "_refresh_shared_backend_session", fake_refresh)
+
+    response = client.post("/api/auth/session/refresh")
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "ok"
+    assert payload["principal_did"] == "did:key:z6MkRefreshExempt"
+
+
 def test_login_page_is_github_only(monkeypatch):
     monkeypatch.setenv("FRONTDOOR_AUTH_MODE", "form")
     client.cookies.clear()
