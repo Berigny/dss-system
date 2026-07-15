@@ -25,11 +25,11 @@ jobs:
         run: |
           export FLYCTL_INSTALL="$HOME/.fly"
           export PATH="$FLYCTL_INSTALL/bin:$PATH"
-          flyctl deploy . --app dss-system-backend --access-token ${{ secrets.FLY_API_TOKEN }}
+          flyctl deploy . --app dss-system-backend --config apps/backend/fly.toml --access-token ${{ secrets.FLY_API_TOKEN }}
 
       - name: Deploy to Fly.io (staging)
         if: github.ref == 'refs/heads/develop'
         run: |
           export FLYCTL_INSTALL="$HOME/.fly"
           export PATH="$FLYCTL_INSTALL/bin:$PATH"
-          flyctl deploy . --app dss-system-backend-staging --access-token ${{ secrets.FLY_API_TOKEN }}
+          flyctl deploy . --app dss-system-backend-staging --config apps/backend/fly.toml --access-token ${{ secrets.FLY_API_TOKEN }}
