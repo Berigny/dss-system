@@ -44,7 +44,7 @@ def test_proxy_sync_pull_returns_502_on_request_error(monkeypatch):
 
 
 def test_proxy_ledger_history_preserves_coord_meta(monkeypatch):
-    async def fake_backend_fetch_json(*, path: str, timeout: float = 20.0, method: str = "GET", payload=None, params=None):
+    async def fake_backend_fetch_json(*, path: str, timeout: float = 20.0, method: str = "GET", payload=None, params=None, headers=None):
         assert params == {"limit": 5}
         assert path == "/ledger/history/chat-demo"
         return {
@@ -75,3 +75,23 @@ def test_proxy_ledger_history_preserves_coord_meta(monkeypatch):
     body = resp.json()
     history = body.get("history") or []
     assert history[0]["coord_meta"]["canonical_subject"] == "did:web:id.dualsubstrate.com:ledgers:chat-demo"
+
+
+def test_proxy_ledger_history_forwards_ledger_context_headers(monkeypatch):
+    captured: dict[str, object] = {}
+
+    async def fake_backend_fetch_json(*, path: str, timeout: float = 20.0, method: str = "GET", payload=None, params=None, headers=None):
+        captured["path"] = path
+        captured["headers"] = headers
+        return {"history": []}
+
+    monkeypatch.setattr(app_module, "_backend_fetch_json", fake_backend_fetch_json)
+
+    resp = client.get(
+        "/ledger/history/LOAM?limit=5",
+        headers={"x-ledger-id": "loam", "x-context-id": "ctx:test"},
+    )
+    assert resp.status_code == 200
+    forwarded = captured.get("headers") or {}
+    assert forwarded.get("x-ledger-id") == "loam"
+    assert forwarded.get("x-context-id") == "ctx:test"

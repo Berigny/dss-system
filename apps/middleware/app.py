@@ -1373,6 +1373,25 @@ def root_info():
     }
 
 
+def _backend_headers_from_request(request: Request) -> dict[str, str]:
+    """Merge the global API headers with any ledger/auth context from the caller."""
+    headers = dict(api.headers)
+    for key in (
+        "x-ledger-id",
+        "x-ledger-id-h64",
+        "x-context-id",
+        "x-principal-id",
+        "x-principal-type",
+        "x-tenant-id",
+        "authorization",
+        "x-session-token",
+    ):
+        value = request.headers.get(key)
+        if value:
+            headers[key] = value
+    return headers
+
+
 async def _backend_fetch_json(
     *,
     method: str,
@@ -1433,6 +1452,7 @@ async def proxy_ledger_history(request: Request, entity_path: str):
         method="GET",
         path=f"/ledger/history/{entity}",
         params={"limit": limit},
+        headers=_backend_headers_from_request(request),
     )
     return JSONResponse(body)
 
