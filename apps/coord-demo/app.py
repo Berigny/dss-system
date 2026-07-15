@@ -34,6 +34,11 @@ DEFAULT_LEDGER_ID = (
     or "LOAM"
 )
 
+COORD_DEMO_BASE_URL = (
+    os.getenv("COORD_DEMO_BASE_URL")
+    or "https://decode.dualsubstrate.com"
+).rstrip("/")
+
 BACKEND_SESSION_TOKEN_COOKIE = "ds_backend_session_token"
 
 
@@ -41,7 +46,7 @@ app, rt = fast_app(secret_key=os.getenv("FASTHTML_SECRET_KEY", "coord-demo-secre
 
 
 def _login_url(request: Request) -> str:
-    callback_url = f"{(os.getenv('COORD_DEMO_BASE_URL') or request.url.scheme + '://' + str(request.url.netloc)).rstrip('/')}/auth/callback"
+    callback_url = f"{COORD_DEMO_BASE_URL}/auth/callback"
     return f"{CONTROL_PLANE_BASE}/login/wallet?next={quote(callback_url, safe='/?:&=')}"
 
 def _is_https_request(request: Request) -> bool:
@@ -52,7 +57,7 @@ async def _verify_session_token(token: str) -> str | None:
     """Ask the control-plane to validate the shared backend session token."""
     if not token:
         return None
-    verify_url = f"{CONTROL_PLANE_BASE}/auth/session/verify"
+    verify_url = f"{CONTROL_PLANE_BASE}/api/auth/session/verify"
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             resp = await client.get(
