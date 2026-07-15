@@ -254,10 +254,20 @@ def refresh_session_token(
 def refresh_surface_session_bundle(
     claims: dict[str, Any],
     *,
+    ledger_ids: list[str] | None = None,
     access_ttl_seconds: int | None = None,
     refresh_ttl_seconds: int | None = None,
 ) -> dict[str, Any]:
     session_family_id = str(claims.get("session_family_id") or "").strip() or f"ssf_{secrets.token_urlsafe(12)}"
+    effective_ledger_ids = (
+        [str(item).strip() for item in ledger_ids if str(item).strip()]
+        if ledger_ids is not None
+        else [
+            str(item).strip()
+            for item in (claims.get("ledger_ids") or [])
+            if str(item).strip()
+        ]
+    )
     session = mint_session_token(
         principal_did=str(claims.get("sub") or "").strip(),
         principal_key_id=str(claims.get("principal_key_id") or "").strip() or None,
@@ -273,11 +283,7 @@ def refresh_surface_session_bundle(
             for item in (claims.get("allowed_context_ids") or [])
             if str(item).strip()
         ],
-        ledger_ids=[
-            str(item).strip()
-            for item in (claims.get("ledger_ids") or [])
-            if str(item).strip()
-        ],
+        ledger_ids=effective_ledger_ids,
         session_family_id=session_family_id,
         ttl_seconds=access_ttl_seconds,
     )
@@ -296,11 +302,7 @@ def refresh_surface_session_bundle(
             for item in (claims.get("allowed_context_ids") or [])
             if str(item).strip()
         ],
-        ledger_ids=[
-            str(item).strip()
-            for item in (claims.get("ledger_ids") or [])
-            if str(item).strip()
-        ],
+        ledger_ids=effective_ledger_ids,
         session_family_id=session_family_id,
         ttl_seconds=refresh_ttl_seconds,
     )

@@ -121,6 +121,7 @@ FRONTDOOR_AUTH_BOOT_API_ALLOWLIST = {
     "/api/ingest/limits",
     "/api/set-agent",
     "/api/deploy-info",
+    "/api/auth/session/refresh",
     "/api/onboarding/model-library",
     "/api/onboarding/model-library/select",
     "/api/onboarding/principals",

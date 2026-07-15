@@ -683,3 +683,65 @@ def test_auth_session_refresh_accepts_refresh_token_without_access_token(monkeyp
     assert payload.get("principal_did") == principal_did
     assert (payload.get("session") or {}).get("token")
     assert (payload.get("refresh_session") or {}).get("token")
+
+
+def _decode_token_payload(token: str) -> dict:
+    payload = token.split(".")[1]
+    padding = "=" * ((4 - len(payload) % 4) % 4)
+    return json.loads(base64.urlsafe_b64decode(payload + padding))
+
+
+def _seed_active_principal_with_ledger(
+    client: TestClient, principal_did: str, ledger_id: str
+) -> None:
+    payload = {
+        "version": 1,
+        "principals": {
+            principal_did: {
+                "principal_did": principal_did,
+                "status": "active",
+                "key_references": [f"{principal_did}#k1"],
+                "metadata": {
+                    "ledger_id": ledger_id,
+                    "provisioned_ledger_id": ledger_id,
+                },
+            }
+        },
+    }
+    client.app.state.db[b"__principals_v1__"] = json.dumps(payload).encode()
+
+
+def test_auth_session_refresh_populates_ledger_ids_from_principal_metadata(monkeypatch) -> None:
+    monkeypatch.setenv("AUTH_WEBAUTHN_ALLOWED_ORIGINS", "https://app.example.test")
+    client = _make_client()
+    principal_did = "did:key:z6MkRefreshWithLedger"
+    ledger_id = "loam-root-01"
+    _seed_active_principal_with_ledger(client, principal_did, ledger_id)
+
+    token_issue = client.post(
+        "/auth/token",
+        json={
+            "principal_did": principal_did,
+            "principal_key_id": f"{principal_did}#k1",
+        },
+    )
+    assert token_issue.status_code == 200
+    original_session = token_issue.json()["session"]["token"]
+    refresh_token = token_issue.json()["refresh_session"]["token"]
+    assert _decode_token_payload(original_session).get("ledger_ids") == []
+
+    refresh_resp = client.post(
+        "/auth/session/refresh",
+        headers={
+            "x-session-token": original_session,
+            "x-refresh-token": refresh_token,
+        },
+    )
+
+    assert refresh_resp.status_code == 200
+    payload = refresh_resp.json()
+    assert payload.get("refreshed") is True
+    refreshed_session = payload["session"]["token"]
+    refreshed_refresh = payload["refresh_session"]["token"]
+    assert _decode_token_payload(refreshed_session).get("ledger_ids") == [ledger_id]
+    assert _decode_token_payload(refreshed_refresh).get("ledger_ids") == [ledger_id]
