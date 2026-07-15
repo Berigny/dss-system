@@ -1374,9 +1374,16 @@ def root_info():
 
 
 def _backend_headers_from_request(request: Request) -> dict[str, str]:
-    """Merge the global API headers with any ledger/auth context from the caller."""
+    """Build upstream headers from the caller's request context.
+
+    The global API client headers are used as a base, but any ledger/auth
+    context is taken from the incoming request. If the caller supplies a
+    ledger_id via query string instead of header, we promote it to the
+    x-ledger-id header so the backend sees the correct scope.
+    """
     headers = dict(api.headers)
-    for key in (
+    caller_headers = {key.lower(): value for key, value in request.headers.items()}
+    context_keys = (
         "x-ledger-id",
         "x-ledger-id-h64",
         "x-context-id",
@@ -1385,10 +1392,17 @@ def _backend_headers_from_request(request: Request) -> dict[str, str]:
         "x-tenant-id",
         "authorization",
         "x-session-token",
-    ):
-        value = request.headers.get(key)
-        if value:
-            headers[key] = value
+    )
+    for key in context_keys:
+        if key in caller_headers:
+            headers[key] = caller_headers[key]
+        else:
+            headers.pop(key, None)
+
+    if "x-ledger-id" not in caller_headers:
+        ledger_id = request.query_params.get("ledger_id") or request.query_params.get("ledger")
+        if ledger_id:
+            headers["x-ledger-id"] = ledger_id
     return headers
 
 
