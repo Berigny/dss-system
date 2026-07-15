@@ -81,6 +81,8 @@ OPENAI_COMPAT_POLICY_ALLOW_CLIENT_OVERRIDES = os.getenv(
 CODEX_PRINCIPAL_DID = os.getenv("CODEX_PRINCIPAL_DID", "")
 CODEX_PRINCIPAL_KEY_ID = "openai:agent:codex"
 CODEX_PRINCIPAL_ID = "openai:codex"
+# KIMI_PRINCIPAL_DID must be set in production for the Kimi Code delegated
+# agent to surface in the model selector and be available for prompt delegation.
 KIMI_PRINCIPAL_DID = os.getenv("KIMI_PRINCIPAL_DID", "")
 KIMI_PRINCIPAL_KEY_ID = "moonshot:agent:kimi-code"
 KIMI_PRINCIPAL_ID = "moonshot:kimi-code"
