@@ -1,6 +1,13 @@
 """Shared pytest fixtures and test-wide environment defaults."""
 
 import os
+import sys
+
+# Ensure the control-plane app directory is importable regardless of the
+# pytest invocation/working directory (DSS-239).
+_CONTROL_PLANE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _CONTROL_PLANE_DIR not in sys.path:
+    sys.path.insert(0, _CONTROL_PLANE_DIR)
 
 
 # DSS-232: source code no longer hardcodes deployment-specific hosts/URLs.
