@@ -95,3 +95,18 @@ def test_proxy_ledger_history_forwards_ledger_context_headers(monkeypatch):
     forwarded = captured.get("headers") or {}
     assert forwarded.get("x-ledger-id") == "loam"
     assert forwarded.get("x-context-id") == "ctx:test"
+
+
+def test_proxy_ledger_history_promotes_ledger_id_query_param(monkeypatch):
+    captured: dict[str, object] = {}
+
+    async def fake_backend_fetch_json(*, path: str, timeout: float = 20.0, method: str = "GET", payload=None, params=None, headers=None):
+        captured["headers"] = headers
+        return {"history": []}
+
+    monkeypatch.setattr(app_module, "_backend_fetch_json", fake_backend_fetch_json)
+
+    resp = client.get("/ledger/history/LOAM?limit=5&ledger_id=loam")
+    assert resp.status_code == 200
+    forwarded = captured.get("headers") or {}
+    assert forwarded.get("x-ledger-id") == "loam"
