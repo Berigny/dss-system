@@ -9115,6 +9115,26 @@ def register_orchestrator_routes(rt):
                 if isinstance(result, dict):
                     result.setdefault("metadata_sent", commit_metadata)
                 return result
+            except httpx.HTTPStatusError as exc:
+                detail_body = ""
+                try:
+                    detail_body = exc.response.text
+                except Exception:
+                    pass
+                LOGGER.error(
+                    "commit_answer_backend_http_error",
+                    extra={
+                        "status_code": exc.response.status_code,
+                        "detail_body": detail_body,
+                        "url": str(exc.request.url),
+                        "request_headers": {k: v for k, v in exc.request.headers.items() if k.lower() not in {"authorization", "cookie"}},
+                    },
+                )
+                return {
+                    "status": "error",
+                    "error": f"{exc}: {detail_body}"[:1000],
+                    "metadata_sent": commit_metadata,
+                }
             except Exception as exc:
                 return {
                     "status": "error",
