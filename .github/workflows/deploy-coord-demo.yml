@@ -28,7 +28,7 @@ jobs:
       - name: Wait for Vercel deployment to propagate
         run: |
           EXPECTED="${GITHUB_SHA}"
-          URL="https://coord-demo.vercel.app/health"
+          URL="https://decode.dualsubstrate.com/health"
           for i in $(seq 1 30); do
             SHA=$(curl -sS --fail "$URL" | python -c "import sys,json; print(json.load(sys.stdin).get('commit_sha',''))" 2>/dev/null || true)
             if [ "$SHA" = "$EXPECTED" ]; then
