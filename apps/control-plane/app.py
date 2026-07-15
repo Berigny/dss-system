@@ -12164,6 +12164,8 @@ def _codex_provision_defaults(identity_card: dict[str, Any] | None, snapshot: di
     }
 
 
+# KIMI_PRINCIPAL_DID must match the stable DID provisioned by the backend
+# (typically did:web:<chat-host>:principals:agent:moonshot:kimi-code).
 def _kimi_principal_did() -> str:
     return os.getenv("KIMI_PRINCIPAL_DID", "")
 
