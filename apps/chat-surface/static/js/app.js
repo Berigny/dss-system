@@ -986,7 +986,7 @@ function _prependChatNode(node) {
     const historyList = document.getElementById('history-list');
     if (chatStream) {
         if (chatStream.contains(node)) return;
-        if (historyList && chatStream.contains(historyList)) {
+        if (historyList && historyList.parentNode === chatStream) {
             chatStream.insertBefore(node, historyList);
         } else {
             chatStream.prepend(node);
