@@ -2617,12 +2617,13 @@ async function handleStreamedChatSubmit(event) {
         if (fullReply.trim()) {
             finalizeStreamRender();
             const metaCoordinate = finalMetaPayload?.coordinate;
-            const shouldPersist =
-                !finalMetaPayload ||
-                !metaCoordinate ||
-                finalMetaPayload.fallback_coordinate === true ||
-                Boolean(finalMetaPayload.persistence_error) ||
-                finalMetaPayload.commit_status === 'error';
+            const shouldPersist = Boolean(
+                finalMetaPayload &&
+                metaCoordinate &&
+                finalMetaPayload.fallback_coordinate !== true &&
+                !finalMetaPayload.persistence_error &&
+                finalMetaPayload.commit_status === 'success'
+            );
             console.log('[chat] persist decision', {
                 shouldPersist,
                 coordinate: metaCoordinate,
