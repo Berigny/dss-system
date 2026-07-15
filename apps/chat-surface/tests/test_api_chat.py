@@ -513,7 +513,7 @@ def test_api_chat_smart_stream_codex_prompt_mode_builds_delegated_principal(monk
     assert delegated.get("delegated_by_principal_did") == "did:key:z6MkOperator"
     assert delegated.get("delegated_by_principal_id") == "wallet-user"
     assert delegated.get("surface_id") == app_module.settings.CHAT_SURFACE_ID
-    assert delegated.get("ledger_scope") == ["LOAM"]
+    assert delegated.get("ledger_scope") == ["loam"]
     assert request_payload.get("metadata", {}).get("principal_display_name") == "David Berigny"
     assert request_headers.get("x-principal-did") == "did:key:z6MkOperator"
     assert request_headers.get("x-principal-id") == "wallet-user"
@@ -1940,3 +1940,12 @@ def test_commit_answer_includes_runtime_identity_metadata(monkeypatch):
     vc_refs = _as_dict(runtime_identity.get("vc_refs"))
     assert vc_refs.get("credential_ref") == "cred:wallet:verified"
     assert vc_refs.get("standing_envelope_ref") == "env:wallet:verified"
+
+
+def test_canonicalize_ledger_scope_value_strips_prefix_and_lowercases():
+    import app as app_module
+
+    assert app_module._canonicalize_ledger_scope_value("LOAM") == "loam"
+    assert app_module._canonicalize_ledger_scope_value("ledger:LOAM") == "loam"
+    assert app_module._canonicalize_ledger_scope_value("Loam-Root-01") == "loam-root-01"
+    assert app_module._canonicalize_ledger_scope_value(None) == ""
