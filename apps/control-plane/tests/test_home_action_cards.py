@@ -21,7 +21,7 @@ spec.loader.exec_module(dashboard_app)
 def test_home_page_renders_chat_and_decode_cards() -> None:
     html = dashboard_app.render_home_page({})
     assert dashboard_app.CHAT_BASE_URL in html
-    assert dashboard_app.COORD_DEMO_BASE_URL in html
+    assert "/go/decode" in html
     assert "Open Chat" in html
     assert "Open Decode" in html
 
@@ -36,7 +36,7 @@ def test_render_action_cards_supports_telegram_url(monkeypatch) -> None:
     monkeypatch.setattr(dashboard_app, "TELEGRAM_BASE_URL", "https://t.me/dssbot")
     html = dashboard_app.render_action_cards(
         chat_url="https://chat.dualsubstrate.com",
-        decode_url="https://coord-demo.vercel.app",
+        decode_url="https://decode.dualsubstrate.com",
         telegram_url="https://t.me/dssbot",
     )
     assert "https://t.me/dssbot" in html
@@ -47,7 +47,7 @@ def test_render_action_cards_supports_telegram_url(monkeypatch) -> None:
 def test_render_action_cards_disabled_when_chat_url_missing() -> None:
     html = dashboard_app.render_action_cards(
         chat_url="",
-        decode_url="https://coord-demo.vercel.app",
+        decode_url="https://decode.dualsubstrate.com",
         telegram_url=None,
     )
     assert "Chat not configured" in html

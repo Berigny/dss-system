@@ -493,6 +493,8 @@ def test_api_chat_smart_stream_codex_prompt_mode_builds_delegated_principal(monk
             "message": "hello",
             "history": [],
             "provider": "anthropic/claude-haiku-4.5",
+            "agent": "anthropic/claude-haiku-4.5",
+            "model": "anthropic/claude-haiku-4.5",
             "enable_ledger": True,
             "prompt_principal_mode": "codex",
         },
@@ -514,6 +516,9 @@ def test_api_chat_smart_stream_codex_prompt_mode_builds_delegated_principal(monk
     assert delegated.get("delegated_by_principal_id") == "wallet-user"
     assert delegated.get("surface_id") == app_module.settings.CHAT_SURFACE_ID
     assert delegated.get("ledger_scope") == ["loam"]
+    assert request_payload.get("provider") == "anthropic/claude-haiku-4.5"
+    assert request_payload.get("agent") == "anthropic/claude-haiku-4.5"
+    assert request_payload.get("model") == "anthropic/claude-haiku-4.5"
     assert request_payload.get("metadata", {}).get("principal_display_name") == "David Berigny"
     assert request_headers.get("x-principal-did") == "did:key:z6MkOperator"
     assert request_headers.get("x-principal-id") == "wallet-user"
@@ -553,6 +558,96 @@ def test_api_chat_smart_stream_codex_prompt_mode_fails_without_authenticated_con
 
     assert response.status_code == 400
     assert response.json().get("detail") == "codex_prompt_requires_authenticated_delegation_context"
+
+
+def test_api_chat_smart_stream_kimi_prompt_mode_builds_delegated_principal_and_preserves_model(monkeypatch):
+    import app as app_module
+    captured: dict[str, object] = {}
+
+    monkeypatch.setattr(app_module, "KIMI_PRINCIPAL_DID", "did:web:chat.dualsubstrate.com:principals:agent:moonshot:kimi-code")
+
+    class DummyStreamResponse:
+        def __init__(self, status_code: int, chunks: list[bytes]):
+            self.status_code = status_code
+            self._chunks = chunks
+
+        async def aiter_bytes(self):
+            for chunk in self._chunks:
+                yield chunk
+
+        async def aread(self):
+            return b""
+
+        async def aclose(self):
+            return None
+
+    class DummyAsyncClient:
+        def __init__(self, *args, **kwargs):
+            return None
+
+        def build_request(self, method, url, json=None, headers=None):
+            return {"method": method, "url": url, "json": json, "headers": headers}
+
+        async def send(self, request, stream=False):
+            captured["request"] = request
+            chunks = [
+                b'{"type":"token","content":"Hello"}\n',
+                b'{"type":"meta","model":"mock"}\n',
+            ]
+            return DummyStreamResponse(200, chunks)
+
+        async def aclose(self):
+            return None
+
+    monkeypatch.setattr(app_module.httpx, "AsyncClient", DummyAsyncClient)
+
+    async def fake_verified_model_auth_context(_request):
+        return {
+            "identity_vc": {
+                "verified": True,
+                "verification_state": "verified",
+                "principal_did": "did:key:z6MkOperator",
+                "canonical_subject": "did:web:id.dualsubstrate.com:principals:wallet-user",
+                "principal_display_name": "David Berigny",
+                "session_jti": "sess-kimi",
+                "auth_method": "wallet_verified_id",
+                "reason_code": "verified",
+            }
+        }
+
+    monkeypatch.setattr(app_module, "_verified_model_auth_context", fake_verified_model_auth_context)
+    client.cookies.set(app_module.BACKEND_SESSION_TOKEN_COOKIE, "opaque-session-token")
+
+    with client.stream(
+        "POST",
+        "/api/chat/smart_stream",
+        json={
+            "session_id": "test-kimi",
+            "message": "hello",
+            "history": [],
+            "provider": "moonshotai/kimi-k2.5",
+            "agent": "moonshotai/kimi-k2.5",
+            "model": "moonshotai/kimi-k2.5",
+            "enable_ledger": True,
+            "prompt_principal_mode": "kimi",
+        },
+    ) as response:
+        assert response.status_code == 200
+        lines = [line for line in response.iter_lines() if line]
+
+    assert lines
+    request_data = _as_dict(captured.get("request"))
+    request_payload = _as_dict(request_data.get("json"))
+    delegated = _as_dict(request_payload.get("delegated_principal"))
+    assert delegated.get("principal_did") == "did:web:chat.dualsubstrate.com:principals:agent:moonshot:kimi-code"
+    assert delegated.get("principal_key_id") == "moonshot:agent:kimi-code"
+    assert delegated.get("principal_id") == "moonshot:kimi-code"
+    assert delegated.get("principal_display_name") == "Moonshot: Kimi-code"
+    assert delegated.get("delegated_by_principal_did") == "did:key:z6MkOperator"
+    assert delegated.get("delegated_by_principal_id") == "wallet-user"
+    assert request_payload.get("provider") == "moonshotai/kimi-k2.5"
+    assert request_payload.get("agent") == "moonshotai/kimi-k2.5"
+    assert request_payload.get("model") == "moonshotai/kimi-k2.5"
 
 
 def test_api_chat_smart_stream_sets_canonical_human_principal_headers(monkeypatch):

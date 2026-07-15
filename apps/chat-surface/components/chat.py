@@ -176,13 +176,22 @@ def _message_attribution_text(metadata: dict[str, Any] | None, *, role: str) -> 
     prompt = _prompt_principal_label(meta)
     requested_by = _requested_by_label(meta)
     answered_by = _response_model_label(meta) if role == "assistant" else ""
+    distinct_delegation = _delegated_prompt_path_is_distinct_operator_delegation(meta)
     parts: list[str] = []
-    if prompt:
-        parts.append(f"asked by: {prompt}")
-    if requested_by:
-        parts.append(f"requested by: {requested_by}")
-    if answered_by:
-        parts.append(f"answered by: {answered_by}")
+    if distinct_delegation:
+        if requested_by:
+            parts.append(f"asked by: {requested_by}")
+        if prompt:
+            parts.append(f"answered by: {prompt}")
+        if answered_by:
+            parts.append(f"model: {answered_by}")
+    else:
+        if prompt:
+            parts.append(f"asked by: {prompt}")
+        if requested_by:
+            parts.append(f"requested by: {requested_by}")
+        if answered_by:
+            parts.append(f"answered by: {answered_by}")
     return " | ".join(parts)
 
 
@@ -274,7 +283,25 @@ def _prompt_principal_label(metadata: dict[str, Any] | None) -> str:
 def _requested_by_label(metadata: dict[str, Any] | None) -> str:
     meta = metadata if isinstance(metadata, dict) else {}
     delegated = meta.get("delegated_prompt_path") if isinstance(meta.get("delegated_prompt_path"), dict) else {}
+    requested_by_id = str(delegated.get("requested_by_principal_id") or "").strip()
+    if requested_by_id:
+        return requested_by_id
     return str(delegated.get("requested_by_principal_did") or "").strip()
+
+
+def _delegated_prompt_path_is_distinct_operator_delegation(metadata: dict[str, Any] | None) -> bool:
+    meta = metadata if isinstance(metadata, dict) else {}
+    delegated = meta.get("delegated_prompt_path") if isinstance(meta.get("delegated_prompt_path"), dict) else {}
+    if not delegated:
+        return False
+    return bool(
+        delegated.get("requested_by_is_distinct_from_prompt_principal")
+        or (
+            delegated.get("requested_by_principal_did")
+            and delegated.get("prompt_principal_did")
+            and delegated.get("requested_by_principal_did") != delegated.get("prompt_principal_did")
+        )
+    )
 
 
 def _response_model_label(metadata: dict[str, Any] | None) -> str:

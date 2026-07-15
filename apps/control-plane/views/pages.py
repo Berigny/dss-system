@@ -174,6 +174,7 @@ def render_action_cards(
     *,
     chat_url: str,
     decode_url: str,
+    decode_launch_url: str | None = None,
     telegram_url: str | None = None,
 ) -> str:
     chat_link = (
@@ -181,9 +182,10 @@ def render_action_cards(
         if chat_url
         else '<button class="btn primary" disabled>Chat not configured</button>'
     )
+    effective_decode_url = decode_launch_url if decode_launch_url else decode_url
     decode_link = (
-        f'<a class="btn primary" href="{html.escape(decode_url)}" target="_blank" rel="noreferrer noopener">Open Decode</a>'
-        if decode_url
+        f'<a class="btn primary" href="{html.escape(effective_decode_url)}" target="_blank" rel="noreferrer noopener">Open Decode</a>'
+        if effective_decode_url
         else '<button class="btn primary" disabled>Decode not configured</button>'
     )
     if telegram_url:

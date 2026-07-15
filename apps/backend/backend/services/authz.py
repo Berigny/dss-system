@@ -422,6 +422,7 @@ def _evaluate_delegated_principal_contract(
         return AuthzDecision(allowed=False, reason="delegated_cli_request_required")
 
     delegated_by_principal_did = _clean_str(request.headers.get("x-delegated-by-principal-did"))
+    delegated_by_principal_id = _clean_str(request.headers.get("x-delegated-by-principal-id"))
     expected_delegator_did = _clean_str(delegated_authority.get("delegated_by_principal_did"))
     if expected_delegator_did and delegated_by_principal_did != expected_delegator_did:
         return AuthzDecision(allowed=False, reason="delegated_by_principal_mismatch")
@@ -453,6 +454,7 @@ def _evaluate_delegated_principal_contract(
             state.authz_delegated_prompt_path_active = True  # type: ignore[attr-defined]
             state.authz_delegated_cli_request = delegated_cli_request  # type: ignore[attr-defined]
             state.authz_delegated_by_principal_did = delegated_by_principal_did  # type: ignore[attr-defined]
+            state.authz_delegated_by_principal_id = delegated_by_principal_id  # type: ignore[attr-defined]
             state.authz_delegation_mode = delegation_mode or "delegated_only"  # type: ignore[attr-defined]
             state.authz_delegated_surface_id = request_surface_id  # type: ignore[attr-defined]
             state.authz_delegated_ledger_scope = ",".join(sorted(request_ledger_scope or expected_ledger_scope))  # type: ignore[attr-defined]
@@ -672,6 +674,7 @@ def authz_diagnostics_from_request(request: Request) -> dict[str, Any]:
         "delegated_prompt_path_active": bool(getattr(state, "authz_delegated_prompt_path_active", False)),
         "delegated_cli_request": bool(getattr(state, "authz_delegated_cli_request", False)),
         "delegated_by_principal_did": _clean_str(getattr(state, "authz_delegated_by_principal_did", None)) or None,
+        "delegated_by_principal_id": _clean_str(getattr(state, "authz_delegated_by_principal_id", None)) or None,
         "delegation_mode": _clean_str(getattr(state, "authz_delegation_mode", None)) or None,
         "delegated_surface_id": _clean_str(getattr(state, "authz_delegated_surface_id", None)) or None,
         "delegated_ledger_scope": _clean_str(getattr(state, "authz_delegated_ledger_scope", None)) or None,

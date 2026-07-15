@@ -92,7 +92,7 @@ MIDDLEWARE_ADMIN_TOKEN = str(
 FRONTEND_TENANT_ID = str(os.getenv("FRONTEND_TENANT_ID") or "tenant:demo").strip()
 CHAT_BASE_URL = (os.getenv("CHAT_BASE_URL") or "").rstrip("/")
 COORD_DEMO_BASE_URL = (
-    os.getenv("COORD_DEMO_BASE_URL") or "https://coord-demo.vercel.app"
+    os.getenv("COORD_DEMO_BASE_URL") or "https://decode.dualsubstrate.com"
 ).rstrip("/")
 TELEGRAM_BASE_URL = (os.getenv("TELEGRAM_BASE_URL") or "").rstrip("/")
 BENCHMARK_DECODER_BASE_URL = (os.getenv("BENCHMARK_DECODER_BASE_URL") or "").rstrip("/")
@@ -4289,8 +4289,9 @@ def _append_session_token_to_url(next_url: str, token: str, request_host: str) -
     """Append a short-lived session token to a cross-domain redirect URL.
 
     Same-domain redirects keep the HttpOnly cookie, but third-party/demo hosts
-    (e.g. coord-demo.vercel.app) cannot read it.  The token is added as a query
-    parameter so the target can establish its own first-party session.
+    (e.g. decode.dualsubstrate.com when it was coord-demo.vercel.app) cannot
+    read it.  The token is added as a query parameter so the target can
+    establish its own first-party session.
     """
     if not token or not next_url:
         return next_url or "/"
@@ -14099,6 +14100,7 @@ def render_home_page(snapshot: dict[str, Any]) -> str:
         actions_html=render_action_cards(
             chat_url=CHAT_BASE_URL,
             decode_url=COORD_DEMO_BASE_URL,
+            decode_launch_url="/go/decode",
             telegram_url=TELEGRAM_BASE_URL or None,
         ),
         support_html="",
@@ -18193,6 +18195,12 @@ def _ledger_entry_kind(metadata: dict[str, Any], entry: dict[str, Any]) -> str:
 
 def _prompt_principal_label(metadata: dict[str, Any]) -> str:
     delegated = _as_dict(metadata.get("delegated_prompt_path"))
+    display_name = str(
+        delegated.get("prompt_principal_display_name")
+        or ""
+    ).strip()
+    if display_name:
+        return display_name
     principal_type = str(
         delegated.get("prompt_principal_type")
         or delegated.get("principal_type")
@@ -18261,6 +18269,35 @@ def _response_model_label(metadata: dict[str, Any]) -> str:
 
 def _delegated_prompt_details(metadata: dict[str, Any]) -> dict[str, Any]:
     return _as_dict(metadata.get("delegated_prompt_path"))
+
+
+def _delegated_prompt_path_is_distinct_operator_delegation(details: dict[str, Any]) -> bool:
+    """True when a delegated agent executed a prompt on behalf of a distinct operator."""
+    delegated = _as_dict(details.get("delegated_prompt_path"))
+    if not delegated:
+        return False
+    return bool(
+        delegated.get("requested_by_is_distinct_from_prompt_principal")
+        or (
+            delegated.get("requested_by_principal_did")
+            and delegated.get("prompt_principal_did")
+            and delegated.get("requested_by_principal_did") != delegated.get("prompt_principal_did")
+        )
+    )
+
+
+def _requested_by_label(details: dict[str, Any]) -> str:
+    """Return a friendly label for the operator who requested a delegated turn."""
+    delegated = _as_dict(details.get("delegated_prompt_path"))
+    if not delegated:
+        return ""
+    requested_by_id = str(delegated.get("requested_by_principal_id") or "").strip()
+    if requested_by_id:
+        return requested_by_id
+    requested_by_did = str(delegated.get("requested_by_principal_did") or "").strip()
+    if requested_by_did:
+        return requested_by_did
+    return ""
 
 
 def _answer_surface_integrity_details(metadata: dict[str, Any]) -> dict[str, Any]:
@@ -18558,37 +18595,60 @@ def _activity_detail_fields(row: dict[str, Any]) -> list[tuple[str, str]]:
     details = _as_dict(row.get("details"))
     delegated = _as_dict(details.get("delegated_prompt_path"))
     integrity = _answer_surface_integrity_details(details)
-    for label, value in (
+    distinct_delegation = _delegated_prompt_path_is_distinct_operator_delegation(details)
+    prompt_label = str(details.get("prompt_principal_label") or "").strip()
+    response_label = str(details.get("response_model_label") or "").strip()
+    requested_by_label = _requested_by_label(details)
+    fields: list[tuple[str, Any]] = [
         ("What happened", row.get("summary")),
         ("Event type", row.get("event_type")),
         ("Entity type", row.get("entity_type")),
         ("Entity ID", row.get("entity_id")),
         ("Status", row.get("status")),
         ("Actor", row.get("actor")),
-        ("Asked by", details.get("prompt_principal_label")),
-        ("Answered by", details.get("response_model_label")),
-        ("Answer integrity", integrity.get("status")),
-        ("Requested by", delegated.get("requested_by_principal_did")),
-        ("Timestamp", row.get("timestamp")),
-        ("COORD", row.get("coord")),
-        ("Ledger", row.get("ledger_id")),
-        ("Target surface", delegated.get("target_surface_id")),
-        ("Canonical subject", row.get("canonical_subject")),
-        ("Subject source", row.get("canonical_subject_source")),
-        ("Display label", row.get("display_label")),
-        ("Reference", row.get("reference")),
-        ("Runtime namespace", details.get("runtime_namespace")),
-        ("Event group", row.get("event_group")),
-        ("Submission ref", row.get("submission_ref")),
-        ("Mutation kind", row.get("mutation_kind")),
-        ("Permission scope", row.get("permission_scope")),
-        ("Enabled state", row.get("enabled_state")),
-        ("Evidence ref", row.get("evidence_ref")),
-        ("Provenance ref", row.get("provenance_ref")),
-        ("Standing envelope", row.get("standing_envelope_ref")),
-        ("Credential ref", row.get("credential_ref")),
-        ("Wallet provider", row.get("wallet_provider")),
-    ):
+    ]
+    if distinct_delegation:
+        fields.extend(
+            [
+                ("Asked by", requested_by_label),
+                ("Answered by", prompt_label),
+                ("Response model", response_label),
+                ("Requested by", requested_by_label),
+            ]
+        )
+    else:
+        fields.extend(
+            [
+                ("Asked by", prompt_label),
+                ("Answered by", response_label),
+                ("Requested by", delegated.get("requested_by_principal_did")),
+            ]
+        )
+    fields.extend(
+        [
+            ("Answer integrity", integrity.get("status")),
+            ("Timestamp", row.get("timestamp")),
+            ("COORD", row.get("coord")),
+            ("Ledger", row.get("ledger_id")),
+            ("Target surface", delegated.get("target_surface_id")),
+            ("Canonical subject", row.get("canonical_subject")),
+            ("Subject source", row.get("canonical_subject_source")),
+            ("Display label", row.get("display_label")),
+            ("Reference", row.get("reference")),
+            ("Runtime namespace", details.get("runtime_namespace")),
+            ("Event group", row.get("event_group")),
+            ("Submission ref", row.get("submission_ref")),
+            ("Mutation kind", row.get("mutation_kind")),
+            ("Permission scope", row.get("permission_scope")),
+            ("Enabled state", row.get("enabled_state")),
+            ("Evidence ref", row.get("evidence_ref")),
+            ("Provenance ref", row.get("provenance_ref")),
+            ("Standing envelope", row.get("standing_envelope_ref")),
+            ("Credential ref", row.get("credential_ref")),
+            ("Wallet provider", row.get("wallet_provider")),
+        ]
+    )
+    for label, value in fields:
         text = str(value or "").strip()
         if text:
             detail_fields.append((label, text))
@@ -18607,15 +18667,37 @@ def _activity_detail_sections(row: dict[str, Any]) -> list[tuple[str, list[tuple
 
     attribution_fields: list[tuple[str, str]] = []
     contributor = _as_dict(details.get("contributor"))
-    for label, value in (
-        ("Asked by", details.get("prompt_principal_label")),
-        ("Answered by", details.get("response_model_label")),
-        ("Prompt principal DID", contributor.get("principal_did")),
-        ("Prompt principal type", contributor.get("principal_type")),
-        ("Prompt principal ID", contributor.get("principal_id")),
-        ("Response model", details.get("model_id")),
-        ("Response provider", details.get("provider_id")),
-    ):
+    distinct_delegation = _delegated_prompt_path_is_distinct_operator_delegation(details)
+    prompt_label = str(details.get("prompt_principal_label") or "").strip()
+    response_label = str(details.get("response_model_label") or "").strip()
+    requested_by_label = _requested_by_label(details)
+    attribution_candidates: list[tuple[str, Any]] = []
+    if distinct_delegation:
+        attribution_candidates.extend(
+            [
+                ("Asked by", requested_by_label),
+                ("Answered by", prompt_label),
+                ("Response model", response_label),
+                ("Response provider", details.get("provider_id")),
+            ]
+        )
+    else:
+        attribution_candidates.extend(
+            [
+                ("Asked by", prompt_label),
+                ("Answered by", response_label),
+            ]
+        )
+    attribution_candidates.extend(
+        [
+            ("Prompt principal DID", contributor.get("principal_did")),
+            ("Prompt principal type", contributor.get("principal_type")),
+            ("Prompt principal ID", contributor.get("principal_id")),
+            ("Response model", "" if distinct_delegation else details.get("model_id")),
+            ("Response provider", "" if distinct_delegation else details.get("provider_id")),
+        ]
+    )
+    for label, value in attribution_candidates:
         text = str(value or "").strip()
         if text:
             attribution_fields.append((label, text))
@@ -18875,10 +18957,20 @@ def _activity_collapsed_hint(row: dict[str, Any]) -> str:
     parts: list[str] = []
     prompt_principal_label = str(details.get("prompt_principal_label") or "").strip()
     response_model_label = str(details.get("response_model_label") or "").strip()
-    if prompt_principal_label:
-        parts.append(f"asked by: {prompt_principal_label}")
-    if response_model_label:
-        parts.append(f"answered by: {response_model_label}")
+    requested_by_label = _requested_by_label(details)
+    distinct_delegation = _delegated_prompt_path_is_distinct_operator_delegation(details)
+    if distinct_delegation:
+        if requested_by_label:
+            parts.append(f"asked by: {requested_by_label}")
+        if prompt_principal_label:
+            parts.append(f"answered by: {prompt_principal_label}")
+        if response_model_label:
+            parts.append(f"model: {response_model_label}")
+    else:
+        if prompt_principal_label:
+            parts.append(f"asked by: {prompt_principal_label}")
+        if response_model_label:
+            parts.append(f"answered by: {response_model_label}")
     integrity_status = str(integrity.get("status") or "").strip().lower()
     integrity_reason = str(integrity.get("reason") or "").strip().lower()
     if integrity_status == "diverged" and integrity_reason == "assembly_summary_richer_than_visible_answer":
@@ -18886,7 +18978,7 @@ def _activity_collapsed_hint(row: dict[str, Any]) -> str:
     elif integrity_status == "collapsed" and integrity_reason == "visible_answer_preamble_collapse_under_blocked_context":
         parts.append("visible answer collapsed under blocked context")
     requested_by = str(delegated.get("requested_by_principal_did") or "").strip()
-    if requested_by:
+    if requested_by and not distinct_delegation:
         parts.append(f"requested by: {requested_by}")
     target_surface = str(delegated.get("target_surface_id") or "").strip()
     if target_surface:
@@ -22289,6 +22381,42 @@ async def api_auth_session_verify(request: Request) -> JSONResponse:
     }, status_code=200)
 
 
+def _is_same_site_host(target_host: str, request_host: str) -> bool:
+    """Return True when target_host is a subdomain of request_host's BASE_DOMAIN."""
+    base_domain = str(os.getenv("BASE_DOMAIN") or "").strip().lower()
+    if not base_domain:
+        return False
+    target = target_host.lower().strip()
+    return target == base_domain or target.endswith("." + base_domain)
+
+
+async def decode_launch(request: Request) -> RedirectResponse:
+    """Cross-domain SSO launch into the coord-demo Decode surface.
+
+    Because coord-demo may be hosted on a different registrable domain from
+    the control plane, it cannot always see the control-plane HttpOnly session
+    cookie.  This endpoint verifies the current control-plane session and
+    appends a short-lived token to the coord-demo URL so the satellite app can
+    establish its own first-party session.  When coord-demo runs on a
+    dualsubstrate.com subdomain the shared cookie is used directly and no
+    query-string token is appended.
+    """
+    callback_url = f"{COORD_DEMO_BASE_URL.rstrip('/')}/auth/callback"
+    token = str(request.cookies.get(BACKEND_SESSION_TOKEN_COOKIE) or "").strip()
+    if token:
+        status_code, body = await _auth_proxy_get("/auth/session/verify", headers={"x-session-token": token})
+        payload = dict(body if isinstance(body, dict) else {})
+        if status_code < 400 and (payload.get("valid") or payload.get("principal_did")):
+            request_host = str(request.headers.get("host") or request.url.netloc or "").split(":")[0]
+            target_host = str(urlparse(COORD_DEMO_BASE_URL).hostname or "").strip()
+            if _is_same_site_host(target_host, request_host):
+                return RedirectResponse(url=COORD_DEMO_BASE_URL, status_code=303)
+            launch_url = _append_session_token_to_url(COORD_DEMO_BASE_URL, token, request_host)
+            return RedirectResponse(url=launch_url, status_code=303)
+    login_url = f"/login/wallet?next={quote(callback_url, safe='/?:&=')}"
+    return RedirectResponse(url=login_url, status_code=303)
+
+
 async def api_control_plane_benchmark_publication_jobs(request: Request) -> JSONResponse:
     _, auth_error = await _control_plane_json_session(request)
     if auth_error is not None:
@@ -23692,6 +23820,7 @@ app = Starlette(
         Route("/api/auth/identity_card", api_auth_identity_card, methods=["GET", "HEAD"]),
         Route("/api/auth/session/refresh", api_auth_session_refresh, methods=["POST"]),
         Route("/api/auth/session/verify", api_auth_session_verify, methods=["GET", "HEAD"]),
+        Route("/go/decode", decode_launch, methods=["GET", "HEAD"]),
         Route("/api/benchmarks/performance", api_benchmarks_performance, methods=["GET", "HEAD"]),
         Route("/api/control-plane/benchmarks/publication-jobs", api_control_plane_benchmark_publication_jobs, methods=["POST"]),
         Route("/api/control-plane/benchmarks/publication-jobs/{job_id}", api_control_plane_benchmark_publication_job_status, methods=["GET", "HEAD"]),

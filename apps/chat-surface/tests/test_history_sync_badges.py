@@ -22,19 +22,38 @@ def test_build_message_badges_sync_and_quarantine() -> None:
     assert len(badges) == 2
 
 
-def test_message_attribution_text_prefers_delegated_codex_prompt_path() -> None:
+def test_message_attribution_text_swaps_labels_for_distinct_delegated_turn() -> None:
     text = _message_attribution_text(
         {
             "model_id": "anthropic/claude-haiku-4.5",
             "delegated_prompt_path": {
                 "prompt_principal_id": "openai:agent:codex",
+                "prompt_principal_did": "did:web:id.dualsubstrate.com:principals:agent:openai:codex",
                 "requested_by_principal_did": "did:key:z6MkOperator",
+                "requested_by_principal_id": "operator:david",
+            },
+        },
+        role="assistant",
+    )
+    assert "asked by: operator:david" in text
+    assert "answered by: openai/codex" in text
+    assert "model: anthropic/claude-haiku-4.5" in text
+    assert "requested by:" not in text
+
+
+def test_message_attribution_text_keeps_legacy_labels_when_requester_is_prompt_principal() -> None:
+    text = _message_attribution_text(
+        {
+            "model_id": "anthropic/claude-haiku-4.5",
+            "delegated_prompt_path": {
+                "prompt_principal_id": "openai:agent:codex",
+                "prompt_principal_did": "did:web:id.dualsubstrate.com:principals:agent:openai:codex",
+                "requested_by_principal_did": "did:web:id.dualsubstrate.com:principals:agent:openai:codex",
             },
         },
         role="assistant",
     )
     assert "asked by: openai/codex" in text
-    assert "requested by: did:key:z6MkOperator" in text
     assert "answered by: anthropic/claude-haiku-4.5" in text
 
 
