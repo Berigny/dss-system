@@ -538,6 +538,7 @@ def test_delegated_prompt_path_metadata_separates_requested_and_prompting_princi
             "delegated_prompt_path_active": True,
             "delegated_cli_request": True,
             "delegated_by_principal_did": "did:key:z6MkOperator",
+            "delegated_by_principal_id": "operator:david",
             "delegation_mode": "delegated_only",
             "delegated_surface_id": "surface:chat:primary",
             "delegated_ledger_scope": ["chat-demo"],
@@ -560,6 +561,7 @@ def test_delegated_prompt_path_metadata_separates_requested_and_prompting_princi
     assert delegated["prompt_principal_id"] == "openai:codex"
     assert delegated["prompt_principal_did"] == "did:web:id.dualsubstrate.com:principals:agent:openai:codex"
     assert delegated["requested_by_principal_did"] == "did:key:z6MkOperator"
+    assert delegated["requested_by_principal_id"] == "operator:david"
     assert delegated["requested_by_is_distinct_from_prompt_principal"] is True
     assert delegated["target_ledger_id"] == "chat-demo"
     assert delegated["target_surface_id"] == "surface:chat:primary"

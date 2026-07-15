@@ -611,6 +611,7 @@ def _delegated_prompt_path_metadata(
         or ""
     ).strip()
     requested_by_principal_did = str(diag.get("delegated_by_principal_did") or "").strip()
+    requested_by_principal_id = str(diag.get("delegated_by_principal_id") or "").strip()
     target_surface_id = str(diag.get("delegated_surface_id") or "").strip()
     raw_ledger_scope = diag.get("delegated_ledger_scope")
     raw_surface_scope = diag.get("delegated_surface_scope")
@@ -637,6 +638,7 @@ def _delegated_prompt_path_metadata(
         "prompt_principal_type": prompt_principal_type or None,
         "prompt_principal_display_name": prompt_principal_display_name or None,
         "requested_by_principal_did": requested_by_principal_did or None,
+        "requested_by_principal_id": requested_by_principal_id or None,
         "requested_by_is_distinct_from_prompt_principal": bool(
             requested_by_principal_did and prompt_principal_did and requested_by_principal_did != prompt_principal_did
         ),

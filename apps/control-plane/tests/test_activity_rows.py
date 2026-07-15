@@ -4220,6 +4220,65 @@ def test_normalize_ledger_entry_rows_uses_delegated_prompt_path_for_prompt_attri
     assert rows[0]["details"]["prompt_principal_label"] == "openai/codex"
 
 
+def _distinct_delegated_row() -> dict[str, Any]:
+    return {
+        "summary": "Chat response committed to did:web:id.dualsubstrate.com:ledgers:chat-demo",
+        "event_type": "ledger.entry",
+        "entity_type": "ledger",
+        "entity_id": "chat-demo",
+        "status": "assistant",
+        "actor": "operator:david",
+        "timestamp": "2026-05-04T10:05:00+00:00",
+        "coord": "loam:WX-123",
+        "ledger_id": "chat-demo",
+        "reference": "loam:WX-123",
+        "canonical_subject": "did:web:id.dualsubstrate.com:ledgers:chat-demo",
+        "details": {
+            "prompt_principal_label": "Moonshot: Kimi-code",
+            "response_model_label": "MoonshotAI: Kimi K2.5",
+            "model_id": "moonshotai/kimi-k2.5",
+            "provider_id": "openrouter",
+            "delegated_prompt_path": {
+                "active": True,
+                "prompt_principal_id": "moonshot:kimi-code",
+                "prompt_principal_did": "did:web:chat.dualsubstrate.com:principals:agent:moonshot:kimi-code",
+                "prompt_principal_display_name": "Moonshot: Kimi-code",
+                "requested_by_principal_did": "did:key:z6MkExampleBootstrapOperatorDidPlaceholder",
+                "requested_by_principal_id": "operator:david",
+                "requested_by_is_distinct_from_prompt_principal": True,
+            },
+        },
+    }
+
+
+def test_activity_detail_fields_swaps_asked_and_answered_for_distinct_delegation() -> None:
+    fields = dict(dashboard_app._activity_detail_fields(_distinct_delegated_row()))
+    assert fields["Asked by"] == "operator:david"
+    assert fields["Answered by"] == "Moonshot: Kimi-code"
+    assert fields["Response model"] == "MoonshotAI: Kimi K2.5"
+
+
+def test_activity_detail_sections_swaps_attribution_for_distinct_delegation() -> None:
+    sections = dict(dashboard_app._activity_detail_sections(_distinct_delegated_row()))
+    assert "Attribution" in sections
+    attribution = dict(sections["Attribution"])
+    assert attribution["Asked by"] == "operator:david"
+    assert attribution["Answered by"] == "Moonshot: Kimi-code"
+    assert attribution["Response model"] == "MoonshotAI: Kimi K2.5"
+    assert "Prompt principal DID" not in attribution
+    assert "Delegation" in sections
+    delegation = dict(sections["Delegation"])
+    assert delegation["Prompt principal DID"] == "did:web:chat.dualsubstrate.com:principals:agent:moonshot:kimi-code"
+
+
+def test_activity_collapsed_hint_swaps_labels_for_distinct_delegation() -> None:
+    hint = dashboard_app._activity_collapsed_hint(_distinct_delegated_row())
+    assert "asked by: operator:david" in hint
+    assert "answered by: Moonshot: Kimi-code" in hint
+    assert "model: MoonshotAI: Kimi K2.5" in hint
+    assert "requested by:" not in hint
+
+
 def test_flow_selection_list_labels_canonical_id_for_ledgers() -> None:
     flows_spec = importlib.util.spec_from_file_location("dss_dashboard_flows", REPO_ROOT / "views" / "flows.py")
     flows_module = importlib.util.module_from_spec(flows_spec)

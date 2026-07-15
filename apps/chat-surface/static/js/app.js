@@ -2586,12 +2586,20 @@ async function handleStreamedChatSubmit(event) {
                     }
                 }
                 if (assistant.promptText) {
-                    const promptLabel = _promptPrincipalLabel(payload);
-                    assistant.promptText.textContent = promptLabel ? ` | asked by: ${promptLabel}` : '';
+                    const askedBy = _askedByLabel(payload);
+                    assistant.promptText.textContent = askedBy ? ` | asked by: ${askedBy}` : '';
                 }
                 if (assistant.requestedText) {
+                    const distinctDelegation = _delegatedPromptPathIsDistinctOperatorDelegation(payload);
+                    const answeredBy = _answeredByLabel(payload);
                     const requestedBy = _requestedByLabel(payload);
-                    assistant.requestedText.textContent = requestedBy ? ` | requested by: ${requestedBy}` : '';
+                    if (distinctDelegation && answeredBy) {
+                        assistant.requestedText.textContent = ` | answered by: ${answeredBy}`;
+                    } else if (!distinctDelegation && requestedBy) {
+                        assistant.requestedText.textContent = ` | requested by: ${requestedBy}`;
+                    } else {
+                        assistant.requestedText.textContent = '';
+                    }
                 }
                 if (assistant.integrityText) {
                     const integrityText = _answerSurfaceIntegrityText(payload);
@@ -2987,6 +2995,10 @@ function getCurrentSessionEntity() {
     );
 }
 
+const DELEGATED_MODEL_ROUTING_MAP = {
+    'kimi': 'moonshotai/kimi-k2.5',
+};
+
 function buildStreamRequestPayload({
     message,
     provider,
@@ -2999,12 +3011,13 @@ function buildStreamRequestPayload({
     provider = normalizeModelId(provider);
     const delegatedModeMatch = String(provider || '').match(/^delegated:([a-z0-9_-]+)$/i);
     const delegatedMode = delegatedModeMatch ? delegatedModeMatch[1].toLowerCase() : '';
-    const activeProvider = delegatedMode ? '' : provider;
+    const routedModel = delegatedMode ? (DELEGATED_MODEL_ROUTING_MAP[delegatedMode] || '') : provider;
+    const activeProvider = routedModel || undefined;
     const payload = {
         message,
-        provider: activeProvider || undefined,
-        agent: activeProvider || undefined,
-        model: activeProvider || undefined,
+        provider: activeProvider,
+        agent: activeProvider,
+        model: activeProvider,
         entity: entity || undefined,
         session_id: sessionId || undefined,
         enable_ledger: true,
