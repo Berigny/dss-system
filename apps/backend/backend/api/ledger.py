@@ -37,7 +37,11 @@ def _request_ledger_id(request: Request) -> str:
     return "default"
 
 
-def _history_namespace_candidates(request: Request, entity: str) -> list[str]:
+def _history_namespace_candidates(
+    request: Request,
+    entity: str,
+    service: LedgerService | None = None,
+) -> list[str]:
     candidates: list[str] = []
     seen: set[str] = set()
 
@@ -61,7 +65,9 @@ def _history_namespace_candidates(request: Request, entity: str) -> list[str]:
                 _append(namespaced[: -len("-session")])
 
     ledger_scope = _request_ledger_id(request)
-    if ledger_scope != "default":
+    if ledger_scope and ledger_scope != "default":
+        if service is not None:
+            ledger_scope = service.resolve_canonical_ledger_id(ledger_scope) or ledger_scope
         _append(ledger_scope)
 
     demo_default = os.getenv("DEMO_GOD_DEFAULT_LEDGER", "").strip()
@@ -259,7 +265,7 @@ async def get_chat_history(
     store = service.store
 
     try:
-        entity_candidates = _history_namespace_candidates(request, requested_entity)
+        entity_candidates = _history_namespace_candidates(request, requested_entity, service=service)
         entity, sliced_entries, total_count = _load_history_window(
             store=store,
             namespace_candidates=entity_candidates,
@@ -371,7 +377,7 @@ async def get_ordered_history(
     store = service.store
 
     try:
-        entity_candidates = _history_namespace_candidates(request, requested_entity)
+        entity_candidates = _history_namespace_candidates(request, requested_entity, service=service)
         entity, sliced_entries, total_count = _load_history_window(
             store=store,
             namespace_candidates=entity_candidates,
