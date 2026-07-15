@@ -2471,7 +2471,7 @@ async def decode_coordinate(request: Request):
 
     session_id = request.cookies.get("ds_session", DEFAULT_SESSION_ID)
     session = get_session(session_id)
-    ledger_id = str(payload.get("ledger_id") or session.get("ledger_id") or settings.DEFAULT_LEDGER_ID or "").strip()
+    ledger_id = str(payload.get("ledger_id") or session.get("ledger_id") or settings.DEFAULT_LEDGER_ID or "").strip().lower()
     entity = session.get("entity") or build_entity_namespace(ledger_id, session_id)
     api.set_ledger(ledger_id)
 
