@@ -411,7 +411,7 @@ async def conversation_history(entity: str, request: Request):
         entities: list[str] = []
         seen_entities: set[str] = set()
 
-        if session_entity and _is_chat_entity(session_entity):
+        if session_entity:
             entities.append(session_entity)
             seen_entities.add(session_entity)
 
