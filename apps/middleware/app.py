@@ -1448,10 +1448,15 @@ async def proxy_ledger_history(request: Request, entity_path: str):
         limit = int(limit_raw)
     except (TypeError, ValueError):
         limit = 50
+    params: dict[str, Any] = {"limit": limit}
+    for passthrough_key in ("ledger_id", "context_id"):
+        passthrough_value = request.query_params.get(passthrough_key)
+        if passthrough_value:
+            params[passthrough_key] = passthrough_value
     body = await _backend_fetch_json(
         method="GET",
         path=f"/ledger/history/{entity}",
-        params={"limit": limit},
+        params=params,
         headers=_backend_headers_from_request(request),
     )
     return JSONResponse(body)
