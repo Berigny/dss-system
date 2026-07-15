@@ -17,7 +17,7 @@ ENDPOINTS = {
     "middleware": "https://dss-system-middleware.fly.dev/health",
     "control-plane": "https://id.dualsubstrate.com/health",
     "chat-surface": "https://chat.dualsubstrate.com/health",
-    "coord-demo": "https://coord-demo.vercel.app/health",
+    "coord-demo": "https://decode.dualsubstrate.com/health",
     "did-issuer": "https://dss-system-did-issuer.fly.dev/livez",
 }
 
