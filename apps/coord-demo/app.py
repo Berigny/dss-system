@@ -31,8 +31,8 @@ CONTROL_PLANE_BASE = (
 DEFAULT_LEDGER_ID = (
     os.getenv("DEFAULT_LEDGER_ID")
     or os.getenv("LEDGER_ID")
-    or "LOAM"
-)
+    or "loam"
+).lower()
 
 COORD_DEMO_BASE_URL = (
     os.getenv("COORD_DEMO_BASE_URL")

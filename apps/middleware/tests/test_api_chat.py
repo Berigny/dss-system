@@ -636,6 +636,28 @@ def test_decode_coordinate_v2_key_order(monkeypatch):
     assert positions == sorted(positions)
 
 
+def test_decode_coordinate_lowercases_ledger_id(monkeypatch):
+    import app as app_module
+
+    async def fake_decode_coordinate(_coord: str, *, entity: str | None = None, session_id: str | None = None):
+        return {
+            "coord": "loam:WX-123",
+            "type": "WX",
+            "skim": {"one_line": "hi", "relevance": 0.9, "reasons": [], "recommended": [], "budgets": {}},
+            "walk": None,
+            "refs": {},
+            "payload": {},
+            "interpretation": {},
+            "governance": {},
+            "meta": {},
+        }
+
+    monkeypatch.setattr(app_module.api, "decode_coordinate", fake_decode_coordinate)
+
+    response = client.post("/api/decode_coordinate", json={"coordinate": "loam:WX-123", "ledger_id": "LOAM"})
+    assert response.status_code == 200
+
+
 def test_api_chat_commit_answer_forwards_payload(monkeypatch):
     import app as app_module
 
