@@ -12152,9 +12152,9 @@ def _snapshot_active_surface_id(snapshot: dict[str, Any], active_ledger_id: str)
 def _codex_provision_defaults(identity_card: dict[str, Any] | None, snapshot: dict[str, Any]) -> dict[str, str]:
     identity_vc = _as_dict(_as_dict(identity_card).get("identity_vc"))
     tenant_id = str(identity_vc.get("tenant_id") or FRONTEND_TENANT_ID).strip() or FRONTEND_TENANT_ID
-    delegated_by_principal_did = str(identity_vc.get("principal_did") or "").strip()
+    delegated_by_principal_did = _principal_did_from_identity_card(identity_card)
     active_ledger_id = str(identity_vc.get("ledger_id") or "").strip()
-    active_surface_id = _snapshot_active_surface_id(snapshot, active_ledger_id) if active_ledger_id else ""
+    active_surface_id = _default_chat_surface_id()
     return {
         "tenant_id": tenant_id,
         "delegated_by_principal_did": delegated_by_principal_did,
@@ -12173,9 +12173,9 @@ def _kimi_principal_did() -> str:
 def _kimi_provision_defaults(identity_card: dict[str, Any] | None, snapshot: dict[str, Any]) -> dict[str, str]:
     identity_vc = _as_dict(_as_dict(identity_card).get("identity_vc"))
     tenant_id = str(identity_vc.get("tenant_id") or FRONTEND_TENANT_ID).strip() or FRONTEND_TENANT_ID
-    delegated_by_principal_did = str(identity_vc.get("principal_did") or "").strip()
+    delegated_by_principal_did = _principal_did_from_identity_card(identity_card)
     active_ledger_id = str(identity_vc.get("ledger_id") or "").strip()
-    active_surface_id = _snapshot_active_surface_id(snapshot, active_ledger_id) if active_ledger_id else ""
+    active_surface_id = _default_chat_surface_id()
     return {
         "tenant_id": tenant_id,
         "delegated_by_principal_did": delegated_by_principal_did,

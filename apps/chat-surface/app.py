@@ -1514,7 +1514,7 @@ async def _prepare_middleware_chat_proxy(
                 "delegation_mode": "delegated_only",
                 "delegated_by_principal_did": operator_principal_did,
                 "delegated_by_principal_id": operator_principal_id,
-                "ledger_scope": [ledger_id],
+                "ledger_scope": [_canonicalize_ledger_scope_value(ledger_id)],
                 "surface_scope": [settings.CHAT_SURFACE_ID],
                 "surface_id": settings.CHAT_SURFACE_ID,
             }
@@ -1530,7 +1530,7 @@ async def _prepare_middleware_chat_proxy(
                 "delegation_mode": "delegated_only",
                 "delegated_by_principal_did": operator_principal_did,
                 "delegated_by_principal_id": operator_principal_id,
-                "ledger_scope": [ledger_id],
+                "ledger_scope": [_canonicalize_ledger_scope_value(ledger_id)],
                 "surface_scope": [settings.CHAT_SURFACE_ID],
                 "surface_id": settings.CHAT_SURFACE_ID,
             }
@@ -1922,6 +1922,18 @@ def _resolve_session_scope(session_id: str, session: dict[str, Any]) -> tuple[st
         update_session(session_id, session)
 
     return desired_ledger, desired_entity, session
+
+
+def _canonicalize_ledger_scope_value(value: str | None) -> str:
+    """Return a lowercase ledger id with any ``ledger:`` prefix removed.
+
+    DSS-240: delegated principal ledger scopes must match the backend's
+    canonical ledger id (case-sensitive), so ``LOAM`` becomes ``loam``.
+    """
+    text = str(value or "").strip()
+    while text.startswith("ledger:"):
+        text = text[len("ledger:") :].strip()
+    return text.lower()
 
 
 def _iter_entry_records(payload: Any) -> list[dict[str, Any]]:
