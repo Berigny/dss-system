@@ -41,8 +41,9 @@ Instead of relying solely on vector search, DSS introduces **vectorless Qp-Nativ
 * **100% Recall on Long Context:** In benchmarks, DSS achieves a Recall@1 of 1.00 at 517K tokens, guaranteeing exact memory retrieval where standard semantic RAG fails completely.
 
 
-
 While the immediate value is a continuous, unbroken conversational state, the architectural byproducts are enterprise-grade: native auditability, immutable hash-chained provenance, and strict non-human identity governance.
+
+> **Request a DSS Demo** Durable memory, exact provenance, and governed recall across models, workflows, and time: **[Dual Substrate System](https://dualsubstrate.com)**.
 
 ---
 
