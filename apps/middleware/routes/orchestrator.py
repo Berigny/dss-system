@@ -901,6 +901,80 @@ def _build_model_auth_context(
     }
 
 
+def _build_delegated_prompt_path(
+    *,
+    actor_resolution: dict[str, Any],
+    auth_headers: dict[str, str],
+    metadata: dict[str, Any] | None = None,
+) -> dict[str, Any] | None:
+    """Build delegated_prompt_path metadata when a delegated principal is active.
+
+    Mirrors the shape produced by the backend's ``_delegated_prompt_path_metadata``
+    so that stream consumers (activity, attribution, smoke tests) see a consistent
+    contract whether the request is proxied or orchestrated by the middleware.
+    """
+    if actor_resolution.get("auth_method") != "delegated_cli_request":
+        return None
+    prompt_principal_did = str(actor_resolution.get("actor_did") or "").strip()
+    if not prompt_principal_did:
+        return None
+
+    requested_by_principal_did = str(
+        auth_headers.get("x-delegated-by-principal-did") or ""
+    ).strip()
+    requested_by_principal_id = str(
+        auth_headers.get("x-delegated-by-principal-id") or ""
+    ).strip()
+    delegation_mode = str(
+        auth_headers.get("x-delegation-mode") or "delegated_only"
+    ).strip()
+    surface_id = str(auth_headers.get("x-surface-id") or "").strip()
+
+    def _split_scope(header_value: str | None) -> list[str]:
+        raw = str(header_value or "").strip()
+        if not raw:
+            return []
+        if raw.startswith("["):
+            try:
+                parsed = json.loads(raw)
+            except Exception:
+                parsed = None
+            if isinstance(parsed, list):
+                return [str(item).strip() for item in parsed if str(item).strip()]
+        return [part.strip() for part in raw.split(",") if part.strip()]
+
+    ledger_scope = _split_scope(auth_headers.get("x-delegated-ledger-scope"))
+    surface_scope = _split_scope(auth_headers.get("x-delegated-surface-scope"))
+    target_ledger_id = ledger_scope[0] if ledger_scope else ""
+    if not target_ledger_id and isinstance(metadata, dict):
+        target_ledger_id = str(
+            metadata.get("ledger_id")
+            or metadata.get("runtime_namespace")
+            or ""
+        ).strip()
+
+    return {
+        "active": True,
+        "audit_posture": "requested_by_operator_executed_by_delegated_principal",
+        "delegation_mode": delegation_mode or "delegated_only",
+        "prompt_principal_did": prompt_principal_did,
+        "prompt_principal_id": str(actor_resolution.get("principal_id") or "").strip() or None,
+        "prompt_principal_type": str(actor_resolution.get("principal_type") or "").strip() or "agent",
+        "prompt_principal_display_name": str(
+            actor_resolution.get("principal_display_name") or ""
+        ).strip() or None,
+        "requested_by_principal_did": requested_by_principal_did or None,
+        "requested_by_principal_id": requested_by_principal_id or None,
+        "requested_by_is_distinct_from_prompt_principal": bool(
+            requested_by_principal_did and requested_by_principal_did != prompt_principal_did
+        ),
+        "target_ledger_id": target_ledger_id or None,
+        "target_surface_id": surface_id or None,
+        "ledger_scope": ledger_scope,
+        "surface_scope": surface_scope,
+    }
+
+
 def _resolve_runtime_actor(
     *,
     payload: dict[str, Any],
@@ -7478,12 +7552,15 @@ def register_orchestrator_routes(rt):
         payload_metadata["model_auth_context"] = model_auth_context
         payload = dict(payload)
         payload["metadata"] = payload_metadata
-        if not bool(standing_envelope.get("write_commit_allowed")) and enable_ledger:
-            enable_ledger = False
-            policy_rejections.append("standing_write_commit_denied")
         retrieval_allowed = str(standing_envelope.get("retrieval_scope") or "").strip().lower() == "tenant"
         if not retrieval_allowed and not BREAK_GLASS_UNSAFE_PROFILE:
+            if enable_ledger:
+                enable_ledger = False
             policy_rejections.append("standing_retrieval_scope_denied")
+        write_commit_allowed = bool(standing_envelope.get("write_commit_allowed"))
+        is_delegated_principal = actor_resolution.get("auth_method") == "delegated_cli_request"
+        if not write_commit_allowed and not BREAK_GLASS_UNSAFE_PROFILE:
+            policy_rejections.append("standing_write_commit_denied")
         payload["enable_ledger"] = enable_ledger
         if backend_stream_requested and (_is_online_model_id(agent) or _is_online_model_id(provider)):
             # DSS-189: keep backend stream enabled when p-adic diagnostics are requested,
@@ -9503,13 +9580,20 @@ def register_orchestrator_routes(rt):
             )
 
             commit_start = time.perf_counter()
-            commit_result = await _commit_answer(
-                final_reply,
-                appraisal,
-                eq9_eval=eq9_eval,
-                answer_surface_integrity=answer_surface_integrity,
-                answer_commit_strategy=answer_commit_strategy,
-            )
+            if write_commit_allowed or not is_delegated_principal:
+                commit_result = await _commit_answer(
+                    final_reply,
+                    appraisal,
+                    eq9_eval=eq9_eval,
+                    answer_surface_integrity=answer_surface_integrity,
+                    answer_commit_strategy=answer_commit_strategy,
+                )
+            else:
+                commit_result = {
+                    "status": "skipped",
+                    "reason": "standing_write_commit_denied",
+                    "metadata": {},
+                }
             commit_ms = int((time.perf_counter() - commit_start) * 1000)
             phase_timing_ms["commit_complete_ms"] = _elapsed_total_ms()
             coordinate = None
@@ -9518,7 +9602,21 @@ def register_orchestrator_routes(rt):
             commit_error = None
             if isinstance(commit_result, dict):
                 coordinate = commit_result.get("coordinate")
-                metadata = commit_result.get("metadata") or commit_result.get("metadata_sent")
+                # The backend may return an empty metadata dict while metadata_sent
+                # contains the full middleware-generated envelope (autonomy_evidence,
+                # walk contracts, etc.). Prefer a non-empty backend metadata, fall
+                # back to metadata_sent, and keep an empty dict for skipped commits
+                # so middleware can still inject delegated_prompt_path.
+                raw_metadata = commit_result.get("metadata")
+                metadata_sent = commit_result.get("metadata_sent")
+                if isinstance(raw_metadata, dict) and raw_metadata:
+                    metadata = raw_metadata
+                elif isinstance(metadata_sent, dict):
+                    metadata = metadata_sent
+                elif isinstance(raw_metadata, dict):
+                    metadata = raw_metadata
+                else:
+                    metadata = None
                 commit_status = commit_result.get("status")
                 commit_error = commit_result.get("error")
             if isinstance(metadata, dict):
@@ -9527,6 +9625,13 @@ def register_orchestrator_routes(rt):
                     metadata["answer_surface_integrity"] = answer_surface_integrity
                 if isinstance(answer_commit_strategy, dict):
                     metadata["answer_commit_strategy"] = answer_commit_strategy
+                delegated_prompt_path = _build_delegated_prompt_path(
+                    actor_resolution=actor_resolution,
+                    auth_headers=auth_headers if isinstance(auth_headers, dict) else {},
+                    metadata=metadata,
+                )
+                if delegated_prompt_path:
+                    metadata["delegated_prompt_path"] = delegated_prompt_path
                 assurance_meta = metadata.get("assurance")
                 if isinstance(assurance_meta, dict):
                     sig = str(assurance_meta.get("signature") or "").strip()
@@ -10812,6 +10917,11 @@ def register_orchestrator_routes(rt):
                     "epistemic_status": epistemic_status,
                     "runtime_actor": actor_resolution,
                     "standing_envelope": standing_envelope,
+                    "delegated_prompt_path": _build_delegated_prompt_path(
+                        actor_resolution=actor_resolution,
+                        auth_headers=auth_headers if isinstance(auth_headers, dict) else {},
+                        metadata=payload_metadata if isinstance(payload_metadata, dict) else None,
+                    ),
                     "attachment_context": _attachment_context_payload(
                         requested_coords=requested_attachment_context,
                         queued_coords=queued_coords,
