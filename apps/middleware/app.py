@@ -2512,7 +2512,7 @@ async def decode_coordinate(request: Request):
             None,
         )
         if authority_detail is not None:
-            raise HTTPException(status_code=403, detail=authority_detail)
+            return JSONResponse(authority_detail, status_code=403)
         last_error = next(
             (
                 str(item.get("error"))
