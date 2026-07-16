@@ -179,7 +179,7 @@ def _canonicalize_control_plane_ledger_id(value: str) -> str:
     text = str(value or "").strip()
     while text.startswith("ledger:"):
         text = text[len("ledger:") :].strip()
-    return text
+    return text.lower()
 
 
 def _prefixed_control_plane_ledger_alias(value: str) -> str | None:
@@ -468,6 +468,10 @@ class EntityRemoveRequest(BaseModel):
 
     entity_type: str = Field(..., min_length=2)
     entity_id: str = Field(..., min_length=2)
+    orphan_only: bool = Field(False, description="Only allow removal if the entity has no active references.")
+    allow_last_active_removal: bool = Field(False, description="Allow removing the only active ledger for a tenant.")
+    reason: str | None = Field(None, description="Operator-supplied reason for the removal.")
+    idempotency_key: str | None = Field(None, description="Optional idempotency/audit key.")
 
 
 class ImpactAnalysisRequest(BaseModel):
@@ -2363,6 +2367,55 @@ def _persist_registered_principals_v1(db, registry: dict[str, dict[str, Any]]) -
     return canonical
 
 
+def _ledger_id_matches(value: Any, ledger_id: str) -> bool:
+    text = str(value or "").strip()
+    if not text:
+        return False
+    return _canonicalize_control_plane_ledger_id(text) == ledger_id
+
+
+def _principal_references_ledger(record: dict[str, Any], ledger_id: str) -> bool:
+    if _ledger_id_matches(record.get("ledger_id"), ledger_id):
+        return True
+    metadata = record.get("metadata") if isinstance(record.get("metadata"), dict) else {}
+    if _ledger_id_matches(metadata.get("ledger_id"), ledger_id):
+        return True
+    delegated = metadata.get("delegated_authority") if isinstance(metadata.get("delegated_authority"), dict) else {}
+    for key in ("ledger_scope", "ledger_ids"):
+        for item in delegated.get(key) or []:
+            if _ledger_id_matches(item, ledger_id):
+                return True
+    return False
+
+
+def _is_orphan_ledger(
+    ledger_id: str,
+    *,
+    relationships: dict[str, dict[str, Any]],
+    surfaces: dict[str, dict[str, Any]],
+    principals: dict[str, dict[str, Any]],
+) -> bool:
+    """Return True when no active connection, surface, or principal references the ledger."""
+    for rel in relationships.values():
+        if not isinstance(rel, dict):
+            continue
+        subject_type = str(rel.get("subject_entity_type") or "").strip().lower()
+        subject_id = _canonicalize_control_plane_ledger_id(rel.get("subject_entity_id"))
+        object_type = str(rel.get("object_entity_type") or "").strip().lower()
+        object_id = _canonicalize_control_plane_ledger_id(rel.get("object_entity_id"))
+        if subject_type == "ledger" and subject_id == ledger_id:
+            return False
+        if object_type == "ledger" and object_id == ledger_id:
+            return False
+    for surface in surfaces.values():
+        if isinstance(surface, dict) and _ledger_id_matches(surface.get("ledger_id"), ledger_id):
+            return False
+    for principal in principals.values():
+        if isinstance(principal, dict) and _principal_references_ledger(principal, ledger_id):
+            return False
+    return True
+
+
 def _load_pilot_signups_v1(db) -> dict[str, dict[str, Any]]:
     raw = db.get(PILOT_SIGNUPS_V1_KEY)
     if raw is None:
@@ -4241,6 +4294,8 @@ def _discover_ledgers(db) -> Set[str]:
                 except Exception:  # pragma: no cover - defensive
                     continue
 
+                if decoded.startswith("__") or ":" not in decoded:
+                    continue
                 if decoded in {
                     LEDGER_REGISTRY_KEY.decode(),
                     LEDGER_REGISTRY_V1_KEY.decode(),
@@ -4255,6 +4310,8 @@ def _discover_ledgers(db) -> Set[str]:
         try:
             for raw_key in db.keys():  # type: ignore[attr-defined]
                 decoded = raw_key.decode() if isinstance(raw_key, (bytes, bytearray)) else str(raw_key)
+                if decoded.startswith("__") or ":" not in decoded:
+                    continue
                 if decoded in {
                     LEDGER_REGISTRY_KEY.decode(),
                     LEDGER_REGISTRY_V1_KEY.decode(),
@@ -4277,6 +4334,66 @@ def _admin_include_discovered_ledgers() -> bool:
         "yes",
         "on",
     }
+
+
+def _runtime_ledger_records_for_control_plane(
+    db,
+    registry_v1: dict[str, dict[str, Any]],
+    *,
+    request: Request | None = None,
+) -> dict[str, dict[str, Any]]:
+    """Return synthetic ledger records for runtime namespaces not yet registered.
+
+    Chat, middleware, and satellite surfaces write to ledger namespaces that may
+    not have an explicit control-plane record. Surfacing them in Manage
+    Connections lets operators link principals and surfaces to the ledger the
+    runtime is actually using.
+    """
+    registered = set(registry_v1.keys())
+    discovered = _discover_ledgers(db)
+    runtime: dict[str, dict[str, Any]] = {}
+    caller_principal_id = ""
+    caller_principal_did = ""
+    if request is not None:
+        try:
+            principal = principal_from_request(request)
+            caller_principal_id = str(principal.principal_id or "").strip()
+            caller_principal_did = str(principal.principal_did or "").strip()
+        except Exception:
+            caller_principal_id = ""
+            caller_principal_did = ""
+    for ledger_id in discovered:
+        canonical = _canonicalize_control_plane_ledger_id(ledger_id)
+        if not canonical or canonical in registered:
+            continue
+        if not _is_valid_control_plane_ledger_id(canonical):
+            continue
+        # Skip nested/internal namespaces such as entity:, bucket:, chain:,
+        # metrics:, tp:, ix:, etc. App ledger namespaces are typically flat.
+        if ":" in canonical:
+            continue
+        timestamp = _now_iso()
+        runtime[canonical] = {
+            "ledger_id": canonical,
+            "display_name": canonical,
+            "namespace": canonical,
+            "tenant_id": "tenant:unknown",
+            "owner_principal_id": caller_principal_did or caller_principal_id or "unknown",
+            "owner_principal_type": "unknown",
+            "policy_profile": "standard",
+            "status": "active",
+            "canonical_subject": _stable_ledger_did(request=request, ledger_id=canonical),
+            "canonical_subject_source": "did:web:ledger",
+            "created_at": timestamp,
+            "updated_at": timestamp,
+            "created_by_principal_id": caller_principal_did or caller_principal_id or None,
+            "metadata": {
+                "provisioning_state": "runtime_discovered",
+                "ledger_alias_history": [],
+            },
+            "provisioning_source": "runtime_discovered",
+        }
+    return runtime
 
 
 def _require_admin(request: Request) -> None:
@@ -4912,7 +5029,34 @@ def control_plane_list_ledgers(request: Request, db=Depends(get_db)):
     _require_control_plane_operator(request)
     _authorize_admin_scope(request, ledger_id="default", action="ledger.read")
     registry_v1 = _load_registered_ledgers_v1(db)
-    return {"status": "ok", "ledgers": [_annotate_control_plane_row(registry_v1[key], kind="ledger") for key in sorted(registry_v1.keys())]}
+    runtime_records = _runtime_ledger_records_for_control_plane(db, registry_v1, request=request)
+    combined = {**runtime_records, **registry_v1}
+    return {"status": "ok", "ledgers": [_annotate_control_plane_row(combined[key], kind="ledger") for key in sorted(combined.keys())]}
+
+
+@control_plane_router.get("/ledgers/orphans")
+def control_plane_list_orphan_ledgers(request: Request, db=Depends(get_db)):
+    _require_control_plane_operator(request)
+    _authorize_admin_scope(request, ledger_id="default", action="ledger.read")
+    registry_v1 = _load_registered_ledgers_v1(db)
+    relationships = _load_control_plane_relationships_v1(db)
+    surfaces = _load_control_plane_surfaces_v1(db)
+    principals = _load_registered_principals_v1(db)
+    orphans: list[dict[str, Any]] = []
+    for ledger_id, record in registry_v1.items():
+        if not isinstance(record, dict):
+            continue
+        status = str(record.get("status") or "").strip().lower()
+        if status in {"superseded", "removed", "archived"}:
+            continue
+        if _is_orphan_ledger(
+            ledger_id,
+            relationships=relationships,
+            surfaces=surfaces,
+            principals=principals,
+        ):
+            orphans.append(_annotate_control_plane_row(record, kind="ledger"))
+    return {"status": "ok", "ledgers": orphans}
 
 
 @control_plane_router.post("/ledgers")
@@ -5019,6 +5163,14 @@ def control_plane_consolidate_ledgers(request: Request, payload: LedgerConsolida
 
     registry_v1 = _load_registered_ledgers_v1(db)
     canonical = registry_v1.get(canonical_ledger_id) if isinstance(registry_v1.get(canonical_ledger_id), dict) else None
+    if not isinstance(canonical, dict):
+        # Allow consolidation into a runtime-discovered ledger that has not yet
+        # been explicitly registered, so stale registry records can be merged
+        # into the namespace the runtime is actually using.
+        runtime_records = _runtime_ledger_records_for_control_plane(db, registry_v1, request=request)
+        canonical = runtime_records.get(canonical_ledger_id)
+        if isinstance(canonical, dict):
+            registry_v1[canonical_ledger_id] = canonical
     if not isinstance(canonical, dict):
         raise HTTPException(status_code=404, detail="canonical ledger not found")
     missing = [item for item in superseded_ledger_ids if not isinstance(registry_v1.get(item), dict)]
@@ -5884,8 +6036,51 @@ def control_plane_remove_entity(request: Request, payload: EntityRemoveRequest, 
 
     if entity_type == "ledger":
         ledgers_v1 = _load_registered_ledgers_v1(db)
-        if not isinstance(ledgers_v1.get(entity_id), dict):
+        target_record = ledgers_v1.get(entity_id)
+        if not isinstance(target_record, dict):
             raise HTTPException(status_code=404, detail="ledger not found")
+
+        surfaces_v1 = _load_control_plane_surfaces_v1(db)
+        principals_v1 = _load_registered_principals_v1(db)
+        is_orphan = _is_orphan_ledger(
+            entity_id,
+            relationships=explicit_relationships,
+            surfaces=surfaces_v1,
+            principals=principals_v1,
+        )
+        if payload.orphan_only and not is_orphan:
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": "ledger_not_orphan",
+                    "ledger_id": entity_id,
+                    "reason": "Ledger still has active references; unlink it before removal.",
+                },
+            )
+
+        target_tenant = str(target_record.get("tenant_id") or "").strip()
+        terminal_statuses = {"superseded", "removed", "archived"}
+        active_same_tenant = [
+            lid
+            for lid, rec in ledgers_v1.items()
+            if isinstance(rec, dict)
+            and str(rec.get("tenant_id") or "").strip() == target_tenant
+            and str(rec.get("status") or "").strip().lower() not in terminal_statuses
+        ]
+        if (
+            len(active_same_tenant) <= 1
+            and entity_id in active_same_tenant
+            and not payload.allow_last_active_removal
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "error": "last_active_ledger",
+                    "ledger_id": entity_id,
+                    "reason": "Cannot remove the only active ledger for the tenant without explicit override.",
+                },
+            )
+
         clear_result = clear_ledger(request, confirm=True, entity=entity_id, dry_run=False, reindex=False, db=db)
 
         surfaces_v1 = _load_control_plane_surfaces_v1(db)
@@ -5925,17 +6120,30 @@ def control_plane_remove_entity(request: Request, payload: EntityRemoveRequest, 
         if mutated_principals:
             _persist_registered_principals_v1(db, principals_v1)
 
-        return {
+        removal_audit = {
             "status": "ok",
             "removed": True,
             "entity_type": entity_type,
             "entity_id": entity_id,
+            "orphan": is_orphan,
+            "reason": str(payload.reason or "").strip() or "operator_entity_removal",
             "relationships_removed": relationships_removed,
             "surfaces_updated": surfaces_updated,
             "principals_updated": principals_updated,
             "model_bindings_updated": model_bindings_updated,
             "clear_result": clear_result or {"status": "ok", "entity": entity_id},
+            "removed_at": timestamp,
+            "removed_by_principal_id": str(principal_from_request(request).principal_id or "").strip() or None,
         }
+        audit_key = str(payload.idempotency_key or "").strip() or f"entity-removal-{entity_type}-{entity_id}-{uuid4().hex}"
+        _store_control_plane_mutation(
+            db,
+            idempotency_key=audit_key,
+            fingerprint=_payload_fingerprint("control_plane_remove_entity", {"entity_type": entity_type, "entity_id": entity_id}),
+            response=removal_audit,
+        )
+
+        return removal_audit
 
     if entity_type == "principal":
         principals_v1 = _load_registered_principals_v1(db)

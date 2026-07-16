@@ -1319,3 +1319,257 @@ def test_control_plane_relationships_derive_from_ledger_owner_and_principal_meta
 
     # No surface exists, so there should be no surface-bound relationship.
     assert not any(r.startswith("surface::") for r in ids)
+
+
+
+def test_control_plane_ledger_canonicalization_lowercases_id_and_namespace(monkeypatch) -> None:
+    monkeypatch.setenv("ADMIN_TOKEN", "test-admin-token")
+    monkeypatch.setenv("LEDGER_AUTHZ_MODE", "registry")
+    monkeypatch.setenv("LEDGER_AUTHZ_UNKNOWN_LEDGER_POLICY", "deny")
+
+    client = _make_client()
+    headers = {"x-principal-id": "ops-admin", "x-principal-type": "admin"}
+
+    response = client.post(
+        "/api/control-plane/ledgers",
+        json={
+            "ledger_id": "ledger:LOAM",
+            "namespace": "LOAM",
+            "name": "Loam Root 01",
+            "status": "active",
+            "idempotency_key": "ledger-loam-uppercase",
+        },
+        headers=headers,
+    )
+    assert response.status_code == 200
+    ledger = response.json()["ledger"]
+    assert ledger["ledger_id"] == "loam"
+    assert ledger["namespace"] == "loam"
+    assert "ledgers:loam" in ledger["canonical_subject"]
+
+    ledgers = client.get("/api/control-plane/ledgers", headers=headers).json()["ledgers"]
+    assert len(ledgers) == 1
+    assert ledgers[0]["ledger_id"] == "loam"
+
+
+def test_control_plane_ledger_list_discovers_runtime_namespaces(monkeypatch) -> None:
+    monkeypatch.setenv("ADMIN_TOKEN", "test-admin-token")
+    monkeypatch.setenv("LEDGER_AUTHZ_MODE", "registry")
+    monkeypatch.setenv("LEDGER_AUTHZ_UNKNOWN_LEDGER_POLICY", "deny")
+
+    client = _make_client()
+    client.app.state.db[b"loam:WX-123"] = b"{}"
+    client.app.state.db[b"entity:chat-demo:body"] = b"{}"
+    client.app.state.db[b"metrics:events:loam:2026-01-01T00:00:00Z"] = b"{}"
+    headers = {"x-principal-id": "ops-admin", "x-principal-type": "admin"}
+
+    ledgers = client.get("/api/control-plane/ledgers", headers=headers).json()["ledgers"]
+    ids = {item["ledger_id"] for item in ledgers}
+    assert "loam" in ids
+    loam = next(item for item in ledgers if item["ledger_id"] == "loam")
+    assert loam.get("provisioning_source") == "runtime_discovered"
+    assert "ledgers:loam" in loam.get("canonical_subject", "")
+    assert "entity" not in ids
+    assert "metrics" not in ids
+
+
+def test_control_plane_ledger_list_merges_registered_and_runtime_ledgers(monkeypatch) -> None:
+    monkeypatch.setenv("ADMIN_TOKEN", "test-admin-token")
+    monkeypatch.setenv("LEDGER_AUTHZ_MODE", "registry")
+    monkeypatch.setenv("LEDGER_AUTHZ_UNKNOWN_LEDGER_POLICY", "deny")
+
+    client = _make_client()
+    headers = {"x-principal-id": "ops-admin", "x-principal-type": "admin"}
+
+    registered = client.post(
+        "/api/control-plane/ledgers",
+        json={
+            "ledger_id": "loam-root-01",
+            "name": "Loam Root 01",
+            "status": "active",
+            "idempotency_key": "ledger-loam-root-01",
+        },
+        headers=headers,
+    )
+    assert registered.status_code == 200
+
+    client.app.state.db[b"loam:WX-456"] = b"{}"
+
+    ledgers = client.get("/api/control-plane/ledgers", headers=headers).json()["ledgers"]
+    ids = {item["ledger_id"] for item in ledgers}
+    assert "loam" in ids
+    assert "loam-root-01" in ids
+
+    # Consolidate the stale registered ledger into the runtime canonical ledger.
+    consolidate = client.post(
+        "/api/control-plane/ledgers/consolidate",
+        json={
+            "canonical_ledger_id": "loam",
+            "superseded_ledger_ids": ["loam-root-01"],
+            "reason": "stale_root_alias",
+            "idempotency_key": "ledger-consolidate-loam",
+        },
+        headers=headers,
+    )
+    assert consolidate.status_code == 200
+    consolidation = consolidate.json()["consolidation"]
+    assert consolidation["canonical_ledger_id"] == "loam"
+    assert "loam-root-01" in consolidation["superseded_ledger_ids"]
+
+    ledgers = client.get("/api/control-plane/ledgers", headers=headers).json()["ledgers"]
+    ids = {item["ledger_id"] for item in ledgers}
+    assert "loam" in ids
+    loam = next(item for item in ledgers if item["ledger_id"] == "loam")
+    assert "loam-root-01" in loam.get("metadata", {}).get("ledger_alias_history", [])
+
+
+
+def test_control_plane_list_orphan_ledgers_excludes_referenced_records(monkeypatch) -> None:
+    monkeypatch.setenv("ADMIN_TOKEN", "test-admin-token")
+    monkeypatch.setenv("LEDGER_AUTHZ_MODE", "registry")
+    monkeypatch.setenv("LEDGER_AUTHZ_UNKNOWN_LEDGER_POLICY", "deny")
+
+    client = _make_client()
+    headers = {"x-principal-id": "ops-admin", "x-principal-type": "admin"}
+
+    client.post(
+        "/api/control-plane/ledgers",
+        json={"ledger_id": "linked-ledger", "name": "Linked", "status": "active", "idempotency_key": "ledger-linked"},
+        headers=headers,
+    )
+    client.post(
+        "/api/control-plane/ledgers",
+        json={"ledger_id": "orphan-ledger", "name": "Orphan", "status": "active", "idempotency_key": "ledger-orphan"},
+        headers=headers,
+    )
+    client.post(
+        "/api/control-plane/surfaces",
+        json={
+            "surface_id": "surface:linked",
+            "display_name": "Linked Surface",
+            "surface_type": "chat",
+            "status": "active",
+            "ledger_id": "linked-ledger",
+            "idempotency_key": "surface-linked",
+        },
+        headers=headers,
+    )
+
+    response = client.get("/api/control-plane/ledgers/orphans", headers=headers)
+    assert response.status_code == 200
+    ids = {item["ledger_id"] for item in response.json()["ledgers"]}
+    assert "orphan-ledger" in ids
+    assert "linked-ledger" not in ids
+
+
+def test_control_plane_remove_entity_ledger_rejects_non_orphan_when_orphan_only(monkeypatch) -> None:
+    monkeypatch.setenv("ADMIN_TOKEN", "test-admin-token")
+    monkeypatch.setenv("LEDGER_AUTHZ_MODE", "registry")
+    monkeypatch.setenv("LEDGER_AUTHZ_UNKNOWN_LEDGER_POLICY", "deny")
+
+    client = _make_client()
+    headers = {"x-principal-id": "ops-admin", "x-principal-type": "admin"}
+
+    client.post(
+        "/api/control-plane/ledgers",
+        json={"ledger_id": "linked-ledger", "name": "Linked", "status": "active", "idempotency_key": "ledger-linked-2"},
+        headers=headers,
+    )
+    client.post(
+        "/api/control-plane/surfaces",
+        json={
+            "surface_id": "surface:linked",
+            "display_name": "Linked Surface",
+            "surface_type": "chat",
+            "status": "active",
+            "ledger_id": "linked-ledger",
+            "idempotency_key": "surface-linked-2",
+        },
+        headers=headers,
+    )
+
+    response = client.post(
+        "/api/control-plane/entities/remove",
+        json={"entity_type": "ledger", "entity_id": "linked-ledger", "orphan_only": True},
+        headers=headers,
+    )
+    assert response.status_code == 400
+    assert response.json()["detail"]["error"] == "ledger_not_orphan"
+
+
+def test_control_plane_remove_entity_ledger_allows_orphan(monkeypatch) -> None:
+    monkeypatch.setenv("ADMIN_TOKEN", "test-admin-token")
+    monkeypatch.setenv("LEDGER_AUTHZ_MODE", "registry")
+    monkeypatch.setenv("LEDGER_AUTHZ_UNKNOWN_LEDGER_POLICY", "deny")
+
+    client = _make_client()
+    headers = {"x-principal-id": "ops-admin", "x-principal-type": "admin"}
+
+    client.post(
+        "/api/control-plane/ledgers",
+        json={"ledger_id": "orphan-ledger", "name": "Orphan", "status": "active", "idempotency_key": "ledger-orphan-3"},
+        headers=headers,
+    )
+    client.post(
+        "/api/control-plane/ledgers",
+        json={"ledger_id": "keeper-ledger", "name": "Keeper", "status": "active", "idempotency_key": "ledger-keeper"},
+        headers=headers,
+    )
+
+    response = client.post(
+        "/api/control-plane/entities/remove",
+        json={
+            "entity_type": "ledger",
+            "entity_id": "orphan-ledger",
+            "orphan_only": True,
+            "reason": "housekeeping",
+            "idempotency_key": "remove-orphan-3",
+        },
+        headers=headers,
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["removed"] is True
+    assert body["orphan"] is True
+    assert body["reason"] == "housekeeping"
+
+    ledgers = client.get("/api/control-plane/ledgers", headers=headers).json()["ledgers"]
+    assert "orphan-ledger" not in {item["ledger_id"] for item in ledgers}
+    assert "keeper-ledger" in {item["ledger_id"] for item in ledgers}
+
+
+def test_control_plane_remove_entity_ledger_blocks_last_active_ledger(monkeypatch) -> None:
+    monkeypatch.setenv("ADMIN_TOKEN", "test-admin-token")
+    monkeypatch.setenv("LEDGER_AUTHZ_MODE", "registry")
+    monkeypatch.setenv("LEDGER_AUTHZ_UNKNOWN_LEDGER_POLICY", "deny")
+
+    client = _make_client()
+    headers = {"x-principal-id": "ops-admin", "x-principal-type": "admin"}
+
+    client.post(
+        "/api/control-plane/ledgers",
+        json={"ledger_id": "only-ledger", "name": "Only", "status": "active", "idempotency_key": "ledger-only"},
+        headers=headers,
+    )
+
+    response = client.post(
+        "/api/control-plane/entities/remove",
+        json={"entity_type": "ledger", "entity_id": "only-ledger", "orphan_only": True},
+        headers=headers,
+    )
+    assert response.status_code == 400
+    assert response.json()["detail"]["error"] == "last_active_ledger"
+
+    response = client.post(
+        "/api/control-plane/entities/remove",
+        json={
+            "entity_type": "ledger",
+            "entity_id": "only-ledger",
+            "orphan_only": True,
+            "allow_last_active_removal": True,
+            "idempotency_key": "remove-only-override",
+        },
+        headers=headers,
+    )
+    assert response.status_code == 200
+    assert response.json()["removed"] is True

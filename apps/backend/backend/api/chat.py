@@ -85,6 +85,7 @@ from backend.services.authz import (
 from backend.services.context_scope import resolve_context_id_or_raise
 from backend.services.ledger_scope import resolve_ledger_scope_or_raise
 from backend.services.namespace_policy import resolve_write_namespace
+from backend.services.surface_scope import assert_surface_ledger_access
 from backend.services.provenance import (
     _build_gravity_tax_policy,
     build_write_provenance,
@@ -5922,6 +5923,14 @@ async def decode_coordinate(
                     "error_code": "missing_namespace",
                     "hint": 'provide namespace like "<ns>:<coord>"',
                 }
+
+        surface_id = str(
+            request.headers.get("x-surface-id")
+            or payload.get("surface_id")
+            or ""
+        ).strip()
+        if surface_id and namespace_used:
+            assert_surface_ledger_access(request, surface_id, namespace_used)
 
         if entry is None:
             key = LedgerKey(namespace=namespace_used, identifier=normalized["bare"])

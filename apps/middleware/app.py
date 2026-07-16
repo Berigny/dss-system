@@ -1015,6 +1015,7 @@ async def _decode_with_fallback_attempts(
     *,
     entity: str,
     session_id: str,
+    auth_headers: dict[str, str] | None = None,
 ) -> tuple[dict[str, Any] | None, list[dict[str, Any]]]:
     resolved: dict[str, Any] | None = None
     diagnostics: list[dict[str, Any]] = []
@@ -1028,12 +1029,13 @@ async def _decode_with_fallback_attempts(
         )
         try:
             if attempt is None:
-                candidate = await api.decode_coordinate(coordinate)
+                candidate = await api.decode_coordinate(coordinate, auth_headers=auth_headers)
             else:
                 candidate = await api.decode_coordinate(
                     coordinate,
                     entity=attempt.get("entity"),
                     session_id=attempt.get("session_id"),
+                    auth_headers=auth_headers,
                 )
         except Exception as exc:
             diagnostics.append(
@@ -2475,10 +2477,21 @@ async def decode_coordinate(request: Request):
     entity = session.get("entity") or build_entity_namespace(ledger_id, session_id)
     api.set_ledger(ledger_id)
 
+    surface_id = str(
+        request.headers.get("x-surface-id")
+        or payload.get("surface_id")
+        or ""
+    ).strip()
+    auth_envelope = build_backend_auth_envelope(request=request, payload=payload)
+    auth_headers: dict[str, str] = dict(auth_envelope.get("headers") or {})
+    if surface_id:
+        auth_headers["x-surface-id"] = surface_id
+
     resolved, diagnostics = await _decode_with_fallback_attempts(
         coordinate,
         entity=str(entity),
         session_id=str(session_id),
+        auth_headers=auth_headers,
     )
 
     if resolved is None:
