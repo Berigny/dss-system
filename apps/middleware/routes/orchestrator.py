@@ -11288,6 +11288,8 @@ def register_orchestrator_routes(rt):
                 isinstance(epistemic_status, dict)
                 and "explicit_target_not_resolved" in (epistemic_status.get("limitations") or [])
             )
+            _buffer_tokens = not guardian_fast_path
+            answer_surface_integrity = None
             if explicit_target_not_resolved:
                 assistant_reply = _build_explicit_target_unresolved_reply(
                     explicit_targets=epistemic_status.get("explicit_targets") or [],
