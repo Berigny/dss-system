@@ -22,7 +22,7 @@ Large Language Models are probabilistic engines, and standard Retrieval-Augmente
 
 * **The Result:** AI amnesia, hallucinations, and broken workflows.
 
-You don't need a better vector database; you need a highly reliable AI memory.f **DSS ensures a continuous, infinite context.** It allows a conversation or agentic decision flow to go on indefinitely without hallucination, maintaining strict persistent state and identity across sessions.
+You don't need a better vector database; you need a highly reliable AI memory... **DSS ensures a continuous, infinite context.** It allows a conversation or agentic decision flow to go on indefinitely without hallucination, maintaining strict persistent state and identity across sessions.
 
 ---
 
