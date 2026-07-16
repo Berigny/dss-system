@@ -2527,6 +2527,83 @@ def test_delegated_principal_on_probation_retrieves_but_does_not_commit(monkeypa
     assert delegated.get("requested_by_principal_did") == operator_did
 
 
+def test_prompt_principal_mode_codex_translates_to_delegated_principal(monkeypatch):
+    """prompt_principal_mode=codex must be translated into a delegated Codex request."""
+    codex_did = "did:web:id.dualsubstrate.com:principals:agent:openai:codex"
+    operator_did = "did:key:z6MkOperator"
+
+    class _Registry:
+        def get(self, principal_did: str):
+            if principal_did == codex_did:
+                return {
+                    "principal_did": codex_did,
+                    "principal_key_refs": ["openai:agent:codex"],
+                    "status": "active",
+                    "tenant_id": "tenant:demo",
+                    "metadata": {
+                        "actor_type": "agent",
+                        "delegated_authority": {
+                            "delegation_mode": "delegated_only",
+                            "ledger_scope": ["chat-demo"],
+                            "surface_scope": ["surface:chat:primary"],
+                            "delegated_by_principal_did": operator_did,
+                        },
+                    },
+                    "standing_view": {
+                        "trust_class": "T1",
+                        "posture_class": "P1",
+                        "probation_status": "probation",
+                        "active_sanctions": [],
+                    },
+                }
+            return None
+
+        def get_standing_view(self, principal_did: str):
+            record = self.get(principal_did)
+            if isinstance(record, dict):
+                return record.get("standing_view") or {}
+            return {}
+
+        def find_by_key_ref(self, principal_key_ref: str, *, tenant_id: str | None = None):
+            return None
+
+    monkeypatch.setattr(orchestrator_module, "_principal_registry", lambda: _Registry())
+    monkeypatch.setattr(orchestrator_module.api, "assemble", _fake_assemble)
+    monkeypatch.setattr(orchestrator_module.api, "decode_coordinate", _fake_decode_coordinate)
+    monkeypatch.setattr(orchestrator_module.api, "coord_walk", _fake_coord_walk)
+    monkeypatch.setattr(orchestrator_module.api, "write_walk", _fake_write_walk)
+    monkeypatch.setattr(orchestrator_module.api, "emit_telemetry", _fake_emit_telemetry)
+    monkeypatch.setattr(orchestrator_module.llm, "stream_response", _fake_stream_response)
+
+    events = _stream_events(
+        {
+            "session_id": "prompt-mode-codex",
+            "message": "resolve chat-demo:WX-DELEGATED-PROBE",
+            "history": [],
+            "provider": "openai",
+            "agent": "mock",
+            "enable_ledger": True,
+            "k": 1,
+            "entity": "chat-demo",
+            "ledger_id": "chat-demo",
+            "prompt_principal_mode": "codex",
+        }
+    )
+
+    meta_events = [event for event in events if event.get("type") == "meta"]
+    assert meta_events, "Expected at least one meta event"
+    meta = meta_events[-1]
+    runtime_actor = meta.get("runtime_actor") or {}
+    assert runtime_actor.get("actor_did") == codex_did
+    assert runtime_actor.get("auth_method") == "delegated_cli_request"
+
+    metadata = meta.get("metadata") if isinstance(meta.get("metadata"), dict) else {}
+    delegated = metadata.get("delegated_prompt_path")
+    assert isinstance(delegated, dict), "delegated_prompt_path must be present in meta.metadata"
+    assert delegated.get("active") is True
+    assert delegated.get("prompt_principal_did") == codex_did
+
+
 def test_continuity_introspect_uses_sticky_auth_headers(monkeypatch):
     captured: dict[str, object] = {}
     session_obj = {

@@ -89,6 +89,32 @@ def _delegated_principal_payload(payload: dict[str, Any]) -> dict[str, Any]:
         delegated = source.get("delegated_principal") if isinstance(source, dict) else None
         if isinstance(delegated, dict):
             return dict(delegated)
+
+    # Fallback: chat-surface may request a delegated agent principal by mode
+    # without sending a full delegated_principal object.
+    prompt_mode = str(_claim_from_payload(payload, "prompt_principal_mode") or "").strip().lower()
+    if prompt_mode == "codex":
+        ledger_scope: list[str] = []
+        for key in ("ledger_id", "entity"):
+            value = str(payload.get(key) or "").strip()
+            if value:
+                ledger_scope.append(value)
+                break
+        surface_scope: list[str] = []
+        surface_id = str(payload.get("surface_id") or "").strip()
+        if surface_id:
+            surface_scope.append(surface_id)
+        return {
+            "principal_did": "did:web:id.dualsubstrate.com:principals:agent:openai:codex",
+            "principal_key_id": "openai:agent:codex",
+            "principal_id": "openai:codex",
+            "principal_type": "agent",
+            "explicit_cli_request": True,
+            "delegation_mode": "delegated_only",
+            "ledger_scope": ledger_scope,
+            "surface_scope": surface_scope or ["surface:chat:primary"],
+        }
+
     return {}
 
 
