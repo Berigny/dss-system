@@ -51,21 +51,52 @@ _PRINCIPAL_REGISTRY_V1_KEY = b"__principals_v1__"
 
 
 def principal_from_request(request: Request) -> Principal:
-    principal_did = _request_claim_value(
-        request,
-        state_attr="auth_claim_principal_did",
-        headers=("x-principal-did", "x-did"),
-    )
-    principal_key_id = _request_claim_value(
-        request,
-        state_attr="auth_claim_principal_key_id",
-        headers=("x-principal-key-id", "x-key-id"),
-    )
-    session_jti = _request_claim_value(
-        request,
-        state_attr="auth_claim_session_jti",
-        headers=("x-session-jti", "x-auth-jti"),
-    )
+    # Delegated CLI requests (e.g. chat-surface Codex/Kimi turns) explicitly
+    # identify the prompt principal via headers. When a delegated header is
+    # present it should override the ambient session token claims for that
+    # field; otherwise fall back to the session token as usual.
+    delegated_cli_request = str(
+        request.headers.get("x-delegated-cli-request") or ""
+    ).strip().lower() in {"1", "true", "yes", "on"}
+
+    if delegated_cli_request:
+        principal_did = _clean_str(
+            request.headers.get("x-principal-did") or request.headers.get("x-did")
+        ) or _request_claim_value(
+            request,
+            state_attr="auth_claim_principal_did",
+            headers=(),
+        )
+        principal_key_id = _clean_str(
+            request.headers.get("x-principal-key-id") or request.headers.get("x-key-id")
+        ) or _request_claim_value(
+            request,
+            state_attr="auth_claim_principal_key_id",
+            headers=(),
+        )
+        session_jti = _clean_str(
+            request.headers.get("x-session-jti") or request.headers.get("x-auth-jti")
+        ) or _request_claim_value(
+            request,
+            state_attr="auth_claim_session_jti",
+            headers=(),
+        )
+    else:
+        principal_did = _request_claim_value(
+            request,
+            state_attr="auth_claim_principal_did",
+            headers=("x-principal-did", "x-did"),
+        )
+        principal_key_id = _request_claim_value(
+            request,
+            state_attr="auth_claim_principal_key_id",
+            headers=("x-principal-key-id", "x-key-id"),
+        )
+        session_jti = _request_claim_value(
+            request,
+            state_attr="auth_claim_session_jti",
+            headers=("x-session-jti", "x-auth-jti"),
+        )
     principal_id = _clean_str(
         request.headers.get("x-principal-id")
         or request.headers.get("x-user-id")

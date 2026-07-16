@@ -2495,6 +2495,24 @@ async def decode_coordinate(request: Request):
     )
 
     if resolved is None:
+        _AUTHORITY_ERROR_CODES = {
+            "surface_inactive",
+            "surface_not_bound_to_ledger",
+            "decode_requires_authenticated_principal",
+            "principal_not_authorized_for_surface",
+        }
+        authority_detail = next(
+            (
+                item.get("detail")
+                for item in reversed(diagnostics)
+                if isinstance(item, dict)
+                and isinstance(item.get("detail"), dict)
+                and str(item["detail"].get("error") or "").strip() in _AUTHORITY_ERROR_CODES
+            ),
+            None,
+        )
+        if authority_detail is not None:
+            raise HTTPException(status_code=403, detail=authority_detail)
         last_error = next(
             (
                 str(item.get("error"))
