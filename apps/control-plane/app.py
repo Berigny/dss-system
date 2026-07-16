@@ -2967,6 +2967,7 @@ def _render_settings_connection_shortcuts(
         _link("/connections/add?entity_kind=ledger", "Add ledger"),
         _link("/connections/add?entity_kind=principal", "Add principal"),
         _link("/connections/add?entity_kind=surface", "Add surface"),
+        _link("/settings/orphan-ledgers", "Orphan ledgers"),
     ]
 
     edit_links: list[str] = []
@@ -19845,6 +19846,19 @@ def render_activity_page(
         if str(value or "").strip()
     }
 
+    ledger_select_html = ""
+    if len(ledger_options) > 1:
+        ledger_option_links = "".join(
+            f'<option value="{html.escape(_activity_query_href(base_query_params, ledger=opt))}"{" selected" if opt.lower() == ledger_filter else ""}>{html.escape(opt)}</option>'
+            for opt in ledger_options
+        )
+        ledger_select_html = f'''<div class="activity-filter-bar">
+          <select aria-label="Filter by ledger" onchange="window.location.href = this.value;">
+            <option value="{html.escape(_activity_query_href(base_query_params, ledger=''))}">All ledgers</option>
+            {ledger_option_links}
+          </select>
+        </div>'''
+
     option_html = lambda values, current: "".join(
         f'<option value="{html.escape(v)}"{" selected" if v.lower() == current else ""}>{html.escape(v)}</option>' for v in values
     )
@@ -19987,6 +20001,31 @@ def render_activity_page(
         outline: none;
         background-color: var(--bg);
       }}
+      .activity-filter-bar {{
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 6px;
+      }}
+      .activity-filter-bar select {{
+        appearance: none;
+        -webkit-appearance: none;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        color: var(--text);
+        padding: 8px 28px 8px 12px;
+        font-size: 0.85rem;
+        font-family: var(--font-body);
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%236b6660' d='M0 1l5 5 5-5z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        cursor: pointer;
+      }}
+      .activity-filter-bar select:focus {{
+        outline: none;
+        border-color: var(--border-strong);
+      }}
       .activity-table {{
         border: 1px solid var(--border);
         border-radius: 12px;
@@ -20078,6 +20117,7 @@ def render_activity_page(
           </select>
         </div>
       </form>
+      {ledger_select_html}
       <div class="pageable-group" data-pageable-group data-pageable-sizes="10,20,40,80" data-pageable-label="entries">
         <div class="activity-table">
           <div class="activity-table-head">
@@ -20635,6 +20675,85 @@ async def settings_page(request: Request) -> Response:
             profile_name=profile_name,
         )
     )
+
+
+async def orphan_ledgers_page(request: Request) -> Response:
+    """List ledgers with no active references and allow operators to remove them."""
+    identity_card, redirect = await _require_control_plane_auth(request)
+    if redirect is not None:
+        return redirect
+    profile_name = _profile_name_from_identity_card(identity_card)
+    auth_headers = _auth_headers_from_request(request)
+    banner = str(request.query_params.get("banner") or "").strip()
+    banner_kind = str(request.query_params.get("banner_kind") or "ok").strip() or "ok"
+
+    if request.method == "POST":
+        form = await request.form()
+        ledger_id = str(form.get("ledger_id") or "").strip()
+        confirm = str(form.get("confirm") or "").strip()
+        if not ledger_id or confirm != "1":
+            return RedirectResponse(
+                url="/settings/orphan-ledgers?banner=Confirmation required&banner_kind=warn",
+                status_code=303,
+            )
+        status_code, body = await _control_plane_post(
+            "/api/control-plane/entities/remove",
+            payload={
+                "entity_type": "ledger",
+                "entity_id": ledger_id,
+                "orphan_only": True,
+                "reason": "operator removed orphan ledger",
+                "idempotency_key": f"cp-orphan-removal-{ledger_id}-{secrets.token_urlsafe(8)}",
+            },
+            request=request,
+        )
+        if status_code >= 400:
+            detail = body.get("detail") if isinstance(body, dict) else {}
+            error = detail.get("error") if isinstance(detail, dict) else "removal_failed"
+            message = detail.get("reason") if isinstance(detail, dict) else f"HTTP {status_code}"
+            return RedirectResponse(
+                url=f"/settings/orphan-ledgers?banner={quote(f'{error}: {message}', safe='')}&banner_kind=error",
+                status_code=303,
+            )
+        return RedirectResponse(
+            url=f"/settings/orphan-ledgers?banner={quote(f'Removed {ledger_id}', safe='')}&banner_kind=ok",
+            status_code=303,
+        )
+
+    status_code, body = await _control_plane_get("/api/control-plane/ledgers/orphans", headers=auth_headers)
+    orphans = _as_dict_list(body.get("ledgers")) if status_code < 400 and isinstance(body, dict) else []
+
+    rows_html = "".join(
+        f'''
+        <div class="connection-row" style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--border);">
+          <div>
+            <strong>{html.escape(str(item.get("display_name") or item.get("ledger_id") or "Unknown"))}</strong>
+            <div class="muted" style="font-size:0.85rem;">{html.escape(str(item.get("canonical_subject") or ""))}</div>
+            <div class="muted" style="font-size:0.8rem;">Updated {html.escape(str(item.get("updated_at") or item.get("created_at") or "unknown"))}</div>
+          </div>
+          <form method="post" action="/settings/orphan-ledgers" onsubmit="return confirm('Remove orphan ledger {html.escape(str(item.get('ledger_id')))}? This cannot be undone.');">
+            <input type="hidden" name="ledger_id" value="{html.escape(str(item.get('ledger_id') or ''))}">
+            <input type="hidden" name="confirm" value="1">
+            <button type="submit" class="btn warn">Remove</button>
+          </form>
+        </div>
+        '''
+        for item in orphans
+    ) or '<p class="muted">No orphan ledgers found.</p>'
+
+    banner_html = ""
+    if banner:
+        banner_html = f'<div class="banner banner-{html.escape(banner_kind)}">{html.escape(banner)}</div>'
+
+    body_html = f"""
+    {render_breadcrumbs([("Home", "/"), ("Settings", "/settings?section=account"), ("Orphan ledgers", None)])}
+    {render_page_header(title="Orphan ledgers", description="Ledgers with no active connections, surfaces, or principals. Remove stale records safely.")}
+    {banner_html}
+    <div class="card">
+      {rows_html}
+    </div>
+    """
+    return HTMLResponse(_layout_with_nav(f"Orphan ledgers | {APP_TITLE}", body_html, "/settings/orphan-ledgers", profile_name=profile_name))
 
 
 async def settings_approvals_approve_submit(request: Request) -> Response:
@@ -23786,6 +23905,7 @@ app = Starlette(
         Route("/benchmarks", benchmarks_page, methods=["GET", "HEAD"]),
         Route("/trust", trust_page, methods=["GET", "HEAD"]),
         Route("/settings", settings_page, methods=["GET", "HEAD"]),
+        Route("/settings/orphan-ledgers", orphan_ledgers_page, methods=["GET", "HEAD", "POST"]),
         Route(ACCOUNT_SETUP_PATH, account_setup_page, methods=["GET", "HEAD"]),
         Route("/account/setup/documents", account_setup_documents_page, methods=["GET", "HEAD"]),
         Route("/health", health, methods=["GET", "HEAD"]),

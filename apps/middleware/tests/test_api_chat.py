@@ -602,7 +602,7 @@ def test_api_chat_smart_stream_disables_ledger_and_retrieval_when_standing_denie
 def test_decode_coordinate_v2_key_order(monkeypatch):
     import app as app_module
 
-    async def fake_decode_coordinate(_coord: str):
+    async def fake_decode_coordinate(_coord: str, **kwargs):
         return {
             "coord": "chat-demo-session:WX-123",
             "type": "WX",
@@ -639,7 +639,7 @@ def test_decode_coordinate_v2_key_order(monkeypatch):
 def test_decode_coordinate_lowercases_ledger_id(monkeypatch):
     import app as app_module
 
-    async def fake_decode_coordinate(_coord: str, *, entity: str | None = None, session_id: str | None = None):
+    async def fake_decode_coordinate(_coord: str, *, entity: str | None = None, session_id: str | None = None, **kwargs):
         return {
             "coord": "loam:WX-123",
             "type": "WX",
@@ -1192,7 +1192,7 @@ def test_identity_card_surfaces_canonical_subject_and_standing_refs(monkeypatch)
 def test_decode_coordinate_preserves_coord_meta(monkeypatch):
     import app as app_module
 
-    async def fake_decode_coordinate(_coord: str):
+    async def fake_decode_coordinate(_coord: str, **kwargs):
         return {
             "coord": "chat-demo:WX-123",
             "type": "WX",

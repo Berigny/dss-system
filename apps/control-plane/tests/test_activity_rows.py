@@ -6278,3 +6278,101 @@ def test_merge_frontend_model_principals_drops_deprecated_online_models():
     assert "x-ai/grok-4-fast" not in model_ids
     assert "x-ai/grok-4.3" in model_ids
 
+
+
+def test_render_activity_page_shows_ledger_selector_when_multiple_ledgers_visible() -> None:
+    request = _make_request()
+    connection_context = {
+        "ledgers": [
+            {"ledger_id": "loam", "canonical_subject": "did:web:id.dualsubstrate.com:ledgers:loam", "status": "active"},
+            {"ledger_id": "chat-demo", "canonical_subject": "did:web:id.dualsubstrate.com:ledgers:chat-demo", "status": "active"},
+        ],
+        "principals": [],
+        "surfaces": [],
+        "model_bindings": [],
+        "relationships": [],
+        "ledger_map": {},
+        "principal_map": {},
+        "surface_map": {},
+    }
+    ledger_entries = [
+        {
+            "key": {"namespace": "loam", "identifier": "WX-123"},
+            "coord_meta": {
+                "coord": "loam:WX-123",
+                "coord_type": "WX",
+                "identifier": "WX-123",
+                "runtime_namespace": "loam",
+                "canonical_subject": "did:web:id.dualsubstrate.com:ledgers:loam",
+            },
+            "created_at": "2026-07-16T00:00:00+00:00",
+            "state": {"metadata": {"role": "assistant", "content": "Decoded loam coordinate."}},
+        },
+        {
+            "key": {"namespace": "chat-demo", "identifier": "WX-456"},
+            "coord_meta": {
+                "coord": "chat-demo:WX-456",
+                "coord_type": "WX",
+                "identifier": "WX-456",
+                "runtime_namespace": "chat-demo",
+                "canonical_subject": "did:web:id.dualsubstrate.com:ledgers:chat-demo",
+            },
+            "created_at": "2026-07-16T00:00:00+00:00",
+            "state": {"metadata": {"role": "assistant", "content": "Chat demo response."}},
+        },
+    ]
+    html = dashboard_app.render_activity_page(
+        request,
+        principals=[],
+        selected_principal="",
+        lookup={},
+        connection_context=connection_context,
+        control_plane_state={},
+        submissions=[],
+        ledger_entries=ledger_entries,
+    )
+    assert '<select aria-label="Filter by ledger"' in html
+    assert 'ledger=loam' in html
+    assert 'ledger=chat-demo' in html
+    assert '>All ledgers</option>' in html
+    assert '>loam</option>' in html
+    assert '>chat-demo</option>' in html
+
+
+def test_render_activity_page_hides_ledger_selector_for_single_ledger() -> None:
+    request = _make_request()
+    connection_context = {
+        "ledgers": [
+            {"ledger_id": "chat-demo", "canonical_subject": "did:web:id.dualsubstrate.com:ledgers:chat-demo", "status": "active"},
+        ],
+        "principals": [],
+        "surfaces": [],
+        "model_bindings": [],
+        "relationships": [],
+        "ledger_map": {},
+        "principal_map": {},
+        "surface_map": {},
+    }
+    html = dashboard_app.render_activity_page(
+        request,
+        principals=[],
+        selected_principal="",
+        lookup={},
+        connection_context=connection_context,
+        control_plane_state={},
+        submissions=[],
+        ledger_entries=[],
+    )
+    assert 'aria-label="Filter by ledger"' not in html
+
+
+def test_orphan_ledgers_route_is_registered() -> None:
+    source = (REPO_ROOT / "app.py").read_text()
+    assert 'Route("/settings/orphan-ledgers", orphan_ledgers_page' in source
+
+
+def test_settings_connection_shortcuts_include_orphan_ledgers_link() -> None:
+    context = _empty_connection_context()
+    html = dashboard_app._render_settings_connection_shortcuts(context, {"identity_vc": {}})
+    assert 'href="/settings/orphan-ledgers"' in html
+    assert '>Orphan ledgers</a>' in html

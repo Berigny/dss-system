@@ -152,12 +152,19 @@ def index(request: Request):
 
 
 @rt("/resolve", methods=["post"])
-def resolve(coordinate: str):
+def resolve(request: Request, coordinate: str):
+    token = str(request.cookies.get(BACKEND_SESSION_TOKEN_COOKIE) or "").strip()
     payload = {"coordinate": coordinate.strip(), "ledger_id": DEFAULT_LEDGER_ID}
+    headers: dict[str, str] = {
+        "x-surface-id": "surface:coord-demo",
+    }
+    if token:
+        headers["x-session-token"] = token
     try:
         response = httpx.post(
             f"{MIDDLEWARE_URL}/api/decode_coordinate",
             json=payload,
+            headers=headers,
             timeout=30.0,
         )
         response.raise_for_status()
