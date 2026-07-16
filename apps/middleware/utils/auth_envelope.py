@@ -78,6 +78,9 @@ def _claim_from_payload(payload: dict[str, Any], *keys: str) -> str | None:
 
 
 def _delegated_principal_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    import sys
+    sys.stdout.flush()
+    print("DEBUG _delegated_principal_payload keys:", list(payload.keys()), flush=True)
     nested_sources = (
         payload,
         _payload_dict(payload, "auth"),
@@ -157,6 +160,7 @@ def build_backend_auth_envelope(
     """
 
     body = payload if isinstance(payload, dict) else {}
+    print("DEBUG build_backend_auth_envelope body keys:", list(body.keys()), flush=True)
     mode = str(os.getenv("MIDDLEWARE_AUTH_ENVELOPE_MODE", "compat") or "compat").strip().lower()
     if mode not in {"compat", "did_strict"}:
         mode = "compat"
