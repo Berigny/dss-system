@@ -1,0 +1,25 @@
+# Vercel upload exclusions for monorepo deployments from repo root.
+# These paths are not needed by the Vercel-hosted apps (coord-demo, chat-surface).
+.venv*
+venv/
+.env
+.env.*
+.git/
+.github/
+.pytest_cache/
+__pycache__/
+*.pyc
+.vscode/
+.idea/
+node_modules/
+.DS_Store
+eval/
+runs/
+findings/
+backlog_reqs/
+data/
+scripts/
+*.md
+*.log
+*.spl
+*.spl.md
