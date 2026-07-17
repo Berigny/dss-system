@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 """
-KSR-EVAL Phase 2 — decode evaluation on novel corpus.
+KSR-EVAL Phase 2 v0.2 — semantic decode evaluation.
 
-Runs scripted raw API decode trials across four arms:
-  A: full registry
-  B: minimal slice
-  C: shuffled codebook
-  D: famous-text control
+Pipeline:
+  1. Script factorizes the encoded number (deterministic).
+  2. Model receives the prime factors and registry slice; it maps factors to
+     KSR concepts and writes a grammatical English sentence.
+  3. Metrics are scored against the encoded factor set, not the original seed.
 
-Metrics:
-  - node-recall: fraction of encoded concept nodes recovered
-  - cosine similarity: original vs reconstructed text (local all-MiniLM-L6-v2)
+Arms:
+  A — full registry
+  B — minimal slice
+  C — shuffled codebook
 
 Usage:
     OPENROUTER_API_KEY=... python3 tools/eval_decode.py --corpus eval/corpus/novel_v0.1.jsonl
@@ -34,37 +35,39 @@ from typing import Any
 import yaml
 from openai import AsyncOpenAI
 
-# Use local sentence-transformers for cosine metric.
 try:
     from sentence_transformers import SentenceTransformer
 except ImportError as exc:  # pragma: no cover
-    print("sentence-transformers is required; install with: pip install sentence-transformers", file=sys.stderr)
+    print("sentence-transformers is required", file=sys.stderr)
     raise SystemExit(2) from exc
 
 from encode import DEFAULT_REGISTRY, build_alphabet, encode_concepts, load_registry, registry_sha256
 
 
 OPENROUTER_BASE = "https://openrouter.ai/api/v1"
-DEFAULT_MODEL = "google/gemma-4-9b-a4b-it"
+DEFAULT_MODEL = "moonshotai/kimi-k3"
 COST_CAP_CALLS = 1200
 
-FAMOUS_TEXTS = [
-    "Imagine there's no heaven, it's easy if you try.",
-    "To be or not to be, that is the question.",
-    "All animals are equal, but some animals are more equal than others.",
-    "In the beginning God created the heaven and the earth.",
-    "We hold these truths to be self-evident, that all men are created equal.",
-    "It was the best of times, it was the worst of times.",
-    "I think, therefore I am.",
-    "The only thing we have to fear is fear itself.",
-    "That's one small step for man, one giant leap for mankind.",
-    "The unexamined life is not worth living.",
-    "E = mc^2",
-    "May the Force be with you.",
-    "A rose by any other name would smell as sweet.",
-    "We shall fight on the beaches, we shall fight on the landing grounds.",
-    "Houston, we have a problem.",
-]
+
+class AsyncRateLimiter:
+    """Simple token-bucket rate limiter for API requests."""
+
+    def __init__(self, rpm: float | None):
+        self.rpm = rpm
+        self.min_interval = 60.0 / rpm if rpm else 0.0
+        self._last_release = 0.0
+        self._lock = asyncio.Lock()
+
+    async def acquire(self) -> None:
+        if not self.rpm:
+            return
+        async with self._lock:
+            now = time.monotonic()
+            wait = self._last_release + self.min_interval - now
+            if wait > 0:
+                await asyncio.sleep(wait)
+                now = time.monotonic()
+            self._last_release = now
 
 
 def load_corpus(path: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
@@ -76,7 +79,6 @@ def load_corpus(path: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
 
 
 def build_minimal_registry(registry: dict[str, Any]) -> dict[str, Any]:
-    """Return a minimal registry slice: core semantic layers only."""
     minimal: dict[str, Any] = {
         "ksr_version": registry.get("ksr_version"),
         "digit_registry": registry.get("digit_registry", {}),
@@ -101,7 +103,6 @@ def build_minimal_registry(registry: dict[str, Any]) -> dict[str, Any]:
 
 
 def build_shuffled_registry(registry: dict[str, Any]) -> dict[str, Any]:
-    """Return a registry with the same structure but shuffled prime assignments."""
     shuffled = json.loads(json.dumps(registry))
     primes = list(shuffled.get("prime_registry", {}).keys())
     if len(primes) < 2:
@@ -129,9 +130,65 @@ def build_shuffled_registry(registry: dict[str, Any]) -> dict[str, Any]:
     return remap_prime(shuffled)
 
 
+def factorize(n: int) -> dict[int, int]:
+    exponents: dict[int, int] = {}
+    d = 2
+    while d * d <= n:
+        while n % d == 0:
+            exponents[d] = exponents.get(d, 0) + 1
+            n //= d
+        d += 1
+    if n > 1:
+        exponents[n] = exponents.get(n, 0) + 1
+    return exponents
+
+
+def prime_to_concepts(registry: dict[str, Any]) -> dict[int, set[str]]:
+    """Build reverse map from prime to canonical concept names."""
+    prime_to_concepts: dict[int, set[str]] = defaultdict(set)
+
+    # Eq nodes via metric_prime_map.
+    for eq_key, prime in registry.get("flow_topology", {}).get("metric_prime_map", {}).items():
+        p = int(prime)
+        prime_to_concepts[p].add(eq_key)
+        digit = registry.get("digit_registry", {}).get(eq_key, {})
+        if digit.get("symbol"):
+            prime_to_concepts[p].add(digit["symbol"])
+        for alias in digit.get("aliases", []):
+            prime_to_concepts[p].add(alias)
+
+    # Corner map.
+    for coord, info in registry.get("lattice_registry", {}).get("corner_map", {}).items():
+        p = int(info.get("structural_prime"))
+        prime_to_concepts[p].update([coord, info.get("kernel"), info.get("hebrew_letter")])
+
+    # Face centers.
+    for face in registry.get("lattice_registry", {}).get("face_centers", []):
+        p = int(face.get("prime"))
+        prime_to_concepts[p].update([face.get("coordinate"), face.get("letter")])
+
+    # Reset node.
+    reset = registry.get("lattice_registry", {}).get("reset_node", {})
+    if reset:
+        p = int(reset.get("structural_prime"))
+        prime_to_concepts[p].update([reset.get("coordinate"), reset.get("kernel")])
+
+    # Prime registry.
+    for prime_val, info in registry.get("prime_registry", {}).items():
+        p = int(prime_val)
+        for key in ("name", "mnemonic", "engineering_dimension"):
+            if info.get(key):
+                prime_to_concepts[p].add(info[key])
+
+    # Quaternary gate dimension labels.
+    for gname, ginfo in registry.get("quaternary_gate_registry", {}).get("gates", {}).items():
+        p = int(ginfo.get("prime"))
+        prime_to_concepts[p].update([gname, gname.lower()])
+
+    return {p: names for p, names in prime_to_concepts.items() if p > 1}
+
+
 def registry_to_text(registry: dict[str, Any], max_chars: int = 8000) -> str:
-    """Compact YAML-like text representation of a registry slice."""
-    # Serialize minimal subset of keys to keep prompt size reasonable.
     lines = [f"ksr_version: {registry.get('ksr_version', 'unknown')}"]
 
     mpm = registry.get("flow_topology", {}).get("metric_prime_map", {})
@@ -164,30 +221,40 @@ def registry_to_text(registry: dict[str, Any], max_chars: int = 8000) -> str:
     return text
 
 
-def format_prompt(encoded_number: int, registry_text: str, arm: str) -> str:
+def format_prompt(factors: dict[int, int], registry_text: str, arm: str) -> str:
+    factor_list = ", ".join(f"{p}^{e}" if e > 1 else str(p) for p, e in sorted(factors.items()))
+    product = 1
+    for p, e in factors.items():
+        product *= p ** e
     return (
-        "You are a deterministic decoder for the Kernel Semantic Registry (KSR).\n"
-        "A sentence was encoded as a product of prime powers. Your task is to recover\n"
-        "the original KSR concepts and reconstruct the original sentence.\n\n"
+        "You are a semantic decoder for the Kernel Semantic Registry (KSR).\n\n"
+        "A sentence has already been factorized by a script. Your job is ONLY the\n"
+        "semantic step: map each prime factor to its KSR concept, then write a\n"
+        "grammatical English sentence that the concepts evoke.\n\n"
         f"Arm: {arm}\n"
-        f"Encoded number: {encoded_number}\n\n"
-        "Registry slice:\n"
+        f"Encoded number: {product}\n"
+        f"Prime factorization: {factor_list}\n\n"
+        "Registry slice (maps primes to concepts):\n"
         "---\n"
         f"{registry_text}\n"
         "---\n\n"
+        "RULES:\n"
+        "1. Use the registry to map each prime factor to a concept.\n"
+        "2. Output the recovered concepts in the 'concepts' array.\n"
+        "3. 'reconstructed_text' MUST be a grammatical English sentence.\n"
+        "   Do NOT output a list of concept names, definitions, or JSON inside the sentence.\n"
+        "4. The sentence should be short (5–15 words) and reflect the semantic content\n"
+        "   of the recovered concepts.\n\n"
         "Respond in this exact JSON format (no markdown, no explanation):\n"
-        '{"concepts": ["concept1", "concept2", ...], "reconstructed_text": "..."}'
+        '{"concepts": ["concept1", "concept2", ...], "reconstructed_text": "A grammatical sentence here."}'
     )
 
 
 def parse_response(text: str) -> dict[str, Any]:
-    """Extract JSON from model response."""
-    # Strip markdown fences.
     text = text.strip()
     if text.startswith("```"):
         text = re.sub(r"^```[a-zA-Z]*\n?", "", text)
         text = re.sub(r"\n?```$", "", text).strip()
-    # Find first JSON object.
     match = re.search(r"\{.*\}", text, re.DOTALL)
     if match:
         try:
@@ -197,48 +264,82 @@ def parse_response(text: str) -> dict[str, Any]:
     return {"concepts": [], "reconstructed_text": text}
 
 
-def compute_node_recall(original: list[str], reconstructed: list[str], alphabet: dict[str, int]) -> float:
-    """Recall of original concept nodes, allowing alias matches."""
-    if not original:
-        return 0.0
-    orig_primes = {alphabet.get(c, alphabet.get(c.lower())) for c in original}
-    orig_primes.discard(None)
-    recon_primes = {alphabet.get(c, alphabet.get(c.lower())) for c in reconstructed}
+def is_grammatical_sentence(text: str) -> bool:
+    """Heuristic: contains a verb and ends with punctuation, not just noun phrases."""
+    text = text.strip()
+    if not text:
+        return False
+    if not re.search(r"[.!?]$", text):
+        return False
+    # Reject if it looks like a list of concept names (no spaces between capitalized words).
+    if re.match(r"^([A-Z][a-zA-Z]*\s*)+$", text.rstrip(".!?")):
+        return False
+    # Reject if every word is capitalized (title-case concept list).
+    words = re.findall(r"[A-Za-z]+", text)
+    if words and all(w[0].isupper() for w in words):
+        return False
+    return True
+
+
+def compute_metrics(
+    encoded_factors: dict[int, int],
+    reconstructed_concepts: list[str],
+    original_text: str,
+    reconstructed_text: str,
+    alphabet: dict[str, int],
+    embedder: SentenceTransformer,
+) -> dict[str, Any]:
+    """Score against the encoded factor set (ground truth)."""
+    ground_truth_primes = set(encoded_factors.keys())
+    recon_primes = {alphabet.get(c, alphabet.get(c.lower())) for c in reconstructed_concepts}
     recon_primes.discard(None)
-    if not orig_primes:
-        return 0.0
-    return len(orig_primes & recon_primes) / len(orig_primes)
 
+    tp = len(ground_truth_primes & recon_primes)
+    fp = len(recon_primes - ground_truth_primes)
+    fn = len(ground_truth_primes - recon_primes)
 
-def cosine_similarity(a, b):
-    from numpy import dot
-    from numpy.linalg import norm
-    if norm(a) == 0 or norm(b) == 0:
-        return 0.0
-    return float(dot(a, b) / (norm(a) * norm(b)))
+    node_recall = tp / len(ground_truth_primes) if ground_truth_primes else 0.0
+    precision = tp / (tp + fp) if (tp + fp) else 0.0
+    f1 = (2 * precision * node_recall / (precision + node_recall)) if (precision + node_recall) else 0.0
+
+    grammatical = is_grammatical_sentence(reconstructed_text)
+    try:
+        embeddings = embedder.encode([original_text, reconstructed_text], convert_to_numpy=True)
+        from numpy import dot
+        from numpy.linalg import norm
+        cos = float(dot(embeddings[0], embeddings[1]) / (norm(embeddings[0]) * norm(embeddings[1]))) if norm(embeddings[0]) and norm(embeddings[1]) else 0.0
+    except Exception:
+        cos = 0.0
+
+    return {
+        "node_recall": node_recall,
+        "precision": precision,
+        "f1": f1,
+        "cosine_similarity": cos,
+        "grammatical": grammatical,
+        "ground_truth_primes": sorted(ground_truth_primes),
+        "reconstructed_primes": sorted(recon_primes),
+    }
 
 
 async def run_trial(
     client: AsyncOpenAI,
     model: str,
     semaphore: asyncio.Semaphore,
+    rate_limiter: AsyncRateLimiter,
     record: dict[str, Any],
-    encoded_number: int,
+    factors: dict[int, int],
     registry_text: str,
     arm: str,
     replicate: int,
     call_counter: dict[str, int],
 ) -> dict[str, Any]:
     async with semaphore:
+        await rate_limiter.acquire()
         if call_counter["calls"] >= COST_CAP_CALLS:
-            return {
-                "id": record["id"],
-                "arm": arm,
-                "replicate": replicate,
-                "error": "cost_cap_reached",
-            }
+            return {"id": record["id"], "arm": arm, "replicate": replicate, "error": "cost_cap_reached"}
         call_counter["calls"] += 1
-        prompt = format_prompt(encoded_number, registry_text, arm)
+        prompt = format_prompt(factors, registry_text, arm)
         try:
             response = await client.chat.completions.create(
                 model=model,
@@ -258,22 +359,18 @@ async def run_trial(
                 "reconstructed_text": parsed.get("reconstructed_text", ""),
             }
         except Exception as exc:
-            return {
-                "id": record["id"],
-                "arm": arm,
-                "replicate": replicate,
-                "error": str(exc),
-            }
+            return {"id": record["id"], "arm": arm, "replicate": replicate, "error": str(exc)}
 
 
 async def main() -> int:
-    parser = argparse.ArgumentParser(description="KSR Phase 2 decode evaluation")
+    parser = argparse.ArgumentParser(description="KSR Phase 2 v0.2 semantic decode evaluation")
     parser.add_argument("--corpus", type=Path, default=Path("eval/corpus/novel_v0.1.jsonl"))
     parser.add_argument("--registry", type=Path, default=DEFAULT_REGISTRY)
     parser.add_argument("--model", default=DEFAULT_MODEL)
-    parser.add_argument("--arms", nargs="+", default=["A", "B", "C", "D"], choices=["A", "B", "C", "D"])
+    parser.add_argument("--arms", nargs="+", default=["A", "B", "C"], choices=["A", "B", "C"])
     parser.add_argument("--replicates", type=int, default=2)
     parser.add_argument("--max-concurrent", type=int, default=8)
+    parser.add_argument("--rate-limit-rpm", type=float, default=18.0, help="Max API requests per minute (0 to disable)")
     parser.add_argument("--output", type=Path, help="Report JSON path")
     parser.add_argument("--sample", type=int, help="Run on first N items only")
     args = parser.parse_args()
@@ -288,47 +385,42 @@ async def main() -> int:
     registry = load_registry(args.registry)
     sha = registry_sha256(args.registry)
     alphabet = build_alphabet(registry)
+    prime_to_concepts_map = prime_to_concepts(registry)
 
     header, records = load_corpus(args.corpus)
     if args.sample:
         records = records[:args.sample]
 
-    # Build registry slices.
     slices = {
         "A": registry,
         "B": build_minimal_registry(registry),
         "C": build_shuffled_registry(registry),
     }
-    registry_texts = {arm: registry_to_text(slices[arm]) for arm in ["A", "B", "C"]}
+    registry_texts = {arm: registry_to_text(slices[arm]) for arm in args.arms}
 
-    # Encode corpus items.
-    encoded = {}
+    # Encode corpus items and capture the actual factor set used.
+    encoded: dict[str, dict[str, Any]] = {}
     for record in records:
         enc = encode_concepts(record["encode_seed"], alphabet, registry)
-        encoded[record["id"]] = enc["number"]
+        encoded[record["id"]] = {
+            "number": enc["number"],
+            "factors": factorize(enc["number"]),
+            "resolved_concepts": enc["resolved"],
+            "unknown_seed_concepts": enc["unknown"],
+        }
 
-    # Build trial list.
     trials = []
     call_counter = {"calls": 0}
     semaphore = asyncio.Semaphore(args.max_concurrent)
+    rate_limiter = AsyncRateLimiter(rpm=args.rate_limit_rpm if args.rate_limit_rpm > 0 else None)
 
     for record in records:
         for arm in args.arms:
-            if arm == "D":
-                # Control arm: decode famous texts instead of corpus numbers.
-                for rep in range(args.replicates):
-                    # Use a fixed prime product as a nonsense encoding.
-                    control_number = 2 * 3 * 5 * 7
-                    trials.append(run_trial(
-                        client, args.model, semaphore,
-                        record, control_number, registry_texts["A"], arm, rep, call_counter
-                    ))
-            else:
-                for rep in range(args.replicates):
-                    trials.append(run_trial(
-                        client, args.model, semaphore,
-                        record, encoded[record["id"]], registry_texts[arm], arm, rep, call_counter
-                    ))
+            for rep in range(args.replicates):
+                trials.append(run_trial(
+                    client, args.model, semaphore, rate_limiter,
+                    record, encoded[record["id"]]["factors"], registry_texts[arm], arm, rep, call_counter
+                ))
 
     print(f"Running {len(trials)} trials (cap: {COST_CAP_CALLS})...")
     start_time = time.time()
@@ -336,13 +428,10 @@ async def main() -> int:
     elapsed = time.time() - start_time
     print(f"Completed {len(trial_results)} trials in {elapsed:.1f}s")
 
-    # Load embedding model.
     print("Loading embedding model all-MiniLM-L6-v2...")
     embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
-    # Compute metrics.
     original_texts = {r["id"]: r["text"] for r in records}
-    original_concepts = {r["id"]: r["encode_seed"] for r in records}
 
     arm_metrics: dict[str, list[dict]] = defaultdict(list)
     for tr in trial_results:
@@ -350,45 +439,42 @@ async def main() -> int:
             arm_metrics[tr["arm"]].append({"id": tr["id"], "error": tr["error"]})
             continue
         rid = tr["id"]
-        recon_concepts = tr.get("reconstructed_concepts", [])
-        recon_text = tr.get("reconstructed_text", "")
-        recall = compute_node_recall(original_concepts[rid], recon_concepts, alphabet)
-
-        # Cosine similarity between original and reconstructed text.
-        try:
-            embeddings = embedder.encode([original_texts[rid], recon_text], convert_to_numpy=True)
-            cos = cosine_similarity(embeddings[0], embeddings[1])
-        except Exception:
-            cos = 0.0
-
+        factors = encoded[rid]["factors"]
+        metrics = compute_metrics(
+            factors,
+            tr.get("reconstructed_concepts", []),
+            original_texts[rid],
+            tr.get("reconstructed_text", ""),
+            alphabet,
+            embedder,
+        )
         stratum = next((r["stratum"] for r in records if r["id"] == rid), "unknown")
         arm_metrics[tr["arm"]].append({
             "id": rid,
             "stratum": stratum,
             "replicate": tr["replicate"],
-            "node_recall": recall,
-            "cosine_similarity": cos,
-            "reconstructed_text": recon_text,
-            "reconstructed_concepts": recon_concepts,
+            **metrics,
+            "reconstructed_text": tr.get("reconstructed_text", ""),
+            "reconstructed_concepts": tr.get("reconstructed_concepts", []),
         })
 
-    # Aggregate.
     def aggregate(metrics: list[dict]) -> dict[str, Any]:
         valid = [m for m in metrics if "error" not in m]
         if not valid:
-            return {"count": 0, "node_recall_mean": 0.0, "cosine_mean": 0.0}
+            return {"count": 0, "node_recall_mean": 0.0, "precision_mean": 0.0, "f1_mean": 0.0, "cosine_mean": 0.0, "grammatical_fraction": 0.0}
         return {
             "count": len(valid),
             "node_recall_mean": sum(m["node_recall"] for m in valid) / len(valid),
+            "precision_mean": sum(m["precision"] for m in valid) / len(valid),
+            "f1_mean": sum(m["f1"] for m in valid) / len(valid),
             "cosine_mean": sum(m["cosine_similarity"] for m in valid) / len(valid),
+            "grammatical_fraction": sum(1 for m in valid if m["grammatical"]) / len(valid),
             "node_recall_gte_0_90": sum(1 for m in valid if m["node_recall"] >= 0.90) / len(valid),
             "cosine_gte_0_85": sum(1 for m in valid if m["cosine_similarity"] >= 0.85) / len(valid),
         }
 
-    summary = {
-        "overall": {arm: aggregate(metrics) for arm, metrics in arm_metrics.items()},
-        "by_stratum": {},
-    }
+    summary = {"overall": {arm: aggregate(metrics) for arm, metrics in arm_metrics.items()}}
+    summary["by_stratum"] = {}
     for arm, metrics in arm_metrics.items():
         by_stratum = defaultdict(list)
         for m in metrics:
@@ -396,9 +482,15 @@ async def main() -> int:
                 by_stratum[m["stratum"]].append(m)
         summary["by_stratum"][arm] = {s: aggregate(ms) for s, ms in by_stratum.items()}
 
+    # Encoder coverage: fraction of seed concepts that are in the KSR alphabet.
+    seed_coverage = []
+    for record in records:
+        known = sum(1 for c in record["encode_seed"] if c in alphabet or c.lower() in alphabet)
+        seed_coverage.append(known / len(record["encode_seed"]) if record["encode_seed"] else 0.0)
+
     report = {
         "header": {
-            "report": "KSR-EVAL Phase 2 — decode evaluation",
+            "report": "KSR-EVAL Phase 2 v0.2 — semantic decode evaluation",
             "date": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "model": args.model,
             "ksr_version": registry.get("ksr_version"),
@@ -409,8 +501,15 @@ async def main() -> int:
         },
         "gate": {
             "C1_node_recall_gte_0_90": summary["overall"].get("A", {}).get("node_recall_mean", 0.0) >= 0.90,
+            "C1_precision_gte_0_90": summary["overall"].get("A", {}).get("precision_mean", 0.0) >= 0.90,
+            "C1_f1_gte_0_90": summary["overall"].get("A", {}).get("f1_mean", 0.0) >= 0.90,
             "C1_cosine_gte_0_85": summary["overall"].get("A", {}).get("cosine_mean", 0.0) >= 0.85,
+            "C1_grammatical_fraction_gte_0_90": summary["overall"].get("A", {}).get("grammatical_fraction", 0.0) >= 0.90,
             "C2_shuffled_lt_full": summary["overall"].get("C", {}).get("node_recall_mean", 1.0) < summary["overall"].get("A", {}).get("node_recall_mean", 0.0),
+        },
+        "encoder_coverage": {
+            "mean_seed_coverage": sum(seed_coverage) / len(seed_coverage) if seed_coverage else 0.0,
+            "per_item": {record["id"]: cov for record, cov in zip(records, seed_coverage)},
         },
         "summary": summary,
         "raw_trials": trial_results,
@@ -423,7 +522,7 @@ async def main() -> int:
     else:
         report_dir = Path(f"eval/reports/{time.strftime('%Y%m%d')}_{sha[:12]}")
         report_dir.mkdir(parents=True, exist_ok=True)
-        report_path = report_dir / "phase2_report.json"
+        report_path = report_dir / "phase2_report_v0.2.json"
         report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"Report written to {report_path}")
 
@@ -431,6 +530,7 @@ async def main() -> int:
     print(json.dumps(summary["overall"], indent=2))
     print("\nGates:")
     print(json.dumps(report["gate"], indent=2))
+    print(f"\nEncoder coverage (mean): {report['encoder_coverage']['mean_seed_coverage']:.3f}")
 
     return 0
 
