@@ -229,12 +229,106 @@ def materialize_number(exponent_vector: dict[str, int]) -> int:
     return number
 
 
+def compute_check_factor(registry: dict[str, Any]) -> int:
+    """Return the 336-derived check factor from the registry (product of quaternary gate primes)."""
+    cc = registry.get("check_component", {})
+    if cc.get("algorithm") == "product_of_quaternary_gates" and "check_factor" in cc:
+        return int(cc["check_factor"])
+    # Fallback: product of quaternary gate primes.
+    primes = [ginfo["prime"] for ginfo in registry.get("quaternary_gate_registry", {}).get("gates", {}).values() if ginfo.get("prime")]
+    factor = 1
+    for p in primes:
+        factor *= int(p)
+    return factor
+
+
+def append_check_component(number: int, registry: dict[str, Any]) -> int:
+    """Append the 336-derived check component to a materialized encoding."""
+    return number * compute_check_factor(registry)
+
+
+def encode_concepts(
+    concepts: list[str],
+    alphabet: dict[str, int],
+    registry: dict[str, Any],
+    append_check: bool = False,
+) -> dict[str, Any]:
+    """
+    Encode a list of concept names into a canonical exponent-vector.
+
+    Returns a dict with:
+      - input: original concept list
+      - resolved: {name: prime} for each concept
+      - unknown: list of unrecognized names
+      - exponent_vector: ordered dict prime -> exponent
+      - number: materialized product (for transport/decode testing)
+      - canonical_bytes: stable UTF-8 bytes of the exponent_vector JSON
+      - check_factor: check component factor (if append_check=True)
+      - checked_number: number * check_factor (if append_check=True)
+      - check_valid: True for encoding (if append_check=True)
+    """
+    result = _encode_concepts_semantic(concepts, alphabet)
+    if append_check:
+        cf = compute_check_factor(registry)
+        result["check_factor"] = cf
+        result["checked_number"] = result["number"] * cf
+        result["check_valid"] = True
+    return result
+
+
+def _encode_concepts_semantic(
+    concepts: list[str],
+    alphabet: dict[str, int],
+) -> dict[str, Any]:
+    unknown: list[str] = []
+    resolved: dict[str, int] = {}
+    exponents: Counter[int] = Counter()
+
+    for name in concepts:
+        key = name.strip()
+        prime = alphabet.get(key)
+        if prime is None:
+            prime = alphabet.get(key.lower())
+        if prime is None:
+            if key.lower().startswith("loam:"):
+                prime = alphabet.get(key[5:])
+        if prime is None:
+            unknown.append(name)
+        else:
+            resolved[name] = prime
+            exponents[prime] += 1
+
+    ordered = {str(p): exponents[p] for p in sorted(exponents)}
+
+    number = 1
+    for p, exp in exponents.items():
+        number *= int(p) ** exp
+
+    canonical_json = json.dumps(
+        ordered,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    )
+    canonical_bytes = canonical_json.encode("utf-8")
+
+    return {
+        "input": concepts,
+        "resolved": resolved,
+        "unknown": unknown,
+        "exponent_vector": ordered,
+        "number": number,
+        "canonical_bytes": canonical_bytes.hex(),
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="KSR canonical encoder")
     parser.add_argument("--registry", type=Path, default=DEFAULT_REGISTRY)
     parser.add_argument("--concepts", nargs="+", help="Concept names to encode")
     parser.add_argument("--seed", type=Path, help="JSONL seed file with 'concepts' lists")
     parser.add_argument("--to-number", action="store_true", help="Emit materialized number instead of full JSON")
+    parser.add_argument("--check", action="store_true", help="Append 336-derived check component to encodings")
     parser.add_argument("--output", type=Path, help="Write full report JSON to path")
     args = parser.parse_args(argv)
 
@@ -267,12 +361,12 @@ def main(argv: list[str] | None = None) -> int:
     results: list[dict[str, Any]] = []
     for record in seeds:
         concepts = record.get("concepts", [])
-        encoded = encode_concepts(concepts, alphabet, registry)
+        encoded = encode_concepts(concepts, alphabet, registry, append_check=args.check)
         encoded["id"] = record.get("id")
         results.append(encoded)
 
     if args.to_number and len(results) == 1:
-        print(results[0]["number"])
+        print(results[0]["checked_number"] if args.check else results[0]["number"])
         return 0
 
     report = {

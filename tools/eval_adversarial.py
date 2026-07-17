@@ -292,6 +292,53 @@ def evaluate_digit_edit_check(registry: dict[str, Any], rng: random.Random, n_sa
     }
 
 
+def load_corpus(path: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    with path.open("r", encoding="utf-8") as fh:
+        lines = [line.strip() for line in fh if line.strip()]
+    header = json.loads(lines[0])
+    records = [json.loads(line) for line in lines[1:]]
+    return header, records
+
+
+def check_false_rejection(registry: dict[str, Any], corpus_path: Path = Path("eval/corpus/novel_v0.1.jsonl")) -> dict[str, Any]:
+    """
+    Verify that appending the 336 check component to every valid corpus encoding
+    produces a number that passes the check. Zero false rejections required.
+    """
+    from encode import append_check_component, build_alphabet, encode_concepts
+
+    alphabet = build_alphabet(registry)
+    header, records = load_corpus(corpus_path)
+    check_factor = registry.get("check_component", {}).get("check_factor", 1)
+    check_primes = set(registry.get("check_component", {}).get("gate_primes", []))
+
+    results = []
+    false_rejections = 0
+    for record in records:
+        enc = encode_concepts(record["encode_seed"], alphabet, registry)
+        checked = append_check_component(enc["number"], registry)
+        # Verify divisibility by the full check factor.
+        valid = checked % check_factor == 0
+        # Also verify each gate prime appears with exponent >= 1.
+        factors = factorize(checked)
+        valid = valid and all(factors.get(int(p), 0) >= 1 for p in check_primes)
+        if not valid:
+            false_rejections += 1
+        results.append({
+            "id": record["id"],
+            "semantic_number": enc["number"],
+            "checked_number": checked,
+            "check_valid": valid,
+        })
+
+    return {
+        "total": len(results),
+        "false_rejections": false_rejections,
+        "false_rejection_rate": false_rejections / len(results) if results else 0.0,
+        "samples": results,
+    }
+
+
 def stripping_degradation(registry: dict[str, Any], rng: random.Random, n_samples: int = 50) -> dict[str, Any]:
     """Compare stripping in priority order vs random stripping."""
     alphabet = build_alphabet(registry)
@@ -426,6 +473,9 @@ def main() -> int:
     print("Running digit-edit mutation + 336 check-digit evaluation...")
     digit_edit = evaluate_digit_edit_check(registry, rng)
 
+    print("Running false-rejection check on corpus...")
+    false_reject = check_false_rejection(registry)
+
     print("Running stripping degradation...")
     strip_deg = stripping_degradation(registry, rng)
 
@@ -434,23 +484,25 @@ def main() -> int:
 
     report = {
         "header": {
-            "report": "KSR-EVAL Phase 3 — adversarial and structural checks",
+            "report": "KSR-EVAL Phase 3/4 — adversarial, structural, and 336 check-digit checks",
             "date": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "ksr_version": registry.get("ksr_version"),
             "registry_sha256": sha,
+            "spec_version": "v0.3",
         },
         "gate": {
             "C3_trap_precision_gte_0_95": trap_eval["precision"] >= 0.95,
             "C3_trap_recall_gte_0_90": trap_eval["recall"] >= 0.90,
             "perturbation_sparsity_ratio": perturb["sparsity_ratio"],
-            "digit_edit_baseline_detection_rate": digit_edit["baseline_detection_rate"],
-            "digit_edit_protected_detection_rate": digit_edit["protected_detection_rate"],
+            "G-PERT_protected_detection_gte_0_95": digit_edit["protected_detection_rate"] >= 0.95,
+            "G-PERT_false_rejection_eq_0": false_reject["false_rejections"] == 0,
             "stripping_graceful_degradation": strip_deg["graceful_degradation"],
             "336_fail_closed_all_gates": drill["all_fail_closed"],
         },
         "trap_evaluation": trap_eval,
         "perturbation": perturb,
         "digit_edit_mutation": digit_edit,
+        "false_rejection_check": false_reject,
         "stripping_degradation": strip_deg,
         "guard_drill": drill,
     }

@@ -1,4 +1,4 @@
-ksr_version: 1.2.1
+ksr_version: 1.3.0
 reference_documents:
   whitepaper:
     path: backlog_reqs/paper/dss-whitepaper.pdf
@@ -265,6 +265,18 @@ checksum_invariant:
   name: checksum_336
   value: 336
   description: Product of Eq6, Eq7 and Eq8 digit-symbol values (336 = 6 * 7 * 8)
+check_component:
+  version: "1.3.0"
+  name: quaternary_gate_product
+  description: Error-detection component appended to encodings; product of the three quaternary gate primes (awareness * unity * ethics).
+  algorithm: product_of_quaternary_gates
+  gate_primes:
+    - 17
+    - 19
+    - 137
+  check_factor: 44251
+  verify: number % check_factor == 0
+  derived_from: checksum_336
 quaternary_gate_registry:
   version: 1.3-alpha
   encoding: quaternary_p-adic
