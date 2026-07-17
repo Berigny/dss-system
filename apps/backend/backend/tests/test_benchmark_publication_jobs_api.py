@@ -316,15 +316,17 @@ def test_control_plane_benchmark_publication_jobs_allow_bootstrap_operator_did(m
     output_path = Path("/tmp/test-benchmark-publication-bootstrap.json")
     if output_path.exists():
         output_path.unlink()
+    bootstrap_did = "did:key:z6MkTestBootstrapOperatorDid"
     monkeypatch.setenv("BENCHMARK_ARTIFACT_ROOT", str(artifact_root))
     monkeypatch.setenv("BENCHMARK_PUBLICATION_OUTPUT", str(output_path))
+    monkeypatch.setenv("BENCHMARK_PUBLICATION_BOOTSTRAP_OPERATOR_DIDS", bootstrap_did)
     monkeypatch.delenv("ADMIN_TOKEN", raising=False)
 
     client = _make_client()
     headers = {
-        "x-principal-id": "did:key:z6MkExampleBootstrapOperatorDidPlaceholder",
+        "x-principal-id": bootstrap_did,
         "x-principal-type": "human",
-        "x-principal-did": "did:key:z6MkExampleBootstrapOperatorDidPlaceholder",
+        "x-principal-did": bootstrap_did,
     }
 
     response = client.post(

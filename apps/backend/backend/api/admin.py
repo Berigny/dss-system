@@ -120,12 +120,12 @@ _RESERVED_NAMESPACE_KEYS = {
     LEDGER_REGISTRY_V1_KEY.decode(),
     TENANT_REGISTRY_V1_KEY.decode(),
 }
-_BENCHMARK_PUBLICATION_BOOTSTRAP_OPERATOR_DIDS: Set[str] = set()
-_bootstrap_dids_env = os.getenv("BENCHMARK_PUBLICATION_BOOTSTRAP_OPERATOR_DIDS", "").strip()
-if _bootstrap_dids_env:
-    _BENCHMARK_PUBLICATION_BOOTSTRAP_OPERATOR_DIDS = {
-        did.strip() for did in _bootstrap_dids_env.split(",") if did.strip()
-    }
+def _benchmark_publication_bootstrap_operator_dids() -> Set[str]:
+    """Return bootstrap operator DIDs from the runtime env var."""
+    env_value = os.getenv("BENCHMARK_PUBLICATION_BOOTSTRAP_OPERATOR_DIDS", "").strip()
+    if not env_value:
+        return set()
+    return {did.strip() for did in env_value.split(",") if did.strip()}
 
 
 class LedgerCreateRequest(BaseModel):
@@ -4454,7 +4454,7 @@ def _benchmark_publication_operator_dids() -> set[str]:
         for item in str(os.getenv("BENCHMARK_PUBLICATION_OPERATOR_DIDS") or "").split(",")
         if item.strip()
     }
-    return configured | set(_BENCHMARK_PUBLICATION_BOOTSTRAP_OPERATOR_DIDS)
+    return configured | _benchmark_publication_bootstrap_operator_dids()
 
 
 def _require_benchmark_publication_operator(request: Request) -> None:
