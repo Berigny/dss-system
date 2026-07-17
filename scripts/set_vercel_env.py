@@ -7,7 +7,7 @@ import urllib.error
 import urllib.request
 
 TOKEN = os.environ["VERCEL_TOKEN"]
-TEAM_ID = os.environ.get("VERCEL_TEAM_ID", "team_FUCk3Rij4hBd56ZSXOxDbRjW")
+TEAM_ID = os.environ.get("VERCEL_TEAM_ID", "")
 
 
 def api_request(method, path, body=None):
@@ -89,10 +89,14 @@ COORD_DEMO = {
 }
 
 if __name__ == "__main__":
+    control_plane_project = os.environ["VERCEL_CONTROL_PLANE_PROJECT_ID"]
+    chat_surface_project = os.environ["VERCEL_CHAT_SURFACE_PROJECT_ID"]
+    coord_demo_project = os.environ["VERCEL_COORD_DEMO_PROJECT_ID"]
+
     print("Updating dss-dashboard (control-plane)...")
-    set_envs("prj_hcY4AduxMTsi6c0U3zic3ZotpObf", CONTROL_PLANE)
+    set_envs(control_plane_project, CONTROL_PLANE)
     print("Updating ds-frontend-local-new (chat-surface)...")
-    set_envs("prj_Ek3eqLAAVq3UHeM2DkN8CyKE677I", CHAT_SURFACE)
+    set_envs(chat_surface_project, CHAT_SURFACE)
     print("Updating coord-demo...")
-    set_envs("prj_meE7m9OmaHUITRc4uphTv3fcIVj7", COORD_DEMO)
+    set_envs(coord_demo_project, COORD_DEMO)
     print("Done.")

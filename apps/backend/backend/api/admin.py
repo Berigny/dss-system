@@ -120,9 +120,12 @@ _RESERVED_NAMESPACE_KEYS = {
     LEDGER_REGISTRY_V1_KEY.decode(),
     TENANT_REGISTRY_V1_KEY.decode(),
 }
-_BENCHMARK_PUBLICATION_BOOTSTRAP_OPERATOR_DIDS = {
-    "did:key:z6MkExampleBootstrapOperatorDidPlaceholder",
-}
+_BENCHMARK_PUBLICATION_BOOTSTRAP_OPERATOR_DIDS: Set[str] = set()
+_bootstrap_dids_env = os.getenv("BENCHMARK_PUBLICATION_BOOTSTRAP_OPERATOR_DIDS", "").strip()
+if _bootstrap_dids_env:
+    _BENCHMARK_PUBLICATION_BOOTSTRAP_OPERATOR_DIDS = {
+        did.strip() for did in _bootstrap_dids_env.split(",") if did.strip()
+    }
 
 
 class LedgerCreateRequest(BaseModel):

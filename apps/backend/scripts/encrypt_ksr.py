@@ -4,9 +4,8 @@
 Usage:
     DSS_KSR_PASSWORD=<secret> python scripts/encrypt_ksr.py
 
-If DSS_KSR_PASSWORD is not set, the script falls back to a deterministic test
-password and prints a loud warning. This is only for local development and
-CI; production steward keys must never be committed.
+DSS_KSR_PASSWORD is required. The script exits with an error if it is not set.
+Production steward keys must never be committed.
 """
 
 from __future__ import annotations
@@ -33,11 +32,10 @@ def main() -> int:
     password = os.getenv("DSS_KSR_PASSWORD")
     if not password:
         print(
-            "WARNING: DSS_KSR_PASSWORD not set; using deterministic test password. "
-            "Never use this in production.",
+            "ERROR: DSS_KSR_PASSWORD environment variable is required.",
             file=sys.stderr,
         )
-        password = "DSS-KSR-TEST-195"
+        return 1
 
     whitepaper_hash = whitepaper_hash_path.read_text().strip()
     plaintext = ksr_yaml.read_bytes()

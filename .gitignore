@@ -3,6 +3,9 @@
 .env.local
 .env.*.local
 
+# OAuth client registrations (secrets must be injected at runtime)
+apps/middleware/.mcp_oauth_clients.json
+
 # Python
 __pycache__/
 *.py[cod]
