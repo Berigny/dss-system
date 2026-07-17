@@ -1,0 +1,151 @@
+{"corpus_sha256": "e03138fceda8ecca37d2b95a63d37d35afd553724a21f55529745d55ae8fdd1a", "count": 150, "strata": ["concrete", "abstract", "negation", "quantifier", "temporal", "relational"], "per_stratum": 25}
+{"id": "na001", "stratum": "abstract", "text": "attention arises from the silence of possibility.", "encode_seed": ["Novelty", "Eq1", "Eq0"]}
+{"id": "na002", "stratum": "abstract", "text": "The idea of order binds many fragments into one.", "encode_seed": ["Connection", "Eq2", "Eq3"]}
+{"id": "na003", "stratum": "abstract", "text": "wonder remains invisible yet structures every choice.", "encode_seed": ["Potential", "Eq4", "Eq5"]}
+{"id": "na004", "stratum": "abstract", "text": "A theory of care must account for its own limits.", "encode_seed": ["Mastery", "Eq7", "Eq6"]}
+{"id": "na005", "stratum": "abstract", "text": "responsibility is the medium through which meaning travels.", "encode_seed": ["Eq8", "Law", "Grace", "Eq9"]}
+{"id": "na006", "stratum": "abstract", "text": "The dignity of novelty depends on its resistance to reduction.", "encode_seed": ["Origin", "Eq0", "Journey", "Eq4"]}
+{"id": "na007", "stratum": "abstract", "text": "order dissolves when pressed too hard.", "encode_seed": ["Eq5", "Eq1", "Boundary", "Process"]}
+{"id": "na008", "stratum": "abstract", "text": "Every model of beauty carries an unstated assumption.", "encode_seed": ["Audit", "Eq2", "Eq6", "Change"]}
+{"id": "na009", "stratum": "abstract", "text": "beauty returns whenever the old forms exhaust themselves.", "encode_seed": ["Eq7", "Justice", "Eq3", "Closure"]}
+{"id": "na010", "stratum": "abstract", "text": "The value of meaning lies in what it refuses to capture.", "encode_seed": ["Constraint", "Eq8", "Awareness", "Eq6"]}
+{"id": "na011", "stratum": "abstract", "text": "meaning is neither cause nor effect but their interval.", "encode_seed": ["Eq0", "Novelty", "Eq1"]}
+{"id": "na012", "stratum": "abstract", "text": "A culture without erosion loses its capacity for reflection.", "encode_seed": ["Eq3", "Eq2", "Connection"]}
+{"id": "na013", "stratum": "abstract", "text": "limit intensifies at the boundary between known and unknown.", "encode_seed": ["Eq5", "Potential", "Eq4"]}
+{"id": "na014", "stratum": "abstract", "text": "The history of memory is a history of forgotten questions.", "encode_seed": ["Eq6", "Eq7", "Mastery"]}
+{"id": "na015", "stratum": "abstract", "text": "suffering persists because it names an irreducible tension.", "encode_seed": ["Grace", "Eq8", "Eq9", "Law"]}
+{"id": "na016", "stratum": "abstract", "text": "To approach doubt is to accept asymptotic understanding.", "encode_seed": ["Journey", "Eq0", "Origin", "Eq4"]}
+{"id": "na017", "stratum": "abstract", "text": "integrity operates as a quiet constraint on imagination.", "encode_seed": ["Eq5", "Process", "Eq1", "Boundary"]}
+{"id": "na018", "stratum": "abstract", "text": "The fragility of truth makes it worth defending.", "encode_seed": ["Eq2", "Audit", "Change", "Eq6"]}
+{"id": "na019", "stratum": "abstract", "text": "trust is learned more by failure than by proof.", "encode_seed": ["Closure", "Eq7", "Justice", "Eq3"]}
+{"id": "na020", "stratum": "abstract", "text": "A definition of order is always also a decision.", "encode_seed": ["Eq6", "Constraint", "Awareness", "Eq8"]}
+{"id": "na021", "stratum": "abstract", "text": "meaning gathers weight through repeated refusal.", "encode_seed": ["Novelty", "Eq1", "Eq0"]}
+{"id": "na022", "stratum": "abstract", "text": "The absence of suffering is felt before it is named.", "encode_seed": ["Connection", "Eq2", "Eq3"]}
+{"id": "na023", "stratum": "abstract", "text": "limit migrates between disciplines without losing itself.", "encode_seed": ["Eq4", "Eq5", "Potential"]}
+{"id": "na024", "stratum": "abstract", "text": "To doubt memory is already to participate in it.", "encode_seed": ["Eq6", "Mastery", "Eq7"]}
+{"id": "na025", "stratum": "abstract", "text": "resolve ends not with answers but with better questions.", "encode_seed": ["Grace", "Eq8", "Law", "Eq9"]}
+{"id": "nc001", "stratum": "concrete", "text": "The orb rests on the bark.", "encode_seed": ["Eq0", "000", "K0"]}
+{"id": "nc002", "stratum": "concrete", "text": "A root falls through the gel.", "encode_seed": ["022", "K1", "Eq1"]}
+{"id": "nc003", "stratum": "concrete", "text": "The flame reflects the moon.", "encode_seed": ["Eq2", "202", "K2"]}
+{"id": "nc004", "stratum": "concrete", "text": "A crystal blocks the line.", "encode_seed": ["K3", "Eq3", "220"]}
+{"id": "nc005", "stratum": "concrete", "text": "The crystal melts into the cave.", "encode_seed": ["K4", "002", "Eq4"]}
+{"id": "nc006", "stratum": "concrete", "text": "A anchor rolls across the metal.", "encode_seed": ["Eq5", "020", "K5"]}
+{"id": "nc007", "stratum": "concrete", "text": "The coil splits the stone cleanly.", "encode_seed": ["Eq6", "K6", "200"]}
+{"id": "nc008", "stratum": "concrete", "text": "A kiln floats above the ink.", "encode_seed": ["K7", "Eq7", "222"]}
+{"id": "nc009", "stratum": "concrete", "text": "The column sinks beneath the column.", "encode_seed": ["C", "Eq8", "111"]}
+{"id": "nc010", "stratum": "concrete", "text": "A seed casts a shadow on the slab.", "encode_seed": ["Eq9", "333", "C_reset"]}
+{"id": "nc011", "stratum": "concrete", "text": "The mirror shatters against the wall.", "encode_seed": ["Eq0", "000", "K0"]}
+{"id": "nc012", "stratum": "concrete", "text": "A feather rises from the vent.", "encode_seed": ["K1", "Eq1", "022"]}
+{"id": "nc013", "stratum": "concrete", "text": "The spire descends into the core.", "encode_seed": ["202", "Eq2", "K2"]}
+{"id": "nc014", "stratum": "concrete", "text": "A mirror clings to the tendon.", "encode_seed": ["Eq3", "220", "K3"]}
+{"id": "nc015", "stratum": "concrete", "text": "The crystal bursts through the net.", "encode_seed": ["002", "Eq4", "K4"]}
+{"id": "nc016", "stratum": "concrete", "text": "A wheel settles into the socket.", "encode_seed": ["Eq5", "020", "K5"]}
+{"id": "nc017", "stratum": "concrete", "text": "The wheel stretches toward the valve.", "encode_seed": ["Eq6", "200", "K6"]}
+{"id": "nc018", "stratum": "concrete", "text": "A bowl hovers at the threshold.", "encode_seed": ["Eq7", "K7", "222"]}
+{"id": "nc019", "stratum": "concrete", "text": "The root pierces the glaze.", "encode_seed": ["Eq8", "111", "C"]}
+{"id": "nc020", "stratum": "concrete", "text": "A vein drifts along the current.", "encode_seed": ["C_reset", "333", "Eq9"]}
+{"id": "nc021", "stratum": "concrete", "text": "The vessel hardens in the night.", "encode_seed": ["K0", "000", "Eq0"]}
+{"id": "nc022", "stratum": "concrete", "text": "A bowl ignites near the impulse.", "encode_seed": ["K1", "022", "Eq1"]}
+{"id": "nc023", "stratum": "concrete", "text": "The stone dissolves within the brine.", "encode_seed": ["Eq2", "202", "K2"]}
+{"id": "nc024", "stratum": "concrete", "text": "A ridge balances on the tip.", "encode_seed": ["220", "Eq3", "K3"]}
+{"id": "nc025", "stratum": "concrete", "text": "The horn emerges from the vent.", "encode_seed": ["Eq4", "002", "K4"]}
+{"id": "nn001", "stratum": "negation", "text": "The wheel is not dense.", "encode_seed": ["Eq8", "Origin", "not", "Eq0"]}
+{"id": "nn002", "stratum": "negation", "text": "No vessel appeared at the plaza.", "encode_seed": ["Boundary", "Eq8", "no", "Eq1"]}
+{"id": "nn003", "stratum": "negation", "text": "Never does the column remain closed.", "encode_seed": ["Temporalization", "Eq8", "Eq2", "never"]}
+{"id": "nn004", "stratum": "negation", "text": "Nothing in the spire suggests weight.", "encode_seed": ["Eq3", "nothing", "Closure", "Eq8"]}
+{"id": "nn005", "stratum": "negation", "text": "None of the pools reached the shore.", "encode_seed": ["Coupling", "Eq8", "none", "Eq4"]}
+{"id": "nn006", "stratum": "negation", "text": "Without coil, the structure collapses.", "encode_seed": ["Eq5", "Persistence", "Eq8", "without"]}
+{"id": "nn007", "stratum": "negation", "text": "Neither vector nor ear survived the shift.", "encode_seed": ["Audit", "neither", "Eq8", "Eq6"]}
+{"id": "nn008", "stratum": "negation", "text": "The anchor is neither deep nor smooth.", "encode_seed": ["Eq8", "nor", "Coherence", "Eq7"]}
+{"id": "nn009", "stratum": "negation", "text": "Absence of horn defined the entire age.", "encode_seed": ["absence", "Eq8", "Eq9", "Relaxation"]}
+{"id": "nn010", "stratum": "negation", "text": "There is no stone beneath the ice.", "encode_seed": ["Eq9", "Eq0", "Null State", "void"]}
+{"id": "nn011", "stratum": "negation", "text": "The shell did not respond to the scent.", "encode_seed": ["Origin", "Eq8", "not", "Eq0"]}
+{"id": "nn012", "stratum": "negation", "text": "Not even the coil could prevent the return.", "encode_seed": ["Boundary", "Eq8", "Eq1", "no"]}
+{"id": "nn013", "stratum": "negation", "text": "No amount of coil restores the symmetry.", "encode_seed": ["never", "Eq2", "Eq8", "Temporalization"]}
+{"id": "nn014", "stratum": "negation", "text": "The horn never crosses the brink.", "encode_seed": ["Eq8", "Closure", "nothing", "Eq3"]}
+{"id": "nn015", "stratum": "negation", "text": "Nothing about thread implies the result.", "encode_seed": ["Eq4", "Coupling", "none", "Eq8"]}
+{"id": "nn016", "stratum": "negation", "text": "Without a vessel, the cycle halts.", "encode_seed": ["Eq5", "Eq8", "without", "Persistence"]}
+{"id": "nn017", "stratum": "negation", "text": "Neither deep nor thin describes the wheel.", "encode_seed": ["Audit", "Eq8", "Eq6", "neither"]}
+{"id": "nn018", "stratum": "negation", "text": "The vein shows no sign of motion.", "encode_seed": ["Eq7", "nor", "Eq8", "Coherence"]}
+{"id": "nn019", "stratum": "negation", "text": "Not once did the orb leave the sector.", "encode_seed": ["absence", "Eq9", "Eq8", "Relaxation"]}
+{"id": "nn020", "stratum": "negation", "text": "Absence makes the spire more raw.", "encode_seed": ["Eq9", "Eq0", "void", "Null State"]}
+{"id": "nn021", "stratum": "negation", "text": "There was no kiln to guide the witness.", "encode_seed": ["not", "Eq8", "Origin", "Eq0"]}
+{"id": "nn022", "stratum": "negation", "text": "The feather cannot exist without its shadow.", "encode_seed": ["no", "Eq1", "Eq8", "Boundary"]}
+{"id": "nn023", "stratum": "negation", "text": "Never has horn been so entirely smooth.", "encode_seed": ["Eq2", "never", "Temporalization", "Eq8"]}
+{"id": "nn024", "stratum": "negation", "text": "None could call the vein cold.", "encode_seed": ["nothing", "Eq3", "Eq8", "Closure"]}
+{"id": "nn025", "stratum": "negation", "text": "The bridge refuses, and so does not become closed.", "encode_seed": ["none", "Coupling", "Eq4", "Eq8"]}
+{"id": "nq001", "stratum": "quantifier", "text": "All horns share one tension.", "encode_seed": ["Origin", "all", "Eq0", "Eq4"]}
+{"id": "nq002", "stratum": "quantifier", "text": "Some pools exceed the ceiling.", "encode_seed": ["Boundary", "some", "Eq1", "Eq4"]}
+{"id": "nq003", "stratum": "quantifier", "text": "Many roots resist the tide.", "encode_seed": ["Eq2", "Eq4", "many", "Temporalization"]}
+{"id": "nq004", "stratum": "quantifier", "text": "Few shells reach the whole.", "encode_seed": ["few", "Eq4", "Eq3", "Closure"]}
+{"id": "nq005", "stratum": "quantifier", "text": "Most horns follow the weave.", "encode_seed": ["Eq4", "most", "Coupling", "Eq5"]}
+{"id": "nq006", "stratum": "quantifier", "text": "Every ridge carries a hidden groove.", "encode_seed": ["every", "Eq5", "Persistence", "Eq6"]}
+{"id": "nq007", "stratum": "quantifier", "text": "Each flame differs in its orientation.", "encode_seed": ["Audit", "Eq6", "Eq7", "each"]}
+{"id": "nq008", "stratum": "quantifier", "text": "Several bowls converge at the pin.", "encode_seed": ["several", "Coherence", "Eq7", "Eq8"]}
+{"id": "nq009", "stratum": "quantifier", "text": "Any horn might trigger the impact.", "encode_seed": ["any", "Constraint", "Eq8", "Eq9"]}
+{"id": "nq010", "stratum": "quantifier", "text": "None of the kilns satisfied the situation.", "encode_seed": ["Eq0", "Eq9", "none", "Relaxation"]}
+{"id": "nq011", "stratum": "quantifier", "text": "All but one wheel failed the challenge.", "encode_seed": ["all", "Eq0", "Eq4", "Origin"]}
+{"id": "nq012", "stratum": "quantifier", "text": "Some of the wheels vanished before the phase.", "encode_seed": ["Eq1", "Boundary", "some", "Eq4"]}
+{"id": "nq013", "stratum": "quantifier", "text": "Many a gate has fallen to the time.", "encode_seed": ["Temporalization", "many", "Eq4", "Eq2"]}
+{"id": "nq014", "stratum": "quantifier", "text": "Fewer veins remain than the  census suggests.", "encode_seed": ["Eq4", "Eq3", "Closure", "few"]}
+{"id": "nq015", "stratum": "quantifier", "text": "Most of the shell dissolved into the mist.", "encode_seed": ["Eq4", "Eq5", "Coupling", "most"]}
+{"id": "nq016", "stratum": "quantifier", "text": "Every single horn retained its density.", "encode_seed": ["Eq5", "Persistence", "Eq6", "every"]}
+{"id": "nq017", "stratum": "quantifier", "text": "Each of the coils marked a distinct period.", "encode_seed": ["Audit", "Eq6", "Eq7", "each"]}
+{"id": "nq018", "stratum": "quantifier", "text": "Several coils together outweigh one receiver.", "encode_seed": ["Eq7", "Coherence", "several", "Eq8"]}
+{"id": "nq019", "stratum": "quantifier", "text": "Any of the anchors could serve as the datum.", "encode_seed": ["Eq8", "Constraint", "any", "Eq9"]}
+{"id": "nq020", "stratum": "quantifier", "text": "None but the gate understood the canon.", "encode_seed": ["Eq9", "Relaxation", "Eq0", "none"]}
+{"id": "nq021", "stratum": "quantifier", "text": "All lenses eventually lose their brink.", "encode_seed": ["Eq4", "Eq0", "all", "Origin"]}
+{"id": "nq022", "stratum": "quantifier", "text": "Some orbs grow stronger under urgency.", "encode_seed": ["Eq1", "some", "Eq4", "Boundary"]}
+{"id": "nq023", "stratum": "quantifier", "text": "Many roots return to the same foundation.", "encode_seed": ["Eq2", "Eq4", "many", "Temporalization"]}
+{"id": "nq024", "stratum": "quantifier", "text": "Few wheels survive the passage.", "encode_seed": ["Closure", "Eq4", "few", "Eq3"]}
+{"id": "nq025", "stratum": "quantifier", "text": "Most columns obey the order.", "encode_seed": ["Coupling", "Eq5", "Eq4", "most"]}
+{"id": "nr001", "stratum": "relational", "text": "The layer connects to the edge.", "encode_seed": ["Eq1", "Eq4", "Boundary", "connects"]}
+{"id": "nr002", "stratum": "relational", "text": "Between the chain and the patient lies the echo.", "encode_seed": ["Eq1", "Eq5", "between", "Boundary"]}
+{"id": "nr003", "stratum": "relational", "text": "The chain depends on the drain.", "encode_seed": ["depends", "Eq4", "Coupling", "Eq6"]}
+{"id": "nr004", "stratum": "relational", "text": "The node follows the arch.", "encode_seed": ["Eq5", "Persistence", "follows", "Eq7"]}
+{"id": "nr005", "stratum": "relational", "text": "The river requires the face.", "encode_seed": ["Eq6", "Eq8", "Audit", "requires"]}
+{"id": "nr006", "stratum": "relational", "text": "The current allows the light to dissolve.", "encode_seed": ["Coherence", "allows", "Eq9", "Eq7"]}
+{"id": "nr007", "stratum": "relational", "text": "The pillar balances the link.", "encode_seed": ["balances", "Eq8", "Eq9", "Constraint"]}
+{"id": "nr008", "stratum": "relational", "text": "The agent measures the link.", "encode_seed": ["Origin", "Eq0", "measures", "Eq7"]}
+{"id": "nr009", "stratum": "relational", "text": "The source contains the bank.", "encode_seed": ["Eq4", "contains", "Eq3", "Closure"]}
+{"id": "nr010", "stratum": "relational", "text": "The node transforms into the bank.", "encode_seed": ["Temporalization", "Eq2", "transforms", "Eq5"]}
+{"id": "nr011", "stratum": "relational", "text": "The thread links the noise to the weft.", "encode_seed": ["connects", "Eq1", "Eq4", "Boundary"]}
+{"id": "nr012", "stratum": "relational", "text": "Between them, the trace and patient form a fabric.", "encode_seed": ["Eq1", "between", "Boundary", "Eq5"]}
+{"id": "nr013", "stratum": "relational", "text": "The voice cannot exist unless the term persists.", "encode_seed": ["depends", "Eq4", "Eq6", "Coupling"]}
+{"id": "nr014", "stratum": "relational", "text": "Where the mask ends, the face begins.", "encode_seed": ["follows", "Eq7", "Persistence", "Eq5"]}
+{"id": "nr015", "stratum": "relational", "text": "The pattern yields to the face under demand.", "encode_seed": ["Eq8", "Eq6", "requires", "Audit"]}
+{"id": "nr016", "stratum": "relational", "text": "The index supports the drain at the apex.", "encode_seed": ["Eq9", "Eq7", "allows", "Coherence"]}
+{"id": "nr017", "stratum": "relational", "text": "The agent mirrors the receiver across the radial.", "encode_seed": ["Constraint", "balances", "Eq8", "Eq9"]}
+{"id": "nr018", "stratum": "relational", "text": "The shadow exceeds the shore in shape.", "encode_seed": ["Origin", "measures", "Eq0", "Eq7"]}
+{"id": "nr019", "stratum": "relational", "text": "The pillar replaces the needle during the cycle.", "encode_seed": ["Closure", "Eq3", "Eq4", "contains"]}
+{"id": "nr020", "stratum": "relational", "text": "The index restrains the patient from the ignition.", "encode_seed": ["Temporalization", "Eq5", "transforms", "Eq2"]}
+{"id": "nr021", "stratum": "relational", "text": "The field channels the loom toward the outcome.", "encode_seed": ["Eq4", "Boundary", "Eq1", "connects"]}
+{"id": "nr022", "stratum": "relational", "text": "The pattern answers to the force alone.", "encode_seed": ["Eq1", "Eq5", "Boundary", "between"]}
+{"id": "nr023", "stratum": "relational", "text": "The thread divides the force from the relation.", "encode_seed": ["Eq4", "Coupling", "Eq6", "depends"]}
+{"id": "nr024", "stratum": "relational", "text": "The shadow receives the ear as its receiver.", "encode_seed": ["follows", "Eq7", "Persistence", "Eq5"]}
+{"id": "nr025", "stratum": "relational", "text": "The shadow completes the base without merging.", "encode_seed": ["Audit", "Eq6", "Eq8", "requires"]}
+{"id": "nt001", "stratum": "temporal", "text": "Before the impact, the shell was ripe.", "encode_seed": ["Eq2", "before", "Temporalization", "Eq0"]}
+{"id": "nt002", "stratum": "temporal", "text": "After the storm, the shell became whole.", "encode_seed": ["Boundary", "Eq1", "Eq2", "after"]}
+{"id": "nt003", "stratum": "temporal", "text": "Then the gate began to bend.", "encode_seed": ["then", "Eq2", "Eq3", "Closure"]}
+{"id": "nt004", "stratum": "temporal", "text": "Now the thread rests in the ridge.", "encode_seed": ["Eq4", "Eq2", "Coupling", "now"]}
+{"id": "nt005", "stratum": "temporal", "text": "Later, the feather will reach the terminus.", "encode_seed": ["Eq2", "Eq5", "later", "Persistence"]}
+{"id": "nt006", "stratum": "temporal", "text": "Always, the pool returns to the origin.", "encode_seed": ["Eq2", "always", "Audit", "Eq6"]}
+{"id": "nt007", "stratum": "temporal", "text": "Never has the flame stayed so raw.", "encode_seed": ["Eq7", "Coherence", "never", "Eq2"]}
+{"id": "nt008", "stratum": "temporal", "text": "Until the storm, the column remains empty.", "encode_seed": ["Eq2", "Eq8", "Constraint", "until"]}
+{"id": "nt009", "stratum": "temporal", "text": "Since the flood, the anchor has extend.", "encode_seed": ["since", "Relaxation", "Eq9", "Eq2"]}
+{"id": "nt010", "stratum": "temporal", "text": "At the beginning, only the crystal existed.", "encode_seed": ["Origin", "beginning", "Eq0", "Eq2"]}
+{"id": "nt011", "stratum": "temporal", "text": "The vessel existed long before the flood.", "encode_seed": ["before", "Eq2", "Temporalization", "Eq0"]}
+{"id": "nt012", "stratum": "temporal", "text": "Afterward, the spire found a new terrace.", "encode_seed": ["after", "Boundary", "Eq2", "Eq1"]}
+{"id": "nt013", "stratum": "temporal", "text": "Then and only then did the thread extend.", "encode_seed": ["Eq3", "Eq2", "Closure", "then"]}
+{"id": "nt014", "stratum": "temporal", "text": "Right now, the thread is at the fulcrum.", "encode_seed": ["now", "Coupling", "Eq2", "Eq4"]}
+{"id": "nt015", "stratum": "temporal", "text": "Soon the shell will cross the border.", "encode_seed": ["Persistence", "Eq5", "later", "Eq2"]}
+{"id": "nt016", "stratum": "temporal", "text": "Always the horn returns, always changed.", "encode_seed": ["Eq2", "Audit", "Eq6", "always"]}
+{"id": "nt017", "stratum": "temporal", "text": "Never again will the flame be so ripe.", "encode_seed": ["never", "Eq2", "Eq7", "Coherence"]}
+{"id": "nt018", "stratum": "temporal", "text": "Until dawn the vessel kept its guard.", "encode_seed": ["until", "Eq2", "Eq8", "Constraint"]}
+{"id": "nt019", "stratum": "temporal", "text": "Since yesterday the stone has lost its shape.", "encode_seed": ["Eq2", "Eq9", "Relaxation", "since"]}
+{"id": "nt020", "stratum": "temporal", "text": "In the beginning the thread knew no brink.", "encode_seed": ["Eq2", "Eq0", "Origin", "beginning"]}
+{"id": "nt021", "stratum": "temporal", "text": "Before long the feather reached the still.", "encode_seed": ["Eq2", "Temporalization", "before", "Eq0"]}
+{"id": "nt022", "stratum": "temporal", "text": "After the storm the spire stood broken.", "encode_seed": ["Boundary", "after", "Eq2", "Eq1"]}
+{"id": "nt023", "stratum": "temporal", "text": "Then the orb and the face diverged.", "encode_seed": ["Eq3", "Eq2", "then", "Closure"]}
+{"id": "nt024", "stratum": "temporal", "text": "Now is when the coil must settle.", "encode_seed": ["now", "Coupling", "Eq4", "Eq2"]}
+{"id": "nt025", "stratum": "temporal", "text": "Eventually every anchor reaches the omega.", "encode_seed": ["later", "Eq2", "Persistence", "Eq5"]}
