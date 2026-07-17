@@ -63,6 +63,7 @@ class SmartStreamRequest(BaseModel):
     include_post_introspect_snapshot: bool | None = None
     metadata: dict[str, Any] | None = None
     delegated_principal: dict[str, Any] | None = None
+    prompt_principal_mode: str | None = None
     s_mode: str | None = None
     query_factors: list[dict[str, Any]] | None = None
     padic_config: dict[str, Any] | None = None
