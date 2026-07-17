@@ -54,3 +54,20 @@ def test_chat_web4_decode_not_found_returns_404() -> None:
     body = resp.json()
     assert body.get("status") == "error"
     assert body.get("error_code") == "coordinate_not_found"
+
+
+def test_chat_web4_decode_accepts_case_only_ledger_scope_difference() -> None:
+    """A coordinate namespace that differs only in casing from the header should
+    not trigger a deterministic ledger_scope_mismatch (DSS-260 regression).
+    """
+    client = _make_client(db={})
+    resp = client.post(
+        "/chat/web4/decode",
+        json={"coordinate": "chat-team-a:WX-NOTFOUND"},
+        headers={"x-ledger-id": "CHAT-TEAM-A"},
+    )
+    # Not a scope mismatch; the coordinate simply does not exist.
+    assert resp.status_code == 404
+    body = resp.json()
+    assert body.get("status") == "error"
+    assert body.get("error_code") == "coordinate_not_found"

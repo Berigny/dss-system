@@ -47,15 +47,19 @@ def resolve_ledger_scope_or_raise(
     }
     if len(unique) > 1:
         if strict_mode and not demo_god_mode_enabled():
-            raise HTTPException(
-                status_code=400,
-                detail={
-                    "error": "ledger_scope_mismatch",
-                    "payload_ledger_id": payload_scope or None,
-                    "header_ledger_id": header_scope or None,
-                    "path_ledger_id": path_scope or None,
-                },
-            )
+            # Defensive: casing alone (e.g. "loam" vs "LOAM") should not trigger a
+            # deterministic mismatch. Only genuinely different scopes are rejected.
+            unique_lower = sorted({v.lower() for v in unique})
+            if len(unique_lower) > 1:
+                raise HTTPException(
+                    status_code=400,
+                    detail={
+                        "error": "ledger_scope_mismatch",
+                        "payload_ledger_id": payload_scope or None,
+                        "header_ledger_id": header_scope or None,
+                        "path_ledger_id": path_scope or None,
+                    },
+                )
         # Compat precedence: payload > header > path.
         return payload_scope or header_scope or path_scope
 

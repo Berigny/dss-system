@@ -2609,21 +2609,51 @@ async def decode_coordinate(request: Request):
             "missing_namespace",
             "coordinate_not_found",
         }
+        _AUTH_ERROR_CODES = {
+            "token_validation_failed",
+            "token_missing",
+            "token_malformed",
+            "token_expired",
+            "unauthorized",
+        }
+
+        def _backend_error_code(item: dict[str, Any]) -> str:
+            """Extract the canonical error code from a backend error body.
+
+            The backend /chat/web4/decode contract uses
+            ``{"status": "error", "error_code": "...", "detail": ...}``.
+            Some legacy/error-handler paths may still return a top-level
+            ``error`` key or nest it under ``detail.error``.
+            """
+            body = item.get("detail") if isinstance(item, dict) else None
+            if not isinstance(body, dict):
+                return ""
+            code = str(body.get("error_code") or "").strip()
+            if code:
+                return code
+            nested = body.get("detail")
+            if isinstance(nested, dict):
+                code = str(nested.get("error") or "").strip()
+                if code:
+                    return code
+            return str(body.get("error") or "").strip()
+
         authority_detail = next(
             (
                 item.get("detail")
                 for item in reversed(diagnostics)
                 if isinstance(item, dict)
                 and isinstance(item.get("detail"), dict)
-                and str(item["detail"].get("error") or "").strip() in _AUTHORITY_ERROR_CODES
+                and _backend_error_code(item) in _AUTHORITY_ERROR_CODES
             ),
             None,
         )
         if authority_detail is not None:
+            error_code = _backend_error_code({"detail": authority_detail})
             logger.info(
                 "decode_coordinate authority failure: coordinate=%s error=%s latency_ms=%s",
                 coordinate,
-                authority_detail.get("error"),
+                error_code,
                 total_latency_ms,
             )
             return JSONResponse(
@@ -2642,8 +2672,20 @@ async def decode_coordinate(request: Request):
         )
         if last_backend is not None:
             status = last_backend.get("status")
-            error_code = last_backend.get("error_code")
+            error_code = last_backend.get("error_code") or _backend_error_code(last_backend)
             detail = last_backend.get("detail")
+            if status == 401 or error_code in _AUTH_ERROR_CODES:
+                logger.info(
+                    "decode_coordinate auth failure: coordinate=%s error_code=%s latency_ms=%s",
+                    coordinate,
+                    error_code,
+                    total_latency_ms,
+                )
+                return JSONResponse(
+                    detail if isinstance(detail, dict) else {"status": "error", "error_code": error_code, "detail": detail},
+                    status_code=401,
+                    headers={"X-Decode-Diagnostics": diag_header},
+                )
             if status == 503:
                 logger.info(
                     "decode_coordinate backend unavailable: coordinate=%s error_code=%s latency_ms=%s",

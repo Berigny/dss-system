@@ -167,7 +167,16 @@ def resolve(request: Request, coordinate: str):
             headers=headers,
             timeout=30.0,
         )
-        response.raise_for_status()
+        if response.status_code >= 400:
+            body = response.text
+            try:
+                body = json.dumps(response.json(), indent=2)
+            except Exception:
+                pass
+            return Pre(
+                f"Resolver error: HTTP {response.status_code}\n{body}",
+                id="result",
+            )
         return Pre(json.dumps(response.json(), indent=2), id="result")
     except httpx.HTTPError as exc:
         return Pre(f"Resolver error: {exc}", id="result")

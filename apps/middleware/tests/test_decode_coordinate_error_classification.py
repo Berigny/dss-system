@@ -14,7 +14,7 @@ def test_decode_coordinate_returns_403_on_authority_error(monkeypatch):
     async def fake_decode_coordinate(_coord: str, **kwargs):
         raise BackendDecodeError(
             status_code=403,
-            body={"error": "surface_not_bound_to_ledger", "surface_id": "s1", "ledger_id": "loam"},
+            body={"status": "error", "error_code": "surface_not_bound_to_ledger", "detail": {"surface_id": "s1", "ledger_id": "loam"}},
         )
 
     monkeypatch.setattr(app_module.api, "decode_coordinate", fake_decode_coordinate)
@@ -22,7 +22,53 @@ def test_decode_coordinate_returns_403_on_authority_error(monkeypatch):
     resp = client.post("/api/decode_coordinate", json={"coordinate": "loam:WX-1"})
     assert resp.status_code == 403
     body = resp.json()
-    assert body.get("error") == "surface_not_bound_to_ledger"
+    assert body.get("error_code") == "surface_not_bound_to_ledger"
+    assert "X-Decode-Diagnostics" in resp.headers
+
+
+def test_decode_coordinate_returns_403_on_decode_requires_authenticated_principal(monkeypatch):
+    async def fake_decode_coordinate(_coord: str, **kwargs):
+        raise BackendDecodeError(
+            status_code=403,
+            body={
+                "status": "error",
+                "error_code": "decode_requires_authenticated_principal",
+                "detail": {
+                    "error": "decode_requires_authenticated_principal",
+                    "surface_id": "surface:coord-demo",
+                    "reason": "Decode through a surface requires an authenticated principal.",
+                },
+            },
+        )
+
+    monkeypatch.setattr(app_module.api, "decode_coordinate", fake_decode_coordinate)
+
+    resp = client.post("/api/decode_coordinate", json={"coordinate": "loam:WX-1"})
+    assert resp.status_code == 403
+    body = resp.json()
+    assert body.get("error_code") == "decode_requires_authenticated_principal"
+    assert body.get("detail", {}).get("error") == "decode_requires_authenticated_principal"
+    assert "X-Decode-Diagnostics" in resp.headers
+
+
+def test_decode_coordinate_returns_401_on_token_validation_failed(monkeypatch):
+    async def fake_decode_coordinate(_coord: str, **kwargs):
+        raise BackendDecodeError(
+            status_code=401,
+            body={
+                "status": "error",
+                "error_code": "token_validation_failed",
+                "detail": {"error": "token_validation_failed", "reason": "token_expired"},
+            },
+        )
+
+    monkeypatch.setattr(app_module.api, "decode_coordinate", fake_decode_coordinate)
+
+    resp = client.post("/api/decode_coordinate", json={"coordinate": "loam:WX-1"})
+    assert resp.status_code == 401
+    body = resp.json()
+    assert body.get("error_code") == "token_validation_failed"
+    assert body.get("detail", {}).get("error") == "token_validation_failed"
     assert "X-Decode-Diagnostics" in resp.headers
 
 
@@ -30,7 +76,7 @@ def test_decode_coordinate_returns_400_on_backend_client_error(monkeypatch):
     async def fake_decode_coordinate(_coord: str, **kwargs):
         raise BackendDecodeError(
             status_code=400,
-            body={"status": "error", "error_code": "ledger_scope_mismatch", "detail": {}},
+            body={"status": "error", "error_code": "ledger_scope_mismatch", "detail": {"error": "ledger_scope_mismatch"}},
         )
 
     monkeypatch.setattr(app_module.api, "decode_coordinate", fake_decode_coordinate)

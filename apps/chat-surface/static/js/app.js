@@ -2615,13 +2615,15 @@ async function handleStreamedChatSubmit(event) {
                     }
                 }
                 if (assistant.promptText) {
-                    const askedBy = _askedByLabel(payload);
+                    const askedBy = typeof _askedByLabel === 'function' ? _askedByLabel(payload) : '';
                     assistant.promptText.textContent = askedBy ? ` | asked by: ${askedBy}` : '';
                 }
                 if (assistant.requestedText) {
-                    const distinctDelegation = _delegatedPromptPathIsDistinctOperatorDelegation(payload);
-                    const answeredBy = _answeredByLabel(payload);
-                    const requestedBy = _requestedByLabel(payload);
+                    const distinctDelegation = typeof _delegatedPromptPathIsDistinctOperatorDelegation === 'function'
+                        ? _delegatedPromptPathIsDistinctOperatorDelegation(payload)
+                        : false;
+                    const answeredBy = typeof _answeredByLabel === 'function' ? _answeredByLabel(payload) : '';
+                    const requestedBy = typeof _requestedByLabel === 'function' ? _requestedByLabel(payload) : '';
                     if (distinctDelegation && answeredBy) {
                         assistant.requestedText.textContent = ` | answered by: ${answeredBy}`;
                     } else if (!distinctDelegation && requestedBy) {
