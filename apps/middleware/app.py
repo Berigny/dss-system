@@ -24,7 +24,7 @@ from starlette.datastructures import UploadFile
 from api.llm import PRICING, llm, set_openrouter_api_key
 from api.client import ChatResponse, api
 from config.settings import DEFAULT_LEDGER_ID, DEFAULT_SESSION_ID, settings
-from routes.orchestrator import register_orchestrator_routes
+from routes.orchestrator import register_orchestrator_routes, _synthesize_field_state
 from routes.wake import register_wake_routes
 from routes.agent import register_agent_routes
 from utils.session import build_entity_namespace, get_session, update_session
@@ -1838,6 +1838,13 @@ async def api_chat_commit_answer(request: Request):
 
     precomputed_appraisal = payload.get("precomputed_appraisal")
     metadata = payload.get("metadata") if isinstance(payload.get("metadata"), dict) else {}
+
+    # Ensure chat commits carry the field_state envelope required by the backend
+    # genesis-ladder gate.
+    if "field_state" not in metadata:
+        metadata["field_state"] = _synthesize_field_state(
+            f"{message}\n{reply}", grid_size=32
+        )
 
     auth_envelope = build_backend_auth_envelope(request=request, payload=payload)
     auth_headers = auth_envelope.get("headers") if isinstance(auth_envelope, dict) else {}
