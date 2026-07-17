@@ -552,6 +552,78 @@ global.fetch = async (url, options) => {{
     assert body["metadata"]["coordinate"] == "chat-demo:WX-1"
 
 
+def test_delegation_attribution_helpers_mirror_python_semantics():
+    source = APP_JS.read_text()
+    functions = "\n\n".join(
+        _extract_function_source(source, name)
+        for name in (
+            "_promptPrincipalLabel",
+            "_requestedByLabel",
+            "_delegatedPromptPathIsDistinctOperatorDelegation",
+            "_answeredByLabel",
+            "_askedByLabel",
+        )
+    )
+    script = f"""
+{functions}
+const payloads = {{
+  nonDelegated: {{
+    prompt_principal_label: 'Operator',
+  }},
+  distinctByFlag: {{
+    delegated_prompt_path: {{
+      requested_by_is_distinct_from_prompt_principal: true,
+      requested_by_principal_did: 'did:key:operator',
+      prompt_principal_did: 'did:key:codex',
+      prompt_principal_display_name: 'openai/codex',
+    }},
+  }},
+  distinctByDid: {{
+    delegated_prompt_path: {{
+      requested_by_principal_did: 'did:key:operator',
+      prompt_principal_did: 'did:key:kimi',
+      prompt_principal_display_name: 'Moonshot: Kimi-code',
+    }},
+  }},
+  sameDid: {{
+    delegated_prompt_path: {{
+      requested_by_principal_did: 'did:key:operator',
+      prompt_principal_did: 'did:key:operator',
+      prompt_principal_display_name: 'Operator',
+    }},
+  }},
+}};
+const result = {{}};
+for (const [key, payload] of Object.entries(payloads)) {{
+  result[key] = {{
+    asked: _askedByLabel(payload),
+    answered: _answeredByLabel(payload),
+    distinct: _delegatedPromptPathIsDistinctOperatorDelegation(payload),
+  }};
+}}
+console.log(JSON.stringify(result));
+"""
+    result = subprocess.run(
+        ["node", "-e", script],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    parsed = json.loads(result.stdout.strip())
+    assert parsed["nonDelegated"]["asked"] == "Operator"
+    assert parsed["nonDelegated"]["answered"] == "Operator"
+    assert parsed["nonDelegated"]["distinct"] is False
+    assert parsed["distinctByFlag"]["asked"] == "did:key:operator"
+    assert parsed["distinctByFlag"]["answered"] == "openai/codex"
+    assert parsed["distinctByFlag"]["distinct"] is True
+    assert parsed["distinctByDid"]["asked"] == "did:key:operator"
+    assert parsed["distinctByDid"]["answered"] == "Moonshot: Kimi-code"
+    assert parsed["distinctByDid"]["distinct"] is True
+    assert parsed["sameDid"]["asked"] == "Operator"
+    assert parsed["sameDid"]["answered"] == "Operator"
+    assert parsed["sameDid"]["distinct"] is False
+
+
 def test_build_stream_request_payload_includes_current_entity():
     source = APP_JS.read_text()
     functions = "\n\n".join(

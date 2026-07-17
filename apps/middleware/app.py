@@ -22,7 +22,7 @@ from starlette.exceptions import HTTPException
 from starlette.datastructures import UploadFile
 
 from api.llm import PRICING, llm, set_openrouter_api_key
-from api.client import ChatResponse, api
+from api.client import BackendDecodeError, ChatResponse, api
 from config.settings import DEFAULT_LEDGER_ID, DEFAULT_SESSION_ID, settings
 from routes.orchestrator import register_orchestrator_routes, _synthesize_field_state
 from routes.wake import register_wake_routes
@@ -1027,9 +1027,13 @@ async def _decode_with_fallback_attempts(
             if idx == 2 and attempt is not None
             else "unscoped"
         )
+        attempt_start = time.perf_counter()
         try:
             if attempt is None:
-                candidate = await api.decode_coordinate(coordinate, auth_headers=auth_headers)
+                candidate = await api.decode_coordinate(
+                    coordinate,
+                    auth_headers=auth_headers,
+                )
             else:
                 candidate = await api.decode_coordinate(
                     coordinate,
@@ -1037,6 +1041,38 @@ async def _decode_with_fallback_attempts(
                     session_id=attempt.get("session_id"),
                     auth_headers=auth_headers,
                 )
+        except BackendDecodeError as exc:
+            body = exc.body
+            error_code = body.get("error_code") if isinstance(body, dict) else None
+            diagnostics.append(
+                {
+                    "attempt": idx,
+                    "scope": label,
+                    "entity": attempt.get("entity") if attempt else None,
+                    "session_id": attempt.get("session_id") if attempt else None,
+                    "ok": False,
+                    "error_kind": "backend_http",
+                    "status": exc.status_code,
+                    "error_code": error_code,
+                    "detail": body,
+                    "latency_ms": round((time.perf_counter() - attempt_start) * 1000, 2),
+                }
+            )
+            continue
+        except httpx.HTTPError as exc:
+            diagnostics.append(
+                {
+                    "attempt": idx,
+                    "scope": label,
+                    "entity": attempt.get("entity") if attempt else None,
+                    "session_id": attempt.get("session_id") if attempt else None,
+                    "ok": False,
+                    "error_kind": "transport",
+                    "error": str(exc),
+                    "latency_ms": round((time.perf_counter() - attempt_start) * 1000, 2),
+                }
+            )
+            continue
         except Exception as exc:
             diagnostics.append(
                 {
@@ -1045,7 +1081,9 @@ async def _decode_with_fallback_attempts(
                     "entity": attempt.get("entity") if attempt else None,
                     "session_id": attempt.get("session_id") if attempt else None,
                     "ok": False,
+                    "error_kind": "unknown",
                     "error": str(exc),
+                    "latency_ms": round((time.perf_counter() - attempt_start) * 1000, 2),
                 }
             )
             continue
@@ -1057,7 +1095,9 @@ async def _decode_with_fallback_attempts(
                     "entity": attempt.get("entity") if attempt else None,
                     "session_id": attempt.get("session_id") if attempt else None,
                     "ok": False,
+                    "error_kind": "invalid_payload",
                     "status": "invalid_payload",
+                    "latency_ms": round((time.perf_counter() - attempt_start) * 1000, 2),
                 }
             )
             continue
@@ -1071,8 +1111,10 @@ async def _decode_with_fallback_attempts(
                 "entity": attempt.get("entity") if attempt else None,
                 "session_id": attempt.get("session_id") if attempt else None,
                 "ok": ok,
+                "error_kind": "backend_error" if not ok else None,
                 "status": status,
                 "detail": detail,
+                "latency_ms": round((time.perf_counter() - attempt_start) * 1000, 2),
             }
         )
         if ok and resolved is None:
@@ -2466,9 +2508,50 @@ async def api_chat(request: Request):
     )
 
 
+def _compact_decode_diagnostics(diagnostics: list[dict[str, Any]]) -> str:
+    """Return a compact, secret-safe JSON summary for the X-Decode-Diagnostics header."""
+    summary = {
+        "attempts": len(diagnostics),
+        "scopes": [
+            item.get("scope")
+            for item in diagnostics
+            if isinstance(item, dict) and item.get("scope")
+        ],
+        "final_error_code": next(
+            (
+                item.get("error_code")
+                for item in reversed(diagnostics)
+                if isinstance(item, dict) and item.get("error_code")
+            ),
+            None,
+        ),
+        "final_status": next(
+            (
+                item.get("status")
+                for item in reversed(diagnostics)
+                if isinstance(item, dict) and "status" in item
+            ),
+            None,
+        ),
+        "final_error_kind": next(
+            (
+                item.get("error_kind")
+                for item in reversed(diagnostics)
+                if isinstance(item, dict) and item.get("error_kind")
+            ),
+            None,
+        ),
+    }
+    try:
+        return json.dumps(summary, ensure_ascii=True, separators=(",", ":"))
+    except Exception:
+        return "{\"error\":\"header_encoding_failed\"}"
+
+
 @rt("/api/decode_coordinate")
 async def decode_coordinate(request: Request):
     """Resolve a ledger coordinate via the backend /web4/decode endpoint."""
+    request_start = time.perf_counter()
     try:
         payload = await request.json()
     except Exception:
@@ -2494,6 +2577,14 @@ async def decode_coordinate(request: Request):
     if surface_id:
         auth_headers["x-surface-id"] = surface_id
 
+    logger.info(
+        "decode_coordinate start: coordinate=%s ledger_id=%s surface_id=%s session_id=%s",
+        coordinate,
+        ledger_id,
+        surface_id,
+        session_id,
+    )
+
     resolved, diagnostics = await _decode_with_fallback_attempts(
         coordinate,
         entity=str(entity),
@@ -2501,12 +2592,22 @@ async def decode_coordinate(request: Request):
         auth_headers=auth_headers,
     )
 
+    total_latency_ms = round((time.perf_counter() - request_start) * 1000, 2)
+    diag_header = _compact_decode_diagnostics(diagnostics)
+
     if resolved is None:
         _AUTHORITY_ERROR_CODES = {
             "surface_inactive",
             "surface_not_bound_to_ledger",
             "decode_requires_authenticated_principal",
             "principal_not_authorized_for_surface",
+        }
+        _CLIENT_ERROR_CODES = {
+            "invalid_coordinate",
+            "invalid_web4_coordinate",
+            "ledger_scope_mismatch",
+            "missing_namespace",
+            "coordinate_not_found",
         }
         authority_detail = next(
             (
@@ -2519,19 +2620,87 @@ async def decode_coordinate(request: Request):
             None,
         )
         if authority_detail is not None:
-            return JSONResponse(authority_detail, status_code=403)
-        last_error = next(
-            (
-                str(item.get("error"))
-                for item in reversed(diagnostics)
-                if isinstance(item, dict) and item.get("error")
-            ),
-            "",
-        )
-        detail = last_error or f"Unable to decode coordinate: {coordinate}"
-        raise HTTPException(status_code=502, detail=detail)
+            logger.info(
+                "decode_coordinate authority failure: coordinate=%s error=%s latency_ms=%s",
+                coordinate,
+                authority_detail.get("error"),
+                total_latency_ms,
+            )
+            return JSONResponse(
+                authority_detail,
+                status_code=403,
+                headers={"X-Decode-Diagnostics": diag_header},
+            )
 
-    return JSONResponse(resolved)
+        last_backend = next(
+            (
+                item
+                for item in reversed(diagnostics)
+                if isinstance(item, dict) and item.get("error_kind") == "backend_http"
+            ),
+            None,
+        )
+        if last_backend is not None:
+            status = last_backend.get("status")
+            error_code = last_backend.get("error_code")
+            detail = last_backend.get("detail")
+            if status == 503:
+                logger.info(
+                    "decode_coordinate backend unavailable: coordinate=%s error_code=%s latency_ms=%s",
+                    coordinate,
+                    error_code,
+                    total_latency_ms,
+                )
+                return JSONResponse(
+                    {"status": "error", "error_code": error_code or "backend_unavailable", "detail": detail},
+                    status_code=503,
+                    headers={"X-Decode-Diagnostics": diag_header},
+                )
+            if status in (400, 404, 422) or error_code in _CLIENT_ERROR_CODES:
+                logger.info(
+                    "decode_coordinate client error: coordinate=%s status=%s error_code=%s latency_ms=%s",
+                    coordinate,
+                    status,
+                    error_code,
+                    total_latency_ms,
+                )
+                return JSONResponse(
+                    {"status": "error", "error_code": error_code or "decode_client_error", "detail": detail},
+                    status_code=int(status) if isinstance(status, int) else 400,
+                    headers={"X-Decode-Diagnostics": diag_header},
+                )
+
+        last_transport = next(
+            (
+                item
+                for item in reversed(diagnostics)
+                if isinstance(item, dict) and item.get("error_kind") == "transport"
+            ),
+            None,
+        )
+        logger.warning(
+            "decode_coordinate gateway failure: coordinate=%s error_kind=%s latency_ms=%s",
+            coordinate,
+            last_transport.get("error_kind") if last_transport else "unknown",
+            total_latency_ms,
+        )
+        return JSONResponse(
+            {
+                "status": "error",
+                "error_code": "upstream_unavailable",
+                "detail": last_transport.get("error") if last_transport else f"Unable to decode coordinate: {coordinate}",
+                "diagnostics": diagnostics,
+            },
+            status_code=502,
+            headers={"X-Decode-Diagnostics": diag_header},
+        )
+
+    logger.info(
+        "decode_coordinate success: coordinate=%s latency_ms=%s",
+        coordinate,
+        total_latency_ms,
+    )
+    return JSONResponse(resolved, headers={"X-Decode-Diagnostics": diag_header})
 
 
 @rt("/api/resolve_tiered", methods=["POST"])

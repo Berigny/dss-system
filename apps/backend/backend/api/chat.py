@@ -15,7 +15,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Mapping, Optional, cast
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 
 from backend.api.http import get_memory_ledger, get_memory_substrate, parse_key
 from backend.api.agent_writes import record_full_payload_blob, record_turn
@@ -5781,6 +5781,18 @@ async def confirm_stream_write(coordinate: str, request: Request):
     return _confirm_stream_write(normalized, request)
 
 
+def _decode_error_response(
+    error_code: str,
+    detail: Any,
+    status_code: int,
+) -> JSONResponse:
+    """Return a consistent JSON error envelope for /web4/decode failures."""
+    return JSONResponse(
+        {"status": "error", "error_code": error_code, "detail": detail},
+        status_code=status_code,
+    )
+
+
 @router.post("/stream/confirm")
 async def confirm_stream_write_post(payload: dict, request: Request):
     enforce_pilot_write_allowed(request, action="chat.stream.confirm")
@@ -5798,7 +5810,7 @@ async def decode_coordinate(
     Librarian Endpoint: STRICTLY resolves a specific Ledger Entry.
     Does NOT search. Requires a precise 'Dewey Code' (Key).
     """
-    
+
     # 1. Strict Input Parsing
     coord_input = None
     if "namespace" in payload and "identifier" in payload:
@@ -5809,10 +5821,11 @@ async def decode_coordinate(
         coord_input = payload["coordinate"]
 
     if not coord_input:
-        return {
-            "status": "error",
-            "detail": "Invalid Code. Please provide a valid identifier."
-        }
+        return _decode_error_response(
+            "invalid_coordinate",
+            "Invalid Code. Please provide a valid identifier.",
+            400,
+        )
 
     normalized = normalise_coord(coord_input)
     web4_value = int(normalized["bare"]) if normalized.get("kind") == "web4" else None
@@ -5830,16 +5843,21 @@ async def decode_coordinate(
 
     # If we still don't have a namespace (and no Web4 value), reject the request.
     if not normalized.get("namespace") and web4_value is None:
-        return {
-            "status": "error",
-            "detail": "Invalid Code. Please provide a full 'namespace:identifier' key."
-        }
+        return _decode_error_response(
+            "invalid_coordinate",
+            "Invalid Code. Please provide a full 'namespace:identifier' key.",
+            400,
+        )
 
     # 2. Setup Store (Read-Only Access)
     service = _optional_ledger_service(request)
     if service is None:
-        return {"status": "error", "detail": "Library database locked."}
-    
+        return _decode_error_response(
+            "library_database_locked",
+            "Library database locked.",
+            503,
+        )
+
     # No index needed for direct read
     store = service.store
 
@@ -5873,38 +5891,58 @@ async def decode_coordinate(
                 meta={"namespace_used": None},
             )
         except Exception:
-            return {"status": "error", "detail": "Invalid Web4 coordinate."}
+            return _decode_error_response(
+                "invalid_web4_coordinate",
+                "Invalid Web4 coordinate.",
+                400,
+            )
 
     # 3. Precise Lookup (The Librarian fetches the exact book)
     try:
         entry = None
         namespace_used = normalized.get("namespace")
         if namespace_used:
-            namespace_used = _canonicalize_ledger_scope(
-                request,
-                resolve_ledger_scope_or_raise(
+            try:
+                resolved_scope = resolve_ledger_scope_or_raise(
                     request,
                     payload_ledger_id=(
                         str(payload_ledger_id).strip() if isinstance(payload_ledger_id, str) else None
                     ),
                     path_ledger_id=namespace_used,
                     hint="provide matching ledger_id/x-ledger-id for coordinate namespace",
-                ),
-            )
+                )
+            except HTTPException as exc:
+                error = (exc.detail or {}) if isinstance(exc.detail, dict) else {"error": "ledger_scope_error"}
+                code = str(error.get("error") or "").strip()
+                if code == "ledger_scope_mismatch":
+                    return _decode_error_response("ledger_scope_mismatch", error, 400)
+                if code == "ledger_context_required":
+                    return _decode_error_response("ledger_context_required", error, 422)
+                raise
+            namespace_used = _canonicalize_ledger_scope(request, resolved_scope)
         if not namespace_used:
             explicit_scope = None
             if isinstance(payload_ledger_id, str) or any(
                 isinstance(request.headers.get(h), str) and str(request.headers.get(h)).strip()
                 for h in ("x-ledger-id", "x-ledger", "x-ledger-id-h64")
             ):
-                explicit_scope = resolve_ledger_scope_or_raise(
-                    request,
-                    payload_ledger_id=(
-                        str(payload_ledger_id).strip() if isinstance(payload_ledger_id, str) else None
-                    ),
-                    path_ledger_id=None,
-                    hint="provide ledger_id/x-ledger-id or namespace-qualified coordinate",
-                )
+                try:
+                    explicit_scope = resolve_ledger_scope_or_raise(
+                        request,
+                        payload_ledger_id=(
+                            str(payload_ledger_id).strip() if isinstance(payload_ledger_id, str) else None
+                        ),
+                        path_ledger_id=None,
+                        hint="provide ledger_id/x-ledger-id or namespace-qualified coordinate",
+                    )
+                except HTTPException as exc:
+                    error = (exc.detail or {}) if isinstance(exc.detail, dict) else {"error": "ledger_scope_error"}
+                    code = str(error.get("error") or "").strip()
+                    if code == "ledger_scope_mismatch":
+                        return _decode_error_response("ledger_scope_mismatch", error, 400)
+                    if code == "ledger_context_required":
+                        return _decode_error_response("ledger_context_required", error, 422)
+                    raise
             if explicit_scope:
                 namespace_used = _canonicalize_ledger_scope(request, explicit_scope)
             else:
@@ -5915,14 +5953,16 @@ async def decode_coordinate(
                         namespace_used = candidate
                         break
             if not namespace_used:
-                return {
-                    "status": "error",
-                    "kind": normalized.get("kind"),
-                    "canonical_coord": normalized["canonical"],
-                    "namespace_used": None,
-                    "error_code": "missing_namespace",
-                    "hint": 'provide namespace like "<ns>:<coord>"',
-                }
+                return _decode_error_response(
+                    "missing_namespace",
+                    {
+                        "kind": normalized.get("kind"),
+                        "canonical_coord": normalized["canonical"],
+                        "namespace_used": None,
+                        "hint": 'provide namespace like "<ns>:<coord>"',
+                    },
+                    422,
+                )
 
         surface_id = str(
             request.headers.get("x-surface-id")
@@ -6027,13 +6067,23 @@ async def decode_coordinate(
                 },
             )
         else:
-             return {"status": "error", "detail": "Book not found on shelf."}
+            return _decode_error_response(
+                "coordinate_not_found",
+                "Book not found on shelf.",
+                404,
+            )
 
-    except HTTPException as exc:
-        return {"status": "error", "detail": exc.detail}
-    except Exception as e:
+    except HTTPException:
+        # Surface-authority errors and unhandled HTTP exceptions propagate with
+        # their original status codes so middleware can classify them directly.
+        raise
+    except Exception:
         LOGGER.error("Decode failed for %s", normalized.get("canonical"), exc_info=True)
-        return {"status": "error", "detail": "Librarian system error."}
+        return _decode_error_response(
+            "librarian_system_error",
+            "Librarian system error.",
+            500,
+        )
 
 
 @router.post("/coord/walk")

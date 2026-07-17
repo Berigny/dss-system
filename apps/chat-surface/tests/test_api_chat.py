@@ -431,6 +431,7 @@ def test_api_chat_smart_stream_fallback_marker(monkeypatch):
 
 def test_api_chat_smart_stream_codex_prompt_mode_builds_delegated_principal(monkeypatch):
     import app as app_module
+    monkeypatch.setattr(app_module, "CODEX_PRINCIPAL_DID", "did:web:id.dualsubstrate.com:principals:agent:openai:codex")
     captured: dict[str, object] = {}
 
     class DummyStreamResponse:
@@ -1867,7 +1868,11 @@ def test_decode_coordinate_v2_key_order(monkeypatch):
     response = client.post("/api/decode_coordinate", json={"coordinate": "WX-123"})
     assert response.status_code == 200
     assert str(captured.get("url") or "").endswith("/api/decode_coordinate")
-    assert captured.get("json") == {"coordinate": "WX-123"}
+    assert captured.get("json") == {
+        "coordinate": "WX-123",
+        "ledger_id": "loam",
+        "surface_id": app_module.settings.CHAT_SURFACE_ID,
+    }
     body = response.text
     keys = [
         '"coord"',
@@ -2044,3 +2049,83 @@ def test_canonicalize_ledger_scope_value_strips_prefix_and_lowercases():
     assert app_module._canonicalize_ledger_scope_value("ledger:LOAM") == "loam"
     assert app_module._canonicalize_ledger_scope_value("Loam-Root-01") == "loam-root-01"
     assert app_module._canonicalize_ledger_scope_value(None) == ""
+
+
+def test_decode_coordinate_forwards_ledger_and_surface_scope(monkeypatch):
+    captured: dict[str, object] = {}
+
+    async def fake_post_middleware_json(request, path, payload):
+        captured["path"] = path
+        captured["payload"] = payload
+        return {"coord": "loam:WX-1"}
+
+    monkeypatch.setattr(app_module, "_post_middleware_json", fake_post_middleware_json)
+
+    response = client.post("/api/decode_coordinate", json={"coordinate": "loam:WX-1"})
+    assert response.status_code == 200
+    payload = _as_dict(captured.get("payload"))
+    assert payload.get("coordinate") == "loam:WX-1"
+    assert payload.get("ledger_id") == "loam"
+    assert payload.get("surface_id") == app_module.settings.CHAT_SURFACE_ID
+
+
+def test_delegated_codex_mode_fails_closed_when_principal_unset(monkeypatch):
+    monkeypatch.setattr(app_module, "CODEX_PRINCIPAL_DID", "")
+
+    async def fake_verified_model_auth_context(_request):
+        return {
+            "identity_vc": {
+                "verified": True,
+                "principal_did": "did:key:z6MkOperator",
+                "session_jti": "sess-codex-missing",
+                "auth_method": "wallet_verified_id",
+            }
+        }
+
+    monkeypatch.setattr(app_module, "_verified_model_auth_context", fake_verified_model_auth_context)
+    client.cookies.set(app_module.BACKEND_SESSION_TOKEN_COOKIE, "opaque-session-token")
+
+    response = client.post(
+        "/api/chat/smart_stream",
+        json={
+            "session_id": "test-codex-missing",
+            "message": "hello",
+            "history": [],
+            "provider": "openai",
+            "enable_ledger": True,
+            "prompt_principal_mode": "codex",
+        },
+    )
+    assert response.status_code == 400
+    assert "codex_principal_not_configured" in response.text
+
+
+def test_delegated_kimi_mode_fails_closed_when_principal_unset(monkeypatch):
+    monkeypatch.setattr(app_module, "KIMI_PRINCIPAL_DID", "")
+
+    async def fake_verified_model_auth_context(_request):
+        return {
+            "identity_vc": {
+                "verified": True,
+                "principal_did": "did:key:z6MkOperator",
+                "session_jti": "sess-kimi-missing",
+                "auth_method": "wallet_verified_id",
+            }
+        }
+
+    monkeypatch.setattr(app_module, "_verified_model_auth_context", fake_verified_model_auth_context)
+    client.cookies.set(app_module.BACKEND_SESSION_TOKEN_COOKIE, "opaque-session-token")
+
+    response = client.post(
+        "/api/chat/smart_stream",
+        json={
+            "session_id": "test-kimi-missing",
+            "message": "hello",
+            "history": [],
+            "provider": "openai",
+            "enable_ledger": True,
+            "prompt_principal_mode": "kimi",
+        },
+    )
+    assert response.status_code == 400
+    assert "kimi_principal_not_configured" in response.text

@@ -1502,6 +1502,11 @@ async def _prepare_middleware_chat_proxy(
             or "demo-user"
         ).strip()
         if prompt_principal_mode == "codex":
+            if not CODEX_PRINCIPAL_DID:
+                raise HTTPException(
+                    status_code=400,
+                    detail="codex_principal_not_configured",
+                )
             forwarded["delegated_principal"] = {
                 "principal_did": CODEX_PRINCIPAL_DID,
                 "principal_key_id": CODEX_PRINCIPAL_KEY_ID,
@@ -1519,6 +1524,11 @@ async def _prepare_middleware_chat_proxy(
                 "surface_id": settings.CHAT_SURFACE_ID,
             }
         elif prompt_principal_mode == "kimi":
+            if not KIMI_PRINCIPAL_DID:
+                raise HTTPException(
+                    status_code=400,
+                    detail="kimi_principal_not_configured",
+                )
             forwarded["delegated_principal"] = {
                 "principal_did": KIMI_PRINCIPAL_DID,
                 "principal_key_id": KIMI_PRINCIPAL_KEY_ID,
@@ -1534,6 +1544,15 @@ async def _prepare_middleware_chat_proxy(
                 "surface_scope": [settings.CHAT_SURFACE_ID],
                 "surface_id": settings.CHAT_SURFACE_ID,
             }
+
+        delegated_principal = forwarded.get("delegated_principal")
+        if isinstance(delegated_principal, dict):
+            for required_field in ("principal_did", "principal_key_id", "principal_id"):
+                if not str(delegated_principal.get(required_field) or "").strip():
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"delegated_principal_missing_{required_field}",
+                    )
 
     outbound_headers = dict(api.headers)
     session_token = str(request.cookies.get(BACKEND_SESSION_TOKEN_COOKIE) or "").strip()
@@ -3256,10 +3275,24 @@ async def decode_coordinate(request: Request):
     if not coordinate:
         raise HTTPException(status_code=422, detail="coordinate is required")
 
+    session_id = str(
+        request.cookies.get("ds_session")
+        or payload.get("session_id")
+        or DEFAULT_SESSION_ID
+    ).strip() or DEFAULT_SESSION_ID
+    session = get_session(session_id)
+    ledger_id, entity, session = _resolve_session_scope(session_id, session)
+
+    forward_payload: dict[str, Any] = {"coordinate": coordinate}
+    forward_payload["ledger_id"] = _canonicalize_ledger_scope_value(ledger_id)
+    forward_payload["surface_id"] = settings.CHAT_SURFACE_ID
+    if payload.get("session_id"):
+        forward_payload["session_id"] = session_id
+
     resolved = await _post_middleware_json(
         request,
         "/api/decode_coordinate",
-        {"coordinate": coordinate},
+        forward_payload,
     )
     return JSONResponse(resolved)
 

@@ -67,6 +67,21 @@ class ChatResponse:
         )
 
 
+class BackendDecodeError(Exception):
+    """Raised when the backend /chat/web4/decode endpoint returns a non-2xx response."""
+
+    def __init__(
+        self,
+        status_code: int,
+        body: dict[str, Any],
+        message: str = "",
+    ):
+        self.status_code = status_code
+        self.body = body
+        self.message = message
+        super().__init__(message or f"backend decode error {status_code}")
+
+
 class APIClient:
     """Async client wrapper for backend interactions."""
 
@@ -75,13 +90,12 @@ class APIClient:
         base_url: str = API_BASE,
         api_key: str = API_KEY,
         ledger_id: str = DEFAULT_LEDGER,
-        timeout: float = 60.0,
+        timeout: float = HTTP_TIMEOUT,
     ):
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.ledger_id = ledger_id
-        # Force 60s minimum timeout to handle LLM generation times
-        self.timeout = max(timeout, 60.0)
+        self.timeout = timeout
         self._base_headers = {"Content-Type": "application/json"}
         self.context_id = ""
 
@@ -251,6 +265,7 @@ class APIClient:
         entity: str | None = None,
         auth_headers: dict[str, str] | None = None,
         auth_claims: dict[str, str] | None = None,
+        timeout: float | None = None,
     ) -> ChatResponse:
         """Send a chat message to the backend /chat endpoint."""
         url = f"{self.base_url}/chat"
@@ -264,7 +279,9 @@ class APIClient:
         if entity:
             payload["entity"] = entity
         payload = self._inject_auth_claims(payload, auth_claims)
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
+        # Chat completion may involve LLM generation; keep a sensible floor.
+        chat_timeout = timeout if timeout is not None else max(self.timeout, 60.0)
+        async with httpx.AsyncClient(timeout=chat_timeout) as client:
             resp = await client.post(
                 url,
                 json=payload,
@@ -398,6 +415,7 @@ class APIClient:
         session_id: str | None = None,
         auth_headers: dict[str, str] | None = None,
         auth_claims: dict[str, str] | None = None,
+        timeout: float | None = None,
     ) -> dict:
         """Resolve a ledger coordinate via backend /chat/web4/decode."""
         url = f"{self.base_url}/chat/web4/decode"
@@ -407,13 +425,23 @@ class APIClient:
         if session_id:
             payload["session_id"] = session_id
         payload = self._inject_auth_claims(payload, auth_claims)
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
+        request_timeout = timeout if timeout is not None else self.timeout
+        async with httpx.AsyncClient(timeout=request_timeout) as client:
             resp = await client.post(
                 url,
                 json=payload,
                 headers=self._request_headers(auth_headers=auth_headers),
             )
-            resp.raise_for_status()
+            if resp.status_code >= 400:
+                try:
+                    body = resp.json()
+                except Exception:
+                    body = {"detail": resp.text[:1000]}
+                raise BackendDecodeError(
+                    status_code=resp.status_code,
+                    body=body if isinstance(body, dict) else {"detail": body},
+                    message=f"backend decode returned {resp.status_code}",
+                )
             return resp.json()
 
     async def decode_web4(self, namespace: str, identifier: str) -> dict:

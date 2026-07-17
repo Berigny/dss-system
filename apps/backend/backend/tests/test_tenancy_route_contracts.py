@@ -576,10 +576,11 @@ def test_chat_web4_decode_rejects_coordinate_namespace_ledger_mismatch() -> None
         json={"coordinate": "chat-team-a:WX-1", "ledger_id": "chat-team-a"},
         headers={"x-ledger-id": "chat-team-b"},
     )
-    assert resp.status_code == 200
+    assert resp.status_code == 400
     payload = resp.json()
     assert isinstance(payload, dict)
     assert payload.get("status") == "error"
+    assert payload.get("error_code") == "ledger_scope_mismatch"
     detail = payload.get("detail")
     assert isinstance(detail, dict)
     assert detail.get("error") == "ledger_scope_mismatch"

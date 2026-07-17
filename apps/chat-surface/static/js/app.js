@@ -1212,6 +1212,35 @@ function _requestedByLabel(payload) {
     return String(delegated.requested_by_principal_did || '').trim();
 }
 
+function _delegatedPromptPathIsDistinctOperatorDelegation(payload) {
+    const delegated = payload && payload.delegated_prompt_path && typeof payload.delegated_prompt_path === 'object'
+        ? payload.delegated_prompt_path
+        : {};
+    if (delegated.requested_by_is_distinct_from_prompt_principal === true) {
+        return true;
+    }
+    if (delegated.requested_by_is_distinct_from_prompt_principal === false) {
+        return false;
+    }
+    const requestedBy = String(delegated.requested_by_principal_did || '').trim();
+    const promptPrincipal = String(delegated.prompt_principal_did || '').trim();
+    if (!requestedBy || !promptPrincipal) {
+        return false;
+    }
+    return requestedBy !== promptPrincipal;
+}
+
+function _answeredByLabel(payload) {
+    return _promptPrincipalLabel(payload);
+}
+
+function _askedByLabel(payload) {
+    if (_delegatedPromptPathIsDistinctOperatorDelegation(payload)) {
+        return _requestedByLabel(payload);
+    }
+    return _promptPrincipalLabel(payload);
+}
+
 function _answerSurfaceIntegrityText(payload) {
     const integrity = payload && payload.answer_surface_integrity && typeof payload.answer_surface_integrity === 'object'
         ? payload.answer_surface_integrity
