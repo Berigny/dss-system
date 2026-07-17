@@ -62,3 +62,4 @@ pyrightconfig.json
 .terraform.lock.hcl
 .vercel
 .env*
+.venv-ksr/
