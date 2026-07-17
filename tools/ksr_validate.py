@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-KSR-VALIDATE v0.1 - structural self-validation for semantic_registry.yaml
+KSR-VALIDATE v0.3 - structural self-validation for semantic_registry.yaml and KSR artifacts.
 
 Usage:
-    python3 ksr_validate.py [REGISTRY] [--repo-root PATH] [--known PATH]
+    python3 ksr_validate.py [REGISTRY] [--mode core|pack] [--repo-root PATH] [--known PATH]
 
-    REGISTRY      path to semantic_registry.yaml
+    REGISTRY      path to semantic_registry.yaml, ksr-core-*.yaml, or pack yaml
                   (default: apps/backend/backend/kernel/semantic_registry.yaml)
+    --mode        validation mode: core (G01-G16) or pack (P01-P04)
     --repo-root   repo root for surface_policy path checks
     --known       JSON manifest of known failures, {"G02": "KSR-1.2.0-002", ...}
 
@@ -14,11 +15,13 @@ Exit code: 0 if no NEW failures, 1 otherwise.
 Deps: PyYAML only.
 """
 import argparse
+import hashlib
 import json
 import math
 import os
 import sys
 from collections import Counter
+from pathlib import Path
 
 import yaml
 
@@ -314,17 +317,25 @@ def run_gates(d, dups, registry_path, repo_root):
     # G14 surface_policy covers actual registry path -----------------------------------------
     g = Gate("G14", "surface_policy private_paths coverage")
     priv = spol.get("private_paths", [])
+    pub = spol.get("public_paths", [])
     if repo_root:
         rel = os.path.relpath(os.path.abspath(registry_path), os.path.abspath(repo_root))
     else:
         rel = registry_path
     rel = rel.replace(os.sep, "/")
-    if rel not in priv:
-        g.fail(f"actual registry path '{rel}' not an exact entry in private_paths {priv}")
+    # Accept exact match or glob match in either public or private paths.
+    covered = rel in priv or rel in pub
+    if not covered:
+        import fnmatch
+        covered = any(fnmatch.fnmatch(rel, pat) for pat in priv + pub)
+    if not covered:
+        g.fail(f"actual registry path '{rel}' not covered by private_paths {priv} or public_paths {pub}")
     missing_on_disk = []
     if repo_root:
         for p in priv:
             if p in (".git", "__pycache__", ".venv", "node_modules"):
+                continue
+            if "*" in p:
                 continue
             if not os.path.exists(os.path.join(repo_root, p)):
                 missing_on_disk.append(p)
@@ -355,26 +366,152 @@ def run_gates(d, dups, registry_path, repo_root):
         g.note(f"usage {dict(rels)}")
     G.append(g)
 
+    # G16 core referential closure ---------------------------------------------
+    g = Gate("G16", "core referential closure")
+    # Core must not contain steward-only (P/H) cross-domain nodes.
+    ph_in_core = []
+
+    def walk_tier(o, path=""):
+        if isinstance(o, dict):
+            tier = str(o.get("tier", "")).upper()
+            if tier in ("P", "H"):
+                ph_in_core.append(path or "<root>")
+            for k, v in o.items():
+                walk_tier(v, f"{path}.{k}" if path else str(k))
+        elif isinstance(o, list):
+            for i, v in enumerate(o):
+                walk_tier(v, f"{path}[{i}]")
+
+    walk_tier(cdr, "cross_domain_registry")
+    if ph_in_core:
+        g.fail(f"core contains P/H tier nodes: {ph_in_core}")
+    else:
+        g.note("no P/H tier nodes in core cross_domain_registry")
+    G.append(g)
+
     return G
+
+
+def run_pack_gates(raw, dups):
+    """Run pack-mode gates P01-P04 on a pack artifact (raw wrapper dict)."""
+    G = []
+    art = raw.get("artifact", raw)
+
+    # P01 parse-clean
+    g = Gate("P01", "pack parse-clean")
+    if dups:
+        g.fail(f"{len(dups)} duplicate keys")
+    else:
+        g.note("no duplicate keys")
+    G.append(g)
+
+    # P02 relation_type validity
+    g = Gate("P02", "pack relation_type validity")
+    rel_valid = set(art.get("relation_types", []))
+    rels = Counter()
+
+    def walk_rels(o):
+        if isinstance(o, dict):
+            if "relation_type" in o:
+                rels[o["relation_type"]] += 1
+            for v in o.values():
+                walk_rels(v)
+        elif isinstance(o, list):
+            for v in o:
+                walk_rels(v)
+
+    walk_rels(art)
+    bad_rels = {r: n for r, n in rels.items() if r not in rel_valid}
+    if bad_rels:
+        g.fail(f"invalid relation_types {bad_rels}")
+    else:
+        g.note(f"usage {dict(rels)}")
+    G.append(g)
+
+    # P03 steward coverage
+    g = Gate("P03", "pack steward coverage")
+    ph_unmarked = []
+    STEWARD_FLAGS = ("steward_only", "steward")
+
+    def walk_steward(o, path=""):
+        if isinstance(o, dict):
+            conf = o.get("confidence")
+            tier = str(o.get("tier", "")).upper()
+            if (conf in ("P", "H") or tier in ("P", "H")) and not any(o.get(f) for f in STEWARD_FLAGS):
+                ph_unmarked.append(path or "<root>")
+            for k, v in o.items():
+                walk_steward(v, f"{path}.{k}" if path else str(k))
+        elif isinstance(o, list):
+            for i, v in enumerate(o):
+                walk_steward(v, f"{path}[{i}]")
+
+    walk_steward(art, "artifact")
+    if ph_unmarked:
+        g.fail(f"P/H nodes without steward flag: {ph_unmarked}")
+    else:
+        g.note("all P/H nodes flagged steward-only")
+    G.append(g)
+
+    # P04 pack->core reference resolves
+    g = Gate("P04", "pack->core reference resolves")
+    src_sha = raw.get("source_registry_sha256")
+    art_name = raw.get("ksr_artifact") or art.get("ksr_pack")
+    if not src_sha:
+        g.fail("missing source_registry_sha256")
+    elif not art_name:
+        g.fail("missing pack identifier")
+    else:
+        g.note(f"pack '{art_name}' references source sha {src_sha[:16]}...")
+    G.append(g)
+
+    return G
+
+
+def sha256_file(path: str) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for chunk in iter(lambda: fh.read(8192), b""):
+            h.update(chunk)
+    return h.hexdigest()
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("registry", nargs="?",
                     default="apps/backend/backend/kernel/semantic_registry.yaml")
+    ap.add_argument("--mode", choices=("full", "core", "pack"), default="full",
+                    help="validation mode: full runs G01-G15 on source; core runs G01-G16; pack runs P01-P04")
     ap.add_argument("--repo-root", default=None)
     ap.add_argument("--known", default=None, help="known-failures JSON manifest")
+    ap.add_argument("--core-sha", default=None, help="expected source core sha (for pack mode)")
     args = ap.parse_args()
 
-    d, dups = load_with_dup_check(args.registry)
-    gates = run_gates(d, dups, args.registry, args.repo_root)
+    raw, dups = load_with_dup_check(args.registry)
+
+    # Unwrap artifact header if present.
+    if "ksr_artifact" in raw and "artifact" in raw:
+        d = raw["artifact"]
+        artifact_meta = {"ksr_artifact": raw.get("ksr_artifact"), "source_registry_sha256": raw.get("source_registry_sha256")}
+    else:
+        d = raw
+        artifact_meta = {}
 
     known = {}
     if args.known and os.path.exists(args.known):
         known = json.load(open(args.known))
 
-    print(f"KSR-VALIDATE v0.1 | registry: {args.registry}")
-    print(f"ksr_version: {d.get('ksr_version')} | gates: {len(gates)}\n")
+    if args.mode == "pack":
+        gates = run_pack_gates(raw, dups)
+        print(f"KSR-VALIDATE v0.3 pack mode | artifact: {args.registry}")
+        print(f"ksr_pack: {raw.get('ksr_artifact')} | gates: {len(gates)}\n")
+    else:
+        gates = run_gates(d, dups, args.registry, args.repo_root)
+        if args.mode == "core":
+            # Filter to G01-G16
+            gates = [g for g in gates if g.gid.startswith("G")]
+        print(f"KSR-VALIDATE v0.3 {'core' if args.mode == 'core' else 'full'} mode | registry: {args.registry}")
+        print(f"ksr_version: {d.get('ksr_version')} | gates: {len(gates)}\n")
+
     new_fail = 0
     for g in gates:
         if g.status == "PASS" and g.gid in known:
