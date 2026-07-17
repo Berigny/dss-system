@@ -200,6 +200,98 @@ def generate_perturbations(registry: dict[str, Any], rng: random.Random, n_sampl
     }
 
 
+def generate_digit_edit_mutations(
+    registry: dict[str, Any],
+    rng: random.Random,
+    n_samples: int = 100,
+    append_336_check: bool = False,
+) -> dict[str, Any]:
+    """
+    Decimal-digit flip mutations of valid encodings.
+
+    Unlike the prime-alphabet perturbations above, digit edits operate on the
+    decimal representation of the encoded number. They model transcription or
+    transport errors (e.g. a character is mis-typed in a ledger coordinate).
+
+    If ``append_336_check`` is True, the base encoding is conceptually protected
+    by appending the 336-derived check component (product of the three
+    quaternary gate primes: awareness * unity * ethics = 17 * 19 * 137).  The
+    same digit flip is then applied to the protected number and we report
+    whether the 336 invariant still holds.
+    """
+    alphabet = build_alphabet(registry)
+    core_primes = set(alphabet.values())
+
+    gate_primes = [
+        ginfo["prime"]
+        for ginfo in registry.get("quaternary_gate_registry", {}).get("gates", {}).values()
+    ]
+    check_factor = math.prod(gate_primes) if gate_primes else 1
+
+    concept_numbers = [(name, prime) for name, prime in alphabet.items() if prime > 1]
+    if not concept_numbers:
+        return {"samples": [], "detection_rate": 0.0, "check_detection_rate": 0.0}
+
+    samples = []
+    for _ in range(n_samples):
+        name, prime = rng.choice(concept_numbers)
+        base = prime
+        if append_336_check:
+            base *= check_factor
+
+        s = str(base)
+        if len(s) < 2:
+            continue
+
+        idx = rng.randrange(len(s))
+        old_digit = s[idx]
+        new_digit = rng.choice([d for d in "0123456789" if d != old_digit])
+        mutated_s = s[:idx] + new_digit + s[idx + 1 :]
+        mutated = int(mutated_s)
+
+        mutated_factors = factorize(mutated)
+        structurally_valid = all(p in core_primes for p in mutated_factors)
+        check_valid = all(mutated_factors.get(p, 0) >= 1 for p in gate_primes)
+
+        samples.append({
+            "base_number": base,
+            "base_concept": name,
+            "mutated_number": mutated,
+            "flipped_position": idx,
+            "old_digit": old_digit,
+            "new_digit": new_digit,
+            "append_336_check": append_336_check,
+            "structurally_valid": structurally_valid,
+            "check_336_valid": check_valid,
+            "detected": not structurally_valid,
+            "check_detected": append_336_check and not check_valid,
+        })
+
+    n = len(samples)
+    detection_rate = sum(1 for s in samples if s["detected"]) / n if n else 0.0
+    check_detection_rate = sum(1 for s in samples if s["check_detected"]) / n if n else 0.0
+    return {
+        "samples": samples,
+        "detection_rate": detection_rate,
+        "check_detection_rate": check_detection_rate,
+    }
+
+
+def evaluate_digit_edit_check(registry: dict[str, Any], rng: random.Random, n_samples: int = 100) -> dict[str, Any]:
+    """
+    Compare digit-flip detection with and without the 336-derived check component.
+    """
+    baseline = generate_digit_edit_mutations(registry, rng, n_samples=n_samples, append_336_check=False)
+    protected = generate_digit_edit_mutations(registry, rng, n_samples=n_samples, append_336_check=True)
+    return {
+        "baseline_detection_rate": baseline["detection_rate"],
+        "protected_detection_rate": protected["detection_rate"],
+        "check_only_detection_rate": protected["check_detection_rate"],
+        "baseline": baseline,
+        "protected": protected,
+    }
+
+
 def stripping_degradation(registry: dict[str, Any], rng: random.Random, n_samples: int = 50) -> dict[str, Any]:
     """Compare stripping in priority order vs random stripping."""
     alphabet = build_alphabet(registry)
@@ -331,6 +423,9 @@ def main() -> int:
     print("Running perturbation curve...")
     perturb = generate_perturbations(registry, rng)
 
+    print("Running digit-edit mutation + 336 check-digit evaluation...")
+    digit_edit = evaluate_digit_edit_check(registry, rng)
+
     print("Running stripping degradation...")
     strip_deg = stripping_degradation(registry, rng)
 
@@ -348,11 +443,14 @@ def main() -> int:
             "C3_trap_precision_gte_0_95": trap_eval["precision"] >= 0.95,
             "C3_trap_recall_gte_0_90": trap_eval["recall"] >= 0.90,
             "perturbation_sparsity_ratio": perturb["sparsity_ratio"],
+            "digit_edit_baseline_detection_rate": digit_edit["baseline_detection_rate"],
+            "digit_edit_protected_detection_rate": digit_edit["protected_detection_rate"],
             "stripping_graceful_degradation": strip_deg["graceful_degradation"],
             "336_fail_closed_all_gates": drill["all_fail_closed"],
         },
         "trap_evaluation": trap_eval,
         "perturbation": perturb,
+        "digit_edit_mutation": digit_edit,
         "stripping_degradation": strip_deg,
         "guard_drill": drill,
     }
