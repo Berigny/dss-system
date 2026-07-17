@@ -8407,3 +8407,21 @@ def test_qp_pure_disables_mixed_signal_fallbacks(monkeypatch) -> None:
     assert row.get("p_adic_score") == 0.2
     assert row.get("relevance_tier") == 4
     assert row.get("skip_reason") == "insufficient_p_adic_search_recency_signal"
+
+
+def test_synthesize_field_state_produces_valid_envelope():
+    state = orchestrator_module._synthesize_field_state("hello\nworld", grid_size=32)
+    assert isinstance(state, dict)
+    assert len(state["E"]) == 3
+    assert len(state["B"]) == 3
+    assert len(state["Theta"]) == 32
+    assert all(len(row) == 32 for row in state["Theta"])
+    assert len(state["node_pos"]) == 2
+    assert 0 <= state["node_pos"][0] < 32
+    assert 0 <= state["node_pos"][1] < 32
+    # Values must be deterministic for the same seed.
+    state2 = orchestrator_module._synthesize_field_state("hello\nworld", grid_size=32)
+    assert state == state2
+    # Different seeds should differ.
+    state3 = orchestrator_module._synthesize_field_state("different", grid_size=32)
+    assert state3 != state

@@ -687,6 +687,71 @@ def test_api_chat_commit_answer_forwards_payload(monkeypatch):
     assert captured["reply"] == "world"
 
 
+def test_api_chat_commit_answer_injects_field_state(monkeypatch):
+    import app as app_module
+
+    captured: dict[str, object] = {}
+
+    async def fake_commit_answer(**kwargs):
+        captured.update(kwargs)
+        return None
+
+    monkeypatch.setattr(app_module.api, "commit_answer", fake_commit_answer)
+
+    response = client.post(
+        "/api/chat/commit-answer",
+        json={
+            "entity": "chat-demo:principal:test",
+            "ledger_id": "ledger:test",
+            "message": "hello",
+            "reply": "world",
+            "metadata": {"source": "frontend"},
+        },
+    )
+
+    assert response.status_code == 200
+    metadata = captured.get("metadata") if isinstance(captured.get("metadata"), dict) else {}
+    field_state = metadata.get("field_state")
+    assert isinstance(field_state, dict)
+    assert isinstance(field_state.get("E"), list) and len(field_state["E"]) == 3
+    assert isinstance(field_state.get("B"), list) and len(field_state["B"]) == 3
+    assert isinstance(field_state.get("Theta"), list) and len(field_state["Theta"]) == 32
+    assert isinstance(field_state.get("node_pos"), list) and len(field_state["node_pos"]) == 2
+
+
+def test_api_chat_commit_answer_preserves_existing_field_state(monkeypatch):
+    import app as app_module
+
+    captured: dict[str, object] = {}
+
+    async def fake_commit_answer(**kwargs):
+        captured.update(kwargs)
+        return None
+
+    monkeypatch.setattr(app_module.api, "commit_answer", fake_commit_answer)
+
+    existing = {
+        "E": [0.1, 0.2, 0.3],
+        "B": [0.4, 0.5, 0.6],
+        "Theta": [[0.0] * 32 for _ in range(32)],
+        "node_pos": [1, 2],
+    }
+    response = client.post(
+        "/api/chat/commit-answer",
+        json={
+            "entity": "chat-demo:principal:test",
+            "ledger_id": "ledger:test",
+            "message": "hello",
+            "reply": "world",
+            "metadata": {"field_state": existing},
+        },
+    )
+
+    assert response.status_code == 200
+    metadata = captured.get("metadata") if isinstance(captured.get("metadata"), dict) else {}
+    assert metadata.get("field_state") == existing
+
+
 def test_openai_compat_rejects_unprivileged_policy_overrides(monkeypatch):
     import app as app_module
 
