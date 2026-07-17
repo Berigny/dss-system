@@ -1,0 +1,20 @@
+{
+  "source": "apps/backend/backend/kernel/semantic_registry.yaml",
+  "source_sha256": "276991e1b4604ce37137feacfd2bcf28fc49454fff21b9d1547c586a593f422f",
+  "ksr_version": "1.3.0",
+  "artifacts": {
+    "core": {
+      "path": "dist/ksr-core-1.3.0.yaml",
+      "sha256": "99d88ef5e92bd1e495da58f961523f1a83ab2815df96adf80b70195daae08706"
+    },
+    "domains": {
+      "path": "dist/ksr-pack-domains-1.3.0.yaml",
+      "sha256": "75888a3914c166c568d6df8711c6a4e1a8409e9b76d1651d3673e2a32eca2908"
+    },
+    "steward": {
+      "path": "dist/ksr-pack-steward-1.3.0.yaml",
+      "sha256": "65bde0ef7418d9efbe5e303f7c06a593475c8b6cd81aaa1472452f6881dd4b96"
+    }
+  },
+  "public_dir": "/tmp/ksr-public"
+}

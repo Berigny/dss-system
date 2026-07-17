@@ -30,7 +30,11 @@ DEFAULT_REGISTRY = Path("apps/backend/backend/kernel/semantic_registry.yaml")
 
 def load_registry(path: Path) -> dict[str, Any]:
     with path.open("r", encoding="utf-8") as fh:
-        return yaml.safe_load(fh)
+        data = yaml.safe_load(fh)
+    # Unwrap artifact header if present.
+    if isinstance(data, dict) and "ksr_artifact" in data and "artifact" in data:
+        return data["artifact"]
+    return data
 
 
 def registry_sha256(path: Path) -> str:
