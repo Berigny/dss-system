@@ -1,0 +1,23 @@
+title = "dss-system gitleaks config"
+
+[extend]
+# Use the latest default gitleaks rules as the base.
+useDefault = true
+
+[allowlist]
+paths = [
+    '''apps/.*/tests/.*\.py$''',
+    '''apps/backend/backend/utils/ref/.*$''',
+]
+regexes = [
+    # Test-only DID identifiers (z6Mk prefix with obvious test names).
+    '''z6Mk(?:Test|David|Canonical|Split|Pending|BadActor|Operator|BoundActor|VerifiedWallet|Activation|Delegator|TestActor|TestPrincipal|TestA|TestAdmin|TenantDefault|DualSubstrate|ExcludeCreds|AllowCreds|Transition|Subject|Principal|Actor|Admin|Default|Primary|Secondary|Wallet|User|Ledger|Orphan|Surface|Material|Legacy|Event|Preserve|Idempotency).*''',
+    # Test idempotency / signup keys.
+    '''(?:signup|wallet-signup|surface-canonical|material-surface|legacy-principal|ledger-orphan|evt-preserve-standing)-[a-z0-9\-]+''',
+    # Obviously fake OpenRouter / API keys used in tests.
+    '''sk-or-(?:v1-)?(?:abc123def456|newkey789|test|test-key-123|test-key-456|test-key-789|newkey|test-fake-not-real)$''',
+    # Generic fake bearer / session tokens.
+    '''Bearer (?:opaque-session-token|delegated-session-token|cookie-session-token|agent-bootstrap-token|test-token)$''',
+    # Default / placeholder values.
+    '''^default$''',
+]
