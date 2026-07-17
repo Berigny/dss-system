@@ -1,0 +1,20 @@
+{"id": "s001", "concepts": ["Eq0"], "note": "Origin only"}
+{"id": "s002", "concepts": ["Eq1"], "note": "Boundary only"}
+{"id": "s003", "concepts": ["Eq0", "Eq1", "Eq2", "Eq3"], "note": "All S1 substrate factors"}
+{"id": "s004", "concepts": ["Eq4", "Eq5", "Eq6", "Eq7"], "note": "All S2 target factors"}
+{"id": "s005", "concepts": ["Eq8", "Eq9"], "note": "Mediator pair"}
+{"id": "s006", "concepts": ["K0", "K1", "K2", "K3"], "note": "S1 corner kernels"}
+{"id": "s007", "concepts": ["K4", "K5", "K6", "K7"], "note": "S2 corner kernels"}
+{"id": "s008", "concepts": ["000", "111", "222"], "note": "Corner and centroid coordinates"}
+{"id": "s009", "concepts": ["001", "010", "100"], "note": "Bridge edge coordinates near origin"}
+{"id": "s010", "concepts": ["011", "101", "110"], "note": "Face center coordinates"}
+{"id": "s011", "concepts": ["ORIGIN", "BOUNDARY", "TEMPORALIZATION", "CLOSURE"], "note": "Digit symbols"}
+{"id": "s012", "concepts": ["AUDIT", "COHERENCE", "CONSTRAINT", "RELAXATION"], "note": "S2/C digit symbols"}
+{"id": "s013", "concepts": ["Eq6", "Eq7", "Eq8"], "note": "336 checksum factors"}
+{"id": "s014", "concepts": ["Aleph", "Bet", "Gimel"], "note": "Hebrew letters"}
+{"id": "s015", "concepts": ["Novelty", "Uniqueness", "Connection", "Action"], "note": "S1 prime names"}
+{"id": "s016", "concepts": ["K0", "K4", "001"], "note": "Dual pair K0-K4 with bridge"}
+{"id": "s017", "concepts": ["333"], "note": "Reset node coordinate"}
+{"id": "s018", "concepts": ["Eq0", "Eq0", "Eq1"], "note": "Repeated concept (exponent > 1)"}
+{"id": "s019", "concepts": ["awareness", "unity", "ethics"], "note": "Quaternary gate dimensions via cross_domain"}
+{"id": "s020", "concepts": ["Eq0", "Eq1", "Eq2", "Eq3", "Eq4", "Eq5", "Eq6", "Eq7", "Eq8", "Eq9"], "note": "Full digit registry"}
