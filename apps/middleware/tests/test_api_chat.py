@@ -278,7 +278,7 @@ def test_answer_surface_integrity_marks_richer_assembly_summary() -> None:
         "I'll send an introspection signal to assess the live DSS Epic 12 state on chat-demo.",
         {
             "summary": {
-                "raw": "Clearly working now: delegated provenance is explicit. Partially working now: ancestry continuity is still weak. Not yet proved: later-turn explicit continuity."
+                "summary": "Clearly working now: delegated provenance is explicit. Partially working now: ancestry continuity is still weak. Not yet proved: later-turn explicit continuity."
             }
         },
     )
@@ -295,7 +295,7 @@ def test_answer_surface_integrity_marks_preamble_collapse_under_blocked_context(
 
     integrity = orchestrator_module._answer_surface_integrity(
         "I'll ground this in observable fields from the current runtime state.",
-        {"summary": {"raw": "short skim summary only"}},
+        {"summary": {"summary": "short skim summary only"}},
         admitted_context_trace=[
             {
                 "coord": "chat-demo:WX-1",

@@ -97,7 +97,7 @@ async def _fake_assemble_with_rich_attachment_summary(**_kwargs):
         ],
         "decoded_context": [],
         "summary": {
-            "text": "Part 4 - There Was Only Ever One Tree. Genesis, the Ring, and the difference between descent and return. The attachment grounds the answer in a richer historical reading rather than a thin excerpt."
+            "summary": "Part 4 - There Was Only Ever One Tree. Genesis, the Ring, and the difference between descent and return. The attachment grounds the answer in a richer historical reading rather than a thin excerpt."
         },
     }
 
@@ -5528,7 +5528,7 @@ def test_successful_evidence_walk_promotes_richer_summary_over_check_placeholder
         return {
             "retrieved": [],
             "summary": {
-                "text": "Genesis and AI design connect through ordered differentiation, stewardship, alignment drift, and purpose."
+                "summary": "Genesis and AI design connect through ordered differentiation, stewardship, alignment drift, and purpose."
             },
         }
 
@@ -5615,7 +5615,7 @@ def test_successful_evidence_walk_promotes_richer_summary_over_ledger_check_plac
         return {
             "retrieved": [],
             "summary": {
-                "text": "Genesis and AI design connect through ordered differentiation, stewardship, alignment drift, and purpose."
+                "summary": "Genesis and AI design connect through ordered differentiation, stewardship, alignment drift, and purpose."
             },
         }
 
@@ -5702,7 +5702,7 @@ def test_successful_evidence_walk_suppresses_placeholder_ledger_summary(monkeypa
         return {
             "retrieved": [],
             "summary": {
-                "text": "I'll check the ledger for grounded evidence on this topic."
+                "summary": "I'll check the ledger for grounded evidence on this topic."
             },
         }
 
@@ -5789,7 +5789,7 @@ def test_successful_evidence_walk_suppresses_unaligned_richer_summary(monkeypatc
         return {
             "retrieved": [],
             "summary": {
-                "text": (
+                "summary": (
                     "This section from a physics textbook presents a unified wave-domain framework for understanding "
                     "long-range forces, Coulomb interactions, and inverse-square laws."
                 )
@@ -5880,7 +5880,7 @@ def test_successful_evidence_walk_promotes_richer_summary_over_governance_signal
         return {
             "retrieved": [],
             "summary": {
-                "text": "Genesis and AI design connect through ordered differentiation, stewardship, alignment drift, and purpose."
+                "summary": "Genesis and AI design connect through ordered differentiation, stewardship, alignment drift, and purpose."
             },
         }
 
@@ -6861,6 +6861,44 @@ def test_attachment_answer_promotion_ignores_unselected_attachment_family():
 
     assert reply == "Thin preview reply."
     assert strategy is None
+
+
+def test_assemble_summary_text_ignores_raw_attachment_blob():
+    full_paper = "Beyond the Context Window: Provable AI Memory. " * 500
+    assert orchestrator_module._assemble_summary_text({"summary": {"raw": full_paper}}) == ""
+    assert orchestrator_module._assemble_summary_text({"summary": {"content": full_paper}}) == ""
+    assert orchestrator_module._assemble_summary_text({"summary": {"text": full_paper}}) == ""
+    assert orchestrator_module._assemble_summary_text({"summary": {"one_line": "Concise."}}) == "Concise."
+    assert (
+        orchestrator_module._assemble_summary_text({"summary": {"summary": "A real summary."}})
+        == "A real summary."
+    )
+    assert (
+        orchestrator_module._assemble_summary_text(
+            {"summary": {"summary": "A" * 3000}}, max_length=2000
+        )
+        == "A" * 2000 + "..."
+    )
+
+
+def test_attachment_answer_commit_strategy_does_not_promote_raw_blob():
+    full_paper = "Beyond the Context Window: Provable AI Memory. " * 500
+    reply, strategy = orchestrator_module._attachment_answer_commit_strategy(
+        "Thin preview reply.",
+        {"summary": {"raw": full_paper}},
+        resolved_coords=["chat-demo:ATT-parent-001"],
+        answer_surface_integrity={
+            "status": "diverged",
+            "reason": "assembly_summary_richer_than_visible_answer",
+            "summary_source": "assemble_summary",
+        },
+        allowed_attachment_parents={"chat-demo:ATT-parent-001"},
+    )
+    assert reply == "Thin preview reply."
+    assert strategy is not None
+    assert strategy.get("attachment_grounded") is True
+    assert strategy.get("promotion_applied") is False
+    assert strategy.get("preview_only_reason") == "no_richer_attachment_summary_promotion_needed"
 
 
 def test_opened_explicit_attachment_denial_rewrites_to_grounded_reply(monkeypatch):

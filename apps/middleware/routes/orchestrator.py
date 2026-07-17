@@ -4990,14 +4990,41 @@ def _truncate_preview(text: str, *, limit: int = 240) -> str:
     return f"{normalized[: max(limit - 3, 0)].rstrip()}..."
 
 
-def _assemble_summary_text(assemble_result: dict[str, Any] | None) -> str:
+def _assemble_summary_text(
+    assemble_result: dict[str, Any] | None,
+    *,
+    max_length: int = 2000,
+) -> str:
+    """Return a concise, promotion-safe summary from an assemble payload.
+
+    We intentionally prefer explicitly-summary fields (``one_line``, ``summary``,
+    ``title``) over ``raw``/``content``/``text`` envelopes, because the latter can
+    contain full transcripts, attachment payloads, or other large blobs that must
+    not be promoted into the user-visible answer.  Anything longer than
+    ``max_length`` is truncated so a runaway payload cannot be surfaced verbatim.
+    """
     if not isinstance(assemble_result, dict):
         return ""
     summary = assemble_result.get("summary") if isinstance(assemble_result.get("summary"), dict) else {}
-    for key in ("raw", "content", "text", "summary", "one_line", "title"):
-        value = summary.get(key)
-        if isinstance(value, str) and value.strip():
-            return value.strip()
+    if not isinstance(summary, dict):
+        return ""
+
+    def _take(value: Any) -> str:
+        if not isinstance(value, str) or not value.strip():
+            return ""
+        text = value.strip()
+        if max_length > 0 and len(text) > max_length:
+            return f"{text[:max_length].rstrip()}..."
+        return text
+
+    # Only intentionally concise summary fields are safe to promote into the
+    # user-visible answer.  Raw/content/text envelopes may hold full transcripts,
+    # attachment blobs, or other large payloads and must not be treated as a
+    # summary.
+    for key in ("one_line", "summary", "title"):
+        taken = _take(summary.get(key))
+        if taken:
+            return taken
     return ""
 
 
