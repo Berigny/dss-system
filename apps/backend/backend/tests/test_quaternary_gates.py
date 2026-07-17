@@ -45,11 +45,13 @@ def test_quaternary_delegates_to_flow_rules() -> None:
 
 
 def test_quaternary_flow_check_prime_sequence_reflects_levels() -> None:
-    # awareness=6 -> level_3 -> prime 5 repeated 3 times
-    # unity=3 -> level_2 -> prime 7 repeated 2 times
+    # awareness=6 -> level_3 -> awareness prime repeated 3 times
+    # unity=3 -> level_2 -> unity prime repeated 2 times
     # ethics=0 -> level_0 -> no primes
     result = QuaternaryGate.evaluate_with_admissibility(6, 3, 0, coherence=1.0)
-    assert result["flow_check"]["prime_sequence"] == [5, 5, 5, 7, 7]
+    awareness_prime = constants.QUATERNARY_GATE_TO_PRIME["awareness"]
+    unity_prime = constants.QUATERNARY_GATE_TO_PRIME["unity"]
+    assert result["flow_check"]["prime_sequence"] == [awareness_prime] * 3 + [unity_prime] * 2
     assert isinstance(result["flow_check"]["is_lawful"], bool)
     assert "lawfulness_level" in result["flow_check"]
 

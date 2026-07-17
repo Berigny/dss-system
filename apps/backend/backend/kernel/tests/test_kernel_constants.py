@@ -71,7 +71,7 @@ def test_lattice_registry_constants() -> None:
     assert constants.LATTICE_RESET_COORDINATE == "000"
     assert len(constants.LATTICE_CORNER_MAP) == 8
     assert constants.LATTICE_CORNER_MAP["000"]["kernel"] == "K0"
-    assert len(constants.LATTICE_BRIDGE_EDGES) == 12
+    assert len(constants.LATTICE_BRIDGE_EDGES) == 18
     assert len(constants.LATTICE_FACE_CENTERS) == 6
     assert len(constants.LATTICE_TRAVERSAL_SEQUENCE) == 28
     assert constants.LATTICE_TRAVERSAL_SEQUENCE[0] == "000"

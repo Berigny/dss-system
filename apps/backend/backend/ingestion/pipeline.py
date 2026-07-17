@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from backend.kernel import constants
 from backend.kernel.layer_router import LayerRouter
 from backend.kernel.quaternary_gates import QuaternaryGate
 
@@ -36,8 +37,13 @@ class IngestionResult:
     checksum_336_satisfied: bool = False
 
 
+_AWARENESS_PRIME = constants.QUATERNARY_GATE_TO_PRIME["awareness"]
+_UNITY_PRIME = constants.QUATERNARY_GATE_TO_PRIME["unity"]
+_ETHICS_PRIME = constants.QUATERNARY_GATE_TO_PRIME["ethics"]
+
+
 def _empty_exponents() -> dict[int, int]:
-    return {2: 0, 5: 0, 7: 0}
+    return {_AWARENESS_PRIME: 0, _UNITY_PRIME: 0, _ETHICS_PRIME: 0}
 
 
 def _exponents_from_atoms(atoms: list[SemanticAtom]) -> dict[int, int]:
@@ -49,9 +55,9 @@ def _exponents_from_atoms(atoms: list[SemanticAtom]) -> dict[int, int]:
 
 def _route_layer(exponents: dict[int, int]) -> str:
     result = QuaternaryGate.evaluate(
-        exponents.get(5, 0),
-        exponents.get(7, 0),
-        exponents.get(2, 0),
+        exponents.get(_AWARENESS_PRIME, 0),
+        exponents.get(_UNITY_PRIME, 0),
+        exponents.get(_ETHICS_PRIME, 0),
     )
     return LayerRouter.route_from_levels(result["levels"])
 
@@ -87,7 +93,7 @@ def ingest_document(text: str, *, chunk_max_tokens: int | None = None) -> Ingest
             )
         )
 
-        for prime in (2, 5, 7):
+        for prime in (_AWARENESS_PRIME, _UNITY_PRIME, _ETHICS_PRIME):
             composite_exponents[prime] += exponents[prime]
 
         # Index each atom under its COORD and the chunk's layer.
@@ -163,7 +169,7 @@ def project_blob(
             )
         )
 
-        for prime in (2, 5, 7):
+        for prime in (_AWARENESS_PRIME, _UNITY_PRIME, _ETHICS_PRIME):
             composite_exponents[prime] += exponents[prime]
 
         # Atom COORD branch markers are preserved in the index_entries list for
@@ -191,9 +197,9 @@ def project_blob(
     )
 
     evaluation = QuaternaryGate.evaluate(
-        composite_exponents.get(5, 0),
-        composite_exponents.get(7, 0),
-        composite_exponents.get(2, 0),
+        composite_exponents.get(_AWARENESS_PRIME, 0),
+        composite_exponents.get(_UNITY_PRIME, 0),
+        composite_exponents.get(_ETHICS_PRIME, 0),
     )
 
     return IngestionResult(

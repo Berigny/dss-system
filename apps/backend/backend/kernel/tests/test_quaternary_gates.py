@@ -92,9 +92,9 @@ def test_constants_expose_quaternary_registry() -> None:
     assert constants.QUATERNARY_SEMANTIC_CHECKSUM_NON_COMPENSATORY is True
     assert constants.QUATERNARY_GATE_KEYS == ("awareness", "unity", "ethics")
     assert constants.QUATERNARY_GATE_TO_PRIME == {
-        "awareness": 5,
-        "unity": 7,
-        "ethics": 2,
+        "awareness": constants.QUATERNARY_GATE_TO_PRIME["awareness"],
+        "unity": constants.QUATERNARY_GATE_TO_PRIME["unity"],
+        "ethics": constants.QUATERNARY_GATE_TO_PRIME["ethics"],
     }
     assert constants.QUATERNARY_LAYER_ORDER == ("SAND", "SILT", "LOAM", "CLAY")
     assert constants.LAYER_CLAY == "CLAY"

@@ -25,10 +25,14 @@ class SemanticAtom:
 
 
 # Core prime → gate dimension mapping from HENGE-001.
+_AWARENESS_PRIME = constants.QUATERNARY_GATE_TO_PRIME["awareness"]
+_UNITY_PRIME = constants.QUATERNARY_GATE_TO_PRIME["unity"]
+_ETHICS_PRIME = constants.QUATERNARY_GATE_TO_PRIME["ethics"]
+
 _PRIME_TO_DIMENSION: dict[int, str] = {
-    constants.QUATERNARY_GATE_TO_PRIME["awareness"]: "awareness",
-    constants.QUATERNARY_GATE_TO_PRIME["unity"]: "unity",
-    constants.QUATERNARY_GATE_TO_PRIME["ethics"]: "ethics",
+    _AWARENESS_PRIME: "awareness",
+    _UNITY_PRIME: "unity",
+    _ETHICS_PRIME: "ethics",
 }
 
 # Heuristic keyword rules. Each rule maps a regex to a COORD branch. The branch's
@@ -71,7 +75,7 @@ def _make_atom(branch: str, prime: int, matched_keywords: Iterable[str]) -> Sema
 def extract_atoms(text: str) -> list[SemanticAtom]:
     """Extract semantic atoms from ``text``.
 
-    Each atom triggers at least one prime gate (5, 7, or 2). The returned list
+    Each atom triggers at least one quaternary gate prime. The returned list
     is ordered by appearance in the text.
     """
     atoms: list[SemanticAtom] = []
@@ -85,8 +89,8 @@ def extract_atoms(text: str) -> list[SemanticAtom]:
         dimension = _dimension_for_branch(branch)
 
         if dimension == "telos":
-            # Purpose atoms bind all three core primes.
-            for prime in (5, 7, 2):
+            # Purpose atoms bind all three quaternary gate primes.
+            for prime in (_AWARENESS_PRIME, _UNITY_PRIME, _ETHICS_PRIME):
                 key = (branch, prime)
                 if key in seen:
                     continue

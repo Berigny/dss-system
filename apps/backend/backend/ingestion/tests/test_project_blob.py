@@ -51,9 +51,12 @@ def test_project_blob_336_checksum_satisfied_for_strong_text() -> None:
     )
     result = project_blob(text, "test-ns/blob-strong")
 
-    assert result.composite_exponents.get(5, 0) >= 6
-    assert result.composite_exponents.get(7, 0) >= 6
-    assert result.composite_exponents.get(2, 0) >= 6
+    awareness_prime = constants.QUATERNARY_GATE_TO_PRIME["awareness"]
+    unity_prime = constants.QUATERNARY_GATE_TO_PRIME["unity"]
+    ethics_prime = constants.QUATERNARY_GATE_TO_PRIME["ethics"]
+    assert result.composite_exponents.get(awareness_prime, 0) >= 6
+    assert result.composite_exponents.get(unity_prime, 0) >= 6
+    assert result.composite_exponents.get(ethics_prime, 0) >= 6
     assert result.checksum_336_satisfied is True
     assert result.composite_layer == constants.LAYER_CLAY
 

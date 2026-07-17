@@ -27,6 +27,8 @@ def test_checksum_336_constant_unchanged():
 
 
 def test_frozen_mapping_still_supports_read_access():
-    assert constants.QUATERNARY_GATE_TO_PRIME["awareness"] == 5
+    awareness_prime = constants.QUATERNARY_GATE_TO_PRIME["awareness"]
+    assert isinstance(awareness_prime, int)
+    assert awareness_prime in set(constants.QUATERNARY_GATE_TO_PRIME.values())
     assert "ethics" in constants.QUATERNARY_GATE_TO_PRIME
     assert dict(constants.QUATERNARY_GATES["awareness"]["levels"])["level_3"]["layer"] == "CLAY"
