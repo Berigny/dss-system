@@ -198,6 +198,42 @@ def test_fastapi_wrapper_preserves_delegated_principal_for_smart_stream(monkeypa
     assert forwarded["include_pipeline_events"] is True
 
 
+def test_fastapi_wrapper_preserves_prompt_principal_mode_for_smart_stream(monkeypatch) -> None:
+    client = TestClient(fastapi_app_module.app)
+    captured: dict[str, object] = {}
+
+    async def fake_stream_from_legacy(request, method: str, path: str, *, json_payload):
+        captured["method"] = method
+        captured["path"] = path
+        captured["json_payload"] = json_payload
+        return fastapi_app_module.Response(
+            content=json.dumps({"status": "ok"}).encode("utf-8"),
+            media_type="application/json",
+        )
+
+    monkeypatch.setattr(fastapi_app_module, "_stream_from_legacy", fake_stream_from_legacy)
+
+    payload = {
+        "message": "resolve loam:WX-A71BA232-1784174248",
+        "provider": "anthropic",
+        "agent": "anthropic/claude-haiku-4.5",
+        "model": "anthropic/claude-haiku-4.5",
+        "entity": "loam",
+        "ledger_id": "loam",
+        "session_id": "prompt-mode-smoke",
+        "include_pipeline_events": True,
+        "prompt_principal_mode": "codex",
+    }
+
+    response = client.post("/api/chat/smart_stream", json=payload)
+
+    assert response.status_code == 200
+    forwarded = captured["json_payload"]
+    assert isinstance(forwarded, dict)
+    assert forwarded.get("prompt_principal_mode") == "codex"
+    assert forwarded.get("entity") == "loam"
+
+
 def test_fastapi_wrapper_proxies_principal_subject_events(monkeypatch) -> None:
     client = TestClient(fastapi_app_module.app)
 
