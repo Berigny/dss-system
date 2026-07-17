@@ -1,0 +1,165 @@
+{
+  "check_factor": 44251,
+  "vectors": [
+    {
+      "id": "na001",
+      "type": "valid",
+      "semantic_number": 12,
+      "checked_number": 531012,
+      "check_factor": 44251,
+      "expected_check_valid": true
+    },
+    {
+      "id": "na002",
+      "type": "valid",
+      "semantic_number": 175,
+      "checked_number": 7743925,
+      "check_factor": 44251,
+      "expected_check_valid": true
+    },
+    {
+      "id": "na003",
+      "type": "valid",
+      "semantic_number": 1573,
+      "checked_number": 69606823,
+      "check_factor": 44251,
+      "expected_check_valid": true
+    },
+    {
+      "id": "na004",
+      "type": "valid",
+      "semantic_number": 6137,
+      "checked_number": 271568387,
+      "check_factor": 44251,
+      "expected_check_valid": true
+    },
+    {
+      "id": "na005",
+      "type": "valid",
+      "semantic_number": 362635849,
+      "checked_number": 16046998954099,
+      "check_factor": 44251,
+      "expected_check_valid": true
+    },
+    {
+      "id": "na006",
+      "type": "valid",
+      "semantic_number": 44,
+      "checked_number": 1947044,
+      "check_factor": 44251,
+      "expected_check_valid": true
+    },
+    {
+      "id": "na007",
+      "type": "valid",
+      "semantic_number": 39,
+      "checked_number": 1725789,
+      "check_factor": 44251,
+      "expected_check_valid": true
+    },
+    {
+      "id": "na008",
+      "type": "valid",
+      "semantic_number": 85,
+      "checked_number": 3761335,
+      "check_factor": 44251,
+      "expected_check_valid": true
+    },
+    {
+      "id": "na009",
+      "type": "valid",
+      "semantic_number": 133,
+      "checked_number": 5885383,
+      "check_factor": 44251,
+      "expected_check_valid": true
+    },
+    {
+      "id": "na010",
+      "type": "valid",
+      "semantic_number": 5424241,
+      "checked_number": 240028088491,
+      "check_factor": 44251,
+      "expected_check_valid": true
+    },
+    {
+      "id": "na011-corrupted",
+      "type": "digit_edit",
+      "semantic_number": 12,
+      "checked_number": 631012,
+      "check_factor": 44251,
+      "expected_check_valid": false
+    },
+    {
+      "id": "na012-corrupted",
+      "type": "digit_edit",
+      "semantic_number": 175,
+      "checked_number": 7743825,
+      "check_factor": 44251,
+      "expected_check_valid": false
+    },
+    {
+      "id": "na013-corrupted",
+      "type": "digit_edit",
+      "semantic_number": 1573,
+      "checked_number": 63606823,
+      "check_factor": 44251,
+      "expected_check_valid": false
+    },
+    {
+      "id": "na014-corrupted",
+      "type": "digit_edit",
+      "semantic_number": 6137,
+      "checked_number": 271568386,
+      "check_factor": 44251,
+      "expected_check_valid": false
+    },
+    {
+      "id": "na015-corrupted",
+      "type": "digit_edit",
+      "semantic_number": 362635849,
+      "checked_number": 16046998954089,
+      "check_factor": 44251,
+      "expected_check_valid": false
+    },
+    {
+      "id": "na016-corrupted",
+      "type": "digit_edit",
+      "semantic_number": 44,
+      "checked_number": 1947048,
+      "check_factor": 44251,
+      "expected_check_valid": false
+    },
+    {
+      "id": "na017-corrupted",
+      "type": "digit_edit",
+      "semantic_number": 39,
+      "checked_number": 1725787,
+      "check_factor": 44251,
+      "expected_check_valid": false
+    },
+    {
+      "id": "na018-corrupted",
+      "type": "digit_edit",
+      "semantic_number": 85,
+      "checked_number": 3061335,
+      "check_factor": 44251,
+      "expected_check_valid": false
+    },
+    {
+      "id": "na019-corrupted",
+      "type": "digit_edit",
+      "semantic_number": 133,
+      "checked_number": 5885183,
+      "check_factor": 44251,
+      "expected_check_valid": false
+    },
+    {
+      "id": "na020-corrupted",
+      "type": "digit_edit",
+      "semantic_number": 5424241,
+      "checked_number": 250028088491,
+      "check_factor": 44251,
+      "expected_check_valid": false
+    }
+  ]
+}

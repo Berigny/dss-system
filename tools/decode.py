@@ -24,7 +24,7 @@ from typing import Any
 
 import yaml
 
-from encode import DEFAULT_REGISTRY, load_registry, registry_sha256
+from encode import DEFAULT_REGISTRY, compute_check_factor, load_registry, registry_sha256
 
 
 def build_prime_to_concept(registry: dict[str, Any]) -> dict[int, set[str]]:
@@ -172,12 +172,25 @@ def factorize(n: int) -> dict[int, int]:
     return exponents
 
 
+def get_check_primes(registry: dict[str, Any]) -> list[int]:
+    """Return the list of primes whose product forms the check component."""
+    cc = registry.get("check_component", {})
+    if "gate_primes" in cc:
+        return [int(p) for p in cc["gate_primes"]]
+    return [ginfo["prime"] for ginfo in registry.get("quaternary_gate_registry", {}).get("gates", {}).values() if ginfo.get("prime")]
+
+
 def decode_number(
     number: int,
     prime_to_concepts: dict[int, set[str]],
     registry: dict[str, Any],
+    verify_check: bool = False,
 ) -> dict[str, Any]:
     """Decode a materialized number into exponent-vector and concept names."""
+    check_factor = compute_check_factor(registry)
+    check_primes = get_check_primes(registry)
+    check_valid = True
+
     if number == 1:
         # Prime 1 is used as an out-of-band marker (reset_node). Factorization
         # cannot recover it, so we special-case the unity value when the registry
@@ -188,6 +201,21 @@ def decode_number(
             exponents = {}
     else:
         exponents = factorize(number)
+
+    if verify_check and check_factor > 1:
+        # Strip exactly one factor of each check prime.
+        for p in check_primes:
+            if exponents.get(p, 0) < 1:
+                check_valid = False
+                break
+            exponents[p] -= 1
+        # Remove zero-exponent entries.
+        exponents = {p: e for p, e in exponents.items() if e > 0}
+        # After stripping check primes, if the semantic number is 1 and the
+        # registry maps prime 1 (reset_node), preserve it.
+        if check_valid and not exponents and 1 in prime_to_concepts:
+            exponents = {1: 1}
+
     ordered = {str(p): e for p, e in sorted(exponents.items())}
 
     unknown_primes: list[int] = []
@@ -209,25 +237,30 @@ def decode_number(
         ensure_ascii=False,
     )
 
-    return {
+    result: dict[str, Any] = {
         "input_number": number,
         "exponent_vector": ordered,
         "canonical_bytes": canonical_json.encode("utf-8").hex(),
         "recovered_concepts": recovered,
         "unknown_primes": unknown_primes,
     }
+    if verify_check:
+        result["check_factor"] = check_factor
+        result["check_valid"] = check_valid
+    return result
 
 
 def decode_vector(
     vector: dict[str, int],
     prime_to_concepts: dict[int, set[str]],
     registry: dict[str, Any],
+    verify_check: bool = False,
 ) -> dict[str, Any]:
     """Decode an exponent-vector directly."""
     number = 1
     for prime_str, exp in vector.items():
         number *= int(prime_str) ** exp
-    return decode_number(number, prime_to_concepts, registry)
+    return decode_number(number, prime_to_concepts, registry, verify_check=verify_check)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -238,6 +271,7 @@ def main(argv: list[str] | None = None) -> int:
     group.add_argument("--vector", type=str, help="Exponent-vector JSON string")
     group.add_argument("--seed", type=Path, help="JSONL seed file")
     parser.add_argument("--encoded-field", default="number", help="Field in seed JSONL containing encoded value")
+    parser.add_argument("--check", action="store_true", help="Verify and strip 336-derived check component before decoding")
     parser.add_argument("--output", type=Path, help="Write full report JSON to path")
     args = parser.parse_args(argv)
 
@@ -254,12 +288,12 @@ def main(argv: list[str] | None = None) -> int:
     results: list[dict[str, Any]] = []
 
     if args.number is not None:
-        decoded = decode_number(args.number, prime_to_concepts, registry)
+        decoded = decode_number(args.number, prime_to_concepts, registry, verify_check=args.check)
         decoded["id"] = "cli"
         results.append(decoded)
     elif args.vector is not None:
         vector = json.loads(args.vector)
-        decoded = decode_vector(vector, prime_to_concepts, registry)
+        decoded = decode_vector(vector, prime_to_concepts, registry, verify_check=args.check)
         decoded["id"] = "cli"
         results.append(decoded)
     elif args.seed:
@@ -272,9 +306,9 @@ def main(argv: list[str] | None = None) -> int:
                 rid = record.get("id", "unknown")
                 value = record.get(args.encoded_field)
                 if isinstance(value, dict):
-                    decoded = decode_vector(value, prime_to_concepts, registry)
+                    decoded = decode_vector(value, prime_to_concepts, registry, verify_check=args.check)
                 else:
-                    decoded = decode_number(int(value), prime_to_concepts, registry)
+                    decoded = decode_number(int(value), prime_to_concepts, registry, verify_check=args.check)
                 decoded["id"] = rid
                 results.append(decoded)
 

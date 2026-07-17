@@ -26,6 +26,7 @@ import json
 import os
 import random
 import re
+import shutil
 import sys
 import time
 from collections import defaultdict
@@ -68,6 +69,22 @@ class AsyncRateLimiter:
                 await asyncio.sleep(wait)
                 now = time.monotonic()
             self._last_release = now
+
+
+def is_transport_failure(exc: Exception) -> bool:
+    """Return True if the exception looks like a transient transport/API failure."""
+    from openai import APIConnectionError, APITimeoutError, InternalServerError, RateLimitError
+    if isinstance(exc, (APIConnectionError, APITimeoutError, InternalServerError, RateLimitError)):
+        return True
+    # OpenRouter-style HTTP errors wrapped in APIError carry a status_code attribute.
+    status = getattr(exc, "status_code", None)
+    if status is not None and status >= 500:
+        return True
+    if status == 429:
+        return True
+    # Fallback: inspect the string for timeout / connection / rate-limit language.
+    text = str(exc).lower()
+    return any(k in text for k in ("timeout", "connection", "rate limit", "too many requests", "429", "503", "502", "500"))
 
 
 def load_corpus(path: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
@@ -333,33 +350,60 @@ async def run_trial(
     arm: str,
     replicate: int,
     call_counter: dict[str, int],
+    max_retries: int = 5,
 ) -> dict[str, Any]:
-    async with semaphore:
-        await rate_limiter.acquire()
-        if call_counter["calls"] >= COST_CAP_CALLS:
-            return {"id": record["id"], "arm": arm, "replicate": replicate, "error": "cost_cap_reached"}
-        call_counter["calls"] += 1
-        prompt = format_prompt(factors, registry_text, arm)
-        try:
-            response = await client.chat.completions.create(
-                model=model,
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.0,
-                max_tokens=256,
-            )
-            raw = response.choices[0].message.content or ""
-            parsed = parse_response(raw)
-            return {
-                "id": record["id"],
-                "arm": arm,
-                "replicate": replicate,
-                "prompt": prompt,
-                "raw_response": raw,
-                "reconstructed_concepts": parsed.get("concepts", []),
-                "reconstructed_text": parsed.get("reconstructed_text", ""),
-            }
-        except Exception as exc:
-            return {"id": record["id"], "arm": arm, "replicate": replicate, "error": str(exc)}
+    prompt = format_prompt(factors, registry_text, arm)
+    last_exc: Exception | None = None
+    retries = 0
+    for attempt in range(max_retries + 1):
+        async with semaphore:
+            await rate_limiter.acquire()
+            if call_counter["calls"] >= COST_CAP_CALLS:
+                return {
+                    "id": record["id"], "arm": arm, "replicate": replicate,
+                    "error": "cost_cap_reached", "transport_failure": False,
+                    "retries": retries, "prompt": prompt,
+                }
+            call_counter["calls"] += 1
+            try:
+                response = await client.chat.completions.create(
+                    model=model,
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.0,
+                    max_tokens=256,
+                )
+                raw = response.choices[0].message.content or ""
+                parsed = parse_response(raw)
+                return {
+                    "id": record["id"],
+                    "arm": arm,
+                    "replicate": replicate,
+                    "prompt": prompt,
+                    "raw_response": raw,
+                    "reconstructed_concepts": parsed.get("concepts", []),
+                    "reconstructed_text": parsed.get("reconstructed_text", ""),
+                    "retries": retries,
+                }
+            except Exception as exc:
+                last_exc = exc
+                if is_transport_failure(exc) and attempt < max_retries:
+                    retries += 1
+                    # Exponential backoff: 1s, 2s, 4s, 8s, 16s
+                    await asyncio.sleep(2 ** attempt)
+                    continue
+                break
+
+    result: dict[str, Any] = {
+        "id": record["id"],
+        "arm": arm,
+        "replicate": replicate,
+        "prompt": prompt,
+        "error": str(last_exc),
+        "retries": retries,
+    }
+    if last_exc is not None and is_transport_failure(last_exc):
+        result["transport_failure"] = True
+    return result
 
 
 async def main() -> int:
@@ -373,6 +417,8 @@ async def main() -> int:
     parser.add_argument("--rate-limit-rpm", type=float, default=18.0, help="Max API requests per minute (0 to disable)")
     parser.add_argument("--output", type=Path, help="Report JSON path")
     parser.add_argument("--sample", type=int, help="Run on first N items only")
+    parser.add_argument("--resume-from", type=Path, help="Path to existing report to re-run transport-failed trials only")
+    parser.add_argument("--preserve-corrupted-as", type=Path, help="Copy original report to this path before merging (Phase R)")
     args = parser.parse_args()
 
     api_key = os.getenv("OPENROUTER_API_KEY")
@@ -409,14 +455,35 @@ async def main() -> int:
             "unknown_seed_concepts": enc["unknown"],
         }
 
+    previous_results: dict[tuple[str, str, int], dict[str, Any]] = {}
+    if args.resume_from:
+        print(f"Resuming from {args.resume_from}...")
+        previous_report = json.loads(args.resume_from.read_text(encoding="utf-8"))
+        for tr in previous_report.get("raw_trials", []):
+            key = (tr.get("id"), tr.get("arm"), tr.get("replicate"))
+            previous_results[key] = tr
+        if args.preserve_corrupted_as:
+            args.preserve_corrupted_as.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(args.resume_from, args.preserve_corrupted_as)
+            print(f"Preserved corrupted report as {args.preserve_corrupted_as}")
+
     trials = []
+    trial_keys: list[tuple[str, str, int]] = []
     call_counter = {"calls": 0}
     semaphore = asyncio.Semaphore(args.max_concurrent)
     rate_limiter = AsyncRateLimiter(rpm=args.rate_limit_rpm if args.rate_limit_rpm > 0 else None)
 
+    attempted = 0
     for record in records:
         for arm in args.arms:
             for rep in range(args.replicates):
+                key = (record["id"], arm, rep)
+                if args.resume_from:
+                    prev = previous_results.get(key)
+                    if prev and "error" not in prev:
+                        continue  # carry forward successful trial
+                attempted += 1
+                trial_keys.append(key)
                 trials.append(run_trial(
                     client, args.model, semaphore, rate_limiter,
                     record, encoded[record["id"]]["factors"], registry_texts[arm], arm, rep, call_counter
@@ -424,9 +491,25 @@ async def main() -> int:
 
     print(f"Running {len(trials)} trials (cap: {COST_CAP_CALLS})...")
     start_time = time.time()
-    trial_results = await asyncio.gather(*trials)
+    new_results = await asyncio.gather(*trials)
     elapsed = time.time() - start_time
-    print(f"Completed {len(trial_results)} trials in {elapsed:.1f}s")
+    print(f"Completed {len(new_results)} API trials in {elapsed:.1f}s")
+
+    # Build keyed new results for merge.
+    new_by_key = {key: result for key, result in zip(trial_keys, new_results)}
+
+    if args.resume_from:
+        trial_results = []
+        for record in records:
+            for arm in args.arms:
+                for rep in range(args.replicates):
+                    key = (record["id"], arm, rep)
+                    if key in new_by_key:
+                        trial_results.append(new_by_key[key])
+                    else:
+                        trial_results.append(previous_results[key])
+    else:
+        trial_results = new_results
 
     print("Loading embedding model all-MiniLM-L6-v2...")
     embedder = SentenceTransformer("all-MiniLM-L6-v2")
@@ -488,18 +571,30 @@ async def main() -> int:
         known = sum(1 for c in record["encode_seed"] if c in alphabet or c.lower() in alphabet)
         seed_coverage.append(known / len(record["encode_seed"]) if record["encode_seed"] else 0.0)
 
+    attempted = len(trial_results)
+    completed = sum(1 for tr in trial_results if "error" not in tr)
+    transport_failures = sum(1 for tr in trial_results if tr.get("transport_failure") is True)
+    retried = sum(tr.get("retries", 0) for tr in trial_results)
+
     report = {
         "header": {
-            "report": "KSR-EVAL Phase 2 v0.2 — semantic decode evaluation",
+            "report": "KSR-EVAL Phase 2 v0.3 — semantic decode evaluation",
             "date": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             "model": args.model,
             "ksr_version": registry.get("ksr_version"),
             "registry_sha256": sha,
             "corpus_sha256": header.get("corpus_sha256"),
+            "spec_version": "v0.3",
+            "validator_version": "v0.3",
+            "attempted": attempted,
+            "completed": completed,
+            "transport_failures": transport_failures,
+            "retried": retried,
             "calls_made": call_counter["calls"],
             "cost_cap": COST_CAP_CALLS,
         },
         "gate": {
+            "completed_gte_0_95": (completed / attempted if attempted else 0.0) >= 0.95,
             "C1_node_recall_gte_0_90": summary["overall"].get("A", {}).get("node_recall_mean", 0.0) >= 0.90,
             "C1_precision_gte_0_90": summary["overall"].get("A", {}).get("precision_mean", 0.0) >= 0.90,
             "C1_f1_gte_0_90": summary["overall"].get("A", {}).get("f1_mean", 0.0) >= 0.90,
@@ -520,9 +615,9 @@ async def main() -> int:
         args.output.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"Report written to {args.output}")
     else:
-        report_dir = Path(f"eval/reports/{time.strftime('%Y%m%d')}_{sha[:12]}")
+        report_dir = Path(f"eval/reports/{time.strftime('%Y%m%d')}_{sha[:12]}_v0.3")
         report_dir.mkdir(parents=True, exist_ok=True)
-        report_path = report_dir / "phase2_report_v0.2.json"
+        report_path = report_dir / "phase2_report_v0.3.json"
         report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"Report written to {report_path}")
 
