@@ -4506,12 +4506,14 @@ def _auth_headers_from_request(request: Request | None) -> dict[str, str]:
 async def _control_plane_get(
     path: str,
     headers: dict[str, str] | None = None,
+    params: dict[str, Any] | None = None,
 ) -> tuple[int, dict[str, Any]]:
     return await _middleware_json_request(
         method="GET",
         path=path,
         error_prefix="control_plane",
         headers=headers,
+        params=params,
     )
 
 
@@ -7695,24 +7697,29 @@ def _layout(
               updateSummary();
             }});
           }});
+          let modelToggleReloadTimer = null;
+          const scheduleReloadAfterModelToggle = () => {{
+            if (modelToggleReloadTimer) window.clearTimeout(modelToggleReloadTimer);
+            modelToggleReloadTimer = window.setTimeout(() => window.location.reload(), 1200);
+          }};
           editor.querySelectorAll('input[type="checkbox"][data-is-model="true"]').forEach((input) => {{
             input.addEventListener('change', async () => {{
               const label = input.parentElement.nextElementSibling;
               const checked = input.checked;
               if (label) label.textContent = checked ? 'On' : 'Off';
-              
+
               const bindingId = input.getAttribute('data-binding-id') || '';
               const modelId = input.getAttribute('data-model-id') || '';
               const linkedPrincipal = input.getAttribute('data-linked-principal') || '';
               const defaultLedgerId = editor.getAttribute('data-default-ledger-id') || '';
               const defaultChatSurfaceId = editor.getAttribute('data-default-chat-surface-id') || 'surface:chat:primary';
-         
+
               let appSurfaces = [defaultChatSurfaceId];
               let ledgerId = ownerLedgerId || defaultLedgerId;
               if (ownerType === 'surface') {{
                 appSurfaces = [ownerId];
               }}
-              
+
               input.disabled = true;
               try {{
                 const response = await fetch('/api/control-plane/model-bindings', {{
@@ -7736,6 +7743,8 @@ def _layout(
                   window.alert(body.error || 'Failed to update model connection.');
                   input.checked = !checked;
                   if (label) label.textContent = input.checked ? 'On' : 'Off';
+                }} else {{
+                  scheduleReloadAfterModelToggle();
                 }}
               }} catch (_error) {{
                 window.alert('Failed to update model connection.');
@@ -22906,7 +22915,11 @@ async def api_control_plane_model_bindings(request: Request) -> JSONResponse:
     _, auth_error = await _control_plane_json_session(request)
     if auth_error is not None:
         return auth_error
-    status_code, body = await _control_plane_get("/api/control-plane/model-bindings")
+    params: dict[str, Any] = {}
+    surface_id = str(request.query_params.get("surface_id") or "").strip()
+    if surface_id:
+        params["surface_id"] = surface_id
+    status_code, body = await _control_plane_get("/api/control-plane/model-bindings", params=params)
     if status_code >= 400:
         return JSONResponse(body if isinstance(body, dict) else {"error": "model_binding_fetch_failed"}, status_code=status_code)
     binding_records = _as_dict_list(body.get("model_bindings")) if isinstance(body, dict) else []

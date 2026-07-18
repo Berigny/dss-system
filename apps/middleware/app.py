@@ -3609,6 +3609,9 @@ def _control_plane_binding_model_rows(payload: dict[str, Any] | None, *, surface
         binding_id = str(row.get("binding_id") or "").strip().lower()
         if not model_id or model_id in seen:
             continue
+        # Never treat a binding id itself as a selectable model id.
+        if model_id.lower().startswith("binding:"):
+            continue
         if provider_type != "openrouter":
             continue
         if status and status not in allowed_statuses:

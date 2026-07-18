@@ -4713,10 +4713,15 @@ async def list_models(request: Request):
             mid = str(item.get("id") or "").strip()
             if mid.startswith("ollama/"):
                 local_models.append(item)
-            elif mid.startswith("binding:") or "/" in mid:
+            elif "/" in mid:
                 online_models.append(item)
             else:
                 local_models.append(item)
+
+    # Never expose binding ids as selectable models/agents.
+    models = [item for item in models if not str(item.get("id") or "").strip().lower().startswith("binding:")]
+    local_models = [item for item in local_models if not str(item.get("id") or "").strip().lower().startswith("binding:")]
+    online_models = [item for item in online_models if not str(item.get("id") or "").strip().lower().startswith("binding:")]
 
     # Surface the Kimi Code delegated agent as a selectable option when configured.
     delegated_models: list[dict[str, str]] = []
