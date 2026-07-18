@@ -59,6 +59,8 @@ def render_page_toolbar(
     secondary_cta_label: str = "",
     secondary_cta_href: str = "",
     secondary_cta_new_tab: bool = False,
+    search_id: str = "connections-search",
+    search_label: str = "Search connections",
 ) -> str:
     hidden_inputs = "".join(
         f'<input type="hidden" name="{html.escape(key)}" value="{html.escape(value)}">'
@@ -79,15 +81,15 @@ def render_page_toolbar(
     return f"""
     <div class="page-toolbar">
       <form class="page-toolbar-search" role="search" method="get" action="{html.escape(search_action)}">
-        <label for="connections-search" class="sr-only">Search connections</label>
+        <label for="{html.escape(search_id)}" class="sr-only">{html.escape(search_label)}</label>
         {hidden_inputs}
         <input
-          id="connections-search"
+          id="{html.escape(search_id)}"
           type="search"
           name="q"
           value="{html.escape(search_query)}"
           placeholder="{html.escape(search_placeholder)}"
-          aria-label="Search connections"
+          aria-label="{html.escape(search_label)}"
           oninput="filterCollection(this.value)"
         >
       </form>

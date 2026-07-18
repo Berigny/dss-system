@@ -6147,7 +6147,7 @@ def control_plane_remove_entity(request: Request, payload: EntityRemoveRequest, 
                 },
             )
 
-        clear_result = clear_ledger(request, confirm=True, entity=entity_id, dry_run=False, reindex=False, db=db)
+        clear_result = clear_ledger(request, confirm=True, entity=entity_id, dry_run=False, reindex=True, db=db)
 
         surfaces_v1 = _load_control_plane_surfaces_v1(db)
         mutated_surfaces = False

@@ -19838,15 +19838,17 @@ def render_activity_page(
         submissions,
         ledger_entries,
     )
-    activity_tab = str(request.query_params.get("tab") or "").strip().lower()
-    if activity_tab not in {"activity", "entity"}:
-        # Backward-compatible scope-to-tab mapping for existing links.
-        legacy_scope = str(request.query_params.get("scope") or "activity").strip().lower()
-        if legacy_scope in {"record", "identity", "identities"}:
-            activity_tab = "entity"
-        else:
-            activity_tab = "activity"
-    entity_type_filter = str(request.query_params.get("entity_type") or "").strip().lower()
+    # Tabs follow the same naming convention as Manage Connections.
+    type_filter = str(request.query_params.get("type") or request.query_params.get("tab") or "all").strip().lower()
+    type_map = {
+        "ledgers": "ledger",
+        "principals": "principal",
+        "surfaces": "surface",
+        "sources": "source",
+    }
+    if type_filter not in {"all", *type_map.keys()}:
+        type_filter = "all"
+    entity_type_filter = type_map.get(type_filter, "")
     actor_filter = str(request.query_params.get("actor") or "").strip().lower()
     status_filter = str(request.query_params.get("status") or "").strip().lower()
     ledger_filter = str(request.query_params.get("ledger") or "").strip().lower()
@@ -19867,20 +19869,14 @@ def render_activity_page(
     date_from_dt = _parse_iso_datetime(f"{date_from_filter}T00:00:00+00:00") if date_from_filter else None
     date_to_dt = _parse_iso_datetime(f"{date_to_filter}T23:59:59+00:00") if date_to_filter else None
 
-    def _activity_tab_matches(row: dict[str, Any], tab: str) -> bool:
-        segment = _activity_segment(row)
-        if tab == "entity":
-            return segment == "record"
-        return segment != "record"
-
     filtered_rows: list[dict[str, Any]] = []
     for row in rows:
-        if not _activity_tab_matches(row, activity_tab):
+        if entity_type_filter and str(row.get("entity_type") or "").strip().lower() != entity_type_filter:
             continue
         if not _activity_row_matches_filters(
             row,
             activity_scope="all",
-            entity_type_filter=entity_type_filter,
+            entity_type_filter="",
             actor_filter=actor_filter,
             status_filter=status_filter,
             ledger_filter=ledger_filter,
@@ -19912,13 +19908,11 @@ def render_activity_page(
         key: value
         for key, value in {
             "principal_did": selected_principal,
-            "tab": activity_tab,
-            "entity_type": entity_type_filter,
+            "actor": actor_filter,
             "status": status_filter,
             "ledger": ledger_filter,
             "tag": tag_filter,
             "ref": reference_filter,
-            "actor": actor_filter,
             "date_from": date_from_filter,
             "date_to": date_to_filter,
             "recent": recent_period,
@@ -19942,12 +19936,18 @@ def render_activity_page(
     def _sort_link(field: str) -> str:
         return _activity_query_href(base_query_params, sort_by=field, sort_dir=_next_dir(field))
 
+    def _tab_link(tab_value: str) -> str:
+        return _activity_query_href(base_query_params, type=tab_value)
+
     tab_counts = {
-        "activity": sum(1 for item in rows if _activity_segment(item) != "record"),
-        "entity": sum(1 for item in rows if _activity_segment(item) == "record"),
+        "all": len(rows),
+        "ledgers": sum(1 for item in rows if str(item.get("entity_type") or "").strip().lower() == "ledger"),
+        "principals": sum(1 for item in rows if str(item.get("entity_type") or "").strip().lower() == "principal"),
+        "surfaces": sum(1 for item in rows if str(item.get("entity_type") or "").strip().lower() == "surface"),
+        "sources": sum(1 for item in rows if str(item.get("entity_type") or "").strip().lower() == "source"),
     }
     empty_state_message = _activity_empty_state_message(
-        activity_scope=activity_tab,
+        activity_scope=type_filter,
         tag_filter=tag_filter,
         reference_filter=reference_filter,
         recent_period=recent_period,
@@ -19992,68 +19992,33 @@ def render_activity_page(
       <h2>No activity found</h2>
       <p>{html.escape(empty_state_message)}</p>
       <div class="inline-actions" style="margin-top:12px;">
-        <a class="btn small" href="{html.escape(_activity_query_href({"principal_did": selected_principal} if selected_principal else {}, tab=activity_tab))}">Reset Filters</a>
+        <a class="btn small" href="{html.escape(_activity_query_href({"principal_did": selected_principal} if selected_principal else {}, type='all'))}">Reset Filters</a>
       </div>
     </div>'''
 
-    hidden_filter_inputs = "".join(
-        f'<input type="hidden" name="{html.escape(key)}" value="{html.escape(str(value))}">'
-        for key, value in {
-            "tab": activity_tab,
-            "entity_type": entity_type_filter,
-            "status": status_filter,
-            "ledger": ledger_filter,
-            "tag": tag_filter,
-            "ref": reference_filter,
-            "actor": actor_filter,
-            "date_from": date_from_filter,
-            "date_to": date_to_filter,
-            "recent": recent_period,
-            "sort_by": sort_by,
-            "sort_dir": sort_dir,
-        }.items()
-        if str(value or "").strip()
-    )
+    toolbar_hidden_fields = {
+        "type": type_filter,
+        "sort_by": sort_by,
+        "sort_dir": sort_dir,
+    }
+    toolbar_hidden_fields = {k: v for k, v in toolbar_hidden_fields.items() if str(v or "").strip()}
+
+    tab_links = []
+    for tab_value, label in (
+        ("all", "All"),
+        ("ledgers", "Ledgers"),
+        ("principals", "Principals"),
+        ("surfaces", "Surfaces"),
+        ("sources", "Sources"),
+    ):
+        cls = "page-tab active" if type_filter == tab_value else "page-tab"
+        tab_links.append(f'<a class="{cls}" href="{html.escape(_tab_link(tab_value))}">{html.escape(label)} ({tab_counts[tab_value]})</a>')
 
     return f"""
     <style>
       .activity-page-shell {{
         display: grid;
         gap: 16px;
-      }}
-      .activity-search-bar {{
-        margin-bottom: 6px;
-      }}
-      .activity-search-input-wrap {{
-        position: relative;
-        display: flex;
-        align-items: center;
-        max-width: 560px;
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        background: var(--surface);
-        overflow: hidden;
-        transition: border-color 0.15s;
-      }}
-      .activity-search-input-wrap:focus-within {{
-        border-color: var(--border-strong);
-      }}
-      .activity-search-icon {{
-        position: absolute;
-        left: 12px;
-        color: var(--text-muted);
-        font-size: 0.9rem;
-        pointer-events: none;
-      }}
-      .activity-search-input-wrap input[type="search"] {{
-        flex: 1;
-        border: none;
-        background: transparent;
-        padding: 9px 12px 9px 38px;
-        font-size: 0.9rem;
-        color: var(--text);
-        outline: none;
-        font-family: var(--font-body);
       }}
       .activity-table {{
         border: 1px solid var(--border);
@@ -20177,16 +20142,17 @@ def render_activity_page(
     <div class="activity-page-shell">
       {render_breadcrumbs([("Home", "/"), ("Activity", None)])}
       {render_page_header(title="Activity", description="Review what happened across your ledgers, principals, and surfaces.")}
-      <form class="activity-search-bar" role="search" method="get" action="/activity" onsubmit="return false;">
-        {hidden_filter_inputs}
-        <div class="activity-search-input-wrap">
-          <span class="activity-search-icon" aria-hidden="true">🔎</span>
-          <input id="activity-search" type="search" name="q" value="{html.escape(text_filter)}" placeholder="Search activity..." oninput="filterActivityCollection(this.value, 'all')">
-        </div>
-      </form>
+      {render_page_toolbar(
+          search_placeholder="Search activity...",
+          search_query=text_filter,
+          search_action="/activity",
+          hidden_fields=toolbar_hidden_fields,
+          primary_cta_label="",
+          search_id="activity-search",
+          search_label="Search activity",
+      )}
       <nav class="page-tabs" aria-label="Activity views">
-        <a class="page-tab{' active' if activity_tab == 'activity' else ''}" href="{html.escape(_activity_query_href(base_query_params, tab='activity'))}">Activity log ({tab_counts['activity']})</a>
-        <a class="page-tab{' active' if activity_tab == 'entity' else ''}" href="{html.escape(_activity_query_href(base_query_params, tab='entity'))}">Entity log ({tab_counts['entity']})</a>
+        {''.join(tab_links)}
       </nav>
       <div class="pageable-group" data-pageable-group data-pageable-sizes="10,20,40,80" data-pageable-label="entries">
         <div class="activity-table">
@@ -20203,16 +20169,11 @@ def render_activity_page(
       </div>
     </div>
     <script>
-      window.filterActivityCollection = function(query, category) {{
+      window.filterCollection = function(query) {{
         const normalized = String(query || '').toLowerCase();
         const rows = document.querySelectorAll('[data-activity-row]');
         rows.forEach(function(row) {{
-          let text = '';
-          if (!category || category === 'all') {{
-            text = String(row.getAttribute('data-filter-name') || '').toLowerCase();
-          }} else {{
-            text = String(row.getAttribute('data-activity-' + category) || '').toLowerCase();
-          }}
+          const text = String(row.getAttribute('data-filter-name') || '').toLowerCase();
           const match = !normalized || text.indexOf(normalized) !== -1;
           row.style.display = match ? '' : 'none';
         }});
@@ -20222,6 +20183,8 @@ def render_activity_page(
       }};
     </script>
     """
+
+
 
 def _normalize_activity_ledger_candidate(candidate: Any, context: _ConnectionLookupContext) -> str:
     text = str(candidate or "").strip()

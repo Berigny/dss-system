@@ -1781,9 +1781,9 @@ def test_login_passkey_page_redirects_back_to_wallet_entry() -> None:
     assert response.headers["location"] == "/login?next=/settings"
 
 
-def test_render_activity_page_scope_governance_filters_rendered_rows() -> None:
+def test_render_activity_page_governance_submission_shows_in_principal_tab() -> None:
     html = dashboard_app.render_activity_page(
-        _make_request("scope=governance"),
+        _make_request("type=principals"),
         principals=[],
         selected_principal="",
         lookup={},
@@ -1802,14 +1802,52 @@ def test_render_activity_page_scope_governance_filters_rendered_rows() -> None:
     )
     assert "sub:approval-1" in html
     assert "Submission" in html
-    assert "Principal record:" not in html
-    assert "Activity log" in html
-    assert "Entity log" in html
+    assert "Principal identity:" not in html
+    # New Manage Connections-style tabs are present.
+    assert "All (" in html
+    assert "Principals (" in html
+    assert "Ledgers (" in html
 
 
-def test_render_activity_page_event_scope_excludes_record_rows() -> None:
+def test_render_activity_page_all_tab_includes_events_and_records() -> None:
     html = dashboard_app.render_activity_page(
-        _make_request("scope=event"),
+        _make_request("type=all"),
+        principals=[
+            {
+                "principal_did": "did:key:z6MkAlice",
+                "display_name": "Alice",
+                "canonical_subject": "did:web:id.dualsubstrate.com:principals:alice",
+                "status": "active",
+                "metadata": {"actor_type": "human"},
+            }
+        ],
+        selected_principal="",
+        lookup={},
+        connection_context=_empty_connection_context(),
+        control_plane_state={},
+        submissions=[],
+        ledger_entries=[
+            {
+                "key": {"namespace": "chat-demo", "identifier": "WX-9C2621E0-1775565322"},
+                "created_at": "2026-04-07T12:00:00+00:00",
+                "state": {
+                    "metadata": {
+                        "kind": "chat",
+                        "role": "assistant",
+                        "content": "Test answer from chat surface.",
+                        "actor_did": "did:key:z6MkModelDemo",
+                    }
+                },
+            }
+        ],
+    )
+    assert "Chat response committed to did:web:id.dualsubstrate.com:ledgers:chat-demo" in html
+    assert "Principal identity: did:web:id.dualsubstrate.com:principals:alice" in html
+
+
+def test_render_activity_page_ledger_tab_excludes_principal_records() -> None:
+    html = dashboard_app.render_activity_page(
+        _make_request("type=ledgers"),
         principals=[
             {
                 "principal_did": "did:key:z6MkAlice",
@@ -1939,9 +1977,9 @@ def test_render_activity_page_shows_delegated_prompt_governance_fields() -> None
     assert "chat-demo:WX-answer" in html
 
 
-def test_render_activity_page_shows_backlog_scope_metrics() -> None:
+def test_render_activity_page_shows_entity_type_tab_counts() -> None:
     html = dashboard_app.render_activity_page(
-        _make_request("scope=all"),
+        _make_request("type=all"),
         principals=[
             {
                 "principal_did": "did:key:z6MkAlice",
@@ -1964,15 +2002,17 @@ def test_render_activity_page_shows_backlog_scope_metrics() -> None:
             }
         ],
     )
-    assert "Activity log" in html
-    assert "Entity log" in html
-    # The activity tab shows the ledger entry event; the entity tab shows the ledger record.
+    assert "All (" in html
+    assert "Ledgers (" in html
+    assert "Principals (" in html
+    assert "Surfaces (" in html
+    assert "Sources (" in html
     assert "Chat response committed" in html
 
 
-def test_render_activity_page_all_scope_prioritizes_events_over_newer_records() -> None:
+def test_render_activity_page_principal_tab_shows_records_not_events() -> None:
     html = dashboard_app.render_activity_page(
-        _make_request("scope=all"),
+        _make_request("type=principals"),
         principals=[
             {
                 "principal_did": "did:key:z6MkAlice",
@@ -1996,42 +2036,43 @@ def test_render_activity_page_all_scope_prioritizes_events_over_newer_records() 
             }
         ],
     )
-    # Default activity tab shows interactions only.
+    assert "Principal identity: did:web:id.dualsubstrate.com:principals:alice" in html
+    assert "Older interaction." not in html
+
+
+def test_render_activity_page_ledger_tab_shows_ledger_events_not_principal_records() -> None:
+    html = dashboard_app.render_activity_page(
+        _make_request("type=ledgers"),
+        principals=[
+            {
+                "principal_did": "did:key:z6MkAlice",
+                "display_name": "Alice",
+                "canonical_subject": "did:web:id.dualsubstrate.com:principals:alice",
+                "status": "active",
+                "updated_at": "2026-04-09T00:00:00+00:00",
+                "metadata": {"actor_type": "human"},
+            }
+        ],
+        selected_principal="",
+        lookup={},
+        connection_context=_empty_connection_context(),
+        control_plane_state={},
+        submissions=[],
+        ledger_entries=[
+            {
+                "key": {"namespace": "chat-demo", "identifier": "WX-older"},
+                "created_at": "2026-04-08T23:00:00+00:00",
+                "state": {"metadata": {"kind": "chat", "role": "assistant", "content": "Older interaction."}},
+            }
+        ],
+    )
     assert "Older interaction." in html
     assert "Principal identity: did:web:id.dualsubstrate.com:principals:alice" not in html
-    # Entity tab shows the principal record.
-    entity_html = dashboard_app.render_activity_page(
-        _make_request("tab=entity"),
-        principals=[
-            {
-                "principal_did": "did:key:z6MkAlice",
-                "display_name": "Alice",
-                "canonical_subject": "did:web:id.dualsubstrate.com:principals:alice",
-                "status": "active",
-                "updated_at": "2026-04-09T00:00:00+00:00",
-                "metadata": {"actor_type": "human"},
-            }
-        ],
-        selected_principal="",
-        lookup={},
-        connection_context=_empty_connection_context(),
-        control_plane_state={},
-        submissions=[],
-        ledger_entries=[
-            {
-                "key": {"namespace": "chat-demo", "identifier": "WX-older"},
-                "created_at": "2026-04-08T23:00:00+00:00",
-                "state": {"metadata": {"kind": "chat", "role": "assistant", "content": "Older interaction."}},
-            }
-        ],
-    )
-    assert "Principal identity: did:web:id.dualsubstrate.com:principals:alice" in entity_html
-    assert "Older interaction." not in entity_html
 
 
-def test_render_activity_page_record_scope_preserves_record_rows() -> None:
+def test_render_activity_page_principal_tab_preserves_principal_records() -> None:
     html = dashboard_app.render_activity_page(
-        _make_request("scope=record"),
+        _make_request("type=principals"),
         principals=[
             {
                 "principal_did": "did:key:z6MkAlice",
@@ -2058,9 +2099,9 @@ def test_render_activity_page_record_scope_preserves_record_rows() -> None:
     assert "Interaction row." not in html
 
 
-def test_render_activity_page_scope_tabs_match_backlog_categories() -> None:
+def test_render_activity_page_entity_type_tabs_match_manage_connections() -> None:
     html = dashboard_app.render_activity_page(
-        _make_request("scope=all"),
+        _make_request("type=all"),
         principals=[],
         selected_principal="",
         lookup={},
@@ -2068,9 +2109,14 @@ def test_render_activity_page_scope_tabs_match_backlog_categories() -> None:
         control_plane_state={},
         submissions=[],
     )
-    assert "Activity log" in html
-    assert "Entity log" in html
-    # Old scope tab class and labels are gone.
+    assert "All (" in html
+    assert "Ledgers (" in html
+    assert "Principals (" in html
+    assert "Surfaces (" in html
+    assert "Sources (" in html
+    # Old scope tab labels are gone.
+    assert "Activity log" not in html
+    assert "Entity log" not in html
     assert "activity-scope-tab" not in html
     assert "Governance" not in html
     assert "Shared" not in html
@@ -2154,9 +2200,9 @@ def test_render_activity_page_shared_scope_keeps_shareable_governance_rows() -> 
     assert "activate" in html
 
 
-def test_render_activity_page_tag_and_reference_filters_preserve_state() -> None:
+def test_render_activity_page_toolbar_search_replaces_custom_search_bar() -> None:
     html = dashboard_app.render_activity_page(
-        _make_request("tag=permissioned&ref=coord"),
+        _make_request("q=permissioned"),
         principals=[],
         selected_principal="",
         lookup={},
@@ -2176,12 +2222,17 @@ def test_render_activity_page_tag_and_reference_filters_preserve_state() -> None
         },
         submissions=[],
     )
-    # Filter state is preserved in hidden inputs for the search form.
-    assert 'name="tag" value="permissioned"' in html
-    assert 'name="ref" value="coord"' in html
+    # Search now uses the shared page-toolbar component.
+    assert 'class="page-toolbar-search"' in html
+    assert 'class="activity-search-bar"' not in html
+    assert 'id="activity-search"' in html
+    # Search icon removed.
+    assert 'class="activity-search-icon"' not in html
+    assert '"🔎"' not in html
     # The ledger/category dropdown filters were removed.
     assert 'class="activity-search-category"' not in html
     assert 'aria-label="Filter by ledger"' not in html
+    assert '<select name="cat"' not in html
 
 
 def test_render_activity_page_includes_recent_ledger_entry_coords() -> None:
@@ -6396,7 +6447,7 @@ def test_render_activity_page_no_ledger_or_category_dropdown() -> None:
     assert '<select name="cat"' not in html
 
 
-def test_render_activity_page_search_form_appears_above_tabs() -> None:
+def test_render_activity_page_toolbar_appears_above_tabs() -> None:
     html = dashboard_app.render_activity_page(
         _make_request(),
         principals=[],
@@ -6406,11 +6457,11 @@ def test_render_activity_page_search_form_appears_above_tabs() -> None:
         control_plane_state={},
         submissions=[],
     )
-    search_index = html.find('class="activity-search-bar"')
+    toolbar_index = html.find('class="page-toolbar"')
     tabs_index = html.find('aria-label="Activity views"')
-    assert search_index != -1
+    assert toolbar_index != -1
     assert tabs_index != -1
-    assert search_index < tabs_index
+    assert toolbar_index < tabs_index
 
 
 def test_render_activity_page_default_sort_is_name_asc() -> None:
