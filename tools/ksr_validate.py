@@ -330,18 +330,28 @@ def run_gates(d, dups, registry_path, repo_root):
         covered = any(fnmatch.fnmatch(rel, pat) for pat in priv + pub)
     if not covered:
         g.fail(f"actual registry path '{rel}' not covered by private_paths {priv} or public_paths {pub}")
-    missing_on_disk = []
     if repo_root:
+        missing_public = []
+        missing_private = []
+        for p in pub:
+            if p in (".git", "__pycache__", ".venv", "node_modules"):
+                continue
+            if "*" in p:
+                continue
+            if not os.path.exists(os.path.join(repo_root, p)):
+                missing_public.append(p)
         for p in priv:
             if p in (".git", "__pycache__", ".venv", "node_modules"):
                 continue
             if "*" in p:
                 continue
             if not os.path.exists(os.path.join(repo_root, p)):
-                missing_on_disk.append(p)
-        if missing_on_disk:
+                missing_private.append(p)
+        if missing_public:
             g.fail((g.detail + " | " if g.detail else "")
-                   + f"declared private_paths absent on disk: {missing_on_disk}")
+                   + f"declared public_paths absent on disk: {missing_public}")
+        if missing_private and g.status == "PASS":
+            g.note(f"declared private_paths absent in public checkout: {missing_private}")
     G.append(g)
 
     # G15 cross_domain relation_type validity --------------------------------------------------
