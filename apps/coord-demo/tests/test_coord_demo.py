@@ -46,20 +46,59 @@ def test_index_renders_form(client: TestClient) -> None:
     assert "coordinate" in response.text
 
 
+def _sample_decode_payload() -> dict:
+    return {
+        "coord": "loam:WX-A71BA232-1784308498",
+        "type": "WX",
+        "skim": {
+            "one_line": "Progress acknowledged with patience and persistence.",
+            "relevance": 1.0,
+        },
+        "payload": {
+            "segments": [{"id": "ANS-01", "kind": "answer", "blob_ref": "BLOB:WX:ANS-01"}],
+            "blobs": {
+                "BLOB:WX:ANS-01": "Your progress with fixes is acknowledged."
+            },
+        },
+        "interpretation": {
+            "topics": [{"label": "progress", "score": 0.78}],
+            "claims": [{"label": "fixes_acknowledged"}],
+        },
+        "refs": {
+            "context": [
+                {"coord": "loam:WX-A71BA232-1784306898", "type": "WX"},
+            ],
+        },
+        "governance": {
+            "appraisal": {"score": 0.9999, "law": 1.0, "grace": 0.9999, "drift": 0.0},
+            "policy_decision": "allow",
+            "risk_class": "low",
+            "policy_version": "mmf-gov-v2",
+        },
+        "meta": {
+            "namespace_used": "loam",
+            "created_at": "2026-07-18T01:57:00+00:00",
+            "canonical_subject": "did:web:legacy.local:ledgers:ledger-loam",
+        },
+    }
+
+
 def test_resolve_forwards_coordinate_to_middleware(
     client: TestClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     captured: dict[str, object] = {}
+    sample = _sample_decode_payload()
 
-    def fake_post(url: str, *, json: object, timeout: float) -> object:
+    def fake_post(url: str, *, json: object, headers: object, timeout: float) -> object:  # noqa: ARG001
         captured["url"] = url
         captured["json"] = json
+        captured["headers"] = headers
 
         class Response:
             status_code = 200
 
             def json(self) -> object:
-                return {"resolved": True, "input": json}
+                return sample
 
             def raise_for_status(self) -> None:
                 pass
@@ -70,14 +109,25 @@ def test_resolve_forwards_coordinate_to_middleware(
 
     response = client.post(
         "/resolve",
-        data={"coordinate": "chat-demo:WX-1"},
+        data={"coordinate": "loam:WX-A71BA232-1784308498"},
         cookies={app.BACKEND_SESSION_TOKEN_COOKIE: "valid-token"},
     )
 
     assert response.status_code == 200
     assert captured["url"] == f"{app.MIDDLEWARE_URL}/api/decode_coordinate"
-    assert captured["json"] == {"coordinate": "chat-demo:WX-1", "ledger_id": app.DEFAULT_LEDGER_ID}
-    assert "resolved" in response.text
+    assert captured["json"] == {
+        "coordinate": "loam:WX-A71BA232-1784308498",
+        "ledger_id": app.DEFAULT_LEDGER_ID,
+    }
+    assert captured["headers"]["x-surface-id"] == "surface:coord-demo"
+    text = response.text
+    assert "Progress acknowledged with patience and persistence." in text
+    assert "Your progress with fixes is acknowledged." in text
+    assert "fixes_acknowledged" in text
+    assert "loam:WX-A71BA232-1784306898" in text
+    assert "View Raw Ledger JSON" in text
+    assert "allow" in text
+    assert "low" in text
 
 
 def test_resolve_renders_upstream_error(
@@ -117,3 +167,27 @@ def test_middleware_accepts_session_token_in_query_string(
     cookies = response.cookies
     assert app.BACKEND_SESSION_TOKEN_COOKIE in cookies
     assert cookies[app.BACKEND_SESSION_TOKEN_COOKIE] == "token-456"
+
+
+def test_extract_payload_text_prefers_blob_segments() -> None:
+    payload = _sample_decode_payload()
+    assert app._extract_payload_text(payload) == "Your progress with fixes is acknowledged."
+
+
+def test_extract_summary_falls_back_to_payload_text() -> None:
+    payload = _sample_decode_payload()
+    payload["skim"] = {}
+    assert app._extract_summary(payload) == "Your progress with fixes is acknowledged."
+
+
+def test_extract_claims_and_topics() -> None:
+    payload = _sample_decode_payload()
+    assert app._extract_claims(payload) == ["fixes_acknowledged"]
+    assert app._extract_topics(payload) == [("progress", 0.78)]
+
+
+def test_collect_referenced_coords_skips_self() -> None:
+    payload = _sample_decode_payload()
+    refs = app._collect_referenced_coords(payload, "loam:WX-A71BA232-1784308498")
+    assert "loam:WX-A71BA232-1784306898" in refs
+    assert "loam:WX-A71BA232-1784308498" not in refs
