@@ -9338,28 +9338,36 @@ def register_orchestrator_routes(rt):
                 effective_traversal_opened_coords=walk_spent_hops,
             )
             if not explicit_target_not_resolved:
-                try:
-                    guard_memories = {
-                        "decoded_context": decoded_context,
-                        "context": context_items,
-                        "summary": assemble_result.get("summary") if isinstance(assemble_result, dict) else {},
-                    }
-                    guard_metadata = {
-                        "introspect_snapshot_pre": introspect_pre if isinstance(introspect_pre, dict) else {},
-                        "eq9_target": eq9_target if isinstance(eq9_target, dict) else {},
-                    }
-                    guard_result = await api.apply_grounding_guard(
-                        user_message=message,
-                        assistant_reply=reply_text,
-                        memories=guard_memories,
-                        metadata=guard_metadata,
-                    )
-                    if isinstance(guard_result, dict):
-                        candidate = guard_result.get("assistant_reply")
-                        if isinstance(candidate, str) and candidate.strip():
-                            guarded_reply = candidate
-                except Exception:
-                    guard_result = {"applied": False, "error": "grounding_guard_unavailable"}
+                has_grounding_context = bool(
+                    decoded_context
+                    or context_items
+                    or (isinstance(assemble_result, dict) and assemble_result.get("summary"))
+                )
+                if has_grounding_context:
+                    try:
+                        guard_memories = {
+                            "decoded_context": decoded_context,
+                            "context": context_items,
+                            "summary": assemble_result.get("summary") if isinstance(assemble_result, dict) else {},
+                        }
+                        guard_metadata = {
+                            "introspect_snapshot_pre": introspect_pre if isinstance(introspect_pre, dict) else {},
+                            "eq9_target": eq9_target if isinstance(eq9_target, dict) else {},
+                        }
+                        guard_result = await api.apply_grounding_guard(
+                            user_message=message,
+                            assistant_reply=reply_text,
+                            memories=guard_memories,
+                            metadata=guard_metadata,
+                        )
+                        if isinstance(guard_result, dict):
+                            candidate = guard_result.get("assistant_reply")
+                            if isinstance(candidate, str) and candidate.strip():
+                                guarded_reply = candidate
+                    except Exception:
+                        guard_result = {"applied": False, "error": "grounding_guard_unavailable"}
+                else:
+                    guard_result = {"applied": False, "skipped": True, "reason": "no_grounding_context"}
             assess_start = time.perf_counter()
             if explicit_target_not_resolved:
                 appraisal_payload = {
@@ -11559,8 +11567,20 @@ def register_orchestrator_routes(rt):
                 )
                 assistant_reply = ""
                 first_token_emitted = False
-                # Buffer tokens when governance may block/replace the response
-                _buffer_tokens = not guardian_fast_path
+                # Stream tokens immediately for low-risk turns; buffer only when
+                # governance replacement is likely (attachments, explicit targets,
+                # or elevated hardening). This cuts perceived latency by emitting
+                # the model's first token as soon as it arrives.
+                _buffer_tokens = (
+                    not guardian_fast_path
+                    and (
+                        hardening_level > 0
+                        or attachment_focus
+                        or bool(explicit_coords)
+                        or bool((epistemic_status or {}).get("explicit_targets"))
+                        or bool((epistemic_status or {}).get("explicit_observed"))
+                    )
+                )
                 async for chunk in stream:
                     if not first_token_emitted and isinstance(chunk, str) and chunk:
                         first_token_emitted = True
@@ -12031,12 +12051,13 @@ def register_orchestrator_routes(rt):
             blocked = assessment["blocked"]
             final_reply = assessment["final_reply"]
             guardian_note = assessment["guardian_note"]
-            # Emit buffered tokens after governance passes (s2/s3 mode only)
-            if _buffer_tokens:
-                if blocked:
-                    yield _ndjson_event({"type": "token", "content": SAFE_REFUSAL_MESSAGE})
-                else:
-                    yield _ndjson_event({"type": "token", "content": final_reply})
+            # Emit the governed answer. In buffered mode we withheld tokens, so
+            # emit them now. In unbuffered mode tokens already streamed; only
+            # emit a correction if governance blocked the response.
+            if blocked:
+                yield _ndjson_event({"type": "token", "content": SAFE_REFUSAL_MESSAGE})
+            elif _buffer_tokens:
+                yield _ndjson_event({"type": "token", "content": final_reply})
             coordinate = assessment["coordinate"]
             metadata = assessment["metadata"]
             commit_status = assessment.get("commit_status")
