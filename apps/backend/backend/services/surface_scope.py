@@ -11,6 +11,7 @@ from backend.services.authz import Principal, principal_from_request
 
 SURFACE_REGISTRY_V1_KEY = b"__surfaces_v1__"
 RELATIONSHIP_REGISTRY_V1_KEY = b"__relationships_v1__"
+MODEL_BINDING_REGISTRY_V1_KEY = b"__model_bindings_v1__"
 
 
 def _decode_json(raw: Any) -> Any:
@@ -51,6 +52,19 @@ def _load_relationships(request: Request) -> list[dict[str, Any]]:
     return []
 
 
+def _load_model_bindings(request: Request) -> dict[str, dict[str, Any]]:
+    db = getattr(getattr(request, "app", None), "state", None)
+    store = getattr(db, "db", None) if db is not None else None
+    if store is None:
+        return {}
+    raw = store.get(MODEL_BINDING_REGISTRY_V1_KEY)
+    decoded = _decode_json(raw)
+    records = decoded.get("model_bindings") if isinstance(decoded, dict) else None
+    if not isinstance(records, dict):
+        return {}
+    return {str(binding_id): dict(record) for binding_id, record in records.items() if isinstance(record, dict)}
+
+
 def _is_active(record: dict[str, Any]) -> bool:
     status = str(record.get("status") or "").strip().lower()
     enabled = str(record.get("enabled_state") or "enabled").strip().lower()
@@ -68,6 +82,8 @@ def _principal_can_access_surface(
     principal: Principal,
     surface: dict[str, Any],
     relationships: list[dict[str, Any]],
+    surfaces: dict[str, dict[str, Any]] | None = None,
+    bindings: dict[str, dict[str, Any]] | None = None,
 ) -> bool:
     surface_principal = str(surface.get("principal_did") or "").strip()
     if surface_principal and principal.principal_did and surface_principal == principal.principal_did:
@@ -75,7 +91,58 @@ def _principal_can_access_surface(
     surface_id = str(surface.get("surface_id") or "").strip()
     principal_did = principal.principal_did or ""
     principal_id = principal.principal_id or ""
-    for rel in relationships:
+
+    # Combine explicit relationships with derived ones from the surface registry and
+    # model bindings so the backend honours the same effective graph the Control Plane
+    # and middleware already compute.
+    effective = list(relationships)
+    if surfaces is None:
+        surfaces = {}
+    if bindings is None:
+        bindings = {}
+
+    surface_status = str(surface.get("status") or "").strip().lower()
+    surface_enabled = str(surface.get("enabled_state") or "enabled").strip().lower()
+    if surface_status in {"active", "approved", "accepted"} and surface_enabled in {"enabled", "active"}:
+        if surface_principal and surface_id:
+            effective.append(
+                {
+                    "subject_entity_type": "principal",
+                    "subject_entity_id": surface_principal,
+                    "object_entity_type": "surface",
+                    "object_entity_id": surface_id,
+                    "relationship_type": "can_access_surface",
+                    "status": "active",
+                    "enabled_state": "enabled",
+                    "derived": True,
+                }
+            )
+
+    for binding in bindings.values():
+        if not isinstance(binding, dict):
+            continue
+        binding_status = str(binding.get("status") or "").strip().lower()
+        if binding_status in {"disabled", "expired", "retired"}:
+            continue
+        linked_model_principal = str(binding.get("linked_model_principal") or "").strip()
+        if not linked_model_principal:
+            continue
+        for app_surface_id in _as_str_list(binding.get("app_surfaces")):
+            if app_surface_id == surface_id:
+                effective.append(
+                    {
+                        "subject_entity_type": "principal",
+                        "subject_entity_id": linked_model_principal,
+                        "object_entity_type": "surface",
+                        "object_entity_id": surface_id,
+                        "relationship_type": "can_access_surface",
+                        "status": "active",
+                        "enabled_state": "enabled",
+                        "derived": True,
+                    }
+                )
+
+    for rel in effective:
         if not _is_active(rel):
             continue
         subject_type = str(rel.get("subject_entity_type") or "").strip().lower()
@@ -92,6 +159,16 @@ def _principal_can_access_surface(
         if subject_id and subject_id in {principal_did, principal_id}:
             return True
     return False
+
+
+def _as_str_list(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, (list, tuple)):
+        return [str(item).strip() for item in value if str(item).strip()]
+    return []
 
 
 def assert_surface_ledger_access(
@@ -166,7 +243,9 @@ def assert_surface_ledger_access(
         )
 
     relationships = _load_relationships(request)
-    if not _principal_can_access_surface(principal, surface, relationships):
+    surfaces = _load_surfaces(request)
+    bindings = _load_model_bindings(request)
+    if not _principal_can_access_surface(principal, surface, relationships, surfaces, bindings):
         raise HTTPException(
             status_code=403,
             detail={

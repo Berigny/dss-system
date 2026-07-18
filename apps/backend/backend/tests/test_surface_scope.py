@@ -10,6 +10,7 @@ from starlette.requests import Request
 from backend.services.surface_scope import (
     SURFACE_REGISTRY_V1_KEY,
     RELATIONSHIP_REGISTRY_V1_KEY,
+    MODEL_BINDING_REGISTRY_V1_KEY,
     assert_surface_ledger_access,
 )
 
@@ -47,6 +48,14 @@ def _relationship_registry(*relationships: dict[str, object]) -> dict[bytes, byt
         "relationships": list(relationships),
     }
     return {RELATIONSHIP_REGISTRY_V1_KEY: json.dumps(payload).encode("utf-8")}
+
+
+def _model_binding_registry(*bindings: dict[str, object]) -> dict[bytes, bytes]:
+    payload = {
+        "version": 1,
+        "model_bindings": {binding["binding_id"]: binding for binding in bindings},
+    }
+    return {MODEL_BINDING_REGISTRY_V1_KEY: json.dumps(payload).encode("utf-8")}
 
 
 def test_missing_surface_record_is_no_op() -> None:
@@ -191,6 +200,92 @@ def test_unauthorized_principal_is_rejected() -> None:
     req = _make_request(headers={"x-principal-did": "did:key:z6MkOther"}, db=db)
     with pytest.raises(HTTPException) as exc_info:
         assert_surface_ledger_access(req, "surface:coord-demo", "loam")
+    assert exc_info.value.status_code == 403
+    detail = exc_info.value.detail
+    assert isinstance(detail, dict) and detail.get("error") == "principal_not_authorized_for_surface"
+
+
+def test_model_principal_bound_to_surface_is_allowed() -> None:
+    db = {
+        **_surface_registry(
+            {
+                "surface_id": "surface:chat:primary",
+                "ledger_id": "loam",
+                "status": "active",
+                "enabled_state": "enabled",
+            }
+        ),
+        **_model_binding_registry(
+            {
+                "binding_id": "binding:moonshot-kimi",
+                "linked_model_principal": "did:web:chat.dualsubstrate.com:principals:agent:moonshot:kimi-code",
+                "app_surfaces": ["surface:chat:primary"],
+                "status": "active",
+            }
+        ),
+    }
+    req = _make_request(
+        headers={"x-principal-did": "did:web:chat.dualsubstrate.com:principals:agent:moonshot:kimi-code"},
+        db=db,
+    )
+    assert_surface_ledger_access(req, "surface:chat:primary", "loam")
+
+
+def test_model_principal_not_bound_to_surface_is_rejected() -> None:
+    db = {
+        **_surface_registry(
+            {
+                "surface_id": "surface:chat:primary",
+                "ledger_id": "loam",
+                "status": "active",
+                "enabled_state": "enabled",
+            }
+        ),
+        **_model_binding_registry(
+            {
+                "binding_id": "binding:moonshot-kimi",
+                "linked_model_principal": "did:web:chat.dualsubstrate.com:principals:agent:moonshot:kimi-code",
+                "app_surfaces": ["surface:chat:primary"],
+                "status": "active",
+            }
+        ),
+    }
+    req = _make_request(
+        headers={"x-principal-did": "did:web:id.dualsubstrate.com:principals:model:openai:gpt-4o"},
+        db=db,
+    )
+    with pytest.raises(HTTPException) as exc_info:
+        assert_surface_ledger_access(req, "surface:chat:primary", "loam")
+    assert exc_info.value.status_code == 403
+    detail = exc_info.value.detail
+    assert isinstance(detail, dict) and detail.get("error") == "principal_not_authorized_for_surface"
+
+
+def test_disabled_model_binding_is_rejected() -> None:
+    db = {
+        **_surface_registry(
+            {
+                "surface_id": "surface:chat:primary",
+                "ledger_id": "loam",
+                "status": "active",
+                "enabled_state": "enabled",
+            }
+        ),
+        **_model_binding_registry(
+            {
+                "binding_id": "binding:moonshot-kimi",
+                "linked_model_principal": "did:web:chat.dualsubstrate.com:principals:agent:moonshot:kimi-code",
+                "app_surfaces": ["surface:chat:primary"],
+                "status": "disabled",
+            }
+        ),
+    }
+    req = _make_request(
+        headers={"x-principal-did": "did:web:chat.dualsubstrate.com:principals:agent:moonshot:kimi-code"},
+        db=db,
+    )
+    with pytest.raises(HTTPException) as exc_info:
+        assert_surface_ledger_access(req, "surface:chat:primary", "loam")
     assert exc_info.value.status_code == 403
     detail = exc_info.value.detail
     assert isinstance(detail, dict) and detail.get("error") == "principal_not_authorized_for_surface"

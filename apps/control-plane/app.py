@@ -11779,8 +11779,18 @@ def _link_editor_checkbox_list(
             binding_id = str(binding.get("binding_id") or "").strip() or _derived_model_binding_id(model_id)
             linked_principal = item_id
             binding_source = str(binding.get("source") or "").strip().lower()
+            app_surfaces = set(
+                str(item).strip()
+                for item in _as_list(binding.get("app_surfaces"))
+                if str(item).strip()
+            )
             is_explicit = binding_source and binding_source != "runtime-model-catalogue"
-            if is_explicit:
+            if owner_entity_type == "surface":
+                # For surface owners, "On" means the binding explicitly lists this surface.
+                # This aligns the modal state with the update handler and the backend
+                # effective-relationship graph.
+                is_on = owner_entity_id in app_surfaces and str(binding.get("status") or "").strip().lower() not in {"disabled", "retired", "inactive"}
+            elif is_explicit:
                 is_on = str(binding.get("status") or "").strip().lower() not in {"disabled", "retired", "inactive"}
             else:
                 is_on = model_id.lower() in base_model_ids
