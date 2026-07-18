@@ -8,7 +8,7 @@ import pytest
 
 from backend.benchmarks.comparison_baselines import (
     BASELINES,
-    DenseRetrievalBaseline,
+    BoWStandInBaseline,
     GrokBaseline,
     HierarchicalRagBaseline,
     LongContextBaseline,
@@ -58,10 +58,10 @@ def test_grok_baseline_is_blocked() -> None:
     assert multihop.run_config["blocked"] is True
 
 
-def test_dense_retrieval_matches_expected_failure_mode() -> None:
-    """Dense baseline should score zero on needle because the target is lexically distant."""
-    baseline = BASELINES["dense_retrieval"]
-    assert isinstance(baseline, DenseRetrievalBaseline)
+def test_bow_stand_in_matches_expected_failure_mode() -> None:
+    """BoW stand-in should score zero on needle because the target is lexically distant."""
+    baseline = BASELINES["bow_stand_in"]
+    assert isinstance(baseline, BoWStandInBaseline)
     artifact = run_needle_baseline(baseline, seed=193, lengths=(8, 16))
     assert artifact.metrics["retrieval"].metrics["recall_at_1"].value == pytest.approx(0.0)
 
@@ -81,10 +81,10 @@ def test_hierarchical_rag_is_two_stage_variant() -> None:
 
 
 def test_ruler_baseline_produces_valid_artifact() -> None:
-    baseline = BASELINES["dense_retrieval"]
+    baseline = BASELINES["bow_stand_in"]
     artifact = run_ruler_baseline(baseline, seed=193, haystack_length=100)
     assert artifact.status == "partial"
-    assert artifact.run_config["baseline"] == "dense_retrieval"
+    assert artifact.run_config["baseline"] == "bow_stand_in"
     assert artifact.run_config["benchmark"] == "ruler-256k"
     assert "retrieval" in artifact.metrics
     assert "latency" in artifact.metrics
@@ -101,7 +101,7 @@ def test_comparison_suite_runs_full_matrix(tmp_path: Path) -> None:
 
     baselines = {row["baseline"] for row in report.comparisons}
     benchmarks = {row["benchmark"] for row in report.comparisons}
-    assert baselines == {"dense_retrieval", "hierarchical_rag", "long_context_model", "grok_latest"}
+    assert baselines == {"bow_stand_in", "hierarchical_rag", "long_context_model", "grok_latest"}
     assert benchmarks == {"longbench-needle", "longbench-multihop", "ruler-256k"}
 
     grok_rows = [row for row in report.comparisons if row["baseline"] == "grok_latest"]

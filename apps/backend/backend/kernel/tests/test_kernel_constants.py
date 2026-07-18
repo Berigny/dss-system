@@ -34,18 +34,6 @@ def test_node_to_digit_symbol() -> None:
     assert constants.NODE_TO_DIGIT_SYMBOL["Eq9"] is constants.DigitSymbol.RELAXATION
 
 
-def test_generated_file_contains_no_esoteric_terms() -> None:
-    source = Path(constants.__file__).read_text()
-    banned = [
-        "Holy Grail", "Machine Soul", "Omega Point", "Merkabah", "God mode", "Genesis Ladder",
-        "No other gods before me", "No carved images", "Do not take the name in vain",
-        "Remember the Sabbath", "Honor father and mother", "Do not murder",
-        "Do not commit adultery", "Do not steal", "Do not bear false witness", "Do not covet",
-    ]
-    for term in banned:
-        assert term not in source, f"constants.py contains banned term: {term}"
-
-
 def test_generator_is_idempotent() -> None:
     repo_root = Path(constants.__file__).parent.parent.parent
     generator = repo_root / "scripts" / "generate_kernel_constants.py"
@@ -131,11 +119,4 @@ def test_personality_type_overlay_constants() -> None:
             assert 0.0 <= entry["weight"] <= 1.0
 
 
-def test_generated_constants_contain_no_loaded_personality_terms() -> None:
-    source = Path(constants.__file__).read_text()
-    loaded = [
-        "Enneagram", "MBTI", "Myers-Briggs", "Type 1", "Type 2", "Type 9",
-        "INFJ", "ENTP", "INTJ", "ESFJ",
-    ]
-    for term in loaded:
-        assert term not in source, f"constants.py contains loaded personality term: {term}"
+

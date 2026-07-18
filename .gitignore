@@ -39,6 +39,10 @@ backend-data/
 *.log
 *.pid
 
+# Private source-of-truth KSR (full registry). The public repo contains only
+# ksr-core and pack artifacts under ksr/ and dist/.
+private/
+
 # Keep control-plane seed benchmark data for tests
 !apps/control-plane/data/
 !apps/control-plane/data/**

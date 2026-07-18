@@ -68,7 +68,7 @@ class ComparisonSuiteReport:
         lines.append("")
         lines.append("## Notes")
         lines.append(
-            "- `dense_retrieval`, `hierarchical_rag`, and `long_context_model` are "
+            "- `bow_stand_in`, `hierarchical_rag`, and `long_context_model` are "
             "deterministic stand-ins for the external systems named in DSS-227."
         )
         lines.append(

@@ -78,9 +78,9 @@ Once integrated, the system "just works."
 
 * All benchmark figures derive from **synthetic micro-corpora**; the hotpotqa, musique, and 2wiki datasets are present in the repo as unintegrated targets for future work.
 * Retrieval comparators are **deterministic stand-ins** that encode documented failure distributions of dense-retrieval systems — reproducible by design, but not live vector-database runs (whitepaper §12, Threats to Validity).
-* Current figures measure **structural filtering given coordinates**, not evidence discovery from raw text. A label-blind ingestion path, matched-information baselines, and counterfactual shuffle tests are tracked under [issue #1](https://github.com/Berigny/dss-system/issues/1) and milestone `benchmark-validity v0.4`.
-* Every benchmark run emits a versioned artifact — seed, commit, dataset, configuration, and metrics with confidence intervals (whitepaper Appendix A). Artifacts live in `eval/reports/`.
-* The KSR kernel ships with a 15-gate structural self-validation suite (`tools/ksr_validate.py`): current status **15/15 PASS** on `ksr-core 1.3.0`, with adversarial trap adjudication at precision/recall 1.0 and fail-closed non-compensatory governance gates. See `eval/` for the full KSR-EVAL evidence chain.
+* Current figures measure **structural filtering given coordinates**, not evidence discovery from raw text. A label-blind ingestion path is specified in `eval/label_blind_ingestion_spec.md` and targeted for v0.5 / Hugo PR; matched-information baselines and counterfactual shuffle tests are implemented in `tools/counterfactual_harness.py` and tracked under [issue #1](https://github.com/Berigny/dss-system/issues/1).
+* Every benchmark run emits a versioned artifact and a flat KSR-EVAL v0.4 manifest — seed, commit, dataset, configuration, and metrics with confidence intervals (whitepaper Appendix A). Artifacts and manifests live in `eval/reports/`.
+* The KSR kernel ships with a 16-gate structural self-validation suite (`tools/ksr_validate.py`): current status **16/16 PASS** on `ksr-core 1.3.1`, with adversarial trap adjudication at precision/recall 1.0 and fail-closed non-compensatory governance gates. See `eval/` for the full KSR-EVAL evidence chain.
 
 ---
 

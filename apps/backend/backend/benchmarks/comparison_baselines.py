@@ -94,6 +94,7 @@ def _run_dense_ranking(
     *,
     top_k: int,
     hierarchical: bool = False,
+    baseline_name: str = "bow_stand_in",
 ) -> BaselineResult:
     """Shared dense-retrieval implementation with optional coarse first stage."""
     start = time.perf_counter()
@@ -170,7 +171,7 @@ def _run_dense_ranking(
     latency_ms = (time.perf_counter() - start) * 1000.0
 
     return BaselineResult(
-        baseline_name="hierarchical_rag" if hierarchical else "dense_retrieval",
+        baseline_name=baseline_name,
         recall_at_1=recall_at_1,
         recall_at_k=recall_at_k,
         mrr=mrr,
@@ -181,10 +182,16 @@ def _run_dense_ranking(
     )
 
 
-class DenseRetrievalBaseline(Baseline):
-    """Bag-of-words cosine retrieval stand-in for a dense embedding model."""
+class BoWStandInBaseline(Baseline):
+    """Bag-of-words cosine retrieval stand-in for a dense embedding model.
 
-    name = "dense_retrieval"
+    Renamed from ``DenseRetrievalBaseline`` in DSS-277 to make the stand-in
+    nature explicit. A real embedding baseline using pinned
+    ``sentence-transformers/all-MiniLM-L6-v2`` weights is provided separately
+    in :mod:`backend.benchmarks.real_embedding_baseline`.
+    """
+
+    name = "bow_stand_in"
 
     def run(
         self,
@@ -193,7 +200,7 @@ class DenseRetrievalBaseline(Baseline):
         *,
         top_k: int = 10,
     ) -> BaselineResult:
-        return _run_dense_ranking(memories, queries, top_k=top_k, hierarchical=False)
+        return _run_dense_ranking(memories, queries, top_k=top_k, hierarchical=False, baseline_name=self.name)
 
 
 class HierarchicalRagBaseline(Baseline):
@@ -208,7 +215,7 @@ class HierarchicalRagBaseline(Baseline):
         *,
         top_k: int = 10,
     ) -> BaselineResult:
-        return _run_dense_ranking(memories, queries, top_k=top_k, hierarchical=True)
+        return _run_dense_ranking(memories, queries, top_k=top_k, hierarchical=True, baseline_name=self.name)
 
 
 class LongContextBaseline(Baseline):
@@ -338,7 +345,7 @@ class GrokBaseline(Baseline):
 BASELINES: dict[str, Baseline] = {
     cls().name: cls()
     for cls in (
-        DenseRetrievalBaseline,
+        BoWStandInBaseline,
         HierarchicalRagBaseline,
         LongContextBaseline,
         GrokBaseline,
@@ -349,7 +356,7 @@ BASELINES: dict[str, Baseline] = {
 __all__ = (
     "Baseline",
     "BaselineResult",
-    "DenseRetrievalBaseline",
+    "BoWStandInBaseline",
     "HierarchicalRagBaseline",
     "LongContextBaseline",
     "GrokBaseline",

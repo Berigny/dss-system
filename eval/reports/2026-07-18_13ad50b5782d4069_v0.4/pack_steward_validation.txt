@@ -1,0 +1,13 @@
+KSR-VALIDATE v0.3 pack mode | artifact: ksr/pack/ksr-pack-steward-1.3.1.yaml
+ksr_pack: ksr-pack-steward | gates: 4
+
+[P01] pack parse-clean                           PASS
+      no duplicate keys
+[P02] pack relation_type validity                PASS
+      usage {}
+[P03] pack steward coverage                      PASS
+      all P/H nodes flagged steward-only
+[P04] pack->core reference resolves              PASS
+      pack 'ksr-pack-steward' references source sha 13ad50b5782d4069...
+
+NEW failures: 0

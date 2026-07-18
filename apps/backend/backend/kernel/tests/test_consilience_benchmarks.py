@@ -38,7 +38,9 @@ def test_ksr_has_confidence_and_relation_metadata(ksr_data: dict) -> None:
     assert audit["has_confidence_taxonomy"]
     assert audit["has_relation_types"]
     assert audit["glossary_confidence_counts"]
-    assert audit["cross_domain_confidence_counts"]
+    # Core-only graceful degradation: cross-domain entries live in the domains pack;
+    # the audit structure must still be present even if counts are empty.
+    assert isinstance(audit["cross_domain_confidence_counts"], dict)
 
 
 def test_public_constants_include_scope_statement() -> None:

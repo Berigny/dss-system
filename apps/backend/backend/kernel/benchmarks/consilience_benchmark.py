@@ -2,7 +2,7 @@
 
 These tests make the kernel's structural claims falsifiable by:
 - Auditing confidence/relation metadata on KSR entries.
-- Running permutation controls on the iChing trigram ↔ kernel corner bijection.
+- Running permutation controls on the 3-bit pattern ↔ kernel corner bijection.
 - Verifying that the public constants module carries the KSR scope statement.
 """
 
@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 # Kernel corner coordinates are ternary triples (L, M, B) where each coordinate
-# is either 0 or 2.  The iChing trigrams are binary triples (bottom, middle,
+# is either 0 or 2.  The comparison patterns are binary triples (bottom, middle,
 # top).  The structural claim is that both are 3-bit patterns and therefore
 # admit a bijection; any random permutation should destroy adjacency structure.
 CORNERS = [
@@ -28,15 +28,15 @@ CORNERS = [
     (2, 2, 2),  # K7
 ]
 
-TRIGRAMS = [
-    (0, 0, 0),  # Kun
-    (0, 0, 1),  # Ken
-    (0, 1, 0),  # Kan
-    (0, 1, 1),  # Hsun
-    (1, 0, 0),  # Chen
-    (1, 0, 1),  # Li
-    (1, 1, 0),  # Tui
-    (1, 1, 1),  # Chien
+PATTERNS = [
+    (0, 0, 0),
+    (0, 0, 1),
+    (0, 1, 0),
+    (0, 1, 1),
+    (1, 0, 0),
+    (1, 0, 1),
+    (1, 1, 0),
+    (1, 1, 1),
 ]
 
 
@@ -52,20 +52,20 @@ def _adjacent_pairs(points: list[tuple[int, ...]]) -> set[tuple[int, int]]:
 
 
 def _mapping_score(mapping: list[int]) -> int:
-    """Count adjacent kernel corners that map to adjacent trigrams."""
+    """Count adjacent kernel corners that map to adjacent comparison patterns."""
     corner_adj = _adjacent_pairs(CORNERS)
-    trigram_adj = _adjacent_pairs(TRIGRAMS)
+    pattern_adj = _adjacent_pairs(PATTERNS)
     score = 0
     for i, j in corner_adj:
-        if (mapping[i], mapping[j]) in trigram_adj:
+        if (mapping[i], mapping[j]) in pattern_adj:
             score += 1
     return score
 
 
 def run_iching_permutation_test(iterations: int = 1000, seed: int = 42) -> dict[str, Any]:
-    """Null-hypothesis test for the kernel-corner / iChing-trigram bijection.
+    """Null-hypothesis test for the kernel-corner / 3-bit-pattern bijection.
 
-    The structural mapping is the identity ordering (corner i maps to trigram i).
+    The structural mapping is the identity ordering (corner i maps to pattern i).
     We compare its adjacency-preservation score to 1000 random permutations.
     """
     rng = random.Random(seed)

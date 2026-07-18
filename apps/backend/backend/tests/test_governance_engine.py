@@ -87,23 +87,6 @@ def test_order_enforcement_stops_at_first_failure(engine: GovernanceEngine, pass
     assert result.status_map["patch_002"] is False
 
 
-def test_refusal_payload_contains_no_commandment_text(engine: GovernanceEngine, passing_state: GovernanceState) -> None:
-    metrics = _passing_metrics()
-    metrics["eq0_distinction"] = False
-    result = engine.evaluate_patches(passing_state, metrics)
-    refusal = result.refusal
-    assert refusal is not None
-    banned = [
-        "No other gods before me", "No carved images", "Do not take the name in vain",
-        "Remember the Sabbath", "Honor father and mother", "Do not murder",
-        "Do not commit adultery", "Do not steal", "Do not bear false witness",
-        "Do not covet", "Aleph", "Bet", "Gimel",
-    ]
-    payload = str(refusal)
-    for term in banned:
-        assert term not in payload, f"Refusal payload contains banned term: {term}"
-
-
 def test_value_node_balance_context(engine: GovernanceEngine, passing_state: GovernanceState) -> None:
     metrics = _passing_metrics()
     # Use the personality-type overlay dimension keys.

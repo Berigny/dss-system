@@ -1,0 +1,160 @@
+# Benchmark manifest schema for KSR-EVAL v0.4.
+# Every benchmark run must emit a manifest conforming to this schema.
+# The manifest is separate from the BenchmarkArtifact (whitepaper Appendix A);
+# it captures provenance and measurement context in a flat, human-reviewable form.
+
+schema_version: "1.0"
+
+required_fields:
+  - artifact_version
+  - git_commit_sha
+  - eval_script_version
+  - run_date
+  - seeds
+  - hardware_profile
+  - dataset
+  - conditions
+  - metrics
+
+field_definitions:
+  artifact_version:
+    type: string
+    description: Manifest schema version (e.g., "ksr-eval-v0.4").
+
+  git_commit_sha:
+    type: string
+    min_length: 7
+    description: Full git commit SHA of the repository used for the run.
+
+  eval_script_version:
+    type: string
+    description: Version identifier of the benchmark harness script.
+
+  run_date:
+    type: string
+    format: iso8601
+    description: UTC timestamp when the benchmark started.
+
+  seeds:
+    type: array
+    items:
+      type: integer
+    description: Pinned random seeds used for the run.
+
+  hardware_profile:
+    type: object
+    required:
+      - platform
+      - backend_accelerator
+    properties:
+      platform:
+        type: string
+        description: Operating-system / platform identifier.
+      processor:
+        type: string
+      cpu_count:
+        type: integer
+        minimum: 1
+      memory_gb:
+        type: number
+        minimum: 0
+      gpu_name:
+        type: string
+      gpu_count:
+        type: integer
+        minimum: 0
+      cuda_version:
+        type: string
+      mps_available:
+        type: boolean
+      backend_accelerator:
+        type: string
+        enum: [cuda, mps, cpu]
+
+  dataset:
+    type: object
+    required:
+      - name
+      - version
+      - path
+      - sha256
+    properties:
+      name:
+        type: string
+      version:
+        type: string
+      split:
+        type: string
+      record_count:
+        type: integer
+        minimum: 0
+      path:
+        type: string
+      sha256:
+        type: string
+
+  conditions:
+    type: object
+    description: Free-form key/value run conditions (model, temperature, k, etc.).
+    additional_properties:
+      type: [string, number, boolean, integer]
+
+  metrics:
+    type: object
+    required:
+      - mean
+      - standard_deviation
+      - min
+      - max
+      - ci_95_low
+      - ci_95_high
+      - sample_count
+    properties:
+      mean:
+        type: number
+      standard_deviation:
+        type: number
+      min:
+        type: number
+      max:
+        type: number
+      ci_95_low:
+        type: number
+      ci_95_high:
+        type: number
+      sample_count:
+        type: integer
+        minimum: 1
+      unit:
+        type: string
+      description:
+        type: string
+
+examples:
+  - artifact_version: "ksr-eval-v0.4"
+    git_commit_sha: "13ad50b5782d40692f59dcabe1dd3d64e051fa5f"
+    eval_script_version: "needle_harness_v1.2"
+    run_date: "2026-07-18T00:00:00Z"
+    seeds: [42, 43, 44]
+    hardware_profile:
+      platform: "Linux-5.15-x86_64"
+      backend_accelerator: "cpu"
+    dataset:
+      name: "ksr_needle_micro_corpus"
+      version: "1.0"
+      path: "eval/corpus/needle_v1.jsonl"
+      sha256: "0000000000000000000000000000000000000000000000000000000000000000"
+    conditions:
+      model: "none"
+      transport: "R1"
+      max_tokens: 517000
+    metrics:
+      mean: 1.0
+      standard_deviation: 0.0
+      min: 1.0
+      max: 1.0
+      ci_95_low: 1.0
+      ci_95_high: 1.0
+      sample_count: 3
+      unit: "recall@1"
+      description: "Needle retrieval recall across pinned seeds."

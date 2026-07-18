@@ -51,7 +51,7 @@ def _repo_sha() -> str:
 
 def _mode_for_baseline(baseline: Baseline) -> BenchmarkMode:
     mapping: dict[str, BenchmarkMode] = {
-        "dense_retrieval": "baseline_dense",
+        "bow_stand_in": "baseline_dense",
         "hierarchical_rag": "baseline_hierarchical",
         "long_context_model": "baseline_long_context",
         "grok_latest": "baseline_grok",

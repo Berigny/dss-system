@@ -102,6 +102,13 @@ class BaseFoundationService:
 
     def _build_public_layer(self, provision_id: str) -> dict[str, Any]:
         """Return the engineering-only public foundation layer."""
+        # Core-only graceful degradation: cross_domain_registry may be present but
+        # empty when the runtime is loading ksr-core without the domains pack.
+        # The ledger remains operational; downstream consumers must check contents.
+        cross_domain = self._load_cross_domain_registry()
+        if cross_domain is None:
+            cross_domain = {"version": constants.KSR_VERSION, "domains": {}}
+
         lattice = {
             "cube_id": constants.LATTICE_CUBE_ID,
             "lattice_type": constants.LATTICE_TYPE,
@@ -151,13 +158,11 @@ class BaseFoundationService:
             },
         }
 
-        cross_domain = self._load_cross_domain_registry()
-        if cross_domain is not None:
-            public["cross_domain_registry"] = {
-                "version": cross_domain.get("version", "1.0"),
-                "domains": dict(cross_domain.get("domains", {})),
-                "value_node_traversal": cross_domain.get("value_node_traversal"),
-            }
+        public["cross_domain_registry"] = {
+            "version": cross_domain.get("version", constants.KSR_VERSION),
+            "domains": dict(cross_domain.get("domains", {})),
+            "value_node_traversal": cross_domain.get("value_node_traversal"),
+        }
 
         return public
 

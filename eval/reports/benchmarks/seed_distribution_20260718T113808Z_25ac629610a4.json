@@ -1,0 +1,132 @@
+{
+  "artefact_schema_version": "1.0.0",
+  "run_id": "seed-distribution-needle-20260718T113808Z",
+  "suite_id": "longbench-needle-seed-distribution",
+  "suite_version": "v1",
+  "executed_at": "2026-07-18T11:38:08.599249Z",
+  "mode": "coordinate_guided",
+  "status": "partial",
+  "repos": [
+    {
+      "name": "ds-backend-local",
+      "commit_sha": "25ac629610a48e10ce6ed8f7d7bb8c54b8a17416",
+      "role": "canonical_benchmark_engine",
+      "required_for_run": true
+    }
+  ],
+  "datasets": [
+    {
+      "name": "longbench_needle_synthetic_v1",
+      "version": "v1",
+      "split": "benchmark",
+      "record_count": 3
+    }
+  ],
+  "metrics": {
+    "retrieval": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "qp_recall_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Qp needle recall at rank 1 across pinned seeds.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 3
+          }
+        },
+        "qp_recall_at_k": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Qp needle recall within top 5 across pinned seeds.",
+          "statistics": null
+        },
+        "vector_recall_at_1": {
+          "value": 0.2222222222222222,
+          "unit": "ratio",
+          "description": "Vector-RAG needle recall at rank 1 across pinned seeds.",
+          "statistics": null
+        },
+        "vector_recall_at_k": {
+          "value": 0.8888888888888888,
+          "unit": "ratio",
+          "description": "Vector-RAG needle recall within top 5 across pinned seeds.",
+          "statistics": null
+        },
+        "per_seed_recall": {
+          "value": "{\"193\": 1.0, \"194\": 1.0, \"195\": 1.0}",
+          "unit": "json",
+          "description": "Per-seed Qp recall@1 values.",
+          "statistics": null
+        }
+      }
+    },
+    "latency": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "total_runtime_ms": {
+          "value": 1846.668447018601,
+          "unit": "ms",
+          "description": "Total harness runtime across all seeds.",
+          "statistics": null
+        }
+      }
+    },
+    "cost": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "embedding_queries": {
+          "value": 3,
+          "unit": "count",
+          "description": "Number of seed runs (no LLM tokens consumed).",
+          "statistics": null
+        }
+      }
+    },
+    "traceability": {
+      "status": "absent",
+      "absence_reason": "Traceability metrics are out of scope for this needle-recall benchmark.",
+      "metrics": {}
+    },
+    "governance": {
+      "status": "absent",
+      "absence_reason": "Governance metrics are out of scope for this needle-recall benchmark.",
+      "metrics": {}
+    }
+  },
+  "freshness": {
+    "status": "fresh",
+    "checked_at": "2026-07-18T11:38:08.599249Z",
+    "max_age_hours": 24,
+    "age_hours": 0.0
+  },
+  "failure_reason": null,
+  "hardware": {
+    "platform": "Darwin-25.5.0-x86_64",
+    "processor": "i386",
+    "cpu_count": 16,
+    "memory_gb": 16.0,
+    "gpu_name": null,
+    "gpu_count": null,
+    "cuda_version": null,
+    "mps_available": true,
+    "backend_accelerator": "mps"
+  },
+  "run_config": {
+    "lengths": "4,8,16",
+    "top_k": 5,
+    "permutations": 5000,
+    "seeds": "193,194,195",
+    "seed_count": 3,
+    "issue": "#1",
+    "credit": "Hugo Berigny \u2014 original needle corpus design"
+  }
+}

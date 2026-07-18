@@ -724,6 +724,24 @@ def run_benchmark(config: BenchmarkConfig) -> tuple[BenchmarkSummary, list[PerQu
         json.dumps(artifact.model_dump(mode="json"), indent=2) + "\n",
         encoding="utf-8",
     )
+
+    # Emit KSR-EVAL v0.4 manifest alongside the artifact.
+    from backend.benchmarks.manifest import build_manifest, write_manifest
+
+    manifest = build_manifest(
+        artifact,
+        eval_script_version="longbench_needle_benchmark_v1.0",
+        seeds=[config.seed],
+        conditions={
+            "lengths": ",".join(str(x) for x in config.lengths),
+            "top_k": config.top_k,
+            "permutations": config.permutations,
+            "transport": "R1",
+        },
+    )
+    manifest_path = output_path.with_suffix(".manifest.json")
+    write_manifest(manifest, manifest_path)
+
     return summary, per_query, output_path
 
 

@@ -478,7 +478,7 @@ def sha256_file(path: str) -> str:
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("registry", nargs="?",
-                    default="apps/backend/backend/kernel/semantic_registry.yaml")
+                    default="ksr/core/ksr-core-1.3.1.yaml")
     ap.add_argument("--mode", choices=("full", "core", "pack"), default="full",
                     help="validation mode: full runs G01-G15 on source; core runs G01-G16; pack runs P01-P04")
     ap.add_argument("--repo-root", default=None)

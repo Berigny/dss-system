@@ -1,0 +1,102 @@
+# Claims registry for README.md and whitepaper assertions.
+# Every public claim must map to a producing harness, measured quantity, status,
+# and evidence link. CI fails if a README claim lacks a registry entry.
+
+schema_version: "1.0"
+last_reviewed: "2026-07-18"
+
+claims:
+  - id: C01
+    source: README.md
+    quote: "In the current benchmark harness, DSS achieves Recall@1 of 1.00 at 517K tokens"
+    claim: Recall@1 equals 1.00 on a 517K-token synthetic micro-corpus.
+    harness: apps/backend/backend/benchmarks/comparison_benchmark.py
+    measurement: Recall@1 across needle-retrieval seeds
+    status: overclaimed-as-framed
+    evidence: eval/reports/2026-07-18_13ad50b5782d4069_v0.4/acceptance_report.md
+    caveats:
+      - Synthetic micro-corpus, not unstructured enterprise data.
+      - Comparator is a deterministic stand-in, not a live vector database.
+
+  - id: C02
+    source: README.md
+    quote: "reported as a distribution across a pinned seed set"
+    claim: Needle benchmark is run across a pinned seed set with distribution statistics.
+    harness: tools/seed_distribution_harness.py
+    measurement: Per-seed recall, mean, CI95, min/max, n
+    status: supported
+    evidence: eval/reports/benchmarks/seed_distribution_20260718T113124Z_25ac629610a4.json
+
+  - id: C03
+    source: README.md
+    quote: "Multi-hop full-chain@5 100%"
+    claim: Multi-hop retrieval achieves full-chain@5 of 100%.
+    harness: apps/backend/backend/benchmarks/comparison_benchmark.py
+    measurement: full-chain@5 on multi-hop synthetic corpora
+    status: pending
+    evidence: issue #1
+
+  - id: C04
+    source: README.md
+    quote: "vector 0%"
+    claim: DSS retrieval does not rely on vector similarity.
+    harness: apps/backend/backend/ingestion/pipeline.py
+    measurement: Coordinate derivation and prime-factor lookup do not call embedding similarity.
+    status: supported
+    evidence: backend/kernel/decode.py
+
+  - id: C05
+    source: README.md
+    quote: "Swap Models Seamlessly"
+    claim: Model swaps do not lose ongoing conversational context.
+    harness: apps/backend/backend/api/chat.py
+    measurement: Conversation continuity across OpenRouter model switches
+    status: pending
+    evidence: manual/integration tests
+
+  - id: C06
+    source: README.md
+    quote: "DSS locates compatible records using an $O(k \\log n)$ composite prime lookup"
+    claim: Record lookup is O(k log n) in the number of records.
+    harness: backend/kernel/layer_router.py
+    measurement: Theoretical complexity of prime-sorted coordinate lookup
+    status: supported
+    evidence: docs/decisions/D1-core-only-graceful-degradation.md
+
+  - id: C07
+    source: README.md
+    quote: "abstains rather than guesses when structural verification fails"
+    claim: System refuses to return memories that fail structural verification.
+    harness: backend/api/agent_writes.py
+    measurement: Fail-closed behavior on checksum/quaternary-gate failure
+    status: supported
+    evidence: backend/kernel/quaternary_gates.py
+
+  - id: C08
+    source: README.md
+    quote: "The KSR kernel ships with a 16-gate structural self-validation suite: current status 16/16 PASS on ksr-core 1.3.1"
+    claim: KSR core artifact passes 16 structural validation gates.
+    harness: tools/ksr_validate.py --mode core
+    measurement: G01–G16 all PASS
+    status: supported
+    evidence: eval/reports/2026-07-18_13ad50b5782d4069_v0.4/core_validation.txt
+
+  - id: C09
+    source: README.md
+    quote: "336-derived checksum invariant and quaternary-gate wiring verified"
+    claim: Checksum 336 invariant and quaternary gate wiring are structurally verified.
+    harness: tools/ksr_validate.py --mode core
+    measurement: G02 and G09 PASS
+    status: supported
+    evidence: eval/reports/2026-07-18_13ad50b5782d4069_v0.4/core_validation.txt
+
+  - id: C10
+    source: README.md
+    quote: "Deterministic encode/decode round-trip on checked encodings"
+    claim: Checked encodings round-trip deterministically.
+    harness: tools/encode.py, tools/decode.py
+    measurement: Encode/decode round-trip with check factor verification
+    status: supported
+    evidence: backend/tests/test_kernel_projection_pipeline.py
+
+unknown_claims_policy: fail_ci

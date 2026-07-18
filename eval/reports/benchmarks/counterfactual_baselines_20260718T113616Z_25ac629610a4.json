@@ -1,0 +1,146 @@
+{
+  "artefact_schema_version": "1.0.0",
+  "run_id": "counterfactual-baselines-20260718T113616Z",
+  "suite_id": "counterfactual-baselines",
+  "suite_version": "v1",
+  "executed_at": "2026-07-18T11:36:16.712384Z",
+  "mode": "coordinate_guided",
+  "status": "partial",
+  "repos": [
+    {
+      "name": "ds-backend-local",
+      "commit_sha": "25ac629610a48e10ce6ed8f7d7bb8c54b8a17416",
+      "role": "canonical_benchmark_engine",
+      "required_for_run": true
+    }
+  ],
+  "datasets": [
+    {
+      "name": "longbench_needle_synthetic_v1",
+      "version": "v1",
+      "split": "benchmark",
+      "record_count": 1
+    },
+    {
+      "name": "longbench_multihop_synthetic_v1",
+      "version": "v1",
+      "split": "benchmark",
+      "record_count": 1
+    }
+  ],
+  "metrics": {
+    "retrieval": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "needle_original_qp_recall_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Needle Qp recall@1 on original paired corpus.",
+          "statistics": null
+        },
+        "needle_shuffle_texts_qp_recall_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Needle Qp recall@1 when texts are shuffled and coordinates held.",
+          "statistics": null
+        },
+        "needle_shuffle_coords_qp_recall_at_1": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "Needle Qp recall@1 when coordinates are shuffled and texts held.",
+          "statistics": null
+        },
+        "multihop_original_qp_chain_recall": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Multi-hop Qp chain recall on original paired corpus.",
+          "statistics": null
+        },
+        "multihop_shuffle_texts_qp_chain_recall": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Multi-hop Qp chain recall when texts are shuffled and coordinates held.",
+          "statistics": null
+        },
+        "multihop_shuffle_coords_qp_chain_recall": {
+          "value": 0.06666666666666667,
+          "unit": "ratio",
+          "description": "Multi-hop Qp chain recall when coordinates are shuffled and texts held.",
+          "statistics": null
+        },
+        "b3_bow_stand_in_needle_recall_at_1": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "B3 BoW stand-in needle recall@1.",
+          "statistics": null
+        },
+        "b3_metadata_filter_needle_recall_at_1": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "B3 metadata-filter needle recall@1.",
+          "statistics": null
+        }
+      }
+    },
+    "latency": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "total_runtime_ms": {
+          "value": 2181.688076991122,
+          "unit": "ms",
+          "description": "Total harness runtime.",
+          "statistics": null
+        }
+      }
+    },
+    "cost": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "embedding_queries": {
+          "value": 1,
+          "unit": "count",
+          "description": "Counterfactual run marker (no LLM tokens consumed).",
+          "statistics": null
+        }
+      }
+    },
+    "traceability": {
+      "status": "absent",
+      "absence_reason": "Traceability metrics are out of scope for counterfactual shuffle tests.",
+      "metrics": {}
+    },
+    "governance": {
+      "status": "absent",
+      "absence_reason": "Governance metrics are out of scope for counterfactual shuffle tests.",
+      "metrics": {}
+    }
+  },
+  "freshness": {
+    "status": "fresh",
+    "checked_at": "2026-07-18T11:36:16.712384Z",
+    "max_age_hours": 24,
+    "age_hours": 0.0
+  },
+  "failure_reason": null,
+  "hardware": {
+    "platform": "Darwin-25.5.0-x86_64",
+    "processor": "i386",
+    "cpu_count": 16,
+    "memory_gb": 16.0,
+    "gpu_name": null,
+    "gpu_count": null,
+    "cuda_version": null,
+    "mps_available": true,
+    "backend_accelerator": "mps"
+  },
+  "run_config": {
+    "seed": 2026,
+    "issue": "#1",
+    "credit": "Hugo Berigny \u2014 original synthetic corpus design",
+    "d2_merge_window_days": 14,
+    "d2_note": "Hold merge of counterfactual shuffle distributions until Hugo's stated PR window expires (14 days) or his PR lands."
+  }
+}

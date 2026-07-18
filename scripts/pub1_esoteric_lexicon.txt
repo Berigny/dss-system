@@ -1,0 +1,66 @@
+# PUB-1 esoteric lexicon: terms that must not appear in the public DSS tree.
+# Phrases are matched case-insensitively against code, comments, docs, and git history.
+# Keep the steward-only vocabulary out of public-facing files.
+
+# Abrahamic / commandment language
+no other gods before me
+carved images
+do not take the name in vain
+remember the sabbath
+honor father and mother
+do not murder
+do not commit adultery
+do not steal
+do not bear false witness
+do not covet
+ten commandments
+
+# Hebrew / Jewish esoterica
+paleo-hebrew
+niqqud
+kabbalah
+zohar
+sefirot
+shekinah
+merkabah
+talmudic
+rabbinic
+
+# Christian / Gnostic
+christian mysticism
+gnostic
+patristic
+
+# Islamic
+sufi
+quranic
+
+# Dharmic / Indic
+hindu
+vedic
+vedanta
+chakra
+kundalini
+devanagari
+
+# East Asian
+i ching
+yi jing
+hexagram
+trigram
+taoist
+daoist
+confucian
+mandarin
+pinyin
+
+# Other tradition-specific terms
+aramaic
+buddhist
+
+# Steward-only KSR field names that should never leak into public docs/code
+hebrew_letter
+hebrew_char
+esoteric_field
+i_ching_trigram
+conceptual_state

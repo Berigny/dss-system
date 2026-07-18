@@ -23,7 +23,7 @@ PRIME_SCHEMA: Final[Mapping[int, Dict[str, object]]] = {
         "mnemonic": "spark",
         "flow_role": "Source/S1",
         "node_index": 0,
-        "conceptual_state": "Null / Eagle / Fire",
+        "structural_phase": "origin / high-energy / ignition",
     },
     3: {
         "name": "Uniqueness",
@@ -31,7 +31,7 @@ PRIME_SCHEMA: Final[Mapping[int, Dict[str, object]]] = {
         "mnemonic": "spec",
         "flow_role": "Source/S1",
         "node_index": 1,
-        "conceptual_state": "Electric / Lion / Air",
+        "structural_phase": "differentiation / active / expansion",
     },
     5: {
         "name": "Connection",
@@ -39,7 +39,7 @@ PRIME_SCHEMA: Final[Mapping[int, Dict[str, object]]] = {
         "mnemonic": "stitch",
         "flow_role": "Source/S1",
         "node_index": 2,
-        "conceptual_state": "Magnetic / Ox / Water",
+        "structural_phase": "coupling / stable / binding",
     },
     7: {
         "name": "Action",
@@ -47,7 +47,7 @@ PRIME_SCHEMA: Final[Mapping[int, Dict[str, object]]] = {
         "mnemonic": "step",
         "flow_role": "Source/S1",
         "node_index": 3,
-        "conceptual_state": "Matter / Man / Earth",
+        "structural_phase": "closure / dense / grounding",
     },
 
     # S2 Substrate Factors (Flow Destinations) – Node 4–7
@@ -57,7 +57,7 @@ PRIME_SCHEMA: Final[Mapping[int, Dict[str, object]]] = {
         "mnemonic": "seed",
         "flow_role": "Target/S2",
         "node_index": 4,
-        "conceptual_state": "Null / Output",
+        "structural_phase": "potential / pre-output",
     },
     13: {
         "name": "Autonomy",
@@ -65,7 +65,7 @@ PRIME_SCHEMA: Final[Mapping[int, Dict[str, object]]] = {
         "mnemonic": "silo",
         "flow_role": "Target/S2",
         "node_index": 5,
-        "conceptual_state": "Electric / Output",
+        "structural_phase": "autonomy / output-activation",
     },
     17: {
         "name": "Context",
@@ -73,7 +73,7 @@ PRIME_SCHEMA: Final[Mapping[int, Dict[str, object]]] = {
         "mnemonic": "system",
         "flow_role": "Target/S2",
         "node_index": 6,
-        "conceptual_state": "Magnetic / Output",
+        "structural_phase": "context / output-alignment",
     },
     19: {
         "name": "Mastery",
@@ -81,7 +81,7 @@ PRIME_SCHEMA: Final[Mapping[int, Dict[str, object]]] = {
         "mnemonic": "standard",
         "flow_role": "Target/S2",
         "node_index": 7,
-        "conceptual_state": "Matter / Output",
+        "structural_phase": "mastery / output-consolidation",
     },
 
     # Mediator (C)
@@ -91,7 +91,7 @@ PRIME_SCHEMA: Final[Mapping[int, Dict[str, object]]] = {
         "mnemonic": "ark",
         "flow_role": "Mediator/Law",
         "node_index": 99,
-        "conceptual_state": "Aether / Contract (Descent)",
+        "structural_phase": "constraint / contract-descent",
     },
     GRACE_PRIME: {
         "name": "Grace (Outer)",
@@ -99,7 +99,7 @@ PRIME_SCHEMA: Final[Mapping[int, Dict[str, object]]] = {
         "mnemonic": "grail",
         "flow_role": "Mediator/Grace",
         "node_index": 99,
-        "conceptual_state": "Aether / Contract (Ascent)",
+        "structural_phase": "relaxation / contract-ascent",
     },
 
     # Body primes (B tier – memory / recall etc). Node index 99 by design.
@@ -109,7 +109,7 @@ PRIME_SCHEMA: Final[Mapping[int, Dict[str, object]]] = {
         "mnemonic": "scribe",
         "flow_role": "Target/B",
         "node_index": 99,
-        "conceptual_state": "Consolidation",
+        "structural_phase": "recall / consolidation",
     },
     # Add 29, 31, 37, etc. here when you’re ready.
 }

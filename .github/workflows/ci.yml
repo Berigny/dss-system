@@ -16,6 +16,7 @@ jobs:
       chat-surface: ${{ steps.filter.outputs.chat-surface }}
       coord-demo: ${{ steps.filter.outputs.coord-demo }}
       shared-types: ${{ steps.filter.outputs.shared-types }}
+      ksr: ${{ steps.filter.outputs.ksr }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -44,6 +45,15 @@ jobs:
               - '.github/workflows/ci.yml'
             shared-types:
               - 'packages/shared-types/**'
+              - '.github/workflows/ci.yml'
+            ksr:
+              - 'ksr/**'
+              - 'tools/ksr_*'
+              - 'scripts/pub1_esoteric_scan.py'
+              - 'scripts/pub1_esoteric_lexicon.txt'
+              - 'scripts/check_readme_claims.py'
+              - 'eval/claims_registry.yaml'
+              - 'README.md'
               - '.github/workflows/ci.yml'
 
   scaffold-check:
@@ -218,3 +228,49 @@ jobs:
         run: |
           cd apps/coord-demo
           pytest -q
+
+  ksr-validate:
+    needs: changes
+    if: ${{ needs.changes.outputs.ksr == 'true' || needs.changes.outputs.backend == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install PyYAML
+        run: pip install pyyaml
+      - name: Validate ksr-core
+        run: python3 tools/ksr_validate.py --mode core ksr/core/ksr-core-1.3.1.yaml --repo-root .
+      - name: Validate ksr-pack-domains
+        run: python3 tools/ksr_validate.py --mode pack ksr/pack/ksr-pack-domains-1.3.1.yaml
+      - name: Validate ksr-pack-steward
+        run: python3 tools/ksr_validate.py --mode pack ksr/pack/ksr-pack-steward-1.3.1.yaml
+
+  pub1-esoteric-scan:
+    needs: changes
+    if: ${{ needs.changes.outputs.ksr == 'true' || needs.changes.outputs.backend == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: PUB-1 esoteric-content scan
+        run: python3 scripts/pub1_esoteric_scan.py
+
+  readme-claims:
+    needs: changes
+    if: ${{ needs.changes.outputs.ksr == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install PyYAML
+        run: pip install pyyaml
+      - name: Check README claims are registered
+        run: python3 scripts/check_readme_claims.py

@@ -3,8 +3,8 @@
 KSR-BUILD v0.3 — deterministic partition of semantic_registry.yaml into core + packs.
 
 Usage:
-    python3 tools/ksr_build.py --source apps/backend/backend/kernel/semantic_registry.yaml --output dist
-    python3 tools/ksr_build.py --source ... --output dist --emit-public --public-dir /tmp/ksr-public
+    python3 tools/ksr_build.py --source private/semantic_registry.yaml --output dist
+    python3 tools/ksr_build.py --source private/semantic_registry.yaml --output dist --emit-public --public-dir /tmp/ksr-public
 """
 
 from __future__ import annotations
@@ -35,16 +35,21 @@ def registry_sha256(path: Path) -> str:
 
 def build_core(registry: dict[str, Any]) -> dict[str, Any]:
     """Build ksr-core (public, load-bearing engineering fields only)."""
-    public_glossary = [entry for entry in registry.get("glossary", [])
-                       if not (isinstance(entry, dict) and entry.get("steward_only"))]
+    _ESOTERIC_CATEGORIES = {"esoteric", "religious"}
+    public_glossary = [
+        entry for entry in registry.get("glossary", [])
+        if isinstance(entry, dict)
+        and not entry.get("steward_only")
+        and str(entry.get("category", "")).lower() not in _ESOTERIC_CATEGORIES
+    ]
     public_glossary_terms = {entry["term"] for entry in public_glossary if isinstance(entry, dict) and entry.get("term")}
     core: dict[str, Any] = {
         "ksr_version": registry.get("ksr_version"),
         "reference_documents": registry.get("reference_documents", {}),
         "digit_registry": registry.get("digit_registry", {}),
-        "prime_registry": registry.get("prime_registry", {}),
+        "prime_registry": _strip_prime_registry_esoterica(registry.get("prime_registry", {})),
         "prime_groups": registry.get("prime_groups", {}),
-        "lattice_registry": registry.get("lattice_registry", {}),
+        "lattice_registry": _strip_lattice_esoterica(registry.get("lattice_registry", {})),
         "checksum_invariant": registry.get("checksum_invariant", {}),
         "check_component": registry.get("check_component", {}),
         "quaternary_gate_registry": registry.get("quaternary_gate_registry", {}),
@@ -54,11 +59,12 @@ def build_core(registry: dict[str, Any]) -> dict[str, Any]:
         "glossary": public_glossary,
         "synonym_registry": _filter_term_lists(registry.get("synonym_registry", {}), public_glossary_terms),
         "stripping_priority": _filter_term_lists(registry.get("stripping_priority", {}), public_glossary_terms),
-        # commandment_patch_registry is steward-only esoteric mapping; engineering
-        # guardian enforcement is represented by checksum_invariant and
-        # quaternary_gate_registry in the public core.
-        # "commandment_patch_registry": ...  (omitted from public core)
+        "commandment_patch_registry": _strip_patch_esoterica(
+            registry.get("commandment_patch_registry", {}), public_glossary_terms
+        ),
         "value_node_registry": registry.get("value_node_registry", {}),
+        "personality_type_overlay": registry.get("personality_type_overlay", {}),
+        "cross_domain_registry": _filter_cross_domain_public(registry.get("cross_domain_registry", {})),
         "surface_policy": _core_surface_policy(registry.get("surface_policy", {})),
         "confidence_taxonomy": registry.get("confidence_taxonomy", {}),
         "relation_types": registry.get("relation_types", {}),
@@ -75,7 +81,8 @@ def _core_surface_policy(spol: dict[str, Any]) -> dict[str, Any]:
         "dist/ksr-core-*.yaml",
     ]
     updated["private_paths"] = [
-        "apps/backend/backend/kernel/semantic_registry.yaml",
+        "private/semantic_registry.yaml",
+        "private/*",
         "ksr/pack/*",
         "dist/ksr-pack-*.yaml",
     ]
@@ -83,7 +90,11 @@ def _core_surface_policy(spol: dict[str, Any]) -> dict[str, Any]:
 
 
 def _filter_term_lists(data: dict[str, Any], public_terms: set[str]) -> dict[str, Any]:
-    """Strip list entries whose values are terms removed from the public glossary."""
+    """Strip list entries whose values are terms removed from the public glossary.
+
+    Recurses into nested dicts so that structures like synonym_registry.PATCH.terms
+    are cleaned of steward-only string synonyms.
+    """
     public: dict[str, Any] = {}
     for key, value in data.items():
         if isinstance(value, list):
@@ -99,9 +110,74 @@ def _filter_term_lists(data: dict[str, Any], public_terms: set[str]) -> dict[str
                     filtered.append(item)
             if filtered:
                 public[key] = filtered
+        elif isinstance(value, dict):
+            nested = _filter_term_lists(value, public_terms)
+            if nested:
+                public[key] = nested
         else:
             public[key] = value
     return public
+
+
+def _filter_cross_domain_public(cdr: dict[str, Any]) -> dict[str, Any]:
+    """Retain only public-optional A/E tier cross-domain nodes in core."""
+    public: dict[str, Any] = {}
+    for key, value in cdr.items():
+        if isinstance(value, list):
+            filtered = [node for node in value if _is_domain_tier(node)]
+            if filtered:
+                public[key] = filtered
+        elif isinstance(value, dict) and _is_domain_tier(value):
+            public[key] = value
+    return public
+
+
+# Esoteric fields that must not appear in the public ksr-core artifact.
+_ESOTERIC_FIELDS = {
+    "hebrew_letter",
+    "hebrew_char",
+    "esoteric",
+    "i_ching_trigram",
+    "mnemonic",
+    "conceptual_state",
+    "esoteric_names",
+    "commandment_number",
+    "commandment_text",
+    "commandment_day",
+    "system_patch",
+}
+
+
+def _strip_esoteric_fields(obj: Any) -> Any:
+    """Recursively remove esoteric fields from dicts and lists."""
+    if isinstance(obj, dict):
+        return {
+            k: _strip_esoteric_fields(v)
+            for k, v in obj.items()
+            if k not in _ESOTERIC_FIELDS
+        }
+    if isinstance(obj, list):
+        return [_strip_esoteric_fields(v) for v in obj]
+    return obj
+
+
+def _strip_lattice_esoterica(lattice: dict[str, Any]) -> dict[str, Any]:
+    """Return a copy of the lattice registry with steward-only fields removed."""
+    return _strip_esoteric_fields(lattice)
+
+
+def _strip_patch_esoterica(patch_reg: dict[str, Any], public_terms: set[str] | None = None) -> dict[str, Any]:
+    """Return a copy of the commandment patch registry with steward text removed."""
+    public = _strip_esoteric_fields(patch_reg)
+    syn = public.get("synonym_registry")
+    if isinstance(syn, dict) and public_terms is not None:
+        public["synonym_registry"] = _filter_term_lists(syn, public_terms)
+    return public
+
+
+def _strip_prime_registry_esoterica(prime_reg: dict[str, Any]) -> dict[str, Any]:
+    """Return a copy of the prime registry with steward-only fields removed."""
+    return _strip_esoteric_fields(prime_reg)
 
 
 def build_pack_domains(registry: dict[str, Any]) -> dict[str, Any]:
@@ -305,7 +381,7 @@ limitations under the License.
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="KSR deterministic build tool")
-    parser.add_argument("--source", type=Path, default=Path("apps/backend/backend/kernel/semantic_registry.yaml"))
+    parser.add_argument("--source", type=Path, default=Path("private/semantic_registry.yaml"))
     parser.add_argument("--output", type=Path, default=Path("dist"))
     parser.add_argument("--emit-public", action="store_true", help="Generate public repo tree")
     parser.add_argument("--public-dir", type=Path, default=Path("/tmp/ksr-public"))
