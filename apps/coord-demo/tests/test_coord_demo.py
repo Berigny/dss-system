@@ -42,8 +42,10 @@ def test_index_redirects_when_unauthenticated(
 def test_index_renders_form(client: TestClient) -> None:
     response = client.get("/", cookies={app.BACKEND_SESSION_TOKEN_COOKIE: "valid-token"})
     assert response.status_code == 200
-    assert "Resolve COORD" in response.text
+    assert "DualSubstrate // Resolver" in response.text
+    assert "Universal Coherence Decoder" in response.text
     assert "coordinate" in response.text
+    assert "hx-post=\"/resolve\"" in response.text
 
 
 def _sample_decode_payload() -> dict:
@@ -191,3 +193,78 @@ def test_collect_referenced_coords_skips_self() -> None:
     refs = app._collect_referenced_coords(payload, "loam:WX-A71BA232-1784308498")
     assert "loam:WX-A71BA232-1784306898" in refs
     assert "loam:WX-A71BA232-1784308498" not in refs
+
+
+def test_resolve_returns_fragment_for_htmx(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    sample = _sample_decode_payload()
+
+    def fake_post(*args, **kwargs):  # noqa: ARG001
+        class Response:
+            status_code = 200
+            def json(self): return sample
+        return Response()
+
+    monkeypatch.setattr("httpx.post", fake_post)
+
+    response = client.post(
+        "/resolve",
+        data={"coordinate": "loam:WX-A71BA232-1784308498"},
+        cookies={app.BACKEND_SESSION_TOKEN_COOKIE: "valid-token"},
+        headers={"HX-Request": "true"},
+    )
+    assert response.status_code == 200
+    assert "<html>" not in response.text
+    assert "Reconstructed Knowledge Tree" in response.text
+    assert "View Raw Ledger JSON" in response.text
+
+
+def test_resolve_returns_full_page_without_htmx(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    sample = _sample_decode_payload()
+
+    def fake_post(*args, **kwargs):  # noqa: ARG001
+        class Response:
+            status_code = 200
+            def json(self): return sample
+        return Response()
+
+    monkeypatch.setattr("httpx.post", fake_post)
+
+    response = client.post(
+        "/resolve",
+        data={"coordinate": "loam:WX-A71BA232-1784308498"},
+        cookies={app.BACKEND_SESSION_TOKEN_COOKIE: "valid-token"},
+    )
+    assert response.status_code == 200
+    assert "<html>" in response.text
+    assert "DualSubstrate // Resolver" in response.text
+    assert "Reconstructed Knowledge Tree" in response.text
+
+
+def test_feedback_submits_to_middleware(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    captured: dict[str, object] = {}
+
+    def fake_post(url: str, *, json: object, headers: object, timeout: float) -> object:  # noqa: ARG001
+        captured["url"] = url
+        captured["json"] = json
+        class Response:
+            status_code = 200
+            def json(self): return {"status": "ok"}
+        return Response()
+
+    monkeypatch.setattr("httpx.post", fake_post)
+
+    response = client.post(
+        "/feedback",
+        data={"coord": "loam:WX-A71BA232-1784308498", "rating": "3", "reason": "test"},
+        cookies={app.BACKEND_SESSION_TOKEN_COOKIE: "valid-token"},
+    )
+    assert response.status_code == 200
+    assert "Feedback submitted" in response.text
+    assert captured["url"] == f"{app.MIDDLEWARE_URL}/ledger/feedback/loam:WX-A71BA232-1784308498"
+    assert captured["json"]["rating"] == 3

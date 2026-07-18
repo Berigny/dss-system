@@ -19,6 +19,7 @@ from fasthtml.common import (
     H1,
     H2,
     H3,
+    Input,
     Li,
     P,
     Pre,
@@ -251,8 +252,28 @@ def _format_metric(value: object) -> str:
     return str(value)
 
 
+def _coord_ref_button(coord: str) -> Button:
+    """Return a clickable COORD button that resolves via HTMX."""
+    return Button(
+        coord if len(coord) <= 32 else f"{coord[:29]}...",
+        title=coord,
+        type="button",
+        cls="coord-ref-btn",
+        hx_post="/resolve",
+        hx_target="#result",
+        hx_swap="innerHTML",
+        hx_vals=json.dumps({"coordinate": coord}),
+        hx_indicator="#resolve-indicator",
+    )
+
+
 def _render_decode_result(payload: dict) -> Div:
-    """Render a backend decode payload as a human-readable result panel."""
+    """Render a backend decode payload as a human-readable result panel.
+
+    Mirrors the layout of Web4-Coordinate-Decode/decoder_app.py:
+    metric cards, reconstructed knowledge tree, content, referenced COORDs,
+    governance, meta, raw JSON expander, and feedback.
+    """
     meta = payload.get("meta") or {}
     governance = payload.get("governance") or {}
     appraisal = governance.get("appraisal") if isinstance(governance, dict) else {}
@@ -303,24 +324,23 @@ def _render_decode_result(payload: dict) -> Div:
 
     children = [
         Div(
+            metric_card("Coherence Norm", coherence or score or grace),
+            metric_card("Mediator Prime", law),
             metric_card("Type", coord_type),
-            metric_card("Namespace", namespace),
-            metric_card("Ledger", ledger_id),
             cls="metric-row",
         ),
+        H2("Reconstructed Knowledge Tree"),
         Div(
-            Div(
-                P(Strong("Summary"), cls="section-label"),
-                P(summary, cls="summary-text"),
-                cls="success-box",
-            )
+            P(Strong("Summary"), cls="section-label"),
+            P(summary, cls="summary-text"),
+            cls="success-box",
         ),
     ]
 
     if payload_text:
         children.append(
             Div(
-                H2("Content"),
+                H3("Content"),
                 Pre(payload_text, cls="content-body"),
                 cls="section",
             )
@@ -346,17 +366,24 @@ def _render_decode_result(payload: dict) -> Div:
         )
 
     if referenced:
+        per_row = 3
+        ref_rows: list[Div] = []
+        for row_start in range(0, len(referenced), per_row):
+            row = referenced[row_start : row_start + per_row]
+            ref_rows.append(
+                Div(*[_coord_ref_button(c) for c in row], cls="coord-ref-row")
+            )
         children.append(
             Div(
                 H3("Referenced COORDs"),
-                Ul(*[Li(ref) for ref in referenced]),
+                *ref_rows,
                 cls="section",
             )
         )
 
     children.append(
         Div(
-            H2("Governance"),
+            H3("Governance"),
             Div(
                 metric_card("Score", score),
                 metric_card("Law", law),
@@ -374,8 +401,9 @@ def _render_decode_result(payload: dict) -> Div:
 
     children.append(
         Div(
-            H2("Meta"),
+            H3("Meta"),
             P(Span(Strong("COORD: "), Span(coord))),
+            P(Span(Strong("Ledger: "), Span(ledger_id))),
             P(Span(Strong("Canonical DID: "), Span(canonical_did))),
             P(Span(Strong("Created at: "), Span(created_at))),
             cls="section",
@@ -390,11 +418,38 @@ def _render_decode_result(payload: dict) -> Div:
         )
     )
 
+    children.append(
+        Div(
+            H3("Human Feedback"),
+            P(f"Coordinate: {coord}"),
+            Form(
+                Input(type="hidden", name="coord", value=coord),
+                Div(
+                    Input(type="radio", name="rating", value="0", id=f"fb-r0-{coord}"),
+                    Span("Reject (0) ", style="margin-right: 0.75rem;"),
+                    Input(type="radio", name="rating", value="1", id=f"fb-r1-{coord}"),
+                    Span("Weak (1) ", style="margin-right: 0.75rem;"),
+                    Input(type="radio", name="rating", value="2", id=f"fb-r2-{coord}"),
+                    Span("Good (2) ", style="margin-right: 0.75rem;"),
+                    Input(type="radio", name="rating", value="3", checked=True, id=f"fb-r3-{coord}"),
+                    Span("Approve (3)"),
+                    cls="feedback-rating",
+                ),
+                Input(name="reason", value="investor_demo_review", placeholder="Reason", style="margin-top: 0.5rem;"),
+                Button("Submit rating", type="submit", cls="feedback-submit"),
+                action="/feedback",
+                method="post",
+                cls="feedback-form",
+            ),
+            cls="section feedback-section",
+        )
+    )
+
     return Div(*children, id="result", cls="decode-result")
 
 
 @rt("/")
-def index(request: Request):
+def index(request: Request, result: object = None):
     principal = getattr(request.state, "principal_did", None)
     header = (
         Div(
@@ -406,6 +461,13 @@ def index(request: Request):
     )
     styles = Style("""
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: #fafafa; color: #111; }
+        .page-header { text-align: center; margin-bottom: 2rem; }
+        .page-header h1 { font-family: 'Times New Roman', serif; font-weight: 400; margin-bottom: 0.25rem; }
+        .page-header .subtitle { color: #6b7280; font-size: 1.1rem; }
+        .resolve-form { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1.25rem; margin-bottom: 1rem; }
+        .resolve-form textarea { font-family: 'Courier New', monospace; border-bottom: 2px solid #333; }
+        .resolve-indicator { display: none; color: #6b7280; font-size: 0.9rem; margin-top: 0.5rem; }
+        .htmx-request .resolve-indicator, .resolve-indicator.htmx-request { display: block; }
         .decode-result { margin-top: 1.5rem; }
         .metric-row { display: flex; flex-wrap: wrap; gap: 1rem; margin: 1rem 0; }
         .metric-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.75rem 1rem; min-width: 120px; flex: 1 1 auto; }
@@ -420,17 +482,30 @@ def index(request: Request):
         .content-body { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 1rem; white-space: pre-wrap; line-height: 1.6; }
         ul { margin: 0.5rem 0; padding-left: 1.25rem; }
         li { margin: 0.25rem 0; }
+        .coord-ref-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.5rem 0; }
+        .coord-ref-btn { background: #fff; border: 1px solid #d1d5db; border-radius: 6px; padding: 0.4rem 0.75rem; font-family: 'Courier New', monospace; font-size: 0.85rem; cursor: pointer; }
+        .coord-ref-btn:hover { background: #f3f4f6; border-color: #9ca3af; }
         .raw-details { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.75rem 1rem; }
         .raw-details summary { cursor: pointer; font-weight: 600; }
         .raw-json { max-height: 500px; overflow: auto; background: #111827; color: #f3f4f6; padding: 1rem; border-radius: 6px; margin-top: 0.5rem; }
+        .feedback-form { margin-top: 0.75rem; }
+        .feedback-form input[type="text"] { width: 100%; margin-bottom: 0.5rem; }
+        .feedback-rating { display: flex; flex-wrap: wrap; gap: 0.25rem; align-items: center; margin-bottom: 0.5rem; }
+        .feedback-submit { margin-top: 0.5rem; }
+        .feedback-message { color: #10b981; font-weight: 500; }
+        .feedback-error { color: #ef4444; font-weight: 500; }
     """)
     return Titled(
-        "COORD Demo",
+        "DualSubstrate // Resolver",
         styles,
         Div(
-            H1("Resolve COORD"),
+            Div(
+                H1("DualSubstrate // Resolver"),
+                P("Universal Coherence Decoder", cls="subtitle"),
+                P("This tool demonstrates Protocol Independence. Input a Web4 Coordinate and any system with Ledger access can reconstruct the knowledge tree.", cls="muted"),
+                cls="page-header",
+            ),
             header,
-            P("Paste a Web4 Coordinate and submit it to the middleware resolver."),
             Form(
                 Textarea(
                     name="coordinate",
@@ -438,11 +513,17 @@ def index(request: Request):
                     rows=3,
                     style="width:100%;",
                 ),
-                Button("Resolve", type="submit"),
+                Button("Resolve Coordinate", type="submit", cls="primary"),
+                Div("Resolving…", id="resolve-indicator", cls="resolve-indicator"),
                 action="/resolve",
                 method="post",
+                hx_post="/resolve",
+                hx_target="#result",
+                hx_swap="innerHTML",
+                hx_indicator="#resolve-indicator",
+                cls="resolve-form",
             ),
-            Div(Pre(id="result"), id="result-container"),
+            Div(result if result is not None else Pre(id="result"), id="result-container"),
             style="max-width: 900px; margin: 0 auto; padding: 0 1rem;",
         ),
     )
@@ -452,9 +533,7 @@ def index(request: Request):
 def resolve(request: Request, coordinate: str):
     token = str(request.cookies.get(BACKEND_SESSION_TOKEN_COOKIE) or "").strip()
     payload = {"coordinate": coordinate.strip(), "ledger_id": DEFAULT_LEDGER_ID}
-    headers: dict[str, str] = {
-        "x-surface-id": "surface:coord-demo",
-    }
+    headers: dict[str, str] = {"x-surface-id": "surface:coord-demo"}
     if token:
         headers["x-session-token"] = token
     try:
@@ -470,14 +549,53 @@ def resolve(request: Request, coordinate: str):
                 body = json.dumps(response.json(), indent=2)
             except Exception:
                 pass
-            return Pre(
+            result = Pre(
                 f"Resolver error: HTTP {response.status_code}\n{body}",
                 id="result",
             )
-        decoded = response.json()
-        return _render_decode_result(decoded)
+        else:
+            result = _render_decode_result(response.json())
     except httpx.HTTPError as exc:
-        return Pre(f"Resolver error: {exc}", id="result")
+        result = Pre(f"Resolver error: {exc}", id="result")
+
+    if request.headers.get("HX-Request") == "true":
+        return result
+
+    # Non-HTMX fallback: render the full page with the result embedded.
+    return index(request, result=result)
+
+
+@rt("/feedback", methods=["post"])
+def feedback(request: Request, coord: str, rating: str, reason: str = ""):
+    """Forward human feedback to the middleware ledger feedback endpoint."""
+    token = str(request.cookies.get(BACKEND_SESSION_TOKEN_COOKIE) or "").strip()
+    headers: dict[str, str] = {"x-surface-id": "surface:coord-demo"}
+    if token:
+        headers["x-session-token"] = token
+    payload = {
+        "actor_id": "human:decoder",
+        "actor_type": "human",
+        "rating": int(rating),
+        "reason": (reason or "manual_rating").strip(),
+        "source": "decoder_app",
+    }
+    try:
+        response = httpx.post(
+            f"{MIDDLEWARE_URL}/ledger/feedback/{coord}",
+            json=payload,
+            headers=headers,
+            timeout=20.0,
+        )
+        if response.status_code >= 400:
+            detail = response.text
+            try:
+                detail = response.json().get("detail") or detail
+            except Exception:
+                pass
+            return P(f"Feedback submit failed: {detail}", cls="feedback-error")
+        return P("Feedback submitted.", cls="feedback-message")
+    except httpx.HTTPError as exc:
+        return P(f"Feedback submit failed: {exc}", cls="feedback-error")
 
 
 @rt("/auth/callback")
