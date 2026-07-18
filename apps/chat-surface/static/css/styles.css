@@ -909,6 +909,25 @@ body {
     background: #7f1d1d;
 }
 
+.message.error-turn {
+    border-left: 4px solid #7f1d1d;
+    background: #fef2f2;
+}
+
+.message.error-turn .error-detail {
+    background: #fee2e2;
+    border: 1px solid #fecaca;
+    border-radius: 0.375rem;
+    padding: 0.75rem;
+    margin-top: 0.5rem;
+    overflow-x: auto;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: #7f1d1d;
+}
+
 @keyframes toast-in {
     to {
         opacity: 1;

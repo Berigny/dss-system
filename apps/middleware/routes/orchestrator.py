@@ -1236,6 +1236,41 @@ def _resolve_runtime_actor(
     return actor_resolution, standing_envelope
 
 
+async def _verify_principal_ledger_connection(
+    *,
+    api_client: Any,
+    ledger_id: str,
+    principal_did: str | None,
+    auth_headers: dict[str, str] | None = None,
+) -> tuple[bool, list[dict[str, Any]]]:
+    """Return True if principal_did is actively connected to ledger_id.
+
+    Falls back to allowed when the backend check is unavailable so a
+    connection outage does not silently deny all chat answers.
+    """
+    if not ledger_id or not principal_did:
+        return True, []
+    try:
+        principals = await api_client.get_ledger_principals(
+            ledger_id,
+            auth_headers=auth_headers if isinstance(auth_headers, dict) else None,
+        )
+    except Exception as exc:
+        LOGGER.warning(
+            "ledger_principals check failed for ledger=%s principal=%s: %s",
+            ledger_id,
+            principal_did,
+            exc,
+        )
+        return True, []
+    if not isinstance(principals, list):
+        return True, []
+    for principal in principals:
+        if isinstance(principal, dict) and str(principal.get("principal_did") or "").strip() == principal_did:
+            return True, principals
+    return False, principals
+
+
 def _collect_available_threads(
     *,
     planned_coords: list[str],
@@ -7643,6 +7678,46 @@ def register_orchestrator_routes(rt):
             provider=provider,
             agent=agent,
         )
+        answering_principal_did = str(actor_resolution.get("actor_did") or "").strip() or None
+        authority_matrix = {
+            "answering_principal": answering_principal_did,
+            "selected_agent": agent,
+            "runtime_model": agent or settings.LLM_MODEL,
+        }
+        if enable_ledger and entity and answering_principal_did and not BREAK_GLASS_UNSAFE_PROFILE:
+            is_connected, ledger_principals = await _verify_principal_ledger_connection(
+                api_client=api,
+                ledger_id=entity,
+                principal_did=answering_principal_did,
+                auth_headers=auth_headers if isinstance(auth_headers, dict) else None,
+            )
+            if not is_connected:
+                LOGGER.warning(
+                    "authority_matrix_blocked: ledger=%s principal=%s agent=%s",
+                    entity,
+                    answering_principal_did,
+                    agent,
+                )
+
+                async def _authority_error_stream():
+                    yield _ndjson_event({
+                        "type": "error",
+                        "error_code": "principal_not_authorized_for_surface",
+                        "message": (
+                            f"Selected agent is not authorized for ledger '{entity}'. "
+                            "Reconnect the principal in Control Plane and try again."
+                        ),
+                        "authority_matrix": {**authority_matrix, "ledger_principals": ledger_principals},
+                    })
+
+                return StreamingResponse(
+                    _authority_error_stream(),
+                    media_type="application/x-ndjson",
+                    headers={
+                        "Cache-Control": "no-cache, no-store, must-revalidate, no-transform",
+                        "X-Authority-Matrix-Blocked": "true",
+                    },
+                )
         model_auth_context = _build_model_auth_context(
             actor_resolution=actor_resolution,
             standing_envelope=standing_envelope,
@@ -9172,6 +9247,9 @@ def register_orchestrator_routes(rt):
                 commit_metadata = {
                     "model": response_model,
                     "provider": provider,
+                    "answering_principal": authority_matrix.get("answering_principal"),
+                    "selected_agent": authority_matrix.get("selected_agent"),
+                    "runtime_model": authority_matrix.get("runtime_model"),
                     "content": reply_text,
                     "content_preview": str(reply_text or "")[:160],
                     "session_id": session_id,

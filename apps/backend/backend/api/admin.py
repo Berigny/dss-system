@@ -2157,6 +2157,52 @@ def _effective_control_plane_relationships(db) -> dict[str, dict[str, Any]]:
     return effective
 
 
+def _active_principals_for_ledger(db, ledger_id: str) -> list[dict[str, Any]]:
+    """Return principals with an active writes_to_ledger or member_of_ledger link."""
+    if not ledger_id:
+        return []
+    canonical_ledger_id = str(ledger_id or "").strip()
+    relationships = _effective_control_plane_relationships(db)
+    principals = _load_registered_principals_v1(db)
+    active: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    today_iso = datetime.now(timezone.utc).date().isoformat()
+    for record in relationships.values():
+        if not isinstance(record, dict):
+            continue
+        if str(record.get("object_entity_type") or "").strip().lower() != "ledger":
+            continue
+        if str(record.get("object_entity_id") or "").strip() != canonical_ledger_id:
+            continue
+        rel_type = str(record.get("relationship_type") or "").strip().lower()
+        if rel_type not in {"writes_to_ledger", "member_of_ledger"}:
+            continue
+        if not _relationship_effective_enabled(record, today_iso):
+            continue
+        principal_did = str(record.get("subject_entity_id") or "").strip()
+        if not principal_did or principal_did in seen:
+            continue
+        if str(record.get("subject_entity_type") or "").strip().lower() != "principal":
+            continue
+        principal = principals.get(principal_did) if isinstance(principals, dict) else None
+        if not isinstance(principal, dict):
+            continue
+        principal_status = str(principal.get("status") or "").strip().lower() or "active"
+        if principal_status in {"disabled", "expired", "retired"}:
+            continue
+        seen.add(principal_did)
+        active.append({
+            "principal_did": principal_did,
+            "principal_type": str(principal.get("principal_type") or principal.get("metadata", {}).get("actor_type") or "").strip() or None,
+            "display_name": str(principal.get("display_name") or "").strip() or None,
+            "relationship_type": rel_type,
+            "relationship_id": str(record.get("relationship_id") or "").strip() or None,
+            "enabled_state": str(record.get("enabled_state") or "enabled").strip(),
+            "derived": bool(record.get("metadata", {}).get("derived")),
+        })
+    return active
+
+
 def _load_provider_credentials_v1(db) -> dict[str, dict[str, Any]]:
     raw = db.get(PROVIDER_CREDENTIAL_REGISTRY_V1_KEY)
     registry: dict[str, dict[str, Any]] = {}
@@ -5798,6 +5844,23 @@ def control_plane_list_relationships(request: Request, db=Depends(get_db)):
     _authorize_admin_scope(request, ledger_id="default", action="ledger.read")
     registry_v1 = _effective_control_plane_relationships(db)
     return {"status": "ok", "relationships": [_annotate_control_plane_row(registry_v1[key], kind="relationship") for key in sorted(registry_v1.keys())]}
+
+
+@control_plane_router.get("/ledger-principals")
+def control_plane_list_ledger_principals(
+    request: Request,
+    ledger_id: str,
+    db=Depends(get_db),
+):
+    _require_control_plane_authenticated(request)
+    _authorize_admin_scope(request, ledger_id=ledger_id or "default", action="ledger.read")
+    canonical_ledger_id = _normalize_related_ledger_id(ledger_id) if ledger_id else ""
+    principals = _active_principals_for_ledger(db, canonical_ledger_id)
+    return {
+        "status": "ok",
+        "ledger_id": canonical_ledger_id,
+        "principals": principals,
+    }
 
 
 @control_plane_router.post("/relationships")

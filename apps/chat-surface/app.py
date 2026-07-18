@@ -2837,11 +2837,36 @@ async def proxy_smart_stream(request: Request):
             )
 
         if upstream_resp.status_code >= 400:
-            detail = await upstream_resp.aread()
-            payload = {
-                "detail": detail.decode("utf-8", errors="ignore") or "Upstream request failed",
-                "upstream_url": upstream_url,
-            }
+            raw_body = await upstream_resp.aread()
+            text_body = raw_body.decode("utf-8", errors="ignore") or ""
+            parsed_body: dict[str, Any] | None = None
+            try:
+                parsed = json.loads(text_body) if text_body else None
+                parsed_body = parsed if isinstance(parsed, dict) else None
+            except Exception:
+                parsed_body = None
+
+            if parsed_body and parsed_body.get("status") == "error" and parsed_body.get("error_code"):
+                payload = {
+                    "status": "error",
+                    "error_code": str(parsed_body["error_code"]),
+                    "detail": parsed_body.get("detail") if parsed_body.get("detail") is not None else text_body,
+                    "upstream_url": upstream_url,
+                }
+            elif parsed_body and (parsed_body.get("error") or parsed_body.get("error_code")):
+                payload = {
+                    "status": "error",
+                    "error_code": str(parsed_body.get("error_code") or parsed_body.get("error") or f"http_{upstream_resp.status_code}"),
+                    "detail": parsed_body.get("detail") if parsed_body.get("detail") is not None else text_body,
+                    "upstream_url": upstream_url,
+                }
+            else:
+                payload = {
+                    "status": "error",
+                    "error_code": f"http_{upstream_resp.status_code}",
+                    "detail": text_body or "Upstream request failed",
+                    "upstream_url": upstream_url,
+                }
             if upstream_resp.status_code == 401:
                 payload["login_url"] = _control_plane_login_url(request)
             response = JSONResponse(payload, status_code=upstream_resp.status_code)

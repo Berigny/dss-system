@@ -47,7 +47,8 @@ def test_decode_coordinate_returns_403_on_decode_requires_authenticated_principa
     assert resp.status_code == 403
     body = resp.json()
     assert body.get("error_code") == "decode_requires_authenticated_principal"
-    assert body.get("detail", {}).get("error") == "decode_requires_authenticated_principal"
+    assert "error" not in body.get("detail", {})
+    assert body.get("detail", {}).get("surface_id") == "surface:coord-demo"
     assert "X-Decode-Diagnostics" in resp.headers
 
 
@@ -68,7 +69,8 @@ def test_decode_coordinate_returns_401_on_token_validation_failed(monkeypatch):
     assert resp.status_code == 401
     body = resp.json()
     assert body.get("error_code") == "token_validation_failed"
-    assert body.get("detail", {}).get("error") == "token_validation_failed"
+    assert "error" not in body.get("detail", {})
+    assert body.get("detail", {}).get("reason") == "token_expired"
     assert "X-Decode-Diagnostics" in resp.headers
 
 
@@ -85,7 +87,41 @@ def test_decode_coordinate_returns_400_on_backend_client_error(monkeypatch):
     assert resp.status_code == 400
     body = resp.json()
     assert body.get("error_code") == "ledger_scope_mismatch"
+    assert "error" not in body.get("detail", {})
     assert "X-Decode-Diagnostics" in resp.headers
+
+
+def test_decode_coordinate_flattens_double_nested_ledger_scope_mismatch(monkeypatch):
+    """DSS-282: legacy backend bodies can be double-nested; ensure the response is flat."""
+    async def fake_decode_coordinate(_coord: str, **kwargs):
+        raise BackendDecodeError(
+            status_code=400,
+            body={
+                "status": "error",
+                "error_code": "ledger_scope_mismatch",
+                "detail": {
+                    "status": "error",
+                    "error_code": "ledger_scope_mismatch",
+                    "detail": {
+                        "error": "ledger_scope_mismatch",
+                        "payload_ledger_id": None,
+                        "header_ledger_id": "loam-root-01",
+                        "path_ledger_id": "loam",
+                    },
+                },
+            },
+        )
+
+    monkeypatch.setattr(app_module.api, "decode_coordinate", fake_decode_coordinate)
+
+    resp = client.post("/api/decode_coordinate", json={"coordinate": "loam:WX-1"})
+    assert resp.status_code == 400
+    body = resp.json()
+    assert body.get("error_code") == "ledger_scope_mismatch"
+    detail = body.get("detail") or {}
+    assert "error" not in detail
+    assert detail.get("header_ledger_id") == "loam-root-01"
+    assert detail.get("path_ledger_id") == "loam"
 
 
 def test_decode_coordinate_returns_503_on_backend_database_locked(monkeypatch):

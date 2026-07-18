@@ -658,6 +658,30 @@ class APIClient:
             resp.raise_for_status()
             return resp.json()
 
+    async def get_ledger_principals(
+        self,
+        ledger_id: str,
+        *,
+        auth_headers: dict[str, str] | None = None,
+    ) -> list[dict[str, Any]]:
+        """Fetch active principals authorized for a ledger."""
+        safe_ledger = httpx.URL(path=f"/{ledger_id}").path.lstrip("/")
+        url = f"{self.base_url}/control-plane/ledger-principals"
+        params = {"ledger_id": safe_ledger}
+        headers = self._request_headers(auth_headers=auth_headers)
+        admin_token = (os.getenv("ADMIN_TOKEN") or os.getenv("TRUST_ANCHOR_ADMIN_TOKEN") or "").strip()
+        if admin_token and not headers.get("x-admin-token"):
+            headers["x-admin-token"] = admin_token
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            resp = await client.get(url, params=params, headers=headers)
+            if resp.status_code == 404:
+                return []
+            resp.raise_for_status()
+            data = resp.json()
+            if not isinstance(data, dict):
+                return []
+            return data.get("principals") if isinstance(data.get("principals"), list) else []
+
     # --- Enrichment ---
 
     async def enrich(

@@ -2096,9 +2096,10 @@ def test_render_activity_page_labels_raw_payload_as_secondary() -> None:
     )
     assert "Principal identity: did:web:id.dualsubstrate.com:principals:alice" in html
     assert "Alice" in html
-    # Expanding detail panels were removed in the two-tab redesign.
-    assert "Overview" not in html
-    assert "Raw payload" not in html
+    # Rows are now expandable and expose overview telemetry plus the full payload.
+    assert '<details class="activity-row"' in html
+    assert "Overview" in html
+    assert "Full payload" in html
 
 
 def test_render_activity_page_governance_rows_show_open_copy_share_actions() -> None:
@@ -2178,7 +2179,9 @@ def test_render_activity_page_tag_and_reference_filters_preserve_state() -> None
     # Filter state is preserved in hidden inputs for the search form.
     assert 'name="tag" value="permissioned"' in html
     assert 'name="ref" value="coord"' in html
-    assert 'class="activity-search-category"' in html
+    # The ledger/category dropdown filters were removed.
+    assert 'class="activity-search-category"' not in html
+    assert 'aria-label="Filter by ledger"' not in html
 
 
 def test_render_activity_page_includes_recent_ledger_entry_coords() -> None:
@@ -6331,12 +6334,11 @@ def test_render_activity_page_shows_ledger_selector_when_multiple_ledgers_visibl
         submissions=[],
         ledger_entries=ledger_entries,
     )
-    assert '<select aria-label="Filter by ledger"' in html
-    assert 'ledger=loam' in html
-    assert 'ledger=chat-demo' in html
-    assert '>All ledgers</option>' in html
-    assert '>loam</option>' in html
-    assert '>chat-demo</option>' in html
+    # Ledger filter dropdown was removed; rows from both ledgers are still shown.
+    assert 'aria-label="Filter by ledger"' not in html
+    assert '>All ledgers</option>' not in html
+    assert "loam:WX-123" in html
+    assert "chat-demo:WX-456" in html
 
 
 def test_render_activity_page_hides_ledger_selector_for_single_ledger() -> None:
@@ -6376,3 +6378,133 @@ def test_settings_connection_shortcuts_include_orphan_ledgers_link() -> None:
     html = dashboard_app._render_settings_connection_shortcuts(context, {"identity_vc": {}})
     assert 'href="/settings/orphan-ledgers"' in html
     assert '>Orphan ledgers</a>' in html
+
+
+
+def test_render_activity_page_no_ledger_or_category_dropdown() -> None:
+    html = dashboard_app.render_activity_page(
+        _make_request(),
+        principals=[],
+        selected_principal="",
+        lookup={},
+        connection_context=_empty_connection_context(),
+        control_plane_state={},
+        submissions=[],
+    )
+    assert 'aria-label="Filter by ledger"' not in html
+    assert 'class="activity-search-category"' not in html
+    assert '<select name="cat"' not in html
+
+
+def test_render_activity_page_search_form_appears_above_tabs() -> None:
+    html = dashboard_app.render_activity_page(
+        _make_request(),
+        principals=[],
+        selected_principal="",
+        lookup={},
+        connection_context=_empty_connection_context(),
+        control_plane_state={},
+        submissions=[],
+    )
+    search_index = html.find('class="activity-search-bar"')
+    tabs_index = html.find('aria-label="Activity views"')
+    assert search_index != -1
+    assert tabs_index != -1
+    assert search_index < tabs_index
+
+
+def test_render_activity_page_default_sort_is_name_asc() -> None:
+    html = dashboard_app.render_activity_page(
+        _make_request(),
+        principals=[],
+        selected_principal="",
+        lookup={},
+        connection_context=_empty_connection_context(),
+        control_plane_state={},
+        submissions=[],
+    )
+    # Default name sort is ascending, so the next click flips to desc.
+    assert 'sort_by=name&amp;sort_dir=desc' in html
+    # Only the Name header shows a chevron by default.
+    assert '>Name ▲' in html
+    assert '>Type</a>' in html
+    assert '>Event</a>' in html
+
+
+def test_render_activity_page_sort_indicators_only_on_active_column() -> None:
+    html = dashboard_app.render_activity_page(
+        _make_request("sort_by=type&sort_dir=desc"),
+        principals=[],
+        selected_principal="",
+        lookup={},
+        connection_context=_empty_connection_context(),
+        control_plane_state={},
+        submissions=[],
+    )
+    assert '>Type ▼' in html
+    # Name link points to asc (it is not active) and has no chevron.
+    assert '>Name ▲' not in html
+    assert '>Name ▼' not in html
+    assert '>Event ▲' not in html
+    assert '>Event ▼' not in html
+
+
+def test_render_activity_page_expander_renders_human_text_telemetry_and_payload() -> None:
+    html = dashboard_app.render_activity_page(
+        _make_request(),
+        principals=[],
+        selected_principal="",
+        lookup={},
+        connection_context=_empty_connection_context(),
+        control_plane_state={},
+        submissions=[],
+        ledger_entries=[
+            {
+                "key": {"namespace": "loam", "identifier": "WX-EXPAND"},
+                "created_at": "2026-07-18T00:00:00+00:00",
+                "coordinate": "loam:WX-EXPAND",
+                "type": "WX",
+                "state": {
+                    "metadata": {
+                        "kind": "chat",
+                        "role": "assistant",
+                        "content": "Visible answer text.",
+                        "delegated_prompt_path": {
+                            "prompt_principal_display_name": "Moonshot: Kimi-code",
+                            "response_model_label": "moonshotai/kimi-k2.5",
+                            "requested_by_principal_did": "did:key:z6MkOperator",
+                        },
+                    }
+                },
+            }
+        ],
+    )
+    assert '<details class="activity-row"' in html
+    assert 'class="activity-human-text"' in html
+    assert "Visible answer text." in html
+    assert 'class="activity-telemetry-sections"' in html
+    assert "Moonshot: Kimi-code" in html
+    assert "moonshotai/kimi-k2.5" in html
+    assert 'class="activity-json-payload"' in html
+    assert "loam:WX-EXPAND" in html
+
+
+def test_render_activity_page_includes_delegated_agent_principal() -> None:
+    html = dashboard_app.render_activity_page(
+        _make_request(),
+        principals=[
+            {
+                "principal_did": "did:web:id.dualsubstrate.com:principals:agent:moonshot:kimi-code",
+                "display_name": "Moonshot: Kimi-code",
+                "status": "active",
+                "metadata": {"actor_type": "service", "service_subtype": "delegated_agent"},
+            }
+        ],
+        selected_principal="",
+        lookup={},
+        connection_context=_empty_connection_context(),
+        control_plane_state={},
+        submissions=[],
+    )
+    assert "Moonshot: Kimi-code" in html
+    assert "Principal activity" in html

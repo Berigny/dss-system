@@ -34,6 +34,16 @@ function parseCoordinateJson(text) {
     });
 }
 
+function escapeHtml(text) {
+    if (text == null) return '';
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 const threadlessMetrics = {
     isGhostState: false,
     sessionCost: 0,
@@ -1772,20 +1782,20 @@ async function readStream(response, onEvent) {
     if (!response.ok || !response.body) {
         const raw = await response.text();
         let detail = '';
+        let errorCode = '';
         let loginUrl = '';
+        let upstreamUrl = '';
         try {
             const parsed = raw ? JSON.parse(raw) : null;
             if (parsed && typeof parsed === 'object') {
+                errorCode = typeof parsed.error_code === 'string' ? parsed.error_code.trim() : '';
                 const d = parsed.detail;
                 if (typeof d === 'string' && d.trim()) {
                     detail = d.trim();
                 } else if (d && typeof d === 'object') {
-                    detail = JSON.stringify(d);
+                    detail = JSON.stringify(d, null, 2);
                 }
-                const upstreamUrl = typeof parsed.upstream_url === 'string' ? parsed.upstream_url.trim() : '';
-                if (upstreamUrl) {
-                    detail = detail ? `${detail} | upstream=${upstreamUrl}` : `upstream=${upstreamUrl}`;
-                }
+                upstreamUrl = typeof parsed.upstream_url === 'string' ? parsed.upstream_url.trim() : '';
                 loginUrl = typeof parsed.login_url === 'string' ? parsed.login_url.trim() : '';
             }
         } catch (_err) {
@@ -1797,7 +1807,13 @@ async function readStream(response, onEvent) {
         }
         const fallback = String(raw || '').trim();
         const message = detail || fallback || `Stream failed (${response.status})`;
-        throw new Error(`Stream failed (${response.status}): ${message}`);
+        const error = new Error(`Stream failed (${response.status}): ${message}`);
+        error.error_code = errorCode || `http_${response.status}`;
+        error.detail = detail;
+        error.upstream_url = upstreamUrl;
+        error.login_url = loginUrl;
+        error.status = response.status;
+        throw error;
     }
 
     const reader = response.body.getReader();
@@ -2376,7 +2392,11 @@ async function handleStreamedChatSubmit(event) {
                     : typeof payload.detail === 'string' && payload.detail.trim()
                         ? payload.detail.trim()
                         : 'Streaming chat failed';
-                throw new Error(message);
+                const error = new Error(message);
+                error.error_code = typeof payload.error_code === 'string' ? payload.error_code.trim() : '';
+                error.detail = typeof payload.detail === 'string' ? payload.detail.trim() : '';
+                error.authority_matrix = payload.authority_matrix && typeof payload.authority_matrix === 'object' ? payload.authority_matrix : null;
+                throw error;
             }
 
             if (payload.type === 'context_item') {
@@ -2781,7 +2801,25 @@ async function handleStreamedChatSubmit(event) {
             streamRenderFrame = null;
         }
         assistant.content.classList.remove('streaming-active', 'streaming-complete');
-        assistant.content.textContent = error.message || 'Streaming chat failed';
+        assistant.bubble.classList.add('error-turn');
+        if (turn) {
+            turn.setAttribute('data-error-turn', 'true');
+        }
+        const errorCode = error && typeof error.error_code === 'string' ? error.error_code : '';
+        const errorDetail = error && typeof error.detail === 'string' && error.detail.trim()
+            ? error.detail.trim()
+            : '';
+        let errorDisplay = '';
+        if (errorCode) {
+            errorDisplay += `<strong>${escapeHtml(errorCode)}</strong>`;
+        }
+        if (errorDetail) {
+            errorDisplay += (errorDisplay ? '<br>' : '') + `<pre class="error-detail">${escapeHtml(errorDetail)}</pre>`;
+        }
+        if (!errorDisplay) {
+            errorDisplay = escapeHtml(error.message || 'Streaming chat failed');
+        }
+        assistant.content.innerHTML = errorDisplay;
         if (assistant.ticker) {
             assistant.ticker.textContent = '';
             assistant.ticker.style.display = 'none';
@@ -3247,13 +3285,14 @@ async function finalizeStreamedHistory() {
     const entity = getActiveHistoryEntity();
     const limit = Number(loader.dataset.historyLimit || '5');
     const streamed = document.querySelector('[data-streamed-turn="true"]');
+    const isErrorTurn = streamed && streamed.getAttribute('data-error-turn') === 'true';
     try {
         await fetchAndSwapHistory(entity, limit);
     } catch (error) {
         console.warn('Unable to refresh history after stream', error);
         return;
     }
-    if (streamed && streamed.parentElement) {
+    if (streamed && streamed.parentElement && !isErrorTurn) {
         streamed.remove();
     }
 }

@@ -13,8 +13,11 @@ from urllib.parse import quote
 import httpx
 from fasthtml.common import (
     Button,
+    Dd,
     Details,
     Div,
+    Dl,
+    Dt,
     Form,
     H1,
     H2,
@@ -494,6 +497,11 @@ def index(request: Request, result: object = None):
         .feedback-submit { margin-top: 0.5rem; }
         .feedback-message { color: #10b981; font-weight: 500; }
         .feedback-error { color: #ef4444; font-weight: 500; }
+        .error-box { padding: 1rem 1.25rem; border-left: 4px solid #ef4444; background-color: #fef2f2; border-radius: 0 8px 8px 0; margin: 1rem 0; }
+        .error-code { font-family: 'Courier New', monospace; font-weight: 600; color: #b91c1c; }
+        .error-detail { background: #fff; border: 1px solid #fecaca; border-radius: 8px; padding: 1rem; margin-top: 0.75rem; }
+        .error-detail dt { font-weight: 600; color: #7f1d1d; }
+        .error-detail dd { margin-left: 0; margin-bottom: 0.5rem; }
     """)
     return Titled(
         "DualSubstrate // Resolver",
@@ -529,6 +537,42 @@ def index(request: Request, result: object = None):
     )
 
 
+def _format_error_detail(detail: object) -> Div:
+    """Render structured error detail as a definition list."""
+    if isinstance(detail, dict):
+        items = []
+        for key, value in detail.items():
+            items.append(Dt(key))
+            items.append(Dd(json.dumps(value, indent=2) if isinstance(value, (dict, list)) else str(value)))
+        return Dl(*items, cls="error-detail")
+    if isinstance(detail, str) and detail.strip():
+        return Pre(detail.strip(), cls="error-detail")
+    return P("No additional detail available.")
+
+
+def _render_decode_error(status_code: int, body: object) -> Div:
+    """Render a structured middleware decode error instead of generic text."""
+    error_code = f"http_{status_code}"
+    detail: object = None
+    if isinstance(body, dict):
+        error_code = str(body.get("error_code") or error_code).strip()
+        detail = body.get("detail")
+
+    return Div(
+        Div(
+            P(Strong("Resolution failed"), cls="section-label"),
+            P(
+                Span("Error code: "),
+                Span(error_code, cls="error-code"),
+            ),
+            _format_error_detail(detail),
+            cls="error-box",
+        ),
+        id="result",
+        cls="decode-result decode-error",
+    )
+
+
 @rt("/resolve", methods=["post"])
 def resolve(request: Request, coordinate: str):
     token = str(request.cookies.get(BACKEND_SESSION_TOKEN_COOKIE) or "").strip()
@@ -544,19 +588,16 @@ def resolve(request: Request, coordinate: str):
             timeout=30.0,
         )
         if response.status_code >= 400:
-            body = response.text
+            body: object = response.text
             try:
-                body = json.dumps(response.json(), indent=2)
+                body = response.json()
             except Exception:
                 pass
-            result = Pre(
-                f"Resolver error: HTTP {response.status_code}\n{body}",
-                id="result",
-            )
+            result = _render_decode_error(response.status_code, body)
         else:
             result = _render_decode_result(response.json())
     except httpx.HTTPError as exc:
-        result = Pre(f"Resolver error: {exc}", id="result")
+        result = _render_decode_error(502, {"error_code": "upstream_unavailable", "detail": str(exc)})
 
     if request.headers.get("HX-Request") == "true":
         return result

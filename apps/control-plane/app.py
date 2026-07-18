@@ -18822,6 +18822,75 @@ def _activity_detail_sections(row: dict[str, Any]) -> list[tuple[str, list[tuple
     return sections
 
 
+def _render_activity_row_panel(row: dict[str, Any]) -> str:
+    """Render the expander panel for an activity row.
+
+    Shows, in order:
+      1. Human-readable payload text.
+      2. Collapsible telemetry sections (attribution, delegation, etc.).
+      3. The full ledger/event payload as pretty-printed JSON.
+    """
+    details = _as_dict(row.get("details"))
+
+    # 1. Human-readable text
+    human_text = ""
+    for candidate in (
+        details.get("content"),
+        details.get("assistant_reply"),
+        details.get("user_message"),
+        details.get("prompt"),
+        details.get("text"),
+        _as_dict(details.get("skim")).get("one_line"),
+        row.get("summary"),
+    ):
+        text = str(candidate or "").strip()
+        if text:
+            human_text = text
+            break
+    if not human_text:
+        payload_blobs = _as_dict(_as_dict(details.get("payload")).get("blobs"))
+        for blob_value in payload_blobs.values():
+            text = str(blob_value or "").strip()
+            if text:
+                human_text = text
+                break
+    if not human_text:
+        human_text = str(row.get("summary") or "No human-readable text available.")
+
+    human_html = f'<div class="activity-human-text">{html.escape(human_text)}</div>'
+
+    # 2. Telemetry sections
+    telemetry_html = ""
+    sections = _activity_detail_sections(row)
+    if sections:
+        section_blocks = []
+        for title, fields in sections:
+            field_html = "".join(
+                f'<dt>{html.escape(str(label))}</dt><dd>{html.escape(str(value))}</dd>'
+                for label, value in fields
+            )
+            section_blocks.append(
+                f'<details class="relationship-subpanel">'
+                f'<summary>{html.escape(title)}</summary>'
+                f'<div class="relationship-subpanel-body">'
+                f'<dl class="activity-detail-list">{field_html}</dl>'
+                f'</div></details>'
+            )
+        telemetry_html = f'<div class="activity-telemetry-sections">{"".join(section_blocks)}</div>'
+
+    # 3. Full payload
+    full_payload_text = json.dumps(dict(row), indent=2, sort_keys=True, default=str)
+    full_html = (
+        f'<details class="relationship-subpanel">'
+        f'<summary>Full payload</summary>'
+        f'<div class="relationship-subpanel-body">'
+        f'<pre class="activity-json-payload"><code>{html.escape(full_payload_text)}</code></pre>'
+        f'</div></details>'
+    )
+
+    return f'<div class="activity-row-panel">{human_html}{telemetry_html}{full_html}</div>'
+
+
 def _activity_share_bundle(row: dict[str, Any]) -> tuple[str, bool, str]:
     details = _as_dict(row.get("details"))
     standing = _as_dict(details.get("standing_view"))
@@ -19588,6 +19657,27 @@ def _normalize_event_stream(
                     "details": {**approval, "canonical_subject": canonical_subject, "display_name": display_name},
                 }
             )
+        # Emit a non-suppressed activity event so every principal (including
+        # delegated agents and runtime model principals) is visible in the
+        # Activity log, not just the Entity log record projection.
+        events.append(
+            {
+                "event_type": "principal.activity",
+                "event_group": "principal",
+                "timestamp": str(principal.get("updated_at") or created_at),
+                "actor": "control-plane",
+                "entity_type": "principal",
+                "entity_id": principal_did,
+                "ledger_id": str(metadata.get("ledger_id") or ""),
+                "coord": str(metadata.get("coord") or principal_did),
+                "status": status or "unknown",
+                "summary": f"Principal activity: {display_name}",
+                "canonical_subject": canonical_subject,
+                "canonical_subject_source": str(principal.get("canonical_subject_source") or "principal_did").strip() or "principal_did",
+                "display_label": display_name,
+                "details": {"display_name": display_name, "status": status or "unknown", "canonical_subject": canonical_subject, "principal_did": principal_did},
+            }
+        )
 
     for ledger in connection_context.get("ledgers", []):
         ledger_id = str(ledger.get("ledger_id") or "").strip()
@@ -19763,15 +19853,12 @@ def render_activity_page(
     tag_filter = str(request.query_params.get("tag") or "").strip().lower()
     reference_filter = str(request.query_params.get("ref") or "").strip().lower()
     text_filter = str(request.query_params.get("q") or "").strip().lower()
-    search_category = str(request.query_params.get("cat") or "all").strip().lower()
-    if search_category not in {"all", "name", "type", "event"}:
-        search_category = "all"
-    sort_by = str(request.query_params.get("sort_by") or "when").strip().lower()
-    sort_dir = str(request.query_params.get("sort_dir") or "desc").strip().lower()
+    sort_by = str(request.query_params.get("sort_by") or "name").strip().lower()
+    sort_dir = str(request.query_params.get("sort_dir") or "asc").strip().lower()
     if sort_by not in {"when", "name", "type", "event", "entity", "status"}:
-        sort_by = "when"
+        sort_by = "name"
     if sort_dir not in {"asc", "desc"}:
-        sort_dir = "desc"
+        sort_dir = "asc"
     date_from_filter = str(request.query_params.get("date_from") or "").strip()
     date_to_filter = str(request.query_params.get("date_to") or "").strip()
     recent_period = str(request.query_params.get("recent") or "").strip().lower()
@@ -19821,9 +19908,6 @@ def render_activity_page(
     else:
         filtered_rows.sort(key=lambda item: _activity_sort_value(item, sort_by).lower(), reverse=reverse_sort)
 
-    entity_type_options = sorted({str(item.get("entity_type") or "").strip() for item in rows if str(item.get("entity_type") or "").strip()})
-    status_options = sorted({str(item.get("status") or "").strip() for item in rows if str(item.get("status") or "").strip()})
-    ledger_options = sorted({str(item.get("ledger_id") or "").strip() for item in rows if str(item.get("ledger_id") or "").strip()})
     base_query_params = {
         key: value
         for key, value in {
@@ -19839,39 +19923,25 @@ def render_activity_page(
             "date_to": date_to_filter,
             "recent": recent_period,
             "q": text_filter,
-            "cat": search_category,
             "sort_by": sort_by,
             "sort_dir": sort_dir,
         }.items()
         if str(value or "").strip()
     }
 
-    ledger_select_html = ""
-    if len(ledger_options) > 1:
-        ledger_option_links = "".join(
-            f'<option value="{html.escape(_activity_query_href(base_query_params, ledger=opt))}"{" selected" if opt.lower() == ledger_filter else ""}>{html.escape(opt)}</option>'
-            for opt in ledger_options
-        )
-        ledger_select_html = f'''<div class="activity-filter-bar">
-          <select aria-label="Filter by ledger" onchange="window.location.href = this.value;">
-            <option value="{html.escape(_activity_query_href(base_query_params, ledger=''))}">All ledgers</option>
-            {ledger_option_links}
-          </select>
-        </div>'''
-
-    option_html = lambda values, current: "".join(
-        f'<option value="{html.escape(v)}"{" selected" if v.lower() == current else ""}>{html.escape(v)}</option>' for v in values
-    )
     def _next_dir(field: str) -> str:
         if sort_by == field and sort_dir == "asc":
             return "desc"
         return "asc"
+
     def _indicator(field: str) -> str:
         if sort_by != field:
             return ""
         return " ▲" if sort_dir == "asc" else " ▼"
+
     def _sort_link(field: str) -> str:
         return _activity_query_href(base_query_params, sort_by=field, sort_dir=_next_dir(field))
+
     tab_counts = {
         "activity": sum(1 for item in rows if _activity_segment(item) != "record"),
         "entity": sum(1 for item in rows if _activity_segment(item) == "record"),
@@ -19892,27 +19962,30 @@ def render_activity_page(
 
     activity_rows_html = "".join(
         f"""
-        <div class="activity-row" data-activity-row data-filter-name="{html.escape((str(row.get('display_label') or '') + ' ' + str(row.get('type_label') or '') + ' ' + str(row.get('summary') or '') + ' ' + str(row.get('reference') or '') + ' ' + str(row.get('coord') or '')).lower())}" data-activity-name="{html.escape(str(row.get('display_label') or row.get('canonical_subject') or '').lower())}" data-activity-type="{html.escape(str(row.get('type_label') or row.get('row_kind') or '').lower())}" data-activity-event="{html.escape(str(row.get('summary') or '').lower())}" data-pageable-item data-pageable-kind="entries">
-          <span class="activity-cell activity-cell-name">
-            <a href="{html.escape(str(row.get('open_href') or _activity_entity_href(str(row.get('entity_type') or ''), str(row.get('entity_id') or '')) or '/activity'))}">
-              <strong>{html.escape(str(row.get("display_label") or row.get("canonical_subject") or row.get("actor") or "Unknown"))}</strong>
-            </a>
-          </span>
-          <span class="activity-cell activity-cell-type">
-            <span class="activity-type-label">{html.escape(str(row.get("type_label") or row.get("row_kind") or "Event"))}</span>
-          </span>
-          <span class="activity-cell activity-cell-event">
-            <strong>{html.escape(str(row.get("summary") or "Untitled row"))}</strong>
-            <span class="activity-cell-meta">{html.escape(" · ".join(
-                part for part in (
-                    str(row.get("status") or "unknown").title(),
-                    _format_activity_timestamp(row.get("timestamp")),
-                    str(row.get("reference") or "").strip(),
-                )
-                if str(part or "").strip()
-            ))}</span>
-          </span>
-        </div>
+        <details class="activity-row" data-activity-row data-filter-name="{html.escape((str(row.get('display_label') or '') + ' ' + str(row.get('type_label') or '') + ' ' + str(row.get('summary') or '') + ' ' + str(row.get('reference') or '') + ' ' + str(row.get('coord') or '')).lower())}" data-activity-name="{html.escape(str(row.get('display_label') or row.get('canonical_subject') or '').lower())}" data-activity-type="{html.escape(str(row.get('type_label') or row.get('row_kind') or '').lower())}" data-activity-event="{html.escape(str(row.get('summary') or '').lower())}" data-pageable-item data-pageable-kind="entries">
+          <summary class="activity-row-summary">
+            <span class="activity-cell activity-cell-name">
+              <a href="{html.escape(str(row.get('open_href') or _activity_entity_href(str(row.get('entity_type') or ''), str(row.get('entity_id') or '')) or '/activity'))}">
+                <strong>{html.escape(str(row.get("display_label") or row.get("canonical_subject") or row.get("actor") or "Unknown"))}</strong>
+              </a>
+            </span>
+            <span class="activity-cell activity-cell-type">
+              <span class="activity-type-label">{html.escape(str(row.get("type_label") or row.get("row_kind") or "Event"))}</span>
+            </span>
+            <span class="activity-cell activity-cell-event">
+              <strong>{html.escape(str(row.get("summary") or "Untitled row"))}</strong>
+              <span class="activity-cell-meta">{html.escape(" · ".join(
+                  part for part in (
+                      str(row.get("status") or "unknown").title(),
+                      _format_activity_timestamp(row.get("timestamp")),
+                      str(row.get("reference") or "").strip(),
+                  )
+                  if str(part or "").strip()
+              ))}</span>
+            </span>
+          </summary>
+          {_render_activity_row_panel(row)}
+        </details>
         """
         for row in filtered_rows
     ) or f'''<div class="empty-state" style="border-top-left-radius:0; border-top-right-radius:0;">
@@ -19945,8 +20018,8 @@ def render_activity_page(
     return f"""
     <style>
       .activity-page-shell {{
-        display:grid;
-        gap:16px;
+        display: grid;
+        gap: 16px;
       }}
       .activity-search-bar {{
         margin-bottom: 6px;
@@ -19982,57 +20055,13 @@ def render_activity_page(
         outline: none;
         font-family: var(--font-body);
       }}
-      .activity-search-category {{
-        border: none;
-        border-left: 1px solid var(--border);
-        background: var(--surface-muted);
-        color: var(--text-muted);
-        padding: 9px 28px 9px 12px;
-        font-size: 0.85rem;
-        cursor: pointer;
-        appearance: none;
-        -webkit-appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%236b6660' d='M0 1l5 5 5-5z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 10px center;
-        font-family: var(--font-body);
-      }}
-      .activity-search-category:focus {{
-        outline: none;
-        background-color: var(--bg);
-      }}
-      .activity-filter-bar {{
-        display: flex;
-        gap: 12px;
-        flex-wrap: wrap;
-        margin-bottom: 6px;
-      }}
-      .activity-filter-bar select {{
-        appearance: none;
-        -webkit-appearance: none;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        background: var(--surface);
-        color: var(--text);
-        padding: 8px 28px 8px 12px;
-        font-size: 0.85rem;
-        font-family: var(--font-body);
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%236b6660' d='M0 1l5 5 5-5z'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: right 10px center;
-        cursor: pointer;
-      }}
-      .activity-filter-bar select:focus {{
-        outline: none;
-        border-color: var(--border-strong);
-      }}
       .activity-table {{
         border: 1px solid var(--border);
         border-radius: 12px;
         overflow: hidden;
       }}
       .activity-table-head,
-      .activity-row {{
+      .activity-row-summary {{
         display: grid;
         grid-template-columns: minmax(200px, 1.6fr) minmax(160px, 1fr) minmax(260px, 2fr);
         gap: 12px;
@@ -20055,8 +20084,21 @@ def render_activity_page(
       .activity-row:last-child {{
         border-bottom: none;
       }}
-      .activity-row:hover {{
+      .activity-row > summary {{
+        list-style: none;
+        cursor: pointer;
+      }}
+      .activity-row > summary::-webkit-details-marker {{
+        display: none;
+      }}
+      .activity-row:hover > summary,
+      .activity-row[open] > summary {{
         background: var(--surface-muted);
+      }}
+      .activity-row-panel {{
+        padding: 0 18px 18px;
+        background: var(--surface-muted);
+        border-top: 1px solid var(--border);
       }}
       .activity-cell {{
         min-width: 0;
@@ -20087,9 +20129,44 @@ def render_activity_page(
         color: var(--text-muted);
         font-size: 0.8rem;
       }}
+      .activity-human-text {{
+        padding: 14px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        line-height: 1.55;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }}
+      .activity-telemetry-sections {{
+        margin-top: 12px;
+      }}
+      .activity-detail-list {{
+        display: grid;
+        grid-template-columns: minmax(140px, 0.5fr) 1fr;
+        gap: 8px 16px;
+        margin: 0;
+      }}
+      .activity-detail-list dt {{
+        color: var(--text-muted);
+        font-size: 0.85rem;
+      }}
+      .activity-detail-list dd {{
+        margin: 0;
+        word-break: break-word;
+      }}
+      .activity-json-payload {{
+        max-height: 480px;
+        overflow: auto;
+        background: var(--bg);
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 0.8rem;
+        line-height: 1.4;
+      }}
       @media (max-width: 900px) {{
         .activity-table-head,
-        .activity-row {{
+        .activity-row-summary {{
           grid-template-columns: 1fr;
         }}
         .activity-table-head {{
@@ -20100,24 +20177,17 @@ def render_activity_page(
     <div class="activity-page-shell">
       {render_breadcrumbs([("Home", "/"), ("Activity", None)])}
       {render_page_header(title="Activity", description="Review what happened across your ledgers, principals, and surfaces.")}
-      <nav class="page-tabs" aria-label="Activity views">
-        <a class="page-tab{' active' if activity_tab == 'activity' else ''}" href="{html.escape(_activity_query_href(base_query_params, tab='activity'))}">Activity log ({tab_counts['activity']})</a>
-        <a class="page-tab{' active' if activity_tab == 'entity' else ''}" href="{html.escape(_activity_query_href(base_query_params, tab='entity'))}">Entity log ({tab_counts['entity']})</a>
-      </nav>
       <form class="activity-search-bar" role="search" method="get" action="/activity" onsubmit="return false;">
         {hidden_filter_inputs}
         <div class="activity-search-input-wrap">
           <span class="activity-search-icon" aria-hidden="true">🔎</span>
-          <input id="activity-search" type="search" name="q" value="{html.escape(text_filter)}" placeholder="Search activity..." data-activity-search-category="{html.escape(search_category)}" oninput="filterActivityCollection(this.value, this.getAttribute('data-activity-search-category'))">
-          <select name="cat" class="activity-search-category" aria-label="Search category" onchange="const input = document.getElementById('activity-search'); input.setAttribute('data-activity-search-category', this.value); filterActivityCollection(input.value, this.value);">
-            <option value="all"{' selected' if search_category == 'all' else ''}>All</option>
-            <option value="name"{' selected' if search_category == 'name' else ''}>Name</option>
-            <option value="type"{' selected' if search_category == 'type' else ''}>Type</option>
-            <option value="event"{' selected' if search_category == 'event' else ''}>Event</option>
-          </select>
+          <input id="activity-search" type="search" name="q" value="{html.escape(text_filter)}" placeholder="Search activity..." oninput="filterActivityCollection(this.value, 'all')">
         </div>
       </form>
-      {ledger_select_html}
+      <nav class="page-tabs" aria-label="Activity views">
+        <a class="page-tab{' active' if activity_tab == 'activity' else ''}" href="{html.escape(_activity_query_href(base_query_params, tab='activity'))}">Activity log ({tab_counts['activity']})</a>
+        <a class="page-tab{' active' if activity_tab == 'entity' else ''}" href="{html.escape(_activity_query_href(base_query_params, tab='entity'))}">Entity log ({tab_counts['entity']})</a>
+      </nav>
       <div class="pageable-group" data-pageable-group data-pageable-sizes="10,20,40,80" data-pageable-label="entries">
         <div class="activity-table">
           <div class="activity-table-head">
@@ -20152,7 +20222,6 @@ def render_activity_page(
       }};
     </script>
     """
-
 
 def _normalize_activity_ledger_candidate(candidate: Any, context: _ConnectionLookupContext) -> str:
     text = str(candidate or "").strip()
@@ -20330,14 +20399,11 @@ async def activity_page(request: Request) -> Response:
         )
     selected_principal = selected_principal or caller_principal_did
 
-    status_code, principal_rows_body = await _principal_registry_get("/api/principals?limit=50", headers=auth_headers)
-    principals = _as_dict_list(principal_rows_body.get("principals")) if status_code < 400 and isinstance(principal_rows_body, dict) else []
-    principals = [
-        item for item in principals
-        if isinstance(item, dict) and str(item.get("principal_did") or "").strip() == caller_principal_did
-    ]
-    lookup = await _load_activity_lookup(selected_principal, auth_headers=auth_headers) if selected_principal else {}
     connection_context = await _load_connection_lookup_context(request, identity_card=identity_card)
+    # Surface every principal the caller is allowed to see (including delegated
+    # agents and runtime model principals), not just the caller.
+    principals = list(_as_dict_list(connection_context.get("principals")))
+    lookup = await _load_activity_lookup(selected_principal, auth_headers=auth_headers) if selected_principal else {}
     control_plane_state = await _load_activity_control_plane_state(auth_headers=auth_headers)
     submissions_status, submissions_body = await _control_plane_get("/api/control-plane/submissions", headers=auth_headers)
     submissions = _as_dict_list(submissions_body.get("submissions")) if submissions_status < 400 and isinstance(submissions_body, dict) else []

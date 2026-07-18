@@ -1573,3 +1573,94 @@ def test_control_plane_remove_entity_ledger_blocks_last_active_ledger(monkeypatc
     )
     assert response.status_code == 200
     assert response.json()["removed"] is True
+
+
+def test_ledger_principals_returns_active_connections(monkeypatch) -> None:
+    monkeypatch.setenv("ADMIN_TOKEN", "test-admin-token")
+    monkeypatch.setenv("LEDGER_AUTHZ_MODE", "registry")
+    monkeypatch.setenv("LEDGER_AUTHZ_UNKNOWN_LEDGER_POLICY", "deny")
+
+    client = _make_client()
+    headers = {
+        "x-principal-id": "ops-admin",
+        "x-principal-type": "admin",
+    }
+
+    client.post(
+        "/api/control-plane/ledgers",
+        json={
+            "ledger_id": "loam",
+            "name": "Loam",
+            "tenant_id": "tenant:demo",
+            "status": "active",
+            "provisioning_source": "control_plane",
+            "idempotency_key": "ledger-loam-1",
+        },
+        headers=headers,
+    )
+    client.post(
+        "/api/control-plane/principals",
+        json={
+            "principal_did": "did:key:z6MkActiveAgent",
+            "tenant_id": "tenant:demo",
+            "display_name": "Active Agent",
+            "status": "active",
+            "provisioning_source": "control_plane",
+            "idempotency_key": "principal-active-1",
+            "metadata": {"actor_type": "agent"},
+        },
+        headers=headers,
+    )
+    client.post(
+        "/api/control-plane/principals",
+        json={
+            "principal_did": "did:key:z6MkInactiveAgent",
+            "tenant_id": "tenant:demo",
+            "display_name": "Inactive Agent",
+            "status": "disabled",
+            "provisioning_source": "control_plane",
+            "idempotency_key": "principal-inactive-1",
+            "metadata": {"actor_type": "agent"},
+        },
+        headers=headers,
+    )
+    client.post(
+        "/api/control-plane/relationships",
+        json={
+            "subject_entity_type": "principal",
+            "subject_entity_id": "did:key:z6MkActiveAgent",
+            "object_entity_type": "ledger",
+            "object_entity_id": "loam",
+            "relationship_type": "writes_to_ledger",
+            "permission_scope": "full",
+            "enabled_state": "enabled",
+            "idempotency_key": "rel-active-write-1",
+        },
+        headers=headers,
+    )
+    client.post(
+        "/api/control-plane/relationships",
+        json={
+            "subject_entity_type": "principal",
+            "subject_entity_id": "did:key:z6MkInactiveAgent",
+            "object_entity_type": "ledger",
+            "object_entity_id": "loam",
+            "relationship_type": "writes_to_ledger",
+            "permission_scope": "full",
+            "enabled_state": "enabled",
+            "idempotency_key": "rel-inactive-write-1",
+        },
+        headers=headers,
+    )
+
+    response = client.get(
+        "/api/control-plane/ledger-principals?ledger_id=loam",
+        headers={**headers, "x-admin-token": "test-admin-token"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body.get("status") == "ok"
+    assert body.get("ledger_id") == "loam"
+    principal_dids = {p["principal_did"] for p in body.get("principals", [])}
+    assert "did:key:z6MkActiveAgent" in principal_dids
+    assert "did:key:z6MkInactiveAgent" not in principal_dids

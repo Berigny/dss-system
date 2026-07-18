@@ -2129,3 +2129,114 @@ def test_delegated_kimi_mode_fails_closed_when_principal_unset(monkeypatch):
     )
     assert response.status_code == 400
     assert "kimi_principal_not_configured" in response.text
+
+
+def _make_upstream_error_client(monkeypatch, status_code: int, error_code: str, detail: object):
+    import app as app_module
+
+    class DummyStreamResponse:
+        def __init__(self, status_code: int, body: bytes):
+            self.status_code = status_code
+            self._body = body
+
+        async def aiter_bytes(self):
+            return
+            yield  # pragma: no cover
+
+        async def aread(self):
+            return self._body
+
+        async def aclose(self):
+            return None
+
+    class DummyAsyncClient:
+        def __init__(self, *args, **kwargs):
+            return None
+
+        def build_request(self, method, url, json=None, headers=None):
+            return {"method": method, "url": url, "json": json, "headers": headers}
+
+        async def send(self, request, stream=False):
+            body = json.dumps({"status": "error", "error_code": error_code, "detail": detail}).encode("utf-8")
+            return DummyStreamResponse(status_code, body)
+
+        async def aclose(self):
+            return None
+
+    monkeypatch.setattr(app_module.httpx, "AsyncClient", DummyAsyncClient)
+
+    async def fake_verified_model_auth_context(_request):
+        return {
+            "identity_vc": {
+                "verified": True,
+                "principal_did": "did:key:z6MkOperator",
+                "session_jti": "sess-error",
+                "auth_method": "wallet_verified_id",
+            }
+        }
+
+    monkeypatch.setattr(app_module, "_verified_model_auth_context", fake_verified_model_auth_context)
+
+
+def test_api_chat_smart_stream_forwards_ledger_scope_mismatch(monkeypatch):
+    _make_upstream_error_client(
+        monkeypatch,
+        status_code=400,
+        error_code="ledger_scope_mismatch",
+        detail={
+            "payload_ledger_id": None,
+            "header_ledger_id": "loam-root-01",
+            "path_ledger_id": "loam",
+        },
+    )
+    client.cookies.set(app_module.BACKEND_SESSION_TOKEN_COOKIE, "opaque-session-token")
+    response = client.post(
+        "/api/chat/smart_stream",
+        json={"session_id": "test-scope", "message": "hello", "history": [], "provider": "openai"},
+    )
+    assert response.status_code == 400
+    body = response.json()
+    assert body.get("status") == "error"
+    assert body.get("error_code") == "ledger_scope_mismatch"
+    assert isinstance(body.get("detail"), dict)
+    assert body["detail"].get("path_ledger_id") == "loam"
+    assert "upstream_url" in body
+
+
+def test_api_chat_smart_stream_forwards_surface_not_authorized(monkeypatch):
+    _make_upstream_error_client(
+        monkeypatch,
+        status_code=403,
+        error_code="surface_not_authorized",
+        detail={"surface_id": "surface:chat", "reason": "not bound"},
+    )
+    client.cookies.set(app_module.BACKEND_SESSION_TOKEN_COOKIE, "opaque-session-token")
+    response = client.post(
+        "/api/chat/smart_stream",
+        json={"session_id": "test-surface", "message": "hello", "history": [], "provider": "openai"},
+    )
+    assert response.status_code == 403
+    body = response.json()
+    assert body.get("status") == "error"
+    assert body.get("error_code") == "surface_not_authorized"
+    assert body["detail"].get("surface_id") == "surface:chat"
+
+
+def test_api_chat_smart_stream_forwards_principal_not_connected(monkeypatch):
+    _make_upstream_error_client(
+        monkeypatch,
+        status_code=401,
+        error_code="principal_not_connected",
+        detail={"principal_did": "did:key:test"},
+    )
+    client.cookies.set(app_module.BACKEND_SESSION_TOKEN_COOKIE, "opaque-session-token")
+    response = client.post(
+        "/api/chat/smart_stream",
+        json={"session_id": "test-principal", "message": "hello", "history": [], "provider": "openai"},
+    )
+    assert response.status_code == 401
+    body = response.json()
+    assert body.get("status") == "error"
+    assert body.get("error_code") == "principal_not_connected"
+    assert body["detail"].get("principal_did") == "did:key:test"
+    assert "login_url" in body

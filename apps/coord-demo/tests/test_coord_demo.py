@@ -148,7 +148,103 @@ def test_resolve_renders_upstream_error(
         cookies={app.BACKEND_SESSION_TOKEN_COOKIE: "valid-token"},
     )
     assert response.status_code == 200
-    assert "Resolver error" in response.text
+    assert "Resolution failed" in response.text
+    assert "upstream_unavailable" in response.text
+
+
+def test_resolve_renders_structured_ledger_scope_mismatch(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fake_post(*args, **kwargs) -> object:  # noqa: ARG001
+        class Response:
+            status_code = 400
+            text = '{"status":"error"}'
+
+            def json(self) -> object:
+                return {
+                    "status": "error",
+                    "error_code": "ledger_scope_mismatch",
+                    "detail": {
+                        "header_ledger_id": "loam-root-01",
+                        "path_ledger_id": "loam",
+                    },
+                }
+
+        return Response()
+
+    monkeypatch.setattr("httpx.post", fake_post)
+
+    response = client.post(
+        "/resolve",
+        data={"coordinate": "loam:WX-1"},
+        cookies={app.BACKEND_SESSION_TOKEN_COOKIE: "valid-token"},
+        headers={"HX-Request": "true"},
+    )
+    assert response.status_code == 200
+    assert "ledger_scope_mismatch" in response.text
+    assert "loam-root-01" in response.text
+    assert "Resolution failed" in response.text
+    assert "Resolver error: HTTP 400" not in response.text
+
+
+def test_resolve_renders_structured_surface_not_authorized(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fake_post(*args, **kwargs) -> object:  # noqa: ARG001
+        class Response:
+            status_code = 403
+            text = '{"status":"error"}'
+
+            def json(self) -> object:
+                return {
+                    "status": "error",
+                    "error_code": "surface_not_authorized",
+                    "detail": {"surface_id": "surface:coord-demo", "reason": "not bound"},
+                }
+
+        return Response()
+
+    monkeypatch.setattr("httpx.post", fake_post)
+
+    response = client.post(
+        "/resolve",
+        data={"coordinate": "loam:WX-1"},
+        cookies={app.BACKEND_SESSION_TOKEN_COOKIE: "valid-token"},
+        headers={"HX-Request": "true"},
+    )
+    assert response.status_code == 200
+    assert "surface_not_authorized" in response.text
+    assert "surface:coord-demo" in response.text
+
+
+def test_resolve_renders_structured_principal_not_connected(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def fake_post(*args, **kwargs) -> object:  # noqa: ARG001
+        class Response:
+            status_code = 401
+            text = '{"status":"error"}'
+
+            def json(self) -> object:
+                return {
+                    "status": "error",
+                    "error_code": "principal_not_connected",
+                    "detail": {"principal_did": "did:key:test"},
+                }
+
+        return Response()
+
+    monkeypatch.setattr("httpx.post", fake_post)
+
+    response = client.post(
+        "/resolve",
+        data={"coordinate": "loam:WX-1"},
+        cookies={app.BACKEND_SESSION_TOKEN_COOKIE: "valid-token"},
+        headers={"HX-Request": "true"},
+    )
+    assert response.status_code == 200
+    assert "principal_not_connected" in response.text
+    assert "did:key:test" in response.text
 
 
 def test_auth_callback_sets_session_cookie(client: TestClient) -> None:

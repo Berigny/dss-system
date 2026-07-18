@@ -2654,6 +2654,49 @@ async def decode_coordinate(request: Request):
                     return code
             return str(body.get("error") or "").strip()
 
+        def _flatten_error_response(
+            status_code: int,
+            error_code: str | None,
+            detail: Any,
+        ) -> dict[str, Any]:
+            """Return a flat {status, error_code, detail} envelope.
+
+            Backend error bodies are already structured, but this middleware
+            previously wrapped them again, producing double-nested detail.
+            This helper collapses any nested envelope and strips redundant
+            ``error`` keys from the safe detail payload.
+            """
+            code = error_code
+            candidate = detail
+
+            # Unwrap nested structured error envelopes until we reach the
+            # innermost payload that is not itself an envelope.
+            while isinstance(candidate, dict) and (
+                candidate.get("error_code") or candidate.get("error")
+            ):
+                if candidate.get("error_code"):
+                    code = str(candidate.get("error_code")).strip() or code
+                    next_candidate = candidate.get("detail")
+                    if isinstance(next_candidate, dict):
+                        candidate = next_candidate
+                        continue
+                    return {
+                        "status": "error",
+                        "error_code": code or f"http_{status_code}",
+                        "detail": next_candidate,
+                    }
+                if candidate.get("error"):
+                    code = str(candidate.get("error")).strip() or code
+                    candidate = {k: v for k, v in candidate.items() if k != "error"}
+                    break
+                break
+
+            return {
+                "status": "error",
+                "error_code": code or f"http_{status_code}",
+                "detail": candidate,
+            }
+
         authority_detail = next(
             (
                 item.get("detail")
@@ -2673,7 +2716,7 @@ async def decode_coordinate(request: Request):
                 total_latency_ms,
             )
             return JSONResponse(
-                authority_detail,
+                _flatten_error_response(403, error_code, authority_detail),
                 status_code=403,
                 headers={"X-Decode-Diagnostics": diag_header},
             )
@@ -2698,7 +2741,7 @@ async def decode_coordinate(request: Request):
                     total_latency_ms,
                 )
                 return JSONResponse(
-                    detail if isinstance(detail, dict) else {"status": "error", "error_code": error_code, "detail": detail},
+                    _flatten_error_response(401, error_code, detail),
                     status_code=401,
                     headers={"X-Decode-Diagnostics": diag_header},
                 )
@@ -2710,7 +2753,7 @@ async def decode_coordinate(request: Request):
                     total_latency_ms,
                 )
                 return JSONResponse(
-                    {"status": "error", "error_code": error_code or "backend_unavailable", "detail": detail},
+                    _flatten_error_response(503, error_code or "backend_unavailable", detail),
                     status_code=503,
                     headers={"X-Decode-Diagnostics": diag_header},
                 )
@@ -2723,7 +2766,11 @@ async def decode_coordinate(request: Request):
                     total_latency_ms,
                 )
                 return JSONResponse(
-                    {"status": "error", "error_code": error_code or "decode_client_error", "detail": detail},
+                    _flatten_error_response(
+                        int(status) if isinstance(status, int) else 400,
+                        error_code or "decode_client_error",
+                        detail,
+                    ),
                     status_code=int(status) if isinstance(status, int) else 400,
                     headers={"X-Decode-Diagnostics": diag_header},
                 )

@@ -1,5 +1,6 @@
 import asyncio
 import json
+from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
@@ -8563,3 +8564,111 @@ def test_synthesize_field_state_produces_valid_envelope():
     # Different seeds should differ.
     state3 = orchestrator_module._synthesize_field_state("different", grid_size=32)
     assert state3 != state
+
+
+def _patch_for_authority_matrix_test(monkeypatch, *, principals_for_ledger: list[dict[str, Any]] | None):
+    _patch_permissive_runtime_actor(monkeypatch)
+    monkeypatch.setattr(orchestrator_module.api, "assemble", _fake_assemble)
+    monkeypatch.setattr(orchestrator_module.api, "decode_coordinate", _fake_decode_coordinate)
+    monkeypatch.setattr(orchestrator_module.api, "coord_walk", _fake_coord_walk)
+    monkeypatch.setattr(orchestrator_module.api, "write_walk", _fake_write_walk)
+    monkeypatch.setattr(orchestrator_module.api, "emit_telemetry", _fake_emit_telemetry)
+    monkeypatch.setattr(orchestrator_module.llm, "stream_response", _fake_stream_response)
+
+    captured: dict[str, object] = {"metadata": None}
+
+    async def fake_commit_answer(**kwargs):
+        metadata = kwargs.get("metadata")
+        captured["metadata"] = metadata
+        return {
+            "status": "success",
+            "coordinate": "chat-demo:WX-authority-matrix",
+            "metadata": metadata if isinstance(metadata, dict) else {},
+            "appraisal": {"score": 1.0, "law_score": 1.0, "grace_score": 1.0, "drift": 0.0},
+            "blocked": False,
+        }
+
+    monkeypatch.setattr(orchestrator_module.api, "commit_answer", fake_commit_answer)
+
+    async def fake_get_ledger_principals(ledger_id: str, *, auth_headers=None) -> list[dict[str, Any]]:
+        return list(principals_for_ledger) if principals_for_ledger is not None else []
+
+    monkeypatch.setattr(orchestrator_module.api, "get_ledger_principals", fake_get_ledger_principals)
+    return captured
+
+
+def test_smart_stream_blocks_when_principal_not_connected_to_ledger(monkeypatch):
+    captured = _patch_for_authority_matrix_test(monkeypatch, principals_for_ledger=[])
+
+    events = _stream_events({
+        "session_id": "authority-blocked",
+        "message": "hello",
+        "history": [],
+        "provider": "openai",
+        "agent": "mock",
+        "enable_ledger": True,
+        "entity": "chat-demo",
+        "principal_did": "did:key:z6MkDisconnected",
+    })
+
+    error_events = [e for e in events if e.get("type") == "error"]
+    assert error_events, "Expected an error event when principal is not connected"
+    assert error_events[0].get("error_code") == "principal_not_authorized_for_surface"
+    assert "chat-demo" in error_events[0].get("message", "")
+    assert captured["metadata"] is None
+
+
+def test_smart_stream_records_authority_matrix_when_principal_connected(monkeypatch):
+    connected_principal = "did:key:z6MkConnected"
+    captured = _patch_for_authority_matrix_test(
+        monkeypatch,
+        principals_for_ledger=[{"principal_did": connected_principal}],
+    )
+
+    events = _stream_events({
+        "session_id": "authority-allowed",
+        "message": "hello",
+        "history": [],
+        "provider": "openai",
+        "agent": "mock",
+        "enable_ledger": True,
+        "entity": "chat-demo",
+        "principal_did": connected_principal,
+    })
+
+    error_events = [e for e in events if e.get("type") == "error"]
+    assert not error_events, f"Unexpected error events: {error_events}"
+    meta_events = [e for e in events if e.get("type") == "meta"]
+    assert meta_events, "Expected a meta event"
+    metadata = captured["metadata"] or {}
+    assert metadata.get("answering_principal") == connected_principal
+    assert metadata.get("selected_agent") == "mock"
+    assert metadata.get("runtime_model") == "mock"
+
+
+def test_smart_stream_allows_when_ledger_principals_check_unavailable(monkeypatch):
+    """A backend outage for the connection check must not deny service."""
+    captured = _patch_for_authority_matrix_test(monkeypatch, principals_for_ledger=None)
+
+    async def failing_get_ledger_principals(_ledger_id: str) -> list[dict[str, Any]]:
+        raise RuntimeError("backend unavailable")
+
+    monkeypatch.setattr(orchestrator_module.api, "get_ledger_principals", failing_get_ledger_principals)
+
+    events = _stream_events({
+        "session_id": "authority-fallback",
+        "message": "hello",
+        "history": [],
+        "provider": "openai",
+        "agent": "mock",
+        "enable_ledger": True,
+        "entity": "chat-demo",
+        "principal_did": "did:key:z6MkFallback",
+    })
+
+    error_events = [e for e in events if e.get("type") == "error"]
+    assert not error_events, f"Unexpected error events when backend check fails: {error_events}"
+    meta_events = [e for e in events if e.get("type") == "meta"]
+    assert meta_events, "Expected a meta event"
+    metadata = captured["metadata"] or {}
+    assert metadata.get("answering_principal") == "did:key:z6MkFallback"

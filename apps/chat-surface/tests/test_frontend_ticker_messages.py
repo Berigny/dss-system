@@ -528,7 +528,7 @@ const response = {{
   try {{
     await readStream(response, () => {{}});
   }} catch (error) {{
-    console.log(JSON.stringify({{ message: String(error.message || error) }}));
+    console.log(JSON.stringify({{ message: String(error.message || error), upstream_url: error.upstream_url || '' }}));
   }}
 }})();
 """
@@ -541,7 +541,7 @@ const response = {{
     parsed = json.loads(result.stdout.strip())
     message = str(parsed.get("message") or "")
     assert "Stream failed (502)" in message
-    assert "upstream=https://middleware.example.internal/api/thinking_trace/stream" in message
+    assert parsed.get("upstream_url") == "https://middleware.example.internal/api/thinking_trace/stream"
 
 
 def test_persist_streamed_turn_posts_commit_payload():
