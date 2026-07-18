@@ -40,6 +40,11 @@ from utils.mcp_server import DSMCPServer
 from utils.mcp_oauth_dev import DevOAuthProvider
 from utils.openrouter_config import get_api_key as _get_openrouter_override, set_api_key as _set_openrouter_override
 from utils.verified_id_requests import VerifiedIDRequests
+from utils.ledger_scope import (
+    canonicalize_ledger_scope,
+    canonicalize_coordinate_namespace,
+    ledger_scope_to_canonical_did,
+)
 
 MAX_DECODED_COORDS = 18
 MAX_SUMMARY_CHARS = 220
@@ -2508,9 +2513,11 @@ async def api_chat(request: Request):
     )
 
 
-def _compact_decode_diagnostics(diagnostics: list[dict[str, Any]]) -> str:
+def _compact_decode_diagnostics(
+    diagnostics: list[dict[str, Any]], *, ledger_id: str | None = None
+) -> str:
     """Return a compact, secret-safe JSON summary for the X-Decode-Diagnostics header."""
-    summary = {
+    summary: dict[str, Any] = {
         "attempts": len(diagnostics),
         "scopes": [
             item.get("scope")
@@ -2542,6 +2549,11 @@ def _compact_decode_diagnostics(diagnostics: list[dict[str, Any]]) -> str:
             None,
         ),
     }
+    if ledger_id:
+        summary["ledger_id"] = ledger_id
+        canonical_did = ledger_scope_to_canonical_did(ledger_id)
+        if canonical_did:
+            summary["canonical_ledger_did"] = canonical_did
     try:
         return json.dumps(summary, ensure_ascii=True, separators=(",", ":"))
     except Exception:
@@ -2557,13 +2569,17 @@ async def decode_coordinate(request: Request):
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid JSON")
 
-    coordinate = (payload.get("coordinate") or "").strip()
+    coordinate = canonicalize_coordinate_namespace(
+        (payload.get("coordinate") or "").strip()
+    )
     if not coordinate:
         raise HTTPException(status_code=422, detail="coordinate is required")
 
     session_id = request.cookies.get("ds_session", DEFAULT_SESSION_ID)
     session = get_session(session_id)
-    ledger_id = str(payload.get("ledger_id") or session.get("ledger_id") or settings.DEFAULT_LEDGER_ID or "").strip().lower()
+    ledger_id = canonicalize_ledger_scope(
+        str(payload.get("ledger_id") or session.get("ledger_id") or settings.DEFAULT_LEDGER_ID or "").strip()
+    )
     entity = session.get("entity") or build_entity_namespace(ledger_id, session_id)
     api.set_ledger(ledger_id)
 
@@ -2593,7 +2609,7 @@ async def decode_coordinate(request: Request):
     )
 
     total_latency_ms = round((time.perf_counter() - request_start) * 1000, 2)
-    diag_header = _compact_decode_diagnostics(diagnostics)
+    diag_header = _compact_decode_diagnostics(diagnostics, ledger_id=ledger_id)
 
     if resolved is None:
         _AUTHORITY_ERROR_CODES = {
@@ -2742,7 +2758,12 @@ async def decode_coordinate(request: Request):
         coordinate,
         total_latency_ms,
     )
-    return JSONResponse(resolved, headers={"X-Decode-Diagnostics": diag_header})
+    resolved_with_scope = dict(resolved) if isinstance(resolved, dict) else {"status": "ok"}
+    resolved_with_scope["ledger_id"] = ledger_id
+    canonical_did = ledger_scope_to_canonical_did(ledger_id)
+    if canonical_did:
+        resolved_with_scope["canonical_ledger_did"] = canonical_did
+    return JSONResponse(resolved_with_scope, headers={"X-Decode-Diagnostics": diag_header})
 
 
 @rt("/api/resolve_tiered", methods=["POST"])
@@ -3057,14 +3078,14 @@ async def decode_web4(request: Request):
     except Exception:
         raise HTTPException(status_code=400, detail="Invalid JSON")
 
-    namespace = (payload.get("namespace") or "").strip()
+    namespace = canonicalize_ledger_scope((payload.get("namespace") or "").strip())
     identifier = (payload.get("identifier") or "").strip()
     if not namespace or not identifier:
         raise HTTPException(status_code=422, detail="namespace and identifier are required")
 
     session_id = request.cookies.get("ds_session", DEFAULT_SESSION_ID)
     session = get_session(session_id)
-    ledger_id = session.get("ledger_id", settings.DEFAULT_LEDGER_ID)
+    ledger_id = canonicalize_ledger_scope(session.get("ledger_id", settings.DEFAULT_LEDGER_ID))
     api.set_ledger(ledger_id)
 
     try:

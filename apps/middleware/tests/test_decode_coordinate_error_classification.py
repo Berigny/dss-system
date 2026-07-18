@@ -132,3 +132,106 @@ def test_decode_coordinate_forwards_ledger_and_surface_in_request(monkeypatch):
     assert resp.status_code == 200
     auth_headers = captured.get("auth_headers") or {}
     assert auth_headers.get("x-surface-id") == "surface:chat:primary"
+
+
+def test_decode_coordinate_canonicalizes_loam_root_01_payload_ledger_id(monkeypatch):
+    """DSS-280: legacy alias payload ledger_id is canonicalized before backend call."""
+    captured: dict[str, object] = {}
+
+    async def fake_decode_coordinate(_coord: str, *, auth_headers=None, **kwargs):
+        captured["coord"] = _coord
+        captured["auth_headers"] = auth_headers
+        return {"coord": "loam:WX-1"}
+
+    monkeypatch.setattr(app_module.api, "decode_coordinate", fake_decode_coordinate)
+
+    resp = client.post(
+        "/api/decode_coordinate",
+        json={"coordinate": "loam:WX-1", "ledger_id": "loam-root-01"},
+    )
+    assert resp.status_code == 200
+    assert app_module.api.ledger_id == "loam"
+    assert (app_module.api.headers or {}).get("x-ledger-id") == "loam"
+    body = resp.json()
+    assert body.get("ledger_id") == "loam"
+    assert body.get("canonical_ledger_did") == "did:web:legacy.local:ledgers:ledger-loam"
+
+
+def test_decode_coordinate_canonicalizes_ledger_prefix_and_uppercase(monkeypatch):
+    """DSS-280: ledger: prefix and casing are normalized."""
+    captured: dict[str, object] = {}
+
+    async def fake_decode_coordinate(_coord: str, *, auth_headers=None, **kwargs):
+        captured["auth_headers"] = auth_headers
+        return {"coord": "loam:WX-1"}
+
+    monkeypatch.setattr(app_module.api, "decode_coordinate", fake_decode_coordinate)
+
+    resp = client.post(
+        "/api/decode_coordinate",
+        json={"coordinate": "loam:WX-1", "ledger_id": "ledger:LOAM"},
+    )
+    assert resp.status_code == 200
+    assert app_module.api.ledger_id == "loam"
+    assert (app_module.api.headers or {}).get("x-ledger-id") == "loam"
+
+
+def test_decode_coordinate_canonicalizes_alias_coordinate_namespace(monkeypatch):
+    """DSS-280: coordinate namespace alias is rewritten to canonical before backend call."""
+    captured: dict[str, object] = {}
+
+    async def fake_decode_coordinate(_coord: str, *, auth_headers=None, **kwargs):
+        captured["coord"] = _coord
+        captured["auth_headers"] = auth_headers
+        return {"coord": "loam:WX-1"}
+
+    monkeypatch.setattr(app_module.api, "decode_coordinate", fake_decode_coordinate)
+
+    resp = client.post(
+        "/api/decode_coordinate",
+        json={"coordinate": "loam-root-01:WX-1", "ledger_id": "loam"},
+    )
+    assert resp.status_code == 200
+    assert captured.get("coord") == "loam:WX-1"
+    assert (app_module.api.headers or {}).get("x-ledger-id") == "loam"
+
+
+def test_decode_coordinate_diagnostics_header_includes_canonical_did(monkeypatch):
+    """DSS-280: X-Decode-Diagnostics advertises the canonical ledger DID."""
+    async def fake_decode_coordinate(_coord: str, **kwargs):
+        return {"coord": "loam:WX-1"}
+
+    monkeypatch.setattr(app_module.api, "decode_coordinate", fake_decode_coordinate)
+
+    resp = client.post(
+        "/api/decode_coordinate",
+        json={"coordinate": "loam:WX-1", "ledger_id": "loam-root-01"},
+    )
+    assert resp.status_code == 200
+    diag_header = resp.headers.get("X-Decode-Diagnostics")
+    assert diag_header
+    import json
+    diagnostics = json.loads(diag_header)
+    assert diagnostics.get("ledger_id") == "loam"
+    assert diagnostics.get("canonical_ledger_did") == "did:web:legacy.local:ledgers:ledger-loam"
+
+
+def test_decode_web4_canonicalizes_alias_namespace_and_session_ledger(monkeypatch):
+    """DSS-280: /api/chat/web4/decode canonicalizes namespace and session ledger alias."""
+    captured: dict[str, object] = {}
+
+    async def fake_decode_web4(*, namespace: str, identifier: str):
+        captured["namespace"] = namespace
+        captured["identifier"] = identifier
+        return {"coord": f"{namespace}:{identifier}"}
+
+    monkeypatch.setattr(app_module.api, "decode_web4", fake_decode_web4)
+
+    resp = client.post(
+        "/api/chat/web4/decode",
+        json={"namespace": "loam-root-01", "identifier": "WX-1"},
+    )
+    assert resp.status_code == 200
+    assert captured.get("namespace") == "loam"
+    assert captured.get("identifier") == "WX-1"
+    assert app_module.api.ledger_id == "loam"

@@ -14,6 +14,7 @@ from shared_types.coord_schema import normalize_coordinate_metadata
 
 # Ensure these settings exist in your config.settings
 from config.settings import API_BASE, API_KEY, DEFAULT_LEDGER, HTTP_TIMEOUT
+from utils.ledger_scope import canonicalize_ledger_scope
 
 
 @dataclass
@@ -137,9 +138,13 @@ class APIClient:
         return out
 
     def set_ledger(self, ledger_id: str) -> None:
-        """Update the active ledger for subsequent requests."""
+        """Update the active ledger for subsequent requests.
+
+        DSS-280: canonicalize legacy aliases (e.g. loam-root-01) so the
+        backend receives the canonical short ledger id in headers/payloads.
+        """
         if ledger_id:
-            self.ledger_id = ledger_id
+            self.ledger_id = canonicalize_ledger_scope(ledger_id)
 
     def set_context(self, context_id: str) -> None:
         """Update the active context for subsequent requests."""

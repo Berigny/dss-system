@@ -27,6 +27,7 @@ from api.llm import llm
 from config.settings import DEFAULT_SESSION_ID, settings
 from utils.assurance import build_assurance_envelope, issue_assurance_challenge
 from utils.auth_envelope import build_backend_auth_envelope
+from utils.ledger_scope import canonicalize_ledger_scope
 from utils.session import get_session, update_session
 from shared_types.coord_schema import parse_bigint
 from utils.qp_pure_metrics import qp_pure_metrics
@@ -7430,7 +7431,7 @@ def register_orchestrator_routes(rt):
             auth_claims=auth_claims if isinstance(auth_claims, dict) else None,
         )
         turn_count = int(session.get("turn_count", 0)) + 1
-        ledger_id = (
+        ledger_id = canonicalize_ledger_scope(
             str(payload.get("ledger_id") or session.get("ledger_id") or settings.DEFAULT_LEDGER_ID or "").strip()
             or settings.DEFAULT_LEDGER_ID
         )
