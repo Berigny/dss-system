@@ -1290,6 +1290,8 @@ function traceStatusFromPayload(tracePayload) {
     if (eventType === 'process_started') return 'Process started';
     if (eventType === 'process_completed') return 'Process completed';
     if (eventType === 'process_failed') return 'Process failed';
+    if (eventType === 'coord_catalog') return 'COORD catalog ready';
+    if (eventType === 'coord_context_admitted') return step_label || 'Context admitted';
     return '';
 }
 
@@ -1437,6 +1439,31 @@ function collectPipelineTickerMessages(payload) {
     if (payload.type === 'context_item' && payload.coord) {
         thinking.push(`Context: ${payload.coord}`);
         overlay.push(`Resolving Coords: ${payload.coord}`);
+        return { thinking, overlay };
+    }
+
+    if (payload.type === 'coord_context_admitted') {
+        const admittedPayload = payload.payload || {};
+        const coord = admittedPayload.coord ? String(admittedPayload.coord) : '';
+        if (coord) {
+            const admission = admittedPayload.admission ? String(admittedPayload.admission) : 'admitted';
+            const text = `Context admitted: ${coord} (${admission})`;
+            thinking.push(text);
+            overlay.push(text);
+        }
+        return { thinking, overlay };
+    }
+
+    if (payload.type === 'coord_catalog') {
+        const catalogPayload = payload.payload || {};
+        const entries = Array.isArray(catalogPayload.entries) ? catalogPayload.entries : [];
+        entries.slice(0, 6).forEach((entry) => {
+            const coord = entry && entry.coord ? String(entry.coord) : '';
+            if (coord) {
+                thinking.push(`COORD: ${coord}`);
+                overlay.push(`COORD: ${coord}`);
+            }
+        });
         return { thinking, overlay };
     }
 
@@ -2357,6 +2384,35 @@ async function handleStreamedChatSubmit(event) {
                 const tickerMessages = collectPipelineTickerMessages(payload);
                 tickerMessages.thinking.forEach(pushThinking);
                 tickerMessages.overlay.forEach(enqueueOverlayStatus);
+                return;
+            }
+
+            if (payload.type === 'coord_context_admitted') {
+                markCoordDiagnosticsSeen();
+                const admittedPayload = payload.payload || {};
+                const coord = admittedPayload.coord ? String(admittedPayload.coord) : '';
+                if (coord) {
+                    const admission = admittedPayload.admission ? String(admittedPayload.admission) : 'admitted';
+                    const text = `Context admitted: ${coord} (${admission})`;
+                    pushThinking(text);
+                    enqueueOverlayStatus(text);
+                }
+                logPipelineEvent('coord_context_admitted', admittedPayload);
+                return;
+            }
+
+            if (payload.type === 'coord_catalog') {
+                markCoordDiagnosticsSeen();
+                const catalogPayload = payload.payload || {};
+                const entries = Array.isArray(catalogPayload.entries) ? catalogPayload.entries : [];
+                entries.slice(0, 6).forEach((entry) => {
+                    const coord = entry && entry.coord ? String(entry.coord) : '';
+                    if (coord) {
+                        pushThinking(`COORD: ${coord}`);
+                        enqueueOverlayStatus(`COORD: ${coord}`);
+                    }
+                });
+                logPipelineEvent('coord_catalog', { entry_count: entries.length });
                 return;
             }
 

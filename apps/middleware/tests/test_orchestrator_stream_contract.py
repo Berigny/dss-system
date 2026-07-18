@@ -3042,6 +3042,106 @@ def test_thinking_trace_lifecycle_contract(monkeypatch):
     assert "coord_count" in ctx_done["details"]
 
 
+def test_coord_context_admitted_and_catalog_mirror_to_thinking_trace(monkeypatch):
+    """DSS-281 regression: direct coord_context_admitted and coord_catalog events
+    must also be emitted as thinking_trace events so they survive LLM errors and replay."""
+
+    async def fake_commit_answer(**_kwargs):
+        return {
+            "status": "success",
+            "coordinate": "chat-demo-session:WX-commit",
+            "metadata": {},
+            "appraisal": {"score": 1.0, "law_score": 1.0, "grace_score": 1.0, "drift": 0.0},
+            "blocked": False,
+        }
+
+    async def fake_decode_coordinate(_coord: str, *, entity: str | None = None, session_id: str | None = None):
+        return {
+            "coord": "chat-demo:WX-1772505927152",
+            "type": "WX",
+            "skim": {"one_line": "candidate"},
+            "walk": None,
+            "refs": {},
+            "payload": {"parts": []},
+            "interpretation": {},
+            "governance": {},
+            "meta": {
+                "eq6_commit_allowed": True,
+                "eq6_lawfulness_level": 2,
+                "eq6_cw": 1,
+                "prime_multiplicative_value": 2310,
+            },
+        }
+
+    async def fake_select_choice_coord(**_kwargs):
+        return "open", "chat-demo:WX-1772505927152", "test_open"
+
+    monkeypatch.setattr(orchestrator_module.api, "assemble", _fake_assemble_with_candidates)
+    monkeypatch.setattr(orchestrator_module.api, "decode_coordinate", fake_decode_coordinate)
+    monkeypatch.setattr(orchestrator_module.api, "coord_walk", _fake_coord_walk)
+    monkeypatch.setattr(orchestrator_module.api, "write_walk", _fake_write_walk)
+    monkeypatch.setattr(orchestrator_module.api, "emit_telemetry", _fake_emit_telemetry)
+    monkeypatch.setattr(orchestrator_module.api, "commit_answer", fake_commit_answer)
+    monkeypatch.setattr(orchestrator_module.llm, "stream_response", _fake_stream_response)
+    monkeypatch.setattr(orchestrator_module, "_select_choice_coord", fake_select_choice_coord)
+    _patch_permissive_runtime_actor(monkeypatch)
+
+    events = _stream_events(
+        {
+            "session_id": "coord-catalog-trace-mirror",
+            "request_id": "req-coord-catalog-trace-mirror",
+            "message": "resolve latest coord",
+            "history": [],
+            "provider": "openai",
+            "agent": "mock",
+            "enable_ledger": True,
+            "k": 2,
+        }
+    )
+
+    admitted_direct = [event for event in events if event.get("type") == "coord_context_admitted"]
+    assert admitted_direct, "direct coord_context_admitted event missing"
+    admitted_coords = {
+        str((event.get("payload") or {}).get("coord") or "")
+        for event in admitted_direct
+    }
+    assert "chat-demo:WX-1772505927152" in admitted_coords
+
+    catalog_direct = [event for event in events if event.get("type") == "coord_catalog"]
+    assert catalog_direct, "direct coord_catalog event missing"
+
+    trace_events = [
+        event.get("payload")
+        for event in events
+        if event.get("type") == "thinking_trace" and isinstance(event.get("payload"), dict)
+    ]
+
+    admitted_trace = [
+        event for event in trace_events if event.get("type") == "coord_context_admitted"
+    ]
+    assert admitted_trace, "thinking_trace coord_context_admitted mirror missing"
+    assert all(
+        event.get("request_id") == "req-coord-catalog-trace-mirror" for event in admitted_trace
+    )
+    trace_admitted_coords = {
+        str((event.get("details") or {}).get("coord") or "") for event in admitted_trace
+    }
+    assert "chat-demo:WX-1772505927152" in trace_admitted_coords
+
+    catalog_trace = [event for event in trace_events if event.get("type") == "coord_catalog"]
+    assert catalog_trace, "thinking_trace coord_catalog mirror missing"
+    assert all(
+        event.get("request_id") == "req-coord-catalog-trace-mirror" for event in catalog_trace
+    )
+    catalog_details = catalog_trace[0].get("details") or {}
+    assert isinstance(catalog_details.get("coords"), list)
+    assert "chat-demo:WX-1772505927152" in catalog_details.get("coords", [])
+    assert catalog_details.get("entry_count", 0) >= 1
+
+    seq_values = [int(event.get("trace_seq")) for event in trace_events if isinstance(event.get("trace_seq"), int)]
+    assert seq_values == sorted(seq_values)
+
+
 def test_coord_catalog_path_reports_resolver_cache_stats(monkeypatch):
     session_obj = {
         "turn_count": 1,

@@ -9797,6 +9797,40 @@ def register_orchestrator_routes(rt):
                 "answer_surface_integrity": answer_surface_integrity,
             }
 
+        trace_seq = 0
+
+        async def _emit_trace(
+            *,
+            event_type: str,
+            status: str,
+            step_code: str | None = None,
+            step_label: str | None = None,
+            details: dict[str, Any] | None = None,
+            turn_id: str | None = None,
+        ) -> bytes:
+            nonlocal trace_seq
+            trace_seq += 1
+            payload_event = {
+                "thinking_trace_version": "tts-v1",
+                "type": event_type,
+                "request_id": request_id,
+                "session_id": session_id,
+                "turn_id": turn_id,
+                "trace_seq": trace_seq,
+                "timestamp_ms": _thinking_trace_now_ms(),
+                "status": status,
+                "step_code": step_code,
+                "step_label": step_label,
+                "details": details if isinstance(details, dict) else {},
+            }
+            _thinking_trace_append_event(
+                session_id=session_id,
+                request_id=request_id,
+                event=payload_event,
+            )
+            await _thinking_trace_publish(session_id=session_id, event=payload_event)
+            return _ndjson_event({"type": "thinking_trace", "payload": payload_event})
+
         async def _decode_and_collect():
             nonlocal decoded_count
             nonlocal child_coord_count
@@ -10904,6 +10938,19 @@ def register_orchestrator_routes(rt):
                         )
                     )
                     yield _ndjson_event({"type": "coord_context_admitted", "payload": admitted_context_trace[-1]})
+                    # Mirror to thinking trace so the event survives LLM errors/timeouts
+                    # and replays identically on history refresh.
+                    yield await _emit_trace(
+                        event_type="coord_context_admitted",
+                        status="in_progress",
+                        step_code="COORD_CONTEXT_ADMITTED",
+                        step_label=f"Context admitted: {coord}",
+                        details={
+                            "coord": coord,
+                            "admission": admission_kind,
+                            "chars": len(admitted_text),
+                        },
+                    )
                     yield _ndjson_event(
                         {
                             "type": "ui_status",
@@ -10948,44 +10995,11 @@ def register_orchestrator_routes(rt):
             nonlocal governance_metrics_for_turn, gen_input_tokens, gen_output_tokens, finish_reason
             nonlocal guardian_fast_path, divergence_from_telos_eq9, epistemic_status, payload_read_attestation
             nonlocal timing
-            trace_seq = 0
             _log_stream_probe(
                 "smart_stream_first_yield",
                 mode="orchestrator_stream",
                 elapsed_ms=int((time.perf_counter() - total_start) * 1000),
             )
-
-            async def _emit_trace(
-                *,
-                event_type: str,
-                status: str,
-                step_code: str | None = None,
-                step_label: str | None = None,
-                details: dict[str, Any] | None = None,
-                turn_id: str | None = None,
-            ) -> bytes:
-                nonlocal trace_seq
-                trace_seq += 1
-                payload_event = {
-                    "thinking_trace_version": "tts-v1",
-                    "type": event_type,
-                    "request_id": request_id,
-                    "session_id": session_id,
-                    "turn_id": turn_id,
-                    "trace_seq": trace_seq,
-                    "timestamp_ms": _thinking_trace_now_ms(),
-                    "status": status,
-                    "step_code": step_code,
-                    "step_label": step_label,
-                    "details": details if isinstance(details, dict) else {},
-                }
-                _thinking_trace_append_event(
-                    session_id=session_id,
-                    request_id=request_id,
-                    event=payload_event,
-                )
-                await _thinking_trace_publish(session_id=session_id, event=payload_event)
-                return _ndjson_event({"type": "thinking_trace", "payload": payload_event})
 
             requested_for_summary = list(dict.fromkeys([*queued_coords, *spare_coords]))
             resolve_summary = _build_resolve_summary(requested_for_summary, resolved_coords)
@@ -11294,6 +11308,25 @@ def register_orchestrator_routes(rt):
                 }
                 signals.append(coord_catalog_signal)
                 context_items.insert(0, {"kind": "coord_catalog", "payload": coord_catalog_signal})
+                # Surface the catalog in the chat stream before generation starts and
+                # mirror it to the thinking trace so it survives errors and replays.
+                yield _ndjson_event(
+                    {"type": "coord_catalog", "payload": coord_catalog_signal}
+                )
+                yield await _emit_trace(
+                    event_type="coord_catalog",
+                    status="in_progress",
+                    step_code="COORD_CATALOG",
+                    step_label="COORD catalog ready",
+                    details={
+                        "coords": [
+                            str(entry.get("coord") or "")
+                            for entry in model_coord_catalog[:6]
+                            if entry.get("coord")
+                        ],
+                        "entry_count": len(model_coord_catalog),
+                    },
+                )
                 system_prompt = (
                     f"{system_prompt}\n"
                     "COORD autonomy: selected coordinates are provided as a catalog for model choice. "

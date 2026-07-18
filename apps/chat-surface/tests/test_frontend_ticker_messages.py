@@ -429,6 +429,47 @@ def test_collect_pipeline_ticker_messages_for_coord_action_plan():
     assert expected in overlay
 
 
+def test_collect_pipeline_ticker_messages_for_coord_context_admitted():
+    """DSS-281 regression: coord_context_admitted yields thinking/overlay ticker lines."""
+    result = _run_ticker_formatter(
+        {
+            "type": "coord_context_admitted",
+            "payload": {
+                "coord": "chat-demo:WX-1772505927152",
+                "admission": "opened_payload",
+                "chars": 42,
+            },
+        }
+    )
+    thinking = result.get("thinking") or []
+    overlay = result.get("overlay") or []
+    expected = "Context admitted: chat-demo:WX-1772505927152 (opened_payload)"
+    assert expected in thinking
+    assert expected in overlay
+
+
+def test_collect_pipeline_ticker_messages_for_coord_catalog():
+    """DSS-281 regression: coord_catalog yields COORD ticker lines for each entry."""
+    result = _run_ticker_formatter(
+        {
+            "type": "coord_catalog",
+            "payload": {
+                "kind": "coord_catalog",
+                "entries": [
+                    {"coord": "chat-demo:WX-1772505927152"},
+                    {"coord": "chat-demo:WX-1772505000000"},
+                ],
+            },
+        }
+    )
+    thinking = result.get("thinking") or []
+    overlay = result.get("overlay") or []
+    assert "COORD: chat-demo:WX-1772505927152" in thinking
+    assert "COORD: chat-demo:WX-1772505000000" in thinking
+    assert "COORD: chat-demo:WX-1772505927152" in overlay
+    assert "COORD: chat-demo:WX-1772505000000" in overlay
+
+
 def test_build_meta_ticker_fallback_for_no_candidate_turn():
     source = APP_JS.read_text()
     functions = "\n\n".join(
