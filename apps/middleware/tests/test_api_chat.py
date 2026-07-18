@@ -1,5 +1,6 @@
 
 import json
+import uuid
 from pathlib import Path
 
 import httpx
@@ -1282,3 +1283,142 @@ def test_decode_coordinate_preserves_coord_meta(monkeypatch):
     meta = body.get("meta") or {}
     assert meta.get("canonical_subject") == "did:web:id.dualsubstrate.com:ledgers:chat-demo"
     assert meta.get("runtime_namespace") == "chat-demo"
+
+
+@pytest.mark.parametrize(
+    "selected_model",
+    [
+        "moonshotai/kimi-k2.5",
+        "openai/gpt-4o-mini",
+    ],
+)
+def test_smart_stream_uses_selected_model_for_answer_and_guardian_for_auxiliaries(
+    monkeypatch, tmp_path: Path, selected_model: str
+):
+    """DSS-279: only the user-selected model is billed for the main answer.
+
+    Auxiliary work (intent classification, navigation, payload attestation) is
+    routed to the Guardian model. The test exercises the middleware answer path
+    directly (backend_stream=False) so every LLM call is visible.
+    """
+    import app as app_module
+    from routes import orchestrator as orchestrator_module
+
+    registry_path = tmp_path / f"principal_registry_{selected_model.replace('/', '_')}.json"
+    app_module.PRINCIPAL_REGISTRY = PrincipalRegistry(registry_path)
+    app_module.PRINCIPAL_REGISTRY.upsert(
+        principal_did="did:key:z6MkSelectedModel",
+        tenant_id="tenant:demo",
+        metadata={"actor_type": "model", "vc_status": "verified"},
+    )
+    app_module.PRINCIPAL_REGISTRY.bind_key_ref(
+        principal_did="did:key:z6MkSelectedModel",
+        principal_key_ref=f"openrouter:model:{selected_model}",
+        tenant_id="tenant:demo",
+    )
+
+    invocations: list[dict[str, str]] = []
+
+    def fake_log_llm_invocation(*, request_id: str, role: str, model: str) -> None:
+        invocations.append({"request_id": request_id, "role": role, "model": model})
+
+    async def fake_generate_response(**kwargs):
+        agent = kwargs.get("agent")
+        if agent == orchestrator_module.GUARDIAN_MODEL:
+            return {
+                "text": json.dumps({"intent": "general", "category": "chat"}),
+                "model": agent,
+                "tokens": {"input": 1, "output": 1},
+            }
+        return {
+            "text": "mock answer",
+            "model": agent,
+            "tokens": {"input": 1, "output": 1},
+        }
+
+    async def fake_stream_response(**kwargs):
+        agent = kwargs.get("agent")
+
+        async def _stream():
+            yield "mock answer"
+
+        async def _result_future():
+            return {
+                "model": agent,
+                "cost": 0.0001,
+                "tokens": {"input": 2, "output": 2},
+                "finish_reason": "stop",
+            }
+
+        return _stream(), _result_future()
+
+    async def fake_assemble(**_kwargs):
+        return {"retrieved": []}
+
+    async def fake_apply_grounding_guard(**_kwargs):
+        return None
+
+    async def fake_assess_chat(**_kwargs):
+        return {
+            "appraisal": {"score": 0.9, "law_score": 0.9, "grace_score": 0.9, "drift": 0.0},
+            "guardian": {"mode": "test", "skipped": False},
+        }
+
+    async def fake_commit_answer(**_kwargs):
+        return {"status": "ok", "metadata": {}, "coordinate": "test:coord"}
+
+    monkeypatch.setattr(orchestrator_module, "_log_llm_invocation", fake_log_llm_invocation)
+    monkeypatch.setattr(app_module.llm, "generate_response", fake_generate_response)
+    monkeypatch.setattr(app_module.llm, "stream_response", fake_stream_response)
+    monkeypatch.setattr(app_module.api, "assemble", fake_assemble)
+    monkeypatch.setattr(app_module.api, "apply_grounding_guard", fake_apply_grounding_guard)
+    monkeypatch.setattr(app_module.api, "assess_chat", fake_assess_chat)
+    monkeypatch.setattr(app_module.api, "commit_answer", fake_commit_answer)
+
+    session_id = f"test-single-model-{selected_model.replace('/', '-')}-{uuid.uuid4().hex[:8]}"
+    with client.stream(
+        "POST",
+        "/api/chat/smart_stream",
+        json={
+            "session_id": session_id,
+            "message": "Please explain the current system status in detail",
+            "history": [],
+            "agent": selected_model,
+            "provider": selected_model,
+            "backend_stream": False,
+            "_stream_passthrough": True,
+            "enable_ledger": True,
+            "principal_did": "did:key:z6MkSelectedModel",
+            "context_id": "ctx:test",
+            "tenant_id": "tenant:demo",
+        },
+        headers={"Authorization": "Bearer opaque-session-token"},
+    ) as response:
+        assert response.status_code == 200
+        lines = [line for line in response.iter_lines() if line]
+
+    assert lines
+    events = [json.loads(line) for line in lines]
+    assert any(ev.get("type") == "token" for ev in events)
+
+    answer_invocations = [inv for inv in invocations if inv["role"] == "answer"]
+    guardian_invocations = [inv for inv in invocations if inv["role"].startswith("guardian_")]
+    answer_retry_invocations = [inv for inv in invocations if inv["role"].startswith("answer_retry_")]
+
+    assert len(answer_invocations) == 1, f"Expected one answer invocation, got: {answer_invocations}"
+    assert answer_invocations[0]["model"] == selected_model
+
+    for inv in guardian_invocations:
+        assert inv["model"] == orchestrator_module.GUARDIAN_MODEL, (
+            f"Guardian role {inv['role']} must use {orchestrator_module.GUARDIAN_MODEL}, got {inv['model']}"
+        )
+
+    for inv in answer_retry_invocations:
+        assert inv["model"] == selected_model, (
+            f"Answer retry role {inv['role']} must use selected model {selected_model}, got {inv['model']}"
+        )
+
+    billed_models = {inv["model"] for inv in invocations}
+    assert billed_models <= {selected_model, orchestrator_module.GUARDIAN_MODEL}, (
+        f"Unexpected models billed: {billed_models}"
+    )

@@ -156,7 +156,30 @@ def _env_bool_const(name: str, default: bool) -> bool:
     return str(raw).strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _env_str_const(name: str, default: str) -> str:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    return str(raw).strip() or default
+
+
+def _log_llm_invocation(*, request_id: str, role: str, model: str) -> None:
+    """Log every LLM invocation with its role for cost/attribution auditing."""
+    LOGGER.info(
+        "llm_invocation",
+        extra={
+            "request_id": request_id,
+            "role": role,
+            "model": model,
+        },
+    )
+
+
 NO_CAPS = _env_bool_const("NO_CAPS", True)
+# DSS-279: Guardian is the only permitted secondary model. It handles auxiliary
+# tasks (intent, navigation, payload attestation) so the user-selected agent is
+# the only model billed for the main answer.
+GUARDIAN_MODEL = _env_str_const("GUARDIAN_MODEL", settings.GUARDIAN_MODEL)
 MAX_DECODED_COORDS = 18
 MAX_TOTAL_SNIPPETS = 24
 MAX_ATTACHMENT_PART_SAMPLE = MAX_TOTAL_SNIPPETS * 4
@@ -3677,11 +3700,16 @@ async def _select_choice_coord(
                     "phase": "choice",
                 }
             ]
+        _log_llm_invocation(
+            request_id=request_id,
+            role="guardian_navigation",
+            model=GUARDIAN_MODEL,
+        )
         response = await llm.generate_response(
             message=prompt,
             context=None,
             history=None,
-            agent=settings.LLM_MODEL,
+            agent=GUARDIAN_MODEL,
             system_prompt="Output only strict JSON.",
             signals=signal_payload,
         )
@@ -6372,7 +6400,7 @@ async def _collect_payload_read_attestation(
             message=message,
             context=llm_context_items if llm_context_items else None,
             history=history if history else None,
-            agent=agent or settings.LLM_MODEL,
+            agent=GUARDIAN_MODEL,
             system_prompt=f"{system_prompt}\n{_payload_read_attestation_instruction(explicit_targets=explicit_targets, delivered_coords=delivered_coords)}",
             signals=None,
         )
@@ -7607,6 +7635,7 @@ def register_orchestrator_routes(rt):
             provider = agent
         if not agent and provider:
             agent = provider
+        selected_model = agent or settings.LLM_MODEL
         actor_resolution, standing_envelope = _resolve_runtime_actor(
             payload=payload,
             auth_claims=auth_claims if isinstance(auth_claims, dict) else None,
@@ -7832,11 +7861,16 @@ def register_orchestrator_routes(rt):
                 intent_start = time.perf_counter()
                 _mark_prestream("intent_start")
                 try:
+                    _log_llm_invocation(
+                        request_id=request_id,
+                        role="guardian_intent",
+                        model=GUARDIAN_MODEL,
+                    )
                     intent_response = await llm.generate_response(
                         message=message,
                         context=None,
                         history=None,
-                        agent=agent or settings.LLM_MODEL,
+                        agent=GUARDIAN_MODEL,
                         system_prompt=INTENT_SYSTEM_PROMPT,
                     )
                     result = _parse_intent_payload(intent_response.get("text"))
@@ -9472,11 +9506,16 @@ def register_orchestrator_routes(rt):
                             for coord in (coord_accounting.get("payload_delivered_to_model_coords") or [])
                             if isinstance(coord, str) and str(coord).strip()
                         ]
+                _log_llm_invocation(
+                    request_id=request_id,
+                    role="answer_retry_synthesis",
+                    model=selected_model,
+                )
                 synthesis_retry = await llm.generate_response(
                     message=message,
                     context=context_items if context_items else None,
                     history=history if history else None,
-                    agent=agent or settings.LLM_MODEL,
+                    agent=selected_model,
                     system_prompt=f"{system_prompt}\n{_payload_synthesis_retry_instruction(explicit_targets=explicit_attachment_targets, delivered_coords=delivered_payload_coords)}",
                     signals=None,
                 )
@@ -9561,11 +9600,16 @@ def register_orchestrator_routes(rt):
                             for coord in (coord_accounting.get("payload_delivered_to_model_coords") or [])
                             if isinstance(coord, str) and str(coord).strip()
                         ]
+                _log_llm_invocation(
+                    request_id=request_id,
+                    role="answer_retry_synthesis",
+                    model=selected_model,
+                )
                 synthesis_retry = await llm.generate_response(
                     message=message,
                     context=context_items if context_items else None,
                     history=history if history else None,
-                    agent=agent or settings.LLM_MODEL,
+                    agent=selected_model,
                     system_prompt=f"{system_prompt}\n{_payload_synthesis_retry_instruction(explicit_targets=explicit_attachment_targets, delivered_coords=delivered_payload_coords)}",
                     signals=None,
                 )
@@ -11499,11 +11543,17 @@ def register_orchestrator_routes(rt):
                     step_code="MODEL_STREAM_START",
                     step_label="Model stream started",
                 )
+                selected_model = agent or settings.LLM_MODEL
+                _log_llm_invocation(
+                    request_id=request_id,
+                    role="answer",
+                    model=selected_model,
+                )
                 stream, result_future = await llm.stream_response(
                     message=message,
                     context=llm_context_items if llm_context_items else None,
                     history=history if history else None,
-                    agent=agent or settings.LLM_MODEL,
+                    agent=selected_model,
                     system_prompt=system_prompt,
                     signals=None if small_model_mode else (signals if signals else None),
                 )
@@ -11615,11 +11665,16 @@ def register_orchestrator_routes(rt):
                         }
                     )
                     retry_start = time.perf_counter()
+                    _log_llm_invocation(
+                        request_id=request_id,
+                        role="answer_retry_consistency",
+                        model=selected_model,
+                    )
                     retry_response = await llm.generate_response(
                         message=message,
                         context=llm_context_items if llm_context_items else None,
                         history=history if history else None,
-                        agent=agent or settings.LLM_MODEL,
+                        agent=selected_model,
                         system_prompt=f"{system_prompt}\n{_consistency_retry_instruction(resolved_coords)}",
                         signals=None if small_model_mode else (signals if signals else None),
                     )
@@ -11684,11 +11739,16 @@ def register_orchestrator_routes(rt):
                         }
                     )
                     retry_start = time.perf_counter()
+                    _log_llm_invocation(
+                        request_id=request_id,
+                        role="answer_retry_attachment",
+                        model=selected_model,
+                    )
                     retry_response = await llm.generate_response(
                         message=message,
                         context=llm_context_items if llm_context_items else None,
                         history=history if history else None,
-                        agent=agent or settings.LLM_MODEL,
+                        agent=selected_model,
                         system_prompt=f"{system_prompt}\n{_attachment_grounded_retry_instruction(explicit_targets=explicit_observed_targets, resolved_coords=resolved_coords)}",
                         signals=None if small_model_mode else (signals if signals else None),
                     )
@@ -11744,6 +11804,11 @@ def register_orchestrator_routes(rt):
                     or explicit_observed_targets
                     or any(_coord_type(coord) in {"ATT", "ATT-PART"} for coord in attestation_candidate_coords)
                 ):
+                    _log_llm_invocation(
+                        request_id=request_id,
+                        role="guardian_attestation",
+                        model=GUARDIAN_MODEL,
+                    )
                     model_payload_attestation = await _collect_payload_read_attestation(
                         llm=llm,
                         message=message,
@@ -11783,11 +11848,16 @@ def register_orchestrator_routes(rt):
                             for coord in (coord_accounting.get("payload_delivered_to_model_coords") or [])
                             if isinstance(coord, str) and str(coord).strip()
                         ]
+                    _log_llm_invocation(
+                        request_id=request_id,
+                        role="answer_retry_synthesis",
+                        model=selected_model,
+                    )
                     synthesis_retry = await llm.generate_response(
                         message=message,
                         context=llm_context_items if llm_context_items else None,
                         history=history if history else None,
-                        agent=agent or settings.LLM_MODEL,
+                        agent=selected_model,
                         system_prompt=f"{system_prompt}\n{_payload_synthesis_retry_instruction(explicit_targets=explicit_observed_targets, delivered_coords=delivered_payload_coords)}",
                         signals=None if small_model_mode else (signals if signals else None),
                     )

@@ -85,6 +85,10 @@ class Settings:
     # LLM (OpenRouter defaults)
     OPENROUTER_API_KEY: str = os.getenv("OPENROUTER_API_KEY", "")
     LLM_MODEL: str = os.getenv("LLM_MODEL", "openai/gpt-4o")
+    # Guardian: small, cheap model used for auxiliary tasks (intent, navigation,
+    # payload attestation) so the user-selected agent is the only model billed for
+    # the main answer.
+    GUARDIAN_MODEL: str = os.getenv("GUARDIAN_MODEL", "openai/gpt-4o-mini")
     LLM_MAX_TOKENS: int = int(
         os.getenv("OPENROUTER_MAX_TOKENS")
         or os.getenv("LLM_MAX_TOKENS")
@@ -143,6 +147,7 @@ DEFAULT_LEDGER_ID: str = settings.DEFAULT_LEDGER_ID
 DEFAULT_SESSION_ID: str = settings.DEFAULT_SESSION_ID
 HTTP_TIMEOUT: float = settings.HTTP_TIMEOUT
 LLM_MODEL: str = settings.LLM_MODEL
+GUARDIAN_MODEL: str = settings.GUARDIAN_MODEL
 LLM_MAX_TOKENS: int = settings.LLM_MAX_TOKENS
 LLM_PROVIDER: str = settings.LLM_PROVIDER
 ENABLE_LOCAL_LLM: bool = settings.ENABLE_LOCAL_LLM
