@@ -1686,10 +1686,8 @@ artifact:
     - private/semantic_registry.yaml
     - private/*
     - ksr/pack/*
-    - dist/ksr-pack-*.yaml
     public_paths:
     - ksr/core/ksr-core-*.yaml
-    - dist/ksr-core-*.yaml
   confidence_taxonomy:
     S: Structural — mathematical identity or provable isomorphism
     A: Archetypal — independently observed across three or more traditions

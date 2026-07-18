@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-KSR-VALIDATE v0.3 - structural self-validation for semantic_registry.yaml and KSR artifacts.
+KSR-VALIDATE v0.3.1 - structural self-validation for semantic_registry.yaml and KSR artifacts.
 
 Usage:
     python3 ksr_validate.py [REGISTRY] [--mode core|pack] [--repo-root PATH] [--known PATH]
@@ -512,14 +512,14 @@ def main():
 
     if args.mode == "pack":
         gates = run_pack_gates(raw, dups)
-        print(f"KSR-VALIDATE v0.3 pack mode | artifact: {args.registry}")
+        print(f"KSR-VALIDATE v0.3.1 pack mode | artifact: {args.registry}")
         print(f"ksr_pack: {raw.get('ksr_artifact')} | gates: {len(gates)}\n")
     else:
         gates = run_gates(d, dups, args.registry, args.repo_root)
         if args.mode == "core":
             # Filter to G01-G16
             gates = [g for g in gates if g.gid.startswith("G")]
-        print(f"KSR-VALIDATE v0.3 {'core' if args.mode == 'core' else 'full'} mode | registry: {args.registry}")
+        print(f"KSR-VALIDATE v0.3.1 {'core' if args.mode == 'core' else 'full'} mode | registry: {args.registry}")
         print(f"ksr_version: {d.get('ksr_version')} | gates: {len(gates)}\n")
 
     new_fail = 0

@@ -63,7 +63,6 @@ def _matches_gitignore(rel: str, patterns: list[str]) -> bool:
 DEFAULT_PRIVATE_PATHS = {
     "private",
     "ksr/pack",
-    "dist/ksr-pack-",
     "apps/backend/backend/kernel/.ksr",
     "apps/backend/backend/kernel/semantic_registry.enc",
     # Steward-only lattice enrichment modules (Hebrew / iChing overlays).

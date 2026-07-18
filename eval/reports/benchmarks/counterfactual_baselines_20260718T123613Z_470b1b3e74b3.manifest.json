@@ -1,8 +1,8 @@
 {
   "artifact_version": "ksr-eval-v0.4",
-  "git_commit_sha": "25ac629610a48e10ce6ed8f7d7bb8c54b8a17416",
-  "eval_script_version": "counterfactual_harness_v1.0",
-  "run_date": "2026-07-18T11:38:19.040595+00:00",
+  "git_commit_sha": "470b1b3e74b32ad89e1dcdae7c5fa88345356316",
+  "eval_script_version": "counterfactual_harness_v1.1",
+  "run_date": "2026-07-18T12:36:13.234792+00:00",
   "seeds": [
     2026
   ],
@@ -10,7 +10,7 @@
     "platform": "Darwin-25.5.0-x86_64",
     "processor": "i386",
     "cpu_count": 16,
-    "memory_gb": 16.0,
+    "memory_gb": null,
     "gpu_name": null,
     "gpu_count": null,
     "cuda_version": null,
@@ -21,13 +21,13 @@
     "name": "longbench_needle_synthetic_v1",
     "version": "v1",
     "split": "benchmark",
-    "record_count": 1,
-    "path": "in_memory",
-    "sha256": ""
+    "record_count": 3,
+    "path": "generator:needle=9a27348ec20bbec8;multihop=36874c8965e2395a",
+    "sha256": "9a27348ec20bbec8947c18a1ec5476301482c93ba99e2bfe8f6f3a821dccefae"
   },
   "conditions": {
-    "lengths": "8,16",
-    "chain_count": 3,
+    "lengths": "8,16,32",
+    "chain_count": 5,
     "top_k": 5,
     "transport": "R1",
     "issue": "#1"
@@ -42,5 +42,9 @@
     "sample_count": 1,
     "unit": "ratio",
     "description": "Needle Qp recall@1 on original paired corpus."
+  },
+  "notes": {
+    "credit": "hugooconnor \u2014 issue #1 reproduction and critique",
+    "partial_status_note": "'partial' indicates traceability/governance groups are intentionally out-of-scope, not retrieval failure."
   }
 }

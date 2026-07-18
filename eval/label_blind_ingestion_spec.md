@@ -2,7 +2,7 @@
 
 **Status:** Design-only for KSR-EVAL v0.4; implementation targeted for v0.5 or Hugo PR.  
 **Scope:** Public artefact. No steward-only content.  
-**Credit:** Hugo Berigny — corpus and evaluation-protocol co-design.
+**Credit:** hugooconnor — issue #1 reproduction and critique.
 
 ## Problem
 

@@ -28,7 +28,7 @@ def _first_dataset(artifact: BenchmarkArtifact) -> dict[str, Any]:
             "version": ds.version,
             "split": ds.split,
             "record_count": ds.record_count,
-            "path": "in_memory",
+            "path": "",
             "sha256": "",
         }
     return {"name": "unknown", "version": "unknown", "split": "unknown", "path": "", "sha256": ""}
@@ -119,7 +119,13 @@ def build_manifest(
             "description": first["description"],
         }
 
-    return {
+    notes = {}
+    if artifact.run_config:
+        for key in ("credit", "partial_status_note"):
+            if key in artifact.run_config:
+                notes[key] = artifact.run_config[key]
+
+    manifest = {
         "artifact_version": "ksr-eval-v0.4",
         "git_commit_sha": repo_sha,
         "eval_script_version": eval_script_version,
@@ -130,6 +136,9 @@ def build_manifest(
         "conditions": conditions or {},
         "metrics": stats,
     }
+    if notes:
+        manifest["notes"] = notes
+    return manifest
 
 
 def write_manifest(

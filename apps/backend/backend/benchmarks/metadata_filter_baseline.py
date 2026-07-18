@@ -1,11 +1,13 @@
 """Metadata-filter baseline for DSS-277 B3 matched-information comparison.
 
-This baseline receives exactly the same structural metadata that DSS uses
-(kernel node, circulation pass, valuation offset, dual validity, tetrahedron)
-but applies only deterministic filters — no Qp arithmetic, no embeddings, and no
-learned ranking. It measures how much of DSS's advantage comes from simply
+This baseline receives exactly the same structural metadata that DSS uses — the
+``QpCoordinate`` objects themselves when available, otherwise the extracted
+structural fields — and applies the same compatibility filter
+(:func:`backend.fieldx_kernel.qp_retrieval.qp_pure_compatible`) that genuine Qp
+routing uses. It then ranks surviving candidates by lexical overlap. The result
+is a true control: it tells us how much of DSS's advantage comes from simply
 holding the structural metadata constant, versus the additional value of Qp
-coordinate arithmetic and governance gates.
+arithmetic and governance gates.
 """
 
 from __future__ import annotations
@@ -39,7 +41,7 @@ class CoordinateMetadata:
 
 
 def _matches(query_meta: CoordinateMetadata, memory_meta: CoordinateMetadata) -> bool:
-    """Return True if memory metadata satisfies the query filter."""
+    """Approximate metadata filter used when real QpCoordinate objects are absent."""
     if query_meta.kernel_node is not None and memory_meta.kernel_node != query_meta.kernel_node:
         return False
     if query_meta.tetrahedron is not None and memory_meta.tetrahedron != query_meta.tetrahedron:
@@ -65,12 +67,35 @@ def _token_count(text: str) -> int:
     return len(text.split())
 
 
-class MetadataFilterBaseline(Baseline):
-    """Deterministic structural-metadata filter baseline.
+def _is_compatible(query: Mapping[str, Any], memory: Mapping[str, Any]) -> bool:
+    """Return True if memory is structurally compatible with the query.
 
-    Each memory and query must carry a ``coordinate_metadata`` dict with the same
-    fields DSS consumes. Memories that fail the filter are dropped; survivors are
-    ranked by lexical overlap with the query text.
+    Uses the real ``qp_pure_compatible`` filter when coordinate objects are
+    embedded; otherwise falls back to the approximate metadata filter.
+    """
+    qcoord = query.get("coordinate")
+    mcoord = memory.get("coordinate")
+    if qcoord is not None and mcoord is not None:
+        try:
+            from backend.fieldx_kernel.qp_retrieval import qp_pure_compatible
+
+            return bool(qp_pure_compatible(qcoord, mcoord))
+        except Exception:
+            pass
+    return _matches(
+        CoordinateMetadata.from_dict(query.get("coordinate_metadata", {})),
+        CoordinateMetadata.from_dict(memory.get("coordinate_metadata", {})),
+    )
+
+
+class MetadataFilterBaseline(Baseline):
+    """Structural-metadata compatibility filter + lexical-overlap ranking baseline.
+
+    When memories/queries include the raw ``coordinate`` object, this baseline
+    calls the same ``qp_pure_compatible`` function as genuine DSS routing,
+    making it a true matched-information control. When only
+    ``coordinate_metadata`` dicts are present, it falls back to an approximate
+    deterministic filter.
     """
 
     name = "metadata_filter"
@@ -93,12 +118,10 @@ class MetadataFilterBaseline(Baseline):
             query_text = str(query.get("text", ""))
             query_tokens = set(query_text.lower().split())
             relevant_ids = set(query.get("relevant_ids", []))
-            query_meta = CoordinateMetadata.from_dict(query.get("coordinate_metadata", {}))
 
             candidates = []
             for memory in memories:
-                memory_meta = CoordinateMetadata.from_dict(memory.get("coordinate_metadata", {}))
-                if not _matches(query_meta, memory_meta):
+                if not _is_compatible(query, memory):
                     continue
                 memory_text = str(memory.get("text", ""))
                 memory_tokens = set(memory_text.lower().split())

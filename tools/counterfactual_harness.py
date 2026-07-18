@@ -13,8 +13,8 @@ Also reports the B3 matched-information baselines:
   - metadata_filter (structural metadata only)
 
 Output is a BenchmarkArtifact per whitepaper Appendix A plus a human-readable
-report under ``eval/reports/benchmarks/``. Hugo is credited as co-author of the
-original synthetic corpora. Decision D2 merge window is documented in the
+report under ``eval/reports/benchmarks/``. Credit: hugooconnor for issue #1
+reproduction and critique. Decision D2 merge window is documented in the
 artifact run_config.
 
 Usage:
@@ -56,6 +56,7 @@ from backend.benchmarks.comparison_benchmark import (  # noqa: E402
     run_needle_baseline,
 )
 from backend.benchmarks.hardware import detect_hardware_profile  # noqa: E402
+from backend.benchmarks.manifest import build_manifest, write_manifest  # noqa: E402
 from backend.benchmarks.longbench_multihop_benchmark import (  # noqa: E402
     DEFAULT_CHAIN_COUNT,
     DEFAULT_CHAIN_LENGTH,
@@ -93,6 +94,17 @@ def _repo_sha() -> str:
         )
     except Exception:
         return "unknown"
+
+
+def _dataset_sha256(name: str, lengths: tuple[int, ...], chain_count: int, seed: int) -> str:
+    """Deterministic fingerprint of the synthetic corpus generator inputs."""
+    import hashlib
+
+    payload = json.dumps(
+        {"name": name, "lengths": lengths, "chain_count": chain_count, "seed": seed},
+        sort_keys=True,
+    )
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def _compute_statistics(values: list[float]) -> MetricStatistics:
@@ -157,6 +169,7 @@ def _normalize_memories_with_metadata(memories: list[Any]) -> list[dict[str, Any
         {
             "id": str(getattr(mem, "memory_id", i)),
             "text": str(getattr(mem, "text", "")),
+            "coordinate": getattr(mem, "coordinate", None),
             "coordinate_metadata": _extract_coordinate_metadata(getattr(mem, "coordinate", None)),
         }
         for i, mem in enumerate(memories)
@@ -169,6 +182,7 @@ def _normalize_needle_queries(queries: list[Any]) -> list[dict[str, Any]]:
             "id": str(q.query_id),
             "text": str(q.text),
             "relevant_ids": {str(q.needle_id)},
+            "coordinate": q.coordinate,
             "coordinate_metadata": _extract_coordinate_metadata(q.coordinate),
         }
         for q in queries
@@ -181,6 +195,7 @@ def _normalize_multihop_queries(queries: list[Any]) -> list[dict[str, Any]]:
             "id": str(q.query_id),
             "text": str(q.text),
             "relevant_ids": set(q.required_ids),
+            "coordinate": q.coordinate,
             "coordinate_metadata": _extract_coordinate_metadata(q.coordinate),
         }
         for q in queries
@@ -326,14 +341,19 @@ def run_b3_baselines(
         "needle": {
             "bow_stand_in_recall_at_1": bow_needle.recall_at_1,
             "metadata_filter_recall_at_1": metadata_needle.recall_at_1,
-            "real_embedding": real_embedding_result.get("needle_recall_at_1"),
+            "real_embedding": {
+                **real_embedding_result,
+                "recall_at_1": real_embedding_result.get("needle_recall_at_1"),
+            },
         },
         "multihop": {
             "bow_stand_in_recall_at_k": bow_multihop.recall_at_k,
             "metadata_filter_recall_at_k": metadata_multihop.recall_at_k,
-            "real_embedding": real_embedding_result.get("multihop_recall_at_k"),
+            "real_embedding": {
+                **real_embedding_result,
+                "recall_at_k": real_embedding_result.get("multihop_recall_at_k"),
+            },
         },
-        "real_embedding": real_embedding_result,
     }
 
 
@@ -346,8 +366,13 @@ def _build_artifact(
     executed_at: datetime,
     runtime_ms: float,
     seed: int,
+    lengths: tuple[int, ...],
+    chain_count: int,
 ) -> BenchmarkArtifact:
     hardware = detect_hardware_profile()
+    real_emb = b3.get("needle", {}).get("real_embedding", {})
+    real_available = isinstance(real_emb, dict) and real_emb.get("available", False)
+    real_recall = real_emb.get("recall_at_1", -1.0) if real_available else -1.0
     return BenchmarkArtifact(
         artefact_schema_version="1.0.0",
         run_id=f"counterfactual-baselines-{executed_at.strftime('%Y%m%dT%H%M%SZ')}",
@@ -369,13 +394,13 @@ def _build_artifact(
                 name="longbench_needle_synthetic_v1",
                 version="v1",
                 split="benchmark",
-                record_count=1,
+                record_count=len(lengths),
             ),
             DatasetRef(
                 name="longbench_multihop_synthetic_v1",
                 version="v1",
                 split="benchmark",
-                record_count=1,
+                record_count=chain_count,
             ),
         ],
         metrics={
@@ -420,7 +445,12 @@ def _build_artifact(
                     "b3_metadata_filter_needle_recall_at_1": MetricEntry(
                         value=b3["needle"]["metadata_filter_recall_at_1"],
                         unit="ratio",
-                        description="B3 metadata-filter needle recall@1.",
+                        description="B3 metadata-filter needle recall@1 (same QpCoordinate compatibility filter as DSS).",
+                    ),
+                    "b3_real_embedding_needle_recall_at_1": MetricEntry(
+                        value=real_recall,
+                        unit="ratio",
+                        description=f"B3 real embedding baseline ({PINNED_MODEL_NAME}) needle recall@1.",
                     ),
                 },
             ),
@@ -462,12 +492,15 @@ def _build_artifact(
         hardware=HardwareProfile(**hardware.to_dict()),
         run_config={
             "seed": seed,
+            "lengths": ",".join(str(x) for x in lengths),
+            "chain_count": chain_count,
             "issue": "#1",
-            "credit": "Hugo Berigny — original synthetic corpus design",
+            "credit": "hugooconnor — issue #1 reproduction and critique",
+            "partial_status_note": "'partial' indicates traceability/governance groups are intentionally out-of-scope, not retrieval failure.",
             "d2_merge_window_days": D2_WINDOW_DAYS,
             "d2_note": (
-                f"Hold merge of counterfactual shuffle distributions until Hugo's "
-                f"stated PR window expires ({D2_WINDOW_DAYS} days) or his PR lands."
+                f"Hold merge of counterfactual shuffle distributions until "
+                f"hugooconnor's stated PR window expires ({D2_WINDOW_DAYS} days) or their PR lands."
             ),
         },
     )
@@ -509,6 +542,8 @@ def main() -> int:
         executed_at=executed_at,
         runtime_ms=runtime_ms,
         seed=args.seed,
+        lengths=args.lengths,
+        chain_count=args.chain_count,
     )
 
     args.output_root.mkdir(parents=True, exist_ok=True)
@@ -519,11 +554,11 @@ def main() -> int:
     )
 
     # Emit KSR-EVAL v0.4 manifest.
-    from backend.benchmarks.manifest import build_manifest, write_manifest
-
+    needle_sha = _dataset_sha256("longbench_needle_synthetic_v1", args.lengths, 0, args.seed)
+    multihop_sha = _dataset_sha256("longbench_multihop_synthetic_v1", (), args.chain_count, args.seed)
     manifest = build_manifest(
         artifact,
-        eval_script_version="counterfactual_harness_v1.0",
+        eval_script_version="counterfactual_harness_v1.1",
         seeds=[args.seed],
         conditions={
             "lengths": ",".join(str(x) for x in args.lengths),
@@ -532,6 +567,8 @@ def main() -> int:
             "transport": "R1",
             "issue": "#1",
         },
+        dataset_path=f"generator:needle={needle_sha[:16]};multihop={multihop_sha[:16]}",
+        dataset_sha256=needle_sha,
     )
     manifest_path = output_path.with_suffix(".manifest.json")
     write_manifest(manifest, manifest_path)
@@ -547,10 +584,15 @@ def main() -> int:
     print("\nB3 matched-information baselines:")
     print(f"  BoW stand-in needle@1: {b3['needle']['bow_stand_in_recall_at_1']:.3f}")
     print(f"  Metadata filter needle@1: {b3['needle']['metadata_filter_recall_at_1']:.3f}")
-    print(f"  Real embedding available: {b3['real_embedding']['available']}")
+    real_emb = b3.get("needle", {}).get("real_embedding", {})
+    if isinstance(real_emb, dict) and real_emb.get("available"):
+        print(f"  Real embedding ({PINNED_MODEL_NAME}) needle@1: {real_emb['recall_at_1']:.3f}")
+    else:
+        reason = real_emb.get("reason", "unknown") if isinstance(real_emb, dict) else "unknown"
+        print(f"  Real embedding: unavailable ({reason})")
     print(f"\nArtifact: {output_path}")
     print(f"Manifest: {manifest_path}")
-    print(f"D2 window: {D2_WINDOW_DAYS} days | issue #1 | credit: Hugo Berigny")
+    print(f"D2 window: {D2_WINDOW_DAYS} days | issue #1 | credit: hugooconnor")
     return 0
 
 

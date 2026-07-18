@@ -1,15 +1,15 @@
 {
   "artefact_schema_version": "1.0.0",
-  "run_id": "counterfactual-baselines-20260718T113616Z",
+  "run_id": "counterfactual-baselines-20260718T123613Z",
   "suite_id": "counterfactual-baselines",
   "suite_version": "v1",
-  "executed_at": "2026-07-18T11:36:16.712384Z",
+  "executed_at": "2026-07-18T12:36:13.234792Z",
   "mode": "coordinate_guided",
   "status": "partial",
   "repos": [
     {
       "name": "ds-backend-local",
-      "commit_sha": "25ac629610a48e10ce6ed8f7d7bb8c54b8a17416",
+      "commit_sha": "470b1b3e74b32ad89e1dcdae7c5fa88345356316",
       "role": "canonical_benchmark_engine",
       "required_for_run": true
     }
@@ -19,13 +19,13 @@
       "name": "longbench_needle_synthetic_v1",
       "version": "v1",
       "split": "benchmark",
-      "record_count": 1
+      "record_count": 3
     },
     {
       "name": "longbench_multihop_synthetic_v1",
       "version": "v1",
       "split": "benchmark",
-      "record_count": 1
+      "record_count": 5
     }
   ],
   "metrics": {
@@ -76,9 +76,15 @@
           "statistics": null
         },
         "b3_metadata_filter_needle_recall_at_1": {
+          "value": 0.3333333333333333,
+          "unit": "ratio",
+          "description": "B3 metadata-filter needle recall@1 (same QpCoordinate compatibility filter as DSS).",
+          "statistics": null
+        },
+        "b3_real_embedding_needle_recall_at_1": {
           "value": 0.0,
           "unit": "ratio",
-          "description": "B3 metadata-filter needle recall@1.",
+          "description": "B3 real embedding baseline (sentence-transformers/all-MiniLM-L6-v2) needle recall@1.",
           "statistics": null
         }
       }
@@ -88,7 +94,7 @@
       "absence_reason": null,
       "metrics": {
         "total_runtime_ms": {
-          "value": 2181.688076991122,
+          "value": 13590.735568024684,
           "unit": "ms",
           "description": "Total harness runtime.",
           "statistics": null
@@ -120,7 +126,7 @@
   },
   "freshness": {
     "status": "fresh",
-    "checked_at": "2026-07-18T11:36:16.712384Z",
+    "checked_at": "2026-07-18T12:36:13.234792Z",
     "max_age_hours": 24,
     "age_hours": 0.0
   },
@@ -129,7 +135,7 @@
     "platform": "Darwin-25.5.0-x86_64",
     "processor": "i386",
     "cpu_count": 16,
-    "memory_gb": 16.0,
+    "memory_gb": null,
     "gpu_name": null,
     "gpu_count": null,
     "cuda_version": null,
@@ -138,9 +144,12 @@
   },
   "run_config": {
     "seed": 2026,
+    "lengths": "8,16,32",
+    "chain_count": 5,
     "issue": "#1",
-    "credit": "Hugo Berigny \u2014 original synthetic corpus design",
+    "credit": "hugooconnor \u2014 issue #1 reproduction and critique",
+    "partial_status_note": "'partial' indicates traceability/governance groups are intentionally out-of-scope, not retrieval failure.",
     "d2_merge_window_days": 14,
-    "d2_note": "Hold merge of counterfactual shuffle distributions until Hugo's stated PR window expires (14 days) or his PR lands."
+    "d2_note": "Hold merge of counterfactual shuffle distributions until hugooconnor's stated PR window expires (14 days) or their PR lands."
   }
 }

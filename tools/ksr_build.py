@@ -2,9 +2,11 @@
 """
 KSR-BUILD v0.3 — deterministic partition of semantic_registry.yaml into core + packs.
 
+Canonical public artifacts are written under ``ksr/core/`` and ``ksr/pack/``.
+
 Usage:
-    python3 tools/ksr_build.py --source private/semantic_registry.yaml --output dist
-    python3 tools/ksr_build.py --source private/semantic_registry.yaml --output dist --emit-public --public-dir /tmp/ksr-public
+    python3 tools/ksr_build.py --source private/semantic_registry.yaml --output ksr
+    python3 tools/ksr_build.py --source private/semantic_registry.yaml --output ksr --emit-public --public-dir /tmp/ksr-public
 """
 
 from __future__ import annotations
@@ -78,13 +80,11 @@ def _core_surface_policy(spol: dict[str, Any]) -> dict[str, Any]:
     updated = dict(spol)
     updated["public_paths"] = [
         "ksr/core/ksr-core-*.yaml",
-        "dist/ksr-core-*.yaml",
     ]
     updated["private_paths"] = [
         "private/semantic_registry.yaml",
         "private/*",
         "ksr/pack/*",
-        "dist/ksr-pack-*.yaml",
     ]
     return updated
 
@@ -253,7 +253,7 @@ def write_yaml(path: Path, data: dict[str, Any]) -> str:
 
 
 def build_all(source: Path, output: Path) -> dict[str, Any]:
-    """Build core + packs and write to output directory."""
+    """Build core + packs and write to ``output/core/`` and ``output/pack/`` subdirectories."""
     registry = load_registry(source)
     source_sha = registry_sha256(source)
 
@@ -261,9 +261,14 @@ def build_all(source: Path, output: Path) -> dict[str, Any]:
     domains = build_pack_domains(registry)
     steward = build_pack_steward(registry)
 
-    core_path = output / f"ksr-core-{registry.get('ksr_version', 'unknown')}.yaml"
-    domains_path = output / f"ksr-pack-domains-{registry.get('ksr_version', 'unknown')}.yaml"
-    steward_path = output / f"ksr-pack-steward-{registry.get('ksr_version', 'unknown')}.yaml"
+    core_dir = output / "core"
+    pack_dir = output / "pack"
+    core_dir.mkdir(parents=True, exist_ok=True)
+    pack_dir.mkdir(parents=True, exist_ok=True)
+
+    core_path = core_dir / f"ksr-core-{registry.get('ksr_version', 'unknown')}.yaml"
+    domains_path = pack_dir / f"ksr-pack-domains-{registry.get('ksr_version', 'unknown')}.yaml"
+    steward_path = pack_dir / f"ksr-pack-steward-{registry.get('ksr_version', 'unknown')}.yaml"
 
     core_sha = write_yaml(core_path, add_header(core, source_sha, "ksr-core"))
     domains_sha = write_yaml(domains_path, add_header(domains, source_sha, "ksr-pack-domains"))
@@ -382,7 +387,7 @@ limitations under the License.
 def main() -> int:
     parser = argparse.ArgumentParser(description="KSR deterministic build tool")
     parser.add_argument("--source", type=Path, default=Path("private/semantic_registry.yaml"))
-    parser.add_argument("--output", type=Path, default=Path("dist"))
+    parser.add_argument("--output", type=Path, default=Path("ksr"))
     parser.add_argument("--emit-public", action="store_true", help="Generate public repo tree")
     parser.add_argument("--public-dir", type=Path, default=Path("/tmp/ksr-public"))
     parser.add_argument("--manifest", type=Path, help="Write build manifest JSON")
