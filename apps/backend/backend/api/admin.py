@@ -6186,6 +6186,12 @@ def control_plane_remove_entity(request: Request, payload: EntityRemoveRequest, 
         if mutated_principals:
             _persist_registered_principals_v1(db, principals_v1)
 
+        # Finally remove the ledger registration itself so it no longer appears
+        # in the Control Plane ledger list.
+        if entity_id in ledgers_v1:
+            del ledgers_v1[entity_id]
+            _persist_registered_ledgers_v1(db, ledgers_v1)
+
         removal_audit = {
             "status": "ok",
             "removed": True,
