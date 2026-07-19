@@ -126,6 +126,30 @@ Verification:
 - `scripts/pub1_esoteric_scan.py`: 0 hits (private plaintext KSR mirror now
   excluded from the public scan).
 
+### PUB-1 lexicon escapes (DSS-290)
+
+Removed steward-flavored strings from public engineering files:
+
+- `DEMO_GOD_MODE` → `DEMO_OVERRIDE_MODE` across `ENV_VARS.md`,
+  `backend/services/demo_mode.py`, call sites in `authz.py`, `ledger_scope.py`,
+  `context_scope.py`, `api/chat.py`, `api/ledger.py`, and the
+  `pilot_qp_retrieval_smoke.py` script.
+- `DEMO_GOD_DEFAULT_LEDGER` → `DEMO_DEFAULT_LEDGER` in the same files.
+- Function `demo_god_mode_enabled()` → `demo_override_mode_enabled()`.
+- `"Holy Grail check"` comment in `backend/fieldx_kernel/kernel_origin_equations.py`
+  rewritten as `"perfect diagonal alignment check"`.
+- Test fixtures in `backend/kernel/tests/test_esoteric_stripper.py` updated to
+  use neutral example terms.
+- Old v0.3 eval reports containing `"holy grail"` removed; they were unreferenced
+  and superseded by v0.4 artifacts.
+- Added `god mode` and `holy grail` to `scripts/pub1_esoteric_lexicon.txt` to
+  prevent regression.
+
+Verification:
+
+- `scripts/pub1_esoteric_scan.py`: 0 hits.
+- Backend pytest: 1246 passed.
+
 ## Status semantics
 
 Benchmark artifacts use `status: "partial"`. In this release that means the

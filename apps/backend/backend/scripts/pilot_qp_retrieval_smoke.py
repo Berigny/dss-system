@@ -22,8 +22,8 @@ from datetime import datetime, timezone
 from typing import Any
 
 os.environ.setdefault("ADMIN_TOKEN", "test-admin-token")
-os.environ.setdefault("DEMO_GOD_MODE", "true")
-os.environ.setdefault("DEMO_GOD_DEFAULT_LEDGER", "pilot-qp-retrieval")
+os.environ.setdefault("DEMO_OVERRIDE_MODE", "true")
+os.environ.setdefault("DEMO_DEFAULT_LEDGER", "pilot-qp-retrieval")
 os.environ.setdefault("LEDGER_AUTHZ_MODE", "registry")
 os.environ.setdefault("LEDGER_AUTHZ_UNKNOWN_LEDGER_POLICY", "allow")
 os.environ.setdefault("LEDGER_AUTHZ_ADMIN_PRINCIPAL_TYPES", "admin,service")

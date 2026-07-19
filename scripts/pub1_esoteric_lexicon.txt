@@ -64,3 +64,7 @@ hebrew_char
 esoteric_field
 i_ching_trigram
 conceptual_state
+
+# Operational/demo flags and loaded engineering metaphors that must stay private
+god mode
+holy grail

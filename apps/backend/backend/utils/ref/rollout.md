@@ -1281,13 +1281,13 @@ Enables:
     - `LEDGER_CONTEXT_BINDING_MODE=compat|enforce|off`
   - PR-8 complete: tests and operator runbooks updated with strict defaults + rollback knobs.
   - PR-9 complete (temporary demo override):
-    - added backend-wide demo flag `DEMO_GOD_MODE=true` for open access during demo operations.
+    - added backend-wide demo flag `DEMO_OVERRIDE_MODE=true` for open access during demo operations.
     - implementation:
       - `backend/services/demo_mode.py`
       - `backend/services/authz.py` (allow all actions when enabled)
-      - `backend/services/ledger_scope.py` (relaxed mismatch + default ledger fallback via `DEMO_GOD_DEFAULT_LEDGER`)
+      - `backend/services/ledger_scope.py` (relaxed mismatch + default ledger fallback via `DEMO_DEFAULT_LEDGER`)
       - `backend/services/context_scope.py` (relaxed context mismatch)
-    - default remains secure (`DEMO_GOD_MODE=false`).
+    - default remains secure (`DEMO_OVERRIDE_MODE=false`).
   - PR-10 complete (2026-03-02): coord-walk persistence/storage authority fix.
     - `/chat/walk/write` now enforces canonical ledger scope for persisted namespace and write authz.
   - PR-11 complete (2026-03-02): middleware namespace emission containment.
@@ -1310,7 +1310,7 @@ Enables:
     - prevent stale cross-scope attachment coordinate reuse from client cache.
     - ensure inline ticker is visible by default unless explicitly disabled.
   - prepare and run one migration fallback drill using PR-7 compatibility values before production cutover.
-  - add and execute RBAC schema rollout (next section), then remove temporary `DEMO_GOD_MODE` for non-demo environments.
+  - add and execute RBAC schema rollout (next section), then remove temporary `DEMO_OVERRIDE_MODE` for non-demo environments.
   - required coverage:
     - write-path tests asserting `persisted_namespace == ledger_id`.
     - mismatch rejection tests for chat/ingest/enrich/commit.
@@ -1320,7 +1320,7 @@ Enables:
 0.3 RBAC schema rollout (next implementation block, 2026-02-26).
 
 Goal:
-- replace temporary demo-wide override (`DEMO_GOD_MODE`) with explicit role-based permissions across ledgers, contributors, contexts, and actions.
+- replace temporary demo-wide override (`DEMO_OVERRIDE_MODE`) with explicit role-based permissions across ledgers, contributors, contexts, and actions.
 
 Target RBAC model:
 - principal:
@@ -1362,11 +1362,11 @@ Rollout sequence:
    - context-bound role checks
    - unknown-ledger + unknown-role deterministic denial reasons
 6. Sunset temporary override:
-   - disable `DEMO_GOD_MODE`
+   - disable `DEMO_OVERRIDE_MODE`
    - keep override only for explicitly named demo environments with expiry date.
 
 Temporary demo override governance:
-- `DEMO_GOD_MODE` is now a short-term operational switch.
+- `DEMO_OVERRIDE_MODE` is now a short-term operational switch.
 - must include:
   - explicit owner approval to enable
   - environment-scoped secret only (never default in code/env template)

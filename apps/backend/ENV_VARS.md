@@ -54,8 +54,8 @@ Auto-generated during DSS-232 pre-migration cleanup.
 | `COORD_TIER_T` | "0.85" | backend/api/stats.py |
 | `COORDS_ONLY_MODE` | "false" | backend/api/chat.py |
 | `DB_PATH` | "./data" | backend/benchmarks/rollup_prod_telemetry_benchmarks.py, backend/main.py, backend/scripts/auth_revocation_fire_drill.py, scripts/backfill_base_foundations.py, scripts/scan_base_foundations.py |
-| `DEMO_GOD_DEFAULT_LEDGER` | "", "default" | backend/api/chat.py, backend/api/ledger.py, backend/services/demo_mode.py |
-| `DEMO_GOD_MODE` | "false" | backend/services/demo_mode.py |
+| `DEMO_DEFAULT_LEDGER` | "", "default" | backend/api/chat.py, backend/api/ledger.py, backend/services/demo_mode.py |
+| `DEMO_OVERRIDE_MODE` | "false" | backend/services/demo_mode.py |
 | `DISABLE_RESPONSE_TOKEN_LIMITS` | "1" | backend/api/chat.py |
 | `DSS_DETERMINISTIC` | "false" | backend/benchmarks/determinism.py, backend/config/settings.py |
 | `DSS_DETERMINISTIC_SEED` | "42" | backend/benchmarks/determinism.py, backend/config/settings.py |

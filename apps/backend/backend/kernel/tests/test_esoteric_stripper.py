@@ -17,14 +17,14 @@ def ksr_data() -> dict:
     return {
         "glossary": [
             {"term": "Omega Point", "replacement": "terminal_coherence_state", "category": "esoteric", "priority": "critical"},
-            {"term": "God mode", "replacement": "override_mode", "category": "esoteric", "priority": "critical"},
+            {"term": "Override mode", "replacement": "override_mode", "category": "esoteric", "priority": "critical"},
             {"term": "Law", "replacement": "constraint", "category": "esoteric", "priority": "medium"},
         ],
         "synonym_registry": {
             "terminal_coherence_state": ["Omega", "omega point"],
         },
         "stripping_priority": {
-            "critical": ["Omega Point", "God mode", "YHVH"],
+            "critical": ["Omega Point", "Override mode", "YHVH"],
             "high": [],
             "medium": ["Law"],
             "low": [],

@@ -36,7 +36,7 @@ def _regenerate_glossary(data: dict[str, Any]) -> list[dict[str, Any]]:
     """Generate glossary from synonym_registry, preserving existing metadata."""
     old_glossary = data.get("glossary", [])
     # Map (replacement_key, term_lower) to the original entry so that forms
-    # with distinct priorities (e.g. "Holy Grail" vs "Grail") stay aligned.
+    # with distinct priorities (e.g. "Terminal optimizer" vs "optimizer") stay aligned.
     form_templates: dict[tuple[str, str], dict[str, Any]] = {}
     fallback_templates: dict[str, dict[str, Any]] = {}
     for entry in old_glossary:

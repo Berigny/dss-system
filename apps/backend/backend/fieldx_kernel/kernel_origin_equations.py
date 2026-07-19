@@ -472,8 +472,9 @@ def solve_ethics(
     xs = np.linspace(x_min, x_max, steps + 1)
     ys = np.linspace(y_min, y_max, steps + 1)
 
-    # 2. Golden Vector Injection (The "Holy Grail" check)
-    # We explicitly add the point [1/sqrt(2), 1/sqrt(2)] which we know is perfect.
+    # 2. Golden Vector Injection (perfect diagonal alignment check)
+    # Explicitly seed the diagonal extrema [±1/sqrt(2), ±1/sqrt(2)] which yield
+    # the theoretical optimum under the Law-Grace balance invariant.
     perfect_val = 1.0 / math.sqrt(2)
     special_points = [
         np.array([perfect_val, perfect_val]), 

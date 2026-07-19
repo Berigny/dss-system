@@ -7,7 +7,7 @@ from typing import Any
 
 from fastapi import HTTPException, Request
 
-from backend.services.demo_mode import demo_god_mode_enabled
+from backend.services.demo_mode import demo_override_mode_enabled
 
 
 def _clean(value: Any) -> str:
@@ -31,7 +31,7 @@ def resolve_context_id_or_raise(
     payload_scope = _clean(payload_context_id)
     header_scope = _header_context_id(request)
 
-    if payload_scope and header_scope and payload_scope != header_scope and not demo_god_mode_enabled():
+    if payload_scope and header_scope and payload_scope != header_scope and not demo_override_mode_enabled():
         raise HTTPException(
             status_code=400,
             detail={

@@ -78,7 +78,7 @@ def test_ledger_inventory_includes_registered_and_discovered() -> None:
 
 
 def test_history_namespace_candidates_include_session_alias(monkeypatch) -> None:
-    monkeypatch.setenv("DEMO_GOD_DEFAULT_LEDGER", "chat-demo")
+    monkeypatch.setenv("DEMO_DEFAULT_LEDGER", "chat-demo")
     request = Request({"type": "http", "headers": [], "query_string": b""})
 
     candidates = ledger_api._history_namespace_candidates(request, "chat-demo-session")

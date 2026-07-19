@@ -70,7 +70,7 @@ def _history_namespace_candidates(
             ledger_scope = service.resolve_canonical_ledger_id(ledger_scope) or ledger_scope
         _append(ledger_scope)
 
-    demo_default = os.getenv("DEMO_GOD_DEFAULT_LEDGER", "").strip()
+    demo_default = os.getenv("DEMO_DEFAULT_LEDGER", "").strip()
     if demo_default:
         _append(demo_default)
 

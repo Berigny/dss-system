@@ -14,7 +14,7 @@ from typing import Any, Literal
 
 from fastapi import HTTPException, Request
 
-from backend.services.demo_mode import demo_god_mode_enabled
+from backend.services.demo_mode import demo_override_mode_enabled
 
 
 LedgerAction = Literal[
@@ -210,8 +210,8 @@ def evaluate_authorization(
     action: LedgerAction,
     request: Request | None = None,
 ) -> AuthzDecision:
-    if demo_god_mode_enabled():
-        # Even in demo god mode, run the delegated-principal contract so that
+    if demo_override_mode_enabled():
+        # Even in demo override mode, run the delegated-principal contract so that
         # stream metadata (e.g. delegated_prompt_path) is populated for
         # delegated chat-surface turns.
         if request is not None:
@@ -220,7 +220,7 @@ def evaluate_authorization(
                 principal=principal,
                 ledger_id=ledger_id,
             )
-        return AuthzDecision(allowed=True, reason="demo_god_mode")
+        return AuthzDecision(allowed=True, reason="demo_override_mode")
 
     delegated_reason: str | None = None
     if request is not None:
@@ -610,7 +610,7 @@ def _enforce_explicit_ledger_context_or_raise(
     ledger_id: str,
     explicit_context: bool,
 ) -> None:
-    if demo_god_mode_enabled():
+    if demo_override_mode_enabled():
         return
     mode = os.getenv("LEDGER_CONTEXT_MODE", "compat").strip().lower()
     if mode in {"off", "disabled"}:

@@ -7,7 +7,7 @@ from typing import Any
 
 from fastapi import HTTPException, Request
 
-from backend.services.demo_mode import demo_default_ledger, demo_god_mode_enabled
+from backend.services.demo_mode import demo_default_ledger, demo_override_mode_enabled
 
 
 def _clean_scope(value: Any) -> str:
@@ -46,7 +46,7 @@ def resolve_ledger_scope_or_raise(
         "on",
     }
     if len(unique) > 1:
-        if strict_mode and not demo_god_mode_enabled():
+        if strict_mode and not demo_override_mode_enabled():
             # Defensive: casing alone (e.g. "loam" vs "LOAM") should not trigger a
             # deterministic mismatch. Only genuinely different scopes are rejected.
             unique_lower = sorted({v.lower() for v in unique})
@@ -66,7 +66,7 @@ def resolve_ledger_scope_or_raise(
     if unique:
         return unique[0]
 
-    if demo_god_mode_enabled():
+    if demo_override_mode_enabled():
         return demo_default_ledger()
 
     raise HTTPException(

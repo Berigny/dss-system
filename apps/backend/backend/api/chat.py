@@ -703,7 +703,7 @@ def _attachment_focus_namespaces(*, entity: str, write_namespace: str) -> list[s
 
     _append(write_namespace)
     _append(entity)
-    _append(os.getenv("DEMO_GOD_DEFAULT_LEDGER", "").strip())
+    _append(os.getenv("DEMO_DEFAULT_LEDGER", "").strip())
     for candidate in namespace_candidates():
         _append(candidate)
 
