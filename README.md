@@ -26,19 +26,29 @@ You don't need a better vector database; you need a reliable memory lane. **DSS 
 
 ## The What: The Dual-Substrate System (DSS)
 
-DSS is an open-source, ledger-oriented framework built to fix how AI memory feels, functions, and is governed. It separates probabilistic model inference from durable system memory.
+DSS is an open-source, ledger-oriented framework built to fix how AI memory feels, functions, and is governed. It separates probabilistic model inference from durable system memory. Instead of relying solely on vector search, DSS introduces **vectorless Qp-Native Retrieval**.
 
-Instead of relying solely on vector search, DSS introduces **vectorless Qp-Native Retrieval**.
+**Four guarantees, each from a mechanism — not a model promise:**
+
+* **Recalls exactly.** Verification precedes recall: a memory that fails structural checks is refused, so precision is a gate, not a score.
+
+* **Cannot forget.** The ledger is append-only and hash-chained — nothing committed is ever truncated, compressed, or degraded. Turn 1 and turn 10,000 are equally retrievable.
+
+* **Never bluffs.** When no verified memory exists, the system says so. Abstention is a first-class outcome, not a failure — no plausible near-miss is ever substituted.
+
+* **Becomes yours.** The model is fungible — swap providers without losing a beat. The ledger is not: over time it becomes a singular, one-of-one record of *your* commitments, corrections, and context that no model can regenerate. Shared geometry, singular history.
+
+**For organizations, that singularity is brand intelligence.** Not the static brand guidelines — the *practiced* brand: approved outputs, corrections and their reasons, promises made to customers, positions taken and refined. Encoded as verified memory, recalled exactly, never lost to turnover or vendor exits, and **enforced at the gate**: off-brand output fails admissibility the same way any violated constraint does — non-compensatory, no offsetting.
+
+**Multimodal by contract.** Per-modality kernels — text, visual, audio — each reduce to one verification contract: semantic checks through derived meaning, modality-native checks through measurable signal (palette, typography, geometry, loudness, voice profile). One ledger for every modality the brand speaks in, under the same verify-or-refuse discipline.
 
 * **Deterministic Resolution:** Memory is resolved through prime-factorized metric addresses with deterministic geometric embeddings.
 
-* **Structural Invariance:** If a retrieved memory does not logically align with your established constraints (enforced via a dual-circuit DAG), it is rejected. There is no "partial credit" for near misses — the system returns nothing rather than guessing.
+* **Structural Invariance:** If a retrieved memory does not logically align with your established constraints (enforced via a dual-circuit DAG), it is rejected. There is no "partial credit" for near misses.
 
-* **Deterministic recall on synthetic micro-corpora:** In the current benchmark harness, DSS achieves Recall@1 of 1.00 at 517K tokens, reported as a distribution across a pinned seed set (see `eval/reports/`). Two scope limits apply: the corpora are **synthetic micro-corpora**, and the comparators are **deterministic stand-ins** that hold documented vector failure modes constant — not live FAISS/Milvus runs. The harness measures deterministic structural filtering given coordinates; label-blind ingestion and live embedding baselines are tracked future work ([issue #1](https://github.com/Berigny/dss-system/issues/1)). Full caveat: whitepaper §12.
+* **Deterministic recall on synthetic micro-corpora:** In the current benchmark harness, DSS achieves Recall@1 of 1.00 at 517K tokens, reported as a distribution across a pinned seed set (see `eval/reports/`). Two scope limits apply: the corpora are **synthetic micro-corpora**, and the harness measures deterministic structural filtering given coordinates — not evidence discovery from raw text. Label-blind ingestion is the active milestone ([spec](eval/label_blind_ingestion_spec.md), [issue #1](https://github.com/Berigny/dss-system/issues/1)). Full caveat: whitepaper §12.
 
 **Maturity:** P1 (ledger integrity) and P4 (identity governance) are High/Stable and defensible for immediate engineering use. P2/P3 (coordinate-based coherence overlays) are at Prototype maturity. We do not yet claim generalisability to unstructured enterprise datasets without further pipeline hardening (whitepaper §11.3).
-
-While the immediate value is a continuous, unbroken conversational state, the architectural byproducts are enterprise-grade: native auditability, immutable hash-chained provenance, and strict non-human identity governance.
 
 > **Request a DSS Demo** Durable memory, exact provenance, and governed recall across models, workflows, and time: **[Dual Substrate System](https://dualsubstrate.com)**.
 
@@ -71,6 +81,20 @@ Once integrated, the system "just works."
 * **Swap Models Seamlessly:** Switch between different AI models (via the OpenRouter gateway) without losing your ongoing context.
 
 * **Trace Every Leap:** Deep memory lineage allows you to trace the exact structural context pulled into a response, providing a verifiable existence proof that cosine similarity cannot offer.
+
+---
+
+## Current Benchmarks
+
+All figures derive from **synthetic micro-corpora**, reported as distributions across pinned seeds, with versioned artifacts (seed, commit, config, CI95) in `eval/reports/benchmarks/`.
+
+| Benchmark | DSS | Comparators (pinned) | Reading |
+|---|---|---|---|
+| Needle, adversarial corpus | **1.00** recall@1 | real MiniLM (all-MiniLM-L6-v2): 0.171@1, 0.40@k · metadata filter: 1.00 | On corpora built to defeat lexical retrieval, structural filtering holds where embeddings fail. A plain metadata filter ties DSS here — on these corpora the geometry's edge over filtering is not yet differentiated (v0.5 adds compatible-but-wrong distractors). |
+| Multi-hop synthetic | **1.00** full-chain@5 | real MiniLM: 1.00 | Parity. No differentiation claimed on this corpus. |
+| Counterfactual shuffles | texts-shuffled: 1.00 · coords-shuffled: 0.00 | — | Confirms current retrieval is coordinate-driven, exactly as [issue #1](https://github.com/Berigny/dss-system/issues/1) diagnosed. Label-blind ingestion is the fix in flight. |
+
+The KSR kernel additionally ships a 16-gate self-validation suite (`tools/ksr_validate.py`): **16/16 PASS** on `ksr-core 1.3.1`; adversarial trap adjudication precision/recall 1.0; non-compensatory governance gates fail closed; invariant check-digit detects 98–100% of corruptions (6% without it); live model retention smoke **0.980** on `ksr-core` alone. Full evidence chain in `eval/`.
 
 ---
 
