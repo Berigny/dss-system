@@ -1,0 +1,962 @@
+{
+  "report": "KSR-EVAL DSS-274 / DSS-291 retention smoke test",
+  "date": "2026-07-19T05:32:55Z",
+  "mode": "dry_run",
+  "model": null,
+  "ksr_version": "1.3.1",
+  "core_artifact_sha256": "79218c3b20a57ef80a83b5b95e62330e808a014e0c645000bd3e8c4bc9a1869c",
+  "repo_commit_sha": "4d94cebc3693e240df70090abb2311f22d64f283",
+  "corpus_sha256": "e03138fceda8ecca37d2b95a63d37d35afd553724a21f55529745d55ae8fdd1a",
+  "sample_size": 50,
+  "recall_gate": 0.89,
+  "mean_node_recall": 1.0,
+  "deterministic_mean_node_recall": 1.0,
+  "gate_pass": true,
+  "per_item": [
+    {
+      "id": "na001",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Novelty",
+        "Eq1",
+        "Eq0"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        2,
+        3
+      ],
+      "recovered_primes": [
+        2,
+        3
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na002",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Connection",
+        "Eq2",
+        "Eq3"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        5,
+        7
+      ],
+      "recovered_primes": [
+        5,
+        7
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na003",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Potential",
+        "Eq4",
+        "Eq5"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        11,
+        13
+      ],
+      "recovered_primes": [
+        11,
+        13
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na004",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Mastery",
+        "Eq7",
+        "Eq6"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        17,
+        19
+      ],
+      "recovered_primes": [
+        17,
+        19
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na005",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Eq8",
+        "Law",
+        "Grace",
+        "Eq9"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        137,
+        139
+      ],
+      "recovered_primes": [
+        137,
+        139
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na006",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Origin",
+        "Eq0",
+        "Journey",
+        "Eq4"
+      ],
+      "unknown_concepts": [
+        "Journey"
+      ],
+      "ground_truth_primes": [
+        2,
+        11
+      ],
+      "recovered_primes": [
+        2,
+        11
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na007",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Eq5",
+        "Eq1",
+        "Boundary",
+        "Process"
+      ],
+      "unknown_concepts": [
+        "Boundary",
+        "Process"
+      ],
+      "ground_truth_primes": [
+        3,
+        13
+      ],
+      "recovered_primes": [
+        3,
+        13
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na008",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Audit",
+        "Eq2",
+        "Eq6",
+        "Change"
+      ],
+      "unknown_concepts": [
+        "Audit",
+        "Change"
+      ],
+      "ground_truth_primes": [
+        5,
+        17
+      ],
+      "recovered_primes": [
+        5,
+        17
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na009",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Eq7",
+        "Justice",
+        "Eq3",
+        "Closure"
+      ],
+      "unknown_concepts": [
+        "Justice",
+        "Closure"
+      ],
+      "ground_truth_primes": [
+        7,
+        19
+      ],
+      "recovered_primes": [
+        7,
+        19
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na010",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Constraint",
+        "Eq8",
+        "Awareness",
+        "Eq6"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        17,
+        137
+      ],
+      "recovered_primes": [
+        17,
+        137
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na011",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Eq0",
+        "Novelty",
+        "Eq1"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        2,
+        3
+      ],
+      "recovered_primes": [
+        2,
+        3
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na012",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Eq3",
+        "Eq2",
+        "Connection"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        5,
+        7
+      ],
+      "recovered_primes": [
+        5,
+        7
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na013",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Eq5",
+        "Potential",
+        "Eq4"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        11,
+        13
+      ],
+      "recovered_primes": [
+        11,
+        13
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na014",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Eq6",
+        "Eq7",
+        "Mastery"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        17,
+        19
+      ],
+      "recovered_primes": [
+        17,
+        19
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na015",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Grace",
+        "Eq8",
+        "Eq9",
+        "Law"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        137,
+        139
+      ],
+      "recovered_primes": [
+        137,
+        139
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na016",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Journey",
+        "Eq0",
+        "Origin",
+        "Eq4"
+      ],
+      "unknown_concepts": [
+        "Journey"
+      ],
+      "ground_truth_primes": [
+        2,
+        11
+      ],
+      "recovered_primes": [
+        2,
+        11
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na017",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Eq5",
+        "Process",
+        "Eq1",
+        "Boundary"
+      ],
+      "unknown_concepts": [
+        "Process",
+        "Boundary"
+      ],
+      "ground_truth_primes": [
+        3,
+        13
+      ],
+      "recovered_primes": [
+        3,
+        13
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na018",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Eq2",
+        "Audit",
+        "Change",
+        "Eq6"
+      ],
+      "unknown_concepts": [
+        "Audit",
+        "Change"
+      ],
+      "ground_truth_primes": [
+        5,
+        17
+      ],
+      "recovered_primes": [
+        5,
+        17
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na019",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Closure",
+        "Eq7",
+        "Justice",
+        "Eq3"
+      ],
+      "unknown_concepts": [
+        "Closure",
+        "Justice"
+      ],
+      "ground_truth_primes": [
+        7,
+        19
+      ],
+      "recovered_primes": [
+        7,
+        19
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na020",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Eq6",
+        "Constraint",
+        "Awareness",
+        "Eq8"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        17,
+        137
+      ],
+      "recovered_primes": [
+        17,
+        137
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na021",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Novelty",
+        "Eq1",
+        "Eq0"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        2,
+        3
+      ],
+      "recovered_primes": [
+        2,
+        3
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na022",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Connection",
+        "Eq2",
+        "Eq3"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        5,
+        7
+      ],
+      "recovered_primes": [
+        5,
+        7
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na023",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Eq4",
+        "Eq5",
+        "Potential"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        11,
+        13
+      ],
+      "recovered_primes": [
+        11,
+        13
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na024",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Eq6",
+        "Mastery",
+        "Eq7"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        17,
+        19
+      ],
+      "recovered_primes": [
+        17,
+        19
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "na025",
+      "stratum": "abstract",
+      "seed_concepts": [
+        "Grace",
+        "Eq8",
+        "Law",
+        "Eq9"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        137,
+        139
+      ],
+      "recovered_primes": [
+        137,
+        139
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc001",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "Eq0",
+        "000",
+        "K0"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        2
+      ],
+      "recovered_primes": [
+        2
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc002",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "022",
+        "K1",
+        "Eq1"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        3
+      ],
+      "recovered_primes": [
+        3
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc003",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "Eq2",
+        "202",
+        "K2"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        5
+      ],
+      "recovered_primes": [
+        5
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc004",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "K3",
+        "Eq3",
+        "220"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        7
+      ],
+      "recovered_primes": [
+        7
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc005",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "K4",
+        "002",
+        "Eq4"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        11
+      ],
+      "recovered_primes": [
+        11
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc006",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "Eq5",
+        "020",
+        "K5"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        13
+      ],
+      "recovered_primes": [
+        13
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc007",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "Eq6",
+        "K6",
+        "200"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        17
+      ],
+      "recovered_primes": [
+        17
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc008",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "K7",
+        "Eq7",
+        "222"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        19
+      ],
+      "recovered_primes": [
+        19
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc009",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "C",
+        "Eq8",
+        "111"
+      ],
+      "unknown_concepts": [
+        "C"
+      ],
+      "ground_truth_primes": [
+        41,
+        137
+      ],
+      "recovered_primes": [
+        41,
+        137
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc010",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "Eq9",
+        "333",
+        "C_reset"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        139
+      ],
+      "recovered_primes": [
+        139
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc011",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "Eq0",
+        "000",
+        "K0"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        2
+      ],
+      "recovered_primes": [
+        2
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc012",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "K1",
+        "Eq1",
+        "022"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        3
+      ],
+      "recovered_primes": [
+        3
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc013",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "202",
+        "Eq2",
+        "K2"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        5
+      ],
+      "recovered_primes": [
+        5
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc014",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "Eq3",
+        "220",
+        "K3"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        7
+      ],
+      "recovered_primes": [
+        7
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc015",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "002",
+        "Eq4",
+        "K4"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        11
+      ],
+      "recovered_primes": [
+        11
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc016",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "Eq5",
+        "020",
+        "K5"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        13
+      ],
+      "recovered_primes": [
+        13
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc017",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "Eq6",
+        "200",
+        "K6"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        17
+      ],
+      "recovered_primes": [
+        17
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc018",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "Eq7",
+        "K7",
+        "222"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        19
+      ],
+      "recovered_primes": [
+        19
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc019",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "Eq8",
+        "111",
+        "C"
+      ],
+      "unknown_concepts": [
+        "C"
+      ],
+      "ground_truth_primes": [
+        41,
+        137
+      ],
+      "recovered_primes": [
+        41,
+        137
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc020",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "C_reset",
+        "333",
+        "Eq9"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        139
+      ],
+      "recovered_primes": [
+        139
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc021",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "K0",
+        "000",
+        "Eq0"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        2
+      ],
+      "recovered_primes": [
+        2
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc022",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "K1",
+        "022",
+        "Eq1"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        3
+      ],
+      "recovered_primes": [
+        3
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc023",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "Eq2",
+        "202",
+        "K2"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        5
+      ],
+      "recovered_primes": [
+        5
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc024",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "220",
+        "Eq3",
+        "K3"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        7
+      ],
+      "recovered_primes": [
+        7
+      ],
+      "node_recall": 1.0
+    },
+    {
+      "id": "nc025",
+      "stratum": "concrete",
+      "seed_concepts": [
+        "Eq4",
+        "002",
+        "K4"
+      ],
+      "unknown_concepts": [],
+      "ground_truth_primes": [
+        11
+      ],
+      "recovered_primes": [
+        11
+      ],
+      "node_recall": 1.0
+    }
+  ],
+  "live_results": null,
+  "note": "Dry-run mode reports deterministic encode/decode recall over ksr-core. Live LLM decode is deferred per Epic 38 agent-heavy benchmark policy."
+}
