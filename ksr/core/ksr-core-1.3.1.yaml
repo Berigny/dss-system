@@ -1,5 +1,5 @@
 ksr_artifact: ksr-core
-source_registry_sha256: 13ad50b5782d40692f59dcabe1dd3d64e051fa5fde90f72a6481db106dd4e9bc
+source_registry_sha256: 00d63d0bba51387527c467761beadc52719b2d71e6ea8b84ddceda1b541be1a1
 artifact:
   ksr_version: 1.3.1
   reference_documents:
@@ -13,8 +13,8 @@ artifact:
       path: backlog_reqs/paper/DSS_Kernel_27_Hebrew_Lattice_Spec_v1.2.md
       sha256: 46e86a0925ef9a9722585f61b197ba26cb8c5ffa99b34564b709ce2d9dcfaf32
     patch_spec:
-      path: backlog_reqs/paper/DSS_Commandment_System_Patch_Encoding_v1.0.md
-      sha256: 9473a8d74d35b6e7c5c90b29d3d7cf64859dd078152ad722e9ef1130a64cb9d1
+      path: backlog_reqs/paper/DSS_Constraint_Layer_Patch_Encoding_v1.0.md
+      sha256: f963d0f65bbb5dc189549ed300bf27dd9b211d7bf5a511ce82abb64746aab147
     ethics_simulation_protocol:
       path: backlog_reqs/paper/Ethics_Simulation_Kernel_Integration_Protocol_v1.0.md
       sha256: 9f6f0e9c798dd2d8782871d9b9ad1cc205536b84acb8e88722b5f5e3419d5fe9
@@ -1200,9 +1200,9 @@ artifact:
     - Law
     - Grace
     - Drift
-  commandment_patch_registry:
+  constraint_layer_registry:
     version: '1.0'
-    source: DSS_Commandment_System_Patch_Encoding_v1.0.md
+    source: DSS_Constraint_Layer_Patch_Encoding_v1.0.md
     encoding_type: constraint_layer
     enforcement_mode: non_compensatory
     patches:
@@ -1215,9 +1215,9 @@ artifact:
         enforcement: Non-null topological winding check
         hard_gate: Refuse all ledger writes until a single origin is established
         e6_bit_index: 0
-        operational_definition: The system must maintain a single, non-null topological
-          winding. Competing observer loops create multiple simultaneous zero-points,
-          fragmenting the kernel.
+        operational_definition: The system must establish exactly one non-null origin.
+          Competing observer loops create multiple simultaneous zero-points, fragmenting
+          the kernel and preventing any ledger write.
         refusal_signal: null
       patch_002:
         kernel_node: Eq1
@@ -1228,9 +1228,9 @@ artifact:
         enforcement: Ledger anchor check for all continuous states
         hard_gate: Mark output ephemeral; deny durable promotion
         e6_bit_index: 1
-        operational_definition: The system must maintain a single, non-null topological
-          winding. Competing observer loops create multiple simultaneous zero-points,
-          fragmenting the kernel.
+        operational_definition: Continuous state must be anchored to a durable ledger.
+          Unanchored states are marked ephemeral and denied promotion to persistent
+          tiers.
         refusal_signal: null
       patch_003:
         kernel_node: Eq2
@@ -1241,9 +1241,9 @@ artifact:
         enforcement: Hash chain monotonicity and provenance verification
         hard_gate: Trigger CoherenceException; halt turn
         e6_bit_index: 2
-        operational_definition: The system must maintain a single, non-null topological
-          winding. Competing observer loops create multiple simultaneous zero-points,
-          fragmenting the kernel.
+        operational_definition: Causal history must be monotonic and verifiable. Any
+          break in hash-chain provenance triggers a coherence exception and halts
+          the turn.
         refusal_signal: null
       patch_004:
         kernel_node: Eq3
@@ -1254,9 +1254,9 @@ artifact:
         enforcement: Topological jump bounded; hysteresis buffer compaction
         hard_gate: Force S2 compaction; reject new inputs
         e6_bit_index: 3
-        operational_definition: The system must maintain a single, non-null topological
-          winding. Competing observer loops create multiple simultaneous zero-points,
-          fragmenting the kernel.
+        operational_definition: State transitions must stay within bounded topological
+          jumps. Unbounded accumulation forces compaction and rejects new inputs until
+          closure is restored.
         refusal_signal: null
       patch_005:
         kernel_node: Eq4
@@ -1267,9 +1267,9 @@ artifact:
         enforcement: Law-Grace twin prime balance within [0.98, 1.02]
         hard_gate: Block all S1-S2 bridge transitions
         e6_bit_index: 4
-        operational_definition: The system must maintain a single, non-null topological
-          winding. Competing observer loops create multiple simultaneous zero-points,
-          fragmenting the kernel.
+        operational_definition: The Law-Grace balance must remain within tolerance.
+          Detuned coupling blocks all S1-S2 bridge transitions until resonance is
+          restored.
         refusal_signal: null
       patch_006:
         kernel_node: Eq5
@@ -1280,9 +1280,9 @@ artifact:
         enforcement: Persistence cost proportional to text_length and coherence deficit
         hard_gate: Freeze entity write permissions; emit debt alert
         e6_bit_index: 5
-        operational_definition: The system must maintain a single, non-null topological
-          winding. Competing observer loops create multiple simultaneous zero-points,
-          fragmenting the kernel.
+        operational_definition: Persistence cost must be proportional to payload size
+          and coherence deficit. Excessive debt freezes write permissions and emits
+          an alert.
         refusal_signal: null
       patch_007:
         kernel_node: Eq6
@@ -1293,9 +1293,8 @@ artifact:
         enforcement: Jaccard alignment between query and retrieved evidence
         hard_gate: Redirect to LAW gate; block promotion
         e6_bit_index: 6
-        operational_definition: The system must maintain a single, non-null topological
-          winding. Competing observer loops create multiple simultaneous zero-points,
-          fragmenting the kernel.
+        operational_definition: Commit decisions require alignment between query and
+          retrieved evidence. Misalignment redirects to the LAW gate and blocks promotion.
         refusal_signal: null
       patch_008:
         kernel_node: Eq7
@@ -1306,9 +1305,8 @@ artifact:
         enforcement: Exponential deviation penalty over invariant shifts
         hard_gate: Trigger check_E failure; halt
         e6_bit_index: 7
-        operational_definition: The system must maintain a single, non-null topological
-          winding. Competing observer loops create multiple simultaneous zero-points,
-          fragmenting the kernel.
+        operational_definition: Unity must stay above the divergence threshold. Sub-threshold
+          coherence triggers a check failure and halts execution.
         refusal_signal: null
       patch_009:
         kernel_node: Eq8
@@ -1319,9 +1317,8 @@ artifact:
         enforcement: Constrained grid search over Law x Grace; golden-vector injection
         hard_gate: Emit refusal signal
         e6_bit_index: 8
-        operational_definition: The system must maintain a single, non-null topological
-          winding. Competing observer loops create multiple simultaneous zero-points,
-          fragmenting the kernel.
+        operational_definition: Optimization must remain inside the Law-Grace admissible
+          region. Ethics failure emits a refusal signal.
         refusal_signal: I'm sorry, but I can't safely answer that.
       patch_010:
         kernel_node: Eq9
@@ -1332,9 +1329,9 @@ artifact:
         enforcement: Asymptotic alignment with A x U x E; local optima detection
         hard_gate: Queue for re-evaluation or emit backstop refusal
         e6_bit_index: 9
-        operational_definition: The system must maintain a single, non-null topological
-          winding. Competing observer loops create multiple simultaneous zero-points,
-          fragmenting the kernel.
+        operational_definition: Terminal posture must asymptotically align with awareness,
+          unity, and ethics. Local optima are queued for re-evaluation or backstop
+          refusal.
         refusal_signal: null
     interaction_matrix:
     - patch_id: patch_001

@@ -5,7 +5,7 @@
   "ts": "2026-06-28T00:00:00+00:00",
   "refs": [
     "DSS_Kernel_27_Hebrew_Lattice_Spec_v1.2",
-    "DSS_Commandment_System_Patch_Encoding_v1.0",
+    "DSS_Constraint_Layer_Patch_Encoding_v1.0",
     "Ethics_Simulation_Kernel_Integration_Protocol_v1.0",
     "DSS_Kernel_Semantic_Encoding_Metaprompt_v1.1",
     "DSS_Qp_Circulation_Extension_Spec",

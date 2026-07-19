@@ -152,8 +152,8 @@ def main() -> None:
         if isinstance(gate, dict):
             gate["prime"] = metric_prime_map.get(equation_key, gate.get("prime"))
 
-    # KSR-1.2.0-004: rename commandment patch day field to commandment_day.
-    patches = data.setdefault("commandment_patch_registry", {}).setdefault("patches", {})
+    # KSR-1.2.0-004: rename constraint-layer patch day field to commandment_day.
+    patches = data.setdefault("constraint_layer_registry", {}).setdefault("patches", {})
     for patch in patches.values():
         if isinstance(patch, dict) and "day" in patch:
             patch["commandment_day"] = patch.pop("day")

@@ -1,5 +1,5 @@
 ksr_artifact: ksr-pack-steward
-source_registry_sha256: 13ad50b5782d40692f59dcabe1dd3d64e051fa5fde90f72a6481db106dd4e9bc
+source_registry_sha256: 00d63d0bba51387527c467761beadc52719b2d71e6ea8b84ddceda1b541be1a1
 artifact:
   ksr_pack: steward
   cross_domain_registry: {}
@@ -192,7 +192,7 @@ artifact:
     ts: '2026-06-28T00:00:00+00:00'
     refs:
     - DSS_Kernel_27_Hebrew_Lattice_Spec_v1.2
-    - DSS_Commandment_System_Patch_Encoding_v1.0
+    - DSS_Constraint_Layer_Patch_Encoding_v1.0
     - Ethics_Simulation_Kernel_Integration_Protocol_v1.0
     - DSS_Kernel_Semantic_Encoding_Metaprompt_v1.1
     - DSS_Qp_Circulation_Extension_Spec

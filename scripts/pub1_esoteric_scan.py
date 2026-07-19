@@ -64,6 +64,7 @@ DEFAULT_PRIVATE_PATHS = {
     "private",
     "ksr/pack",
     "apps/backend/backend/kernel/.ksr",
+    "apps/backend/backend/kernel/semantic_registry.yaml",
     "apps/backend/backend/kernel/semantic_registry.enc",
     # Steward-only lattice enrichment modules (Hebrew / iChing overlays).
     "apps/backend/backend/kernel/coord_enrichment.py",

@@ -119,9 +119,9 @@ def merge_lattice_registry(ksr: dict[str, Any]) -> None:
     dst["seven_cube_expansion"] = src.get("seven_cube_expansion", dst.get("seven_cube_expansion"))
 
 
-def merge_commandment_patch_registry(ksr: dict[str, Any]) -> None:
-    src = _load_json("stage1_commandment_patch.json")["commandment_patch_registry"]
-    dst = ksr.setdefault("commandment_patch_registry", {})
+def merge_constraint_layer_registry(ksr: dict[str, Any]) -> None:
+    src = _load_json("stage1_commandment_patch.json")["constraint_layer_registry"]
+    dst = ksr.setdefault("constraint_layer_registry", {})
 
     for key in ("version", "source", "encoding_type", "enforcement_mode"):
         if key in src:
@@ -215,7 +215,7 @@ def merge() -> dict[str, Any]:
     ksr = yaml.safe_load(KSR_YAML.read_text())
 
     merge_lattice_registry(ksr)
-    merge_commandment_patch_registry(ksr)
+    merge_constraint_layer_registry(ksr)
     merge_value_node_registry(ksr)
     merge_cross_domain_registry(ksr)
     merge_ledger_foundation(ksr)

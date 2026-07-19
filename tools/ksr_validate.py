@@ -219,7 +219,7 @@ def run_gates(d, dups, registry_path, repo_root):
 
     # G08 day-field overload (patches vs lattice) ---------------------------------
     g = Gate("G08", "'day' field semantic overload")
-    patches = d.get("commandment_patch_registry", {}).get("patches", {})
+    patches = d.get("constraint_layer_registry", {}).get("patches", {})
     patch_days = {p.get("day") for p in patches.values()}
     lattice_days = {v.get("day") for v in corner.values()} | {e.get("day") for e in edges}
     overlap = sorted(patch_days & lattice_days)

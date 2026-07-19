@@ -61,8 +61,8 @@ def build_core(registry: dict[str, Any]) -> dict[str, Any]:
         "glossary": public_glossary,
         "synonym_registry": _filter_term_lists(registry.get("synonym_registry", {}), public_glossary_terms),
         "stripping_priority": _filter_term_lists(registry.get("stripping_priority", {}), public_glossary_terms),
-        "commandment_patch_registry": _strip_patch_esoterica(
-            registry.get("commandment_patch_registry", {}), public_glossary_terms
+        "constraint_layer_registry": _strip_patch_esoterica(
+            registry.get("constraint_layer_registry", {}), public_glossary_terms
         ),
         "value_node_registry": registry.get("value_node_registry", {}),
         "personality_type_overlay": registry.get("personality_type_overlay", {}),
@@ -167,7 +167,7 @@ def _strip_lattice_esoterica(lattice: dict[str, Any]) -> dict[str, Any]:
 
 
 def _strip_patch_esoterica(patch_reg: dict[str, Any], public_terms: set[str] | None = None) -> dict[str, Any]:
-    """Return a copy of the commandment patch registry with steward text removed."""
+    """Return a copy of the constraint-layer patch registry with steward text removed."""
     public = _strip_esoteric_fields(patch_reg)
     syn = public.get("synonym_registry")
     if isinstance(syn, dict) and public_terms is not None:

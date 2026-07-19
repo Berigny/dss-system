@@ -451,8 +451,8 @@ def generate(repo_root: Path) -> str:
         "centroid_active": list(raw_checksum_rules.get("centroid_active", [137, 139])),
     }
 
-    # Commandment patch registry -----------------------------------------------
-    patch_reg = ksr["commandment_patch_registry"]
+    # Constraint-layer patch registry ------------------------------------------
+    patch_reg = ksr["constraint_layer_registry"]
     patch_version = patch_reg["version"]
     patch_ids = tuple(sorted(patch_reg["patches"].keys()))
     patch_registry = {

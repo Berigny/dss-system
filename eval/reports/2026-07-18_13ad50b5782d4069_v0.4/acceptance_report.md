@@ -104,6 +104,28 @@ coordinate-driven property of the corpus, not a general retrieval upper bound.
 These numbers are intentionally produced with identical structural metadata as
 the DSS retrieval path so they serve as a true control, not an upper bound.
 
+### Public-core frame hardening (DSS-289)
+
+Decision D6: **Option A applied.** The public-core registry key
+`commandment_patch_registry` is renamed to `constraint_layer_registry`. The
+source-document reference is neutralised from
+`DSS_Commandment_System_Patch_Encoding_v1.0.md` to
+`DSS_Constraint_Layer_Patch_Encoding_v1.0.md`, and the ten patch
+`operational_definition` texts are corrected so each patch has a unique,
+engineering-faithful definition instead of the previous duplicated text.
+
+All code paths that loaded the old key are updated:
+`tools/ksr_build.py`, `tools/ksr_validate.py`, `tools/apply_ksr_phase0.py`,
+`scripts/merge_ksr_population.py`, and `scripts/generate_kernel_constants.py`.
+The private KSR source and the backend plaintext mirror keep the renamed key
+and the neutral source reference for consistency.
+
+Verification:
+
+- `tools/ksr_validate.py --mode core ksr/core/ksr-core-1.3.1.yaml`: 16/16 PASS.
+- `scripts/pub1_esoteric_scan.py`: 0 hits (private plaintext KSR mirror now
+  excluded from the public scan).
+
 ## Status semantics
 
 Benchmark artifacts use `status: "partial"`. In this release that means the

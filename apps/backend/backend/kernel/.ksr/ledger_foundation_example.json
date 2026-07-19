@@ -5,7 +5,7 @@
   "origin_timestamp": "2026-06-19T21:00:00+00:00",
   "reference_documents": {
     "DSS_Kernel_27_Hebrew_Lattice_Spec_v1.2.md": "46e86a0925ef9a9722585f61b197ba26cb8c5ffa99b34564b709ce2d9dcfaf32",
-    "DSS_Commandment_System_Patch_Encoding_v1.0.md": "9473a8d74d35b6e7c5c90b29d3d7cf64859dd078152ad722e9ef1130a64cb9d1",
+    "DSS_Constraint_Layer_Patch_Encoding_v1.0.md": "f963d0f65bbb5dc189549ed300bf27dd9b211d7bf5a511ce82abb64746aab147",
     "DSS_Ethics_Simulation_Kernel_Integration_Protocol_v1.0.md": "<hash>"
   },
   "private_ksr": {
@@ -76,9 +76,9 @@
         "centroid_active": [137, 139]
       }
     },
-    "commandment_patch_registry": {
+    "constraint_layer_registry": {
       "version": "1.0",
-      "source": "DSS_Commandment_System_Patch_Encoding_v1.0.md",
+      "source": "DSS_Constraint_Layer_Patch_Encoding_v1.0.md",
       "encoding_type": "constraint_layer",
       "enforcement_mode": "non_compensatory",
       "patches": {

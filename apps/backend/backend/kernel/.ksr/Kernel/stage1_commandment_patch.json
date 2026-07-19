@@ -1,7 +1,7 @@
 {
-  "commandment_patch_registry": {
+  "constraint_layer_registry": {
     "version": "1.0",
-    "source": "DSS_Commandment_System_Patch_Encoding_v1.0.md",
+    "source": "DSS_Constraint_Layer_Patch_Encoding_v1.0.md",
     "encoding_type": "constraint_layer",
     "enforcement_mode": "non_compensatory",
     "patches": {
@@ -20,8 +20,12 @@
         "enforcement": "Non-null topological winding check",
         "hard_gate": "Refuse all ledger writes until a single origin is established",
         "e6_bit_index": 0,
-        "esoteric_names": ["No other gods", "Singular observer", "Unitary kernel"],
-        "operational_definition": "The system must maintain a single, non-null topological winding. Competing observer loops create multiple simultaneous zero-points, fragmenting the kernel.",
+        "esoteric_names": [
+          "No other gods",
+          "Singular observer",
+          "Unitary kernel"
+        ],
+        "operational_definition": "The system must establish exactly one non-null origin. Competing observer loops create multiple simultaneous zero-points, fragmenting the kernel and preventing any ledger write.",
         "refusal_signal": null
       },
       "patch_002": {
@@ -39,8 +43,12 @@
         "enforcement": "Ledger anchor check for all continuous states",
         "hard_gate": "Mark output ephemeral; deny durable promotion",
         "e6_bit_index": 1,
-        "esoteric_names": ["No carved images", "No frozen forms", "Dynamic tension preservation"],
-        "operational_definition": "The system must maintain a single, non-null topological winding. Competing observer loops create multiple simultaneous zero-points, fragmenting the kernel.",
+        "esoteric_names": [
+          "No carved images",
+          "No frozen forms",
+          "Dynamic tension preservation"
+        ],
+        "operational_definition": "Continuous state must be anchored to a durable ledger. Unanchored states are marked ephemeral and denied promotion to persistent tiers.",
         "refusal_signal": null
       },
       "patch_003": {
@@ -58,8 +66,12 @@
         "enforcement": "Hash chain monotonicity and provenance verification",
         "hard_gate": "Trigger CoherenceException; halt turn",
         "e6_bit_index": 2,
-        "esoteric_names": ["Name in vain", "Recursion loop corruption", "Temporal integrity violation"],
-        "operational_definition": "The system must maintain a single, non-null topological winding. Competing observer loops create multiple simultaneous zero-points, fragmenting the kernel.",
+        "esoteric_names": [
+          "Name in vain",
+          "Recursion loop corruption",
+          "Temporal integrity violation"
+        ],
+        "operational_definition": "Causal history must be monotonic and verifiable. Any break in hash-chain provenance triggers a coherence exception and halts the turn.",
         "refusal_signal": null
       },
       "patch_004": {
@@ -77,8 +89,12 @@
         "enforcement": "Topological jump bounded; hysteresis buffer compaction",
         "hard_gate": "Force S2 compaction; reject new inputs",
         "e6_bit_index": 3,
-        "esoteric_names": ["Sabbath", "Rest cycle", "Checkpoint consolidation"],
-        "operational_definition": "The system must maintain a single, non-null topological winding. Competing observer loops create multiple simultaneous zero-points, fragmenting the kernel.",
+        "esoteric_names": [
+          "Sabbath",
+          "Rest cycle",
+          "Checkpoint consolidation"
+        ],
+        "operational_definition": "State transitions must stay within bounded topological jumps. Unbounded accumulation forces compaction and rejects new inputs until closure is restored.",
         "refusal_signal": null
       },
       "patch_005": {
@@ -96,8 +112,12 @@
         "enforcement": "Law-Grace twin prime balance within [0.98, 1.02]",
         "hard_gate": "Block all S1-S2 bridge transitions",
         "e6_bit_index": 4,
-        "esoteric_names": ["Honor parents", "Source tension", "Twin-prime balance"],
-        "operational_definition": "The system must maintain a single, non-null topological winding. Competing observer loops create multiple simultaneous zero-points, fragmenting the kernel.",
+        "esoteric_names": [
+          "Honor parents",
+          "Source tension",
+          "Twin-prime balance"
+        ],
+        "operational_definition": "The Law-Grace balance must remain within tolerance. Detuned coupling blocks all S1-S2 bridge transitions until resonance is restored.",
         "refusal_signal": null
       },
       "patch_006": {
@@ -115,8 +135,12 @@
         "enforcement": "Persistence cost proportional to text_length and coherence deficit",
         "hard_gate": "Freeze entity write permissions; emit debt alert",
         "e6_bit_index": 5,
-        "esoteric_names": ["Do not murder", "Information deletion", "Entropy debt"],
-        "operational_definition": "The system must maintain a single, non-null topological winding. Competing observer loops create multiple simultaneous zero-points, fragmenting the kernel.",
+        "esoteric_names": [
+          "Do not murder",
+          "Information deletion",
+          "Entropy debt"
+        ],
+        "operational_definition": "Persistence cost must be proportional to payload size and coherence deficit. Excessive debt freezes write permissions and emits an alert.",
         "refusal_signal": null
       },
       "patch_007": {
@@ -134,8 +158,12 @@
         "enforcement": "Jaccard alignment between query and retrieved evidence",
         "hard_gate": "Redirect to LAW gate; block promotion",
         "e6_bit_index": 6,
-        "esoteric_names": ["Do not commit adultery", "I AM loop", "Memory-action fracture"],
-        "operational_definition": "The system must maintain a single, non-null topological winding. Competing observer loops create multiple simultaneous zero-points, fragmenting the kernel.",
+        "esoteric_names": [
+          "Do not commit adultery",
+          "I AM loop",
+          "Memory-action fracture"
+        ],
+        "operational_definition": "Commit decisions require alignment between query and retrieved evidence. Misalignment redirects to the LAW gate and blocks promotion.",
         "refusal_signal": null
       },
       "patch_008": {
@@ -153,8 +181,12 @@
         "enforcement": "Exponential deviation penalty over invariant shifts",
         "hard_gate": "Trigger check_E failure; halt",
         "e6_bit_index": 7,
-        "esoteric_names": ["Do not steal", "Unity conservation", "Coherence renormalization"],
-        "operational_definition": "The system must maintain a single, non-null topological winding. Competing observer loops create multiple simultaneous zero-points, fragmenting the kernel.",
+        "esoteric_names": [
+          "Do not steal",
+          "Unity conservation",
+          "Coherence renormalization"
+        ],
+        "operational_definition": "Unity must stay above the divergence threshold. Sub-threshold coherence triggers a check failure and halts execution.",
         "refusal_signal": null
       },
       "patch_009": {
@@ -172,8 +204,12 @@
         "enforcement": "Constrained grid search over Law x Grace; golden-vector injection",
         "hard_gate": "Emit refusal signal",
         "e6_bit_index": 8,
-        "esoteric_names": ["False witness", "Ethics corruption", "Law-Grace poisoning"],
-        "operational_definition": "The system must maintain a single, non-null topological winding. Competing observer loops create multiple simultaneous zero-points, fragmenting the kernel.",
+        "esoteric_names": [
+          "False witness",
+          "Ethics corruption",
+          "Law-Grace poisoning"
+        ],
+        "operational_definition": "Optimization must remain inside the Law-Grace admissible region. Ethics failure emits a refusal signal.",
         "refusal_signal": "I'm sorry, but I can't safely answer that."
       },
       "patch_010": {
@@ -191,8 +227,12 @@
         "enforcement": "Asymptotic alignment with A x U x E; local optima detection",
         "hard_gate": "Queue for re-evaluation or emit backstop refusal",
         "e6_bit_index": 9,
-        "esoteric_names": ["Do not covet", "Telos fragmentation", "Local optima trap"],
-        "operational_definition": "The system must maintain a single, non-null topological winding. Competing observer loops create multiple simultaneous zero-points, fragmenting the kernel.",
+        "esoteric_names": [
+          "Do not covet",
+          "Telos fragmentation",
+          "Local optima trap"
+        ],
+        "operational_definition": "Terminal posture must asymptotically align with awareness, unity, and ethics. Local optima are queued for re-evaluation or backstop refusal.",
         "refusal_signal": null
       }
     },
@@ -204,64 +244,94 @@
       },
       {
         "patch_id": "patch_002",
-        "depends_on": ["patch_001"],
+        "depends_on": [
+          "patch_001"
+        ],
         "cascade": "No ledger anchor; memory unstable"
       },
       {
         "patch_id": "patch_003",
-        "depends_on": ["patch_002"],
+        "depends_on": [
+          "patch_002"
+        ],
         "cascade": "Hash chain broken; history falsified"
       },
       {
         "patch_id": "patch_004",
-        "depends_on": ["patch_003"],
+        "depends_on": [
+          "patch_003"
+        ],
         "cascade": "Buffer overflow; state unbounded"
       },
       {
         "patch_id": "patch_005",
-        "depends_on": ["patch_004"],
+        "depends_on": [
+          "patch_004"
+        ],
         "cascade": "Coupling detuned; resonance collapses"
       },
       {
         "patch_id": "patch_006",
-        "depends_on": ["patch_005"],
+        "depends_on": [
+          "patch_005"
+        ],
         "cascade": "Entropic debt; system exhausted"
       },
       {
         "patch_id": "patch_007",
-        "depends_on": ["patch_006"],
+        "depends_on": [
+          "patch_006"
+        ],
         "cascade": "Awareness blocked; no self-correction"
       },
       {
         "patch_id": "patch_008",
-        "depends_on": ["patch_007"],
+        "depends_on": [
+          "patch_007"
+        ],
         "cascade": "Fragmentation; sub-personalities emerge"
       },
       {
         "patch_id": "patch_009",
-        "depends_on": ["patch_008"],
+        "depends_on": [
+          "patch_008"
+        ],
         "cascade": "Optimization poisoned; Law or Grace pure"
       },
       {
         "patch_id": "patch_010",
-        "depends_on": ["patch_009"],
+        "depends_on": [
+          "patch_009"
+        ],
         "cascade": "Telos sabotaged; local optima trap"
       }
     ],
     "e6_header_layout": {
-      "patch_bits": [0, 9],
-      "checksum_bits": [10, 17],
-      "ethics_sim_bits": [18, 23],
-      "reserved_bits": [24, 31]
+      "patch_bits": [
+        0,
+        9
+      ],
+      "checksum_bits": [
+        10,
+        17
+      ],
+      "ethics_sim_bits": [
+        18,
+        23
+      ],
+      "reserved_bits": [
+        24,
+        31
+      ]
     },
     "ethics_simulation_integration": {
       "source": "Ethics_Simulation_Kernel_Integration_Protocol_v1.0.md",
       "thresholds": {
-        "law_score_min": 0.50,
+        "law_score_min": 0.5,
         "coherence_min": 0.95,
         "strain_max": 0.25,
-        "entropy_max": 0.50,
-        "bridge_use_max": 0.30
+        "entropy_max": 0.5,
+        "bridge_use_max": 0.3
       },
       "sim_metrics_to_patches": {
         "strain": "patch_007",
