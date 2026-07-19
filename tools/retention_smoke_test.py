@@ -541,7 +541,7 @@ async def run_delegated_kimi_decode(
     alphabet = build_alphabet(registry)
     registry_text = _registry_to_prompt_text(registry)
     concept_to_prime = _build_concept_to_prime(registry)
-    results: list[dict[str, Any]] = list(existing_results or [])
+    results: list[dict[str, Any]] = list(report.get("live_results") or [])
     completed_ids = {r["id"] for r in results}
 
     REFRESH_INTERVAL_SECONDS = 2700  # refresh session token every 45 min (token TTL ~1h)
