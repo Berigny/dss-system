@@ -458,6 +458,7 @@ def _recompute_and_save_report(
     succeeded: int,
     failed: int,
     original_calls_made: int,
+    original_retried: int,
     output_path: Path,
 ) -> None:
     """Recompute aggregates from current sums and write the report in-place."""
@@ -472,13 +473,13 @@ def _recompute_and_save_report(
 
     completed = sum(1 for t in trials if "error" not in t and str(t.get("raw_response", "")).strip())
     transport_failures = sum(1 for t in trials if t.get("transport_failure") is True)
-    retried = sum(t.get("retries", 0) for t in trials) + attempted
+    retried = original_retried + attempted
     report["header"]["date"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     report["header"]["completed"] = completed
     report["header"]["transport_failures"] = transport_failures
     report["header"]["retried"] = retried
     report["header"]["calls_made"] = original_calls_made + attempted
-    report["header"]["phase_r_note"] = f"Retried {attempted} empty trials; {succeeded} succeeded, {failed} failed."
+    report["header"]["phase_r_note"] = f"Retried {attempted} empty trials this run ({retried} total); {succeeded} succeeded, {failed} failed."
 
     attempted_total = len(trials)
     a_agg = new_overall.get("A", {})
@@ -530,6 +531,7 @@ async def main() -> int:
 
     report = json.loads(args.report.read_text(encoding="utf-8"))
     original_calls_made = report["header"].get("calls_made", 0)
+    original_retried = report["header"].get("retried", 0)
     header, records = _load_corpus(args.corpus)
     id_to_record = {r["id"]: r for r in records}
     trials = report["raw_trials"]
@@ -596,10 +598,18 @@ async def main() -> int:
             print(f"[{idx + 1}/{len(empty_trials)}] {trial['id']} {trial['arm']} r{trial['replicate']}: {response['error']}", file=sys.stderr)
             failed += 1
             continue
+        raw_response = str(response.get("raw_response") or "").strip()
+        if not raw_response:
+            print(
+                f"[{idx + 1}/{len(empty_trials)}] {trial['id']} {trial['arm']} r{trial['replicate']}: empty_response",
+                file=sys.stderr,
+            )
+            failed += 1
+            continue
         parsed = response.get("parsed_response") or {}
         concepts = parsed.get("concepts") if isinstance(parsed.get("concepts"), list) else []
         reconstructed = str(parsed.get("reconstructed_text") or "").strip()
-        trial["raw_response"] = response.get("raw_response", "")
+        trial["raw_response"] = raw_response
         trial["reconstructed_concepts"] = concepts
         trial["reconstructed_text"] = reconstructed
         trial.pop("error", None)
@@ -624,7 +634,7 @@ async def main() -> int:
         # Save incremental progress so a crash does not lose completed trials.
         _recompute_and_save_report(
             report, arm_sums, stratum_sums, trials,
-            attempted, succeeded, failed, original_calls_made, output_path,
+            attempted, succeeded, failed, original_calls_made, original_retried, output_path,
         )
         if args.delay > 0:
             await asyncio.sleep(args.delay)
@@ -632,7 +642,7 @@ async def main() -> int:
     # Final save and summary
     _recompute_and_save_report(
         report, arm_sums, stratum_sums, trials,
-        attempted, succeeded, failed, original_calls_made, output_path,
+        attempted, succeeded, failed, original_calls_made, original_retried, output_path,
     )
     print(f"\nUpdated report: {output_path}")
     print(f"Empty trials attempted: {attempted}, succeeded: {succeeded}, failed: {failed}")

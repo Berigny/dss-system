@@ -116,6 +116,35 @@ DSS_REFRESH_TOKEN="<valid-token>" \
   python3 tools/retention_smoke_test.py --delegated-kimi --sample 50
 ```
 
+### Phase R integrity fix (semantic decode evaluation)
+
+The committed `phase2_report_v0.2.json` originally contained empty `raw_response` entries while its header claimed zero transport failures. I re-ran all empty trials via the delegated Kimi Code chat-surface path using `tools/phase2_retry_empty.py`.
+
+- Empty trials retried: **346** (344 in the first run, 2 remaining in a second run after adding empty-response detection)
+- Retry successes: **346**; failures: **0**
+- Final report: `eval/reports/2026-07-17_6b0fb395_v0.2/phase2_report_v0.2.json`
+- All 900 trials now have non-empty raw responses.
+
+Updated arm aggregates (A = full prompt, B = shuffled coordinates, C = shuffled texts):
+
+| Arm | Node recall | Precision | F1 | Grammatical fraction |
+|-----|-------------|-----------|-----|---------------------|
+| A   | 0.96        | 0.964     | 0.961 | 0.967 |
+| B   | 0.927       | 0.933     | 0.929 | 0.933 |
+| C   | 0.95        | 0.955     | 0.951 | 0.957 |
+
+Gates:
+
+- `completed_gte_0_95`: PASS
+- `C1_node_recall_gte_0_90`: PASS
+- `C1_precision_gte_0_90`: PASS
+- `C1_f1_gte_0_90`: PASS
+- `C1_cosine_gte_0_85`: FAIL (cosine similarity remains low against short generated sentences; this is expected and documented)
+- `C1_grammatical_fraction_gte_0_90`: PASS
+- `C2_shuffled_lt_full`: PASS
+
+The header now honestly reports `completed: 900, transport_failures: 0, retried: 346, calls_made: 353`.
+
 ### Public-core frame hardening (DSS-289)
 
 Decision D6: **Option A applied.** The public-core registry key `commandment_patch_registry` is renamed to `constraint_layer_registry`. The source-document reference is neutralised from `DSS_Commandment_System_Patch_Encoding_v1.0.md` to `DSS_Constraint_Layer_Patch_Encoding_v1.0.md`, and the ten patch `operational_definition` texts are corrected so each patch has a unique, engineering-faithful definition instead of the previous duplicated text.
