@@ -24,6 +24,7 @@ import hashlib
 import json
 import os
 import re
+import socket
 import subprocess
 import sys
 import time
@@ -402,6 +403,8 @@ async def _post_chat_smart_stream(
     ledger_id: str,
     surface_id: str,
     rate_limit_retries: int = 3,
+    timeout_seconds: float = 240.0,
+    transient_retries: int = 3,
 ) -> dict[str, Any]:
     """Post a single prompt to the chat surface smart stream and return parsed output."""
     session_id = f"retention-smoke-{uuid.uuid4().hex[:12]}"
@@ -422,6 +425,7 @@ async def _post_chat_smart_stream(
         "include_post_introspect_snapshot": True,
         "prompt_principal_mode": "kimi",
     }
+    payload_bytes = json.dumps(payload).encode("utf-8")
 
     headers = {
         "content-type": "application/json",
@@ -433,17 +437,20 @@ async def _post_chat_smart_stream(
     }
 
     url = f"{chat_base_url.rstrip('/')}/api/chat/smart_stream"
-    req = request.Request(
-        url,
-        data=json.dumps(payload).encode("utf-8"),
-        headers=headers,
-        method="POST",
-    )
+
+    def _make_request() -> request.Request:
+        return request.Request(
+            url,
+            data=payload_bytes,
+            headers=headers,
+            method="POST",
+        )
 
     rate_limit_failures = 0
+    transient_failures = 0
     while True:
         try:
-            with request.urlopen(req, timeout=120) as resp:
+            with request.urlopen(_make_request(), timeout=timeout_seconds) as resp:
                 status = getattr(resp, "status", 200)
                 if status >= 400:
                     body = resp.read().decode("utf-8", errors="ignore")
@@ -494,8 +501,30 @@ async def _post_chat_smart_stream(
                 await asyncio.sleep(60)
                 continue
             return {"error": f"http_{exc.code}", "detail": body[:1000]}
+        except (TimeoutError, socket.timeout) as exc:
+            transient_failures += 1
+            if transient_failures > max(0, transient_retries):
+                return {"error": "timeout", "detail": f"read timed out after {timeout_seconds}s ({exc})"}
+            wait = 5 * (2 ** (transient_failures - 1))
+            print(
+                f"warning: chat surface timeout ({transient_failures}/{transient_retries}); retrying in {wait}s...",
+                file=sys.stderr,
+                flush=True,
+            )
+            await asyncio.sleep(wait)
+            continue
         except error.URLError as exc:
-            return {"error": "request_failed", "detail": str(exc.reason)}
+            transient_failures += 1
+            if transient_failures > max(0, transient_retries):
+                return {"error": "request_failed", "detail": str(exc.reason)}
+            wait = 5 * (2 ** (transient_failures - 1))
+            print(
+                f"warning: chat surface URL error ({transient_failures}/{transient_retries}): {exc.reason}; retrying in {wait}s...",
+                file=sys.stderr,
+                flush=True,
+            )
+            await asyncio.sleep(wait)
+            continue
 
 
 def _save_report(report: dict[str, Any], output_path: Path) -> None:
@@ -585,15 +614,23 @@ async def run_delegated_kimi_decode(
             file=sys.stderr,
             flush=True,
         )
-        response = await _post_chat_smart_stream(
-            prompt,
-            session_token=session_token,
-            chat_base_url=chat_base_url,
-            operator_did=operator_did,
-            operator_id=operator_id,
-            ledger_id=ledger_id,
-            surface_id=surface_id,
-        )
+        try:
+            response = await _post_chat_smart_stream(
+                prompt,
+                session_token=session_token,
+                chat_base_url=chat_base_url,
+                operator_did=operator_did,
+                operator_id=operator_id,
+                ledger_id=ledger_id,
+                surface_id=surface_id,
+            )
+        except Exception as exc:  # pragma: no cover - last-resort safety net
+            print(
+                f"[{idx + 1}/{len(records)}] {record['id']} UNEXPECTED ERROR: {exc}",
+                file=sys.stderr,
+                flush=True,
+            )
+            response = {"error": "unexpected_exception", "detail": str(exc)}
 
         if response.get("error"):
             print(
