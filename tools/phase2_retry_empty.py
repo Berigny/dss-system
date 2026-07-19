@@ -19,6 +19,7 @@ import asyncio
 import json
 import os
 import re
+import socket
 import sys
 import time
 import uuid
@@ -149,7 +150,8 @@ async def _post_chat_smart_stream(
     ledger_id: str,
     surface_id: str,
     model: str,
-    timeout: float = 180.0,
+    timeout: float = 240.0,
+    transient_retries: int = 3,
 ) -> dict[str, Any]:
     session_id = f"phase2-retry-{uuid.uuid4().hex[:12]}"
     request_id = f"phase2-retry-req-{uuid.uuid4().hex}"
@@ -168,6 +170,7 @@ async def _post_chat_smart_stream(
         "include_pipeline_events": False,
         "prompt_principal_mode": "kimi",
     }
+    payload_bytes = json.dumps(payload).encode("utf-8")
     headers = {
         "content-type": "application/json",
         "accept": "application/x-ndjson, application/json",
@@ -177,50 +180,77 @@ async def _post_chat_smart_stream(
         "cookie": f"ds_backend_session_token={session_token}",
     }
     url = f"{chat_base_url.rstrip('/')}/api/chat/smart_stream"
-    req = request.Request(
-        url,
-        data=json.dumps(payload).encode("utf-8"),
-        headers=headers,
-        method="POST",
-    )
-    try:
-        with request.urlopen(req, timeout=timeout) as resp:
-            status = getattr(resp, "status", 200)
-            if status >= 400:
-                body = resp.read().decode("utf-8", errors="ignore")
-                return {"error": f"http_{status}", "detail": body[:1000]}
-            content_type = str(resp.headers.get("content-type") or "")
-            if "text/html" in content_type:
-                snippet = resp.read(2048).decode("utf-8", errors="ignore")
-                title_match = re.search(r"<title>([^<]+)</title>", snippet, re.IGNORECASE)
+
+    def _make_request() -> request.Request:
+        return request.Request(
+            url,
+            data=payload_bytes,
+            headers=headers,
+            method="POST",
+        )
+
+    transient_failures = 0
+    while True:
+        try:
+            with request.urlopen(_make_request(), timeout=timeout) as resp:
+                status = getattr(resp, "status", 200)
+                if status >= 400:
+                    body = resp.read().decode("utf-8", errors="ignore")
+                    return {"error": f"http_{status}", "detail": body[:1000]}
+                content_type = str(resp.headers.get("content-type") or "")
+                if "text/html" in content_type:
+                    snippet = resp.read(2048).decode("utf-8", errors="ignore")
+                    title_match = re.search(r"<title>([^<]+)</title>", snippet, re.IGNORECASE)
+                    return {
+                        "error": "auth_failed_html",
+                        "detail": "chat surface returned HTML (session token may be invalid/expired)",
+                        "page_title": title_match.group(1).strip() if title_match else None,
+                    }
+                if "json" in content_type and "ndjson" not in content_type:
+                    body = json.loads(resp.read().decode("utf-8", errors="ignore"))
+                    return {"error": "unexpected_json_response", "detail": body}
+                events = _iter_ndjson_lines(resp)
+                chunks: list[str] = []
+                for event in events:
+                    etype = str(event.get("type") or "")
+                    if etype in {"token", "delta", "message"}:
+                        chunks.append(_event_text_value(event))
+                raw = "".join(chunks).strip()
+                parsed = _extract_json_object(raw) if raw else None
                 return {
-                    "error": "auth_failed_html",
-                    "detail": "chat surface returned HTML (session token may be invalid/expired)",
-                    "page_title": title_match.group(1).strip() if title_match else None,
+                    "raw_response": raw,
+                    "parsed_response": parsed,
+                    "event_count": len(events),
+                    "session_id": session_id,
+                    "request_id": request_id,
                 }
-            if "json" in content_type and "ndjson" not in content_type:
-                body = json.loads(resp.read().decode("utf-8", errors="ignore"))
-                return {"error": "unexpected_json_response", "detail": body}
-            events = _iter_ndjson_lines(resp)
-            chunks: list[str] = []
-            for event in events:
-                etype = str(event.get("type") or "")
-                if etype in {"token", "delta", "message"}:
-                    chunks.append(_event_text_value(event))
-            raw = "".join(chunks).strip()
-            parsed = _extract_json_object(raw) if raw else None
-            return {
-                "raw_response": raw,
-                "parsed_response": parsed,
-                "event_count": len(events),
-                "session_id": session_id,
-                "request_id": request_id,
-            }
-    except error.HTTPError as exc:
-        body = exc.read().decode("utf-8", errors="ignore")
-        return {"error": f"http_{exc.code}", "detail": body[:1000]}
-    except error.URLError as exc:
-        return {"error": "request_failed", "detail": str(exc.reason)}
+        except error.HTTPError as exc:
+            body = exc.read().decode("utf-8", errors="ignore")
+            return {"error": f"http_{exc.code}", "detail": body[:1000]}
+        except (TimeoutError, socket.timeout) as exc:
+            transient_failures += 1
+            if transient_failures > max(0, transient_retries):
+                return {"error": "timeout", "detail": f"read timed out after {timeout}s ({exc})"}
+            wait = 5 * (2 ** (transient_failures - 1))
+            print(
+                f"warning: phase2 chat surface timeout ({transient_failures}/{transient_retries}); retrying in {wait}s...",
+                file=sys.stderr,
+                flush=True,
+            )
+            await asyncio.sleep(wait)
+            continue
+        except error.URLError as exc:
+            transient_failures += 1
+            if transient_failures > max(0, transient_retries):
+                return {"error": "request_failed", "detail": str(exc.reason)}
+            wait = 5 * (2 ** (transient_failures - 1))
+            print(
+                f"warning: phase2 chat surface URL error ({transient_failures}/{transient_retries}): {exc.reason}; retrying in {wait}s...",
+                file=sys.stderr,
+                flush=True,
+            )
+            await asyncio.sleep(wait)
+            continue
 
 
 def _parse_factorization_from_prompt(prompt: str) -> set[int]:
@@ -545,16 +575,23 @@ async def main() -> int:
             file=sys.stderr,
             flush=True,
         )
-        response = await _post_chat_smart_stream(
-            trial["prompt"],
-            session_token=session_token,
-            chat_base_url=args.chat_base_url,
-            operator_did=args.operator_did,
-            operator_id=args.operator_id,
-            ledger_id=args.ledger_id,
-            surface_id=args.surface_id,
-            model=args.model,
-        )
+        try:
+            response = await _post_chat_smart_stream(
+                trial["prompt"],
+                session_token=session_token,
+                chat_base_url=args.chat_base_url,
+                operator_did=args.operator_did,
+                operator_id=args.operator_id,
+                ledger_id=args.ledger_id,
+                surface_id=args.surface_id,
+                model=args.model,
+            )
+        except Exception as exc:  # pragma: no cover - last-resort safety net
+            print(
+                f"[{idx + 1}/{len(empty_trials)}] {trial['id']} {trial['arm']} r{trial['replicate']} UNEXPECTED ERROR: {exc}",
+                file=sys.stderr,
+            )
+            response = {"error": "unexpected_exception", "detail": str(exc)}
         if response.get("error"):
             print(f"[{idx + 1}/{len(empty_trials)}] {trial['id']} {trial['arm']} r{trial['replicate']}: {response['error']}", file=sys.stderr)
             failed += 1
