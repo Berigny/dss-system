@@ -139,35 +139,80 @@ def _run_b3_baselines(
     queries: list[NeedleQuery],
     top_k: int,
 ) -> dict[str, Any]:
-    """Run B3 matched-information baselines on one seed's corpus."""
-    norm_memories, norm_queries = _normalize_for_b3(memories, queries)
+    """Run B3 matched-information baselines per-length and aggregate.
+
+    Each needle query must retrieve from its own haystack length.  Passing the
+    full multi-length corpus to the baselines lets longer haystacks drown the
+    relevant memory in the global top-k, which produced the impossible all-zero
+    real-embedding numbers reported in DSS-288.
+    """
+    memories_by_length: dict[int, list[NeedleMemory]] = {}
+    for memory in memories:
+        memories_by_length.setdefault(memory.length, []).append(memory)
+
+    queries_by_length: dict[int, list[NeedleQuery]] = {}
+    for query in queries:
+        queries_by_length.setdefault(query.length, []).append(query)
+
+    bow_recalls_1: list[float] = []
+    bow_recalls_k: list[float] = []
+    metadata_recalls_1: list[float] = []
+    metadata_recalls_k: list[float] = []
+    real_recalls_1: list[float] = []
+    real_recalls_k: list[float] = []
+    real_mrrs: list[float] = []
+    real_embedding_available = False
+    real_embedding_reason = "sentence-transformers not available"
+    real_weights_sha256: str | None = None
 
     bow = BASELINES["bow_stand_in"]
-    bow_result = bow.run(norm_memories, norm_queries, top_k=top_k)
 
-    metadata = MetadataFilterBaseline()
-    metadata_result = metadata.run(norm_memories, norm_queries, top_k=top_k)
+    for length in sorted(queries_by_length):
+        length_memories = memories_by_length.get(length, [])
+        length_queries = queries_by_length[length]
+        if not length_memories:
+            continue
+        norm_memories, norm_queries = _normalize_for_b3(length_memories, length_queries)
 
-    real_embedding: dict[str, Any] = {"available": False, "reason": "sentence-transformers not available"}
-    try:
-        real_emb = RealEmbeddingBaseline()
-        real_result = real_emb.run(norm_memories, norm_queries, top_k=top_k)
-        real_embedding = {
-            "available": True,
-            "model": PINNED_MODEL_NAME,
-            "weights_sha256": real_emb.model_info.weights_sha256 if real_emb.model_info else None,
-            "recall_at_1": real_result.recall_at_1,
-            "recall_at_k": real_result.recall_at_k,
-            "mrr": real_result.mrr,
-        }
-    except Exception as exc:
-        real_embedding["reason"] = str(exc)
+        bow_result = bow.run(norm_memories, norm_queries, top_k=top_k)
+        bow_recalls_1.append(bow_result.recall_at_1)
+        bow_recalls_k.append(bow_result.recall_at_k)
+
+        metadata = MetadataFilterBaseline()
+        metadata_result = metadata.run(norm_memories, norm_queries, top_k=top_k)
+        metadata_recalls_1.append(metadata_result.recall_at_1)
+        metadata_recalls_k.append(metadata_result.recall_at_k)
+
+        try:
+            real_emb = RealEmbeddingBaseline()
+            real_result = real_emb.run(norm_memories, norm_queries, top_k=top_k)
+            real_embedding_available = True
+            real_recalls_1.append(real_result.recall_at_1)
+            real_recalls_k.append(real_result.recall_at_k)
+            real_mrrs.append(real_result.mrr)
+            if real_emb.model_info:
+                real_weights_sha256 = real_emb.model_info.weights_sha256
+        except Exception as exc:
+            real_embedding_reason = str(exc)
+
+    def _mean(values: list[float]) -> float:
+        return float(statistics.mean(values)) if values else 0.0
+
+    real_embedding: dict[str, Any] = {
+        "available": real_embedding_available,
+        "reason": None if real_embedding_available else real_embedding_reason,
+        "model": PINNED_MODEL_NAME if real_embedding_available else None,
+        "weights_sha256": real_weights_sha256,
+        "recall_at_1": _mean(real_recalls_1),
+        "recall_at_k": _mean(real_recalls_k),
+        "mrr": _mean(real_mrrs),
+    }
 
     return {
-        "bow_stand_in_recall_at_1": bow_result.recall_at_1,
-        "bow_stand_in_recall_at_k": bow_result.recall_at_k,
-        "metadata_filter_recall_at_1": metadata_result.recall_at_1,
-        "metadata_filter_recall_at_k": metadata_result.recall_at_k,
+        "bow_stand_in_recall_at_1": _mean(bow_recalls_1),
+        "bow_stand_in_recall_at_k": _mean(bow_recalls_k),
+        "metadata_filter_recall_at_1": _mean(metadata_recalls_1),
+        "metadata_filter_recall_at_k": _mean(metadata_recalls_k),
         "real_embedding": real_embedding,
     }
 

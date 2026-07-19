@@ -296,25 +296,81 @@ def run_counterfactual_multihop(
     }
 
 
+def _group_by_length(
+    memories: list[Any], queries: list[Any]
+) -> dict[int, tuple[list[Any], list[Any]]]:
+    """Group needle memories and queries by haystack length."""
+    memories_by_length: dict[int, list[Any]] = {}
+    for memory in memories:
+        memories_by_length.setdefault(memory.length, []).append(memory)
+    queries_by_length: dict[int, list[Any]] = {}
+    for query in queries:
+        queries_by_length.setdefault(query.length, []).append(query)
+    return {
+        length: (memories_by_length.get(length, []), queries_by_length[length])
+        for length in sorted(queries_by_length)
+    }
+
+
+def _mean(values: list[float]) -> float:
+    return float(statistics.mean(values)) if values else 0.0
+
+
 def run_b3_baselines(
     *,
     seed: int,
     needle_lengths: tuple[int, ...] = (8, 16, 32),
     chain_count: int = 5,
 ) -> dict[str, Any]:
-    """Run B3 matched-information baselines on small needle + multi-hop splits."""
+    """Run B3 matched-information baselines per-length and aggregate.
+
+    Needle baselines are evaluated against each query's own haystack length,
+    not the full multi-length corpus, so that top-k recall at short lengths is
+    not artificially diluted by longer haystacks.
+    """
     bow = BASELINES["bow_stand_in"]
     metadata = MetadataFilterBaseline()
 
-    # Needle baselines.
+    # Needle baselines — run per-length and aggregate.
     memories, queries = generate_needle_corpus(needle_lengths, seed=seed)
-    norm_memories = _normalize_memories_with_metadata(memories)
-    norm_queries = _normalize_needle_queries(queries)
+    grouped = _group_by_length(memories, queries)
 
-    bow_needle = bow.run(norm_memories, norm_queries, top_k=NEEDLE_TOP_K)
-    metadata_needle = metadata.run(norm_memories, norm_queries, top_k=NEEDLE_TOP_K)
+    bow_needle_recalls_1: list[float] = []
+    bow_needle_recalls_k: list[float] = []
+    metadata_needle_recalls_1: list[float] = []
+    metadata_needle_recalls_k: list[float] = []
+    real_needle_recalls_1: list[float] = []
+    real_needle_recalls_k: list[float] = []
+    real_embedding_available = False
+    real_embedding_reason = "sentence-transformers not available or skipped"
+    real_weights_sha256: str | None = None
 
-    # Multi-hop baselines.
+    for length, (length_memories, length_queries) in grouped.items():
+        if not length_memories:
+            continue
+        norm_memories = _normalize_memories_with_metadata(length_memories)
+        norm_queries = _normalize_needle_queries(length_queries)
+
+        bow_result = bow.run(norm_memories, norm_queries, top_k=NEEDLE_TOP_K)
+        bow_needle_recalls_1.append(bow_result.recall_at_1)
+        bow_needle_recalls_k.append(bow_result.recall_at_k)
+
+        metadata_result = metadata.run(norm_memories, norm_queries, top_k=NEEDLE_TOP_K)
+        metadata_needle_recalls_1.append(metadata_result.recall_at_1)
+        metadata_needle_recalls_k.append(metadata_result.recall_at_k)
+
+        try:
+            real_emb = RealEmbeddingBaseline()
+            real_result = real_emb.run(norm_memories, norm_queries, top_k=NEEDLE_TOP_K)
+            real_embedding_available = True
+            real_needle_recalls_1.append(real_result.recall_at_1)
+            real_needle_recalls_k.append(real_result.recall_at_k)
+            if real_emb.model_info:
+                real_weights_sha256 = real_emb.model_info.weights_sha256
+        except Exception as exc:
+            real_embedding_reason = str(exc)
+
+    # Multi-hop baselines — single corpus, no length grouping needed.
     mh_memories, mh_queries = generate_multihop_corpus(chain_count, seed=seed)
     mh_norm_memories = _normalize_memories_with_metadata(mh_memories)
     mh_norm_queries = _normalize_multihop_queries(mh_queries)
@@ -322,31 +378,39 @@ def run_b3_baselines(
     bow_multihop = bow.run(mh_norm_memories, mh_norm_queries, top_k=MULTIHOP_TOP_K)
     metadata_multihop = metadata.run(mh_norm_memories, mh_norm_queries, top_k=MULTIHOP_TOP_K)
 
-    real_embedding_result = {"available": False, "reason": "sentence-transformers not available or skipped"}
-    try:
-        real_emb = RealEmbeddingBaseline()
-        real_needle = real_emb.run(norm_memories, norm_queries, top_k=NEEDLE_TOP_K)
-        real_multihop = real_emb.run(mh_norm_memories, mh_norm_queries, top_k=MULTIHOP_TOP_K)
-        real_embedding_result = {
-            "available": True,
-            "model": PINNED_MODEL_NAME,
-            "weights_sha256": real_emb.model_info.weights_sha256 if real_emb.model_info else None,
-            "needle_recall_at_1": real_needle.recall_at_1,
-            "needle_recall_at_k": real_needle.recall_at_k,
-            "multihop_recall_at_1": real_multihop.recall_at_1,
-            "multihop_recall_at_k": real_multihop.recall_at_k,
-        }
-    except Exception as exc:
-        real_embedding_result["reason"] = str(exc)
+    real_multihop_recall_1: float | None = None
+    real_multihop_recall_k: float | None = None
+    if real_embedding_available:
+        try:
+            real_emb = RealEmbeddingBaseline()
+            real_multihop = real_emb.run(mh_norm_memories, mh_norm_queries, top_k=MULTIHOP_TOP_K)
+            real_multihop_recall_1 = real_multihop.recall_at_1
+            real_multihop_recall_k = real_multihop.recall_at_k
+        except Exception as exc:
+            real_embedding_reason = str(exc)
+            real_embedding_available = False
+
+    real_embedding_result = {
+        "available": real_embedding_available,
+        "reason": None if real_embedding_available else real_embedding_reason,
+        "model": PINNED_MODEL_NAME if real_embedding_available else None,
+        "weights_sha256": real_weights_sha256,
+        "needle_recall_at_1": _mean(real_needle_recalls_1),
+        "needle_recall_at_k": _mean(real_needle_recalls_k),
+        "multihop_recall_at_1": real_multihop_recall_1,
+        "multihop_recall_at_k": real_multihop_recall_k,
+    }
 
     return {
         "needle": {
-            "bow_stand_in_recall_at_1": bow_needle.recall_at_1,
-            "metadata_filter_recall_at_1": metadata_needle.recall_at_1,
+            "bow_stand_in_recall_at_1": _mean(bow_needle_recalls_1),
+            "bow_stand_in_recall_at_k": _mean(bow_needle_recalls_k),
+            "metadata_filter_recall_at_1": _mean(metadata_needle_recalls_1),
+            "metadata_filter_recall_at_k": _mean(metadata_needle_recalls_k),
             "real_embedding": {
                 **real_embedding_result,
-                "recall_at_1": real_embedding_result.get("needle_recall_at_1"),
-                "recall_at_k": real_embedding_result.get("needle_recall_at_k"),
+                "recall_at_1": real_embedding_result["needle_recall_at_1"],
+                "recall_at_k": real_embedding_result["needle_recall_at_k"],
             },
         },
         "multihop": {
@@ -354,8 +418,8 @@ def run_b3_baselines(
             "metadata_filter_recall_at_k": metadata_multihop.recall_at_k,
             "real_embedding": {
                 **real_embedding_result,
-                "recall_at_1": real_embedding_result.get("multihop_recall_at_1"),
-                "recall_at_k": real_embedding_result.get("multihop_recall_at_k"),
+                "recall_at_1": real_embedding_result["multihop_recall_at_1"],
+                "recall_at_k": real_embedding_result["multihop_recall_at_k"],
             },
         },
     }

@@ -1,0 +1,173 @@
+{
+  "artefact_schema_version": "1.0.0",
+  "run_id": "counterfactual-baselines-20260719T064215Z",
+  "suite_id": "counterfactual-baselines",
+  "suite_version": "v1",
+  "executed_at": "2026-07-19T06:42:15.000390Z",
+  "mode": "coordinate_guided",
+  "status": "partial",
+  "repos": [
+    {
+      "name": "ds-backend-local",
+      "commit_sha": "16bcd79deceb3930a09558e2b73d78fa00b5ceed",
+      "role": "canonical_benchmark_engine",
+      "required_for_run": true
+    }
+  ],
+  "datasets": [
+    {
+      "name": "longbench_needle_synthetic_v1",
+      "version": "v1",
+      "split": "benchmark",
+      "record_count": 3
+    },
+    {
+      "name": "longbench_multihop_synthetic_v1",
+      "version": "v1",
+      "split": "benchmark",
+      "record_count": 5
+    }
+  ],
+  "metrics": {
+    "retrieval": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "needle_original_qp_recall_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Needle Qp recall@1 on original paired corpus.",
+          "statistics": null
+        },
+        "needle_shuffle_texts_qp_recall_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Needle Qp recall@1 when texts are shuffled and coordinates held.",
+          "statistics": null
+        },
+        "needle_shuffle_coords_qp_recall_at_1": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "Needle Qp recall@1 when coordinates are shuffled and texts held.",
+          "statistics": null
+        },
+        "multihop_original_qp_chain_recall": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Multi-hop Qp chain recall on original paired corpus.",
+          "statistics": null
+        },
+        "multihop_shuffle_texts_qp_chain_recall": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Multi-hop Qp chain recall when texts are shuffled and coordinates held.",
+          "statistics": null
+        },
+        "multihop_shuffle_coords_qp_chain_recall": {
+          "value": 0.06666666666666667,
+          "unit": "ratio",
+          "description": "Multi-hop Qp chain recall when coordinates are shuffled and texts held.",
+          "statistics": null
+        },
+        "b3_bow_stand_in_needle_recall_at_1": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "B3 BoW stand-in needle recall@1.",
+          "statistics": null
+        },
+        "b3_metadata_filter_needle_recall_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "B3 metadata-filter needle recall@1 (same QpCoordinate compatibility filter as DSS).",
+          "statistics": null
+        },
+        "b3_real_embedding_needle_recall_at_1": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "B3 real embedding baseline (sentence-transformers/all-MiniLM-L6-v2) needle recall@1.",
+          "statistics": null
+        },
+        "b3_real_embedding_needle_recall_at_k": {
+          "value": 0.6666666666666666,
+          "unit": "ratio",
+          "description": "B3 real embedding baseline (sentence-transformers/all-MiniLM-L6-v2) needle recall@5.",
+          "statistics": null
+        },
+        "b3_real_embedding_multihop_recall_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "B3 real embedding baseline (sentence-transformers/all-MiniLM-L6-v2) multi-hop recall@1.",
+          "statistics": null
+        },
+        "b3_real_embedding_multihop_recall_at_k": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "B3 real embedding baseline (sentence-transformers/all-MiniLM-L6-v2) multi-hop recall@5.",
+          "statistics": null
+        }
+      }
+    },
+    "latency": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "total_runtime_ms": {
+          "value": 34618.666184018366,
+          "unit": "ms",
+          "description": "Total harness runtime.",
+          "statistics": null
+        }
+      }
+    },
+    "cost": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "embedding_queries": {
+          "value": 1,
+          "unit": "count",
+          "description": "Counterfactual run marker (no LLM tokens consumed).",
+          "statistics": null
+        }
+      }
+    },
+    "traceability": {
+      "status": "absent",
+      "absence_reason": "Traceability metrics are out of scope for counterfactual shuffle tests.",
+      "metrics": {}
+    },
+    "governance": {
+      "status": "absent",
+      "absence_reason": "Governance metrics are out of scope for counterfactual shuffle tests.",
+      "metrics": {}
+    }
+  },
+  "freshness": {
+    "status": "fresh",
+    "checked_at": "2026-07-19T06:42:15.000390Z",
+    "max_age_hours": 24,
+    "age_hours": 0.0
+  },
+  "failure_reason": null,
+  "hardware": {
+    "platform": "Darwin-25.5.0-x86_64",
+    "processor": "i386",
+    "cpu_count": 16,
+    "memory_gb": null,
+    "gpu_name": null,
+    "gpu_count": null,
+    "cuda_version": null,
+    "mps_available": true,
+    "backend_accelerator": "mps"
+  },
+  "run_config": {
+    "seed": 2026,
+    "lengths": "8,16,32",
+    "chain_count": 5,
+    "issue": "#1",
+    "credit": "hugooconnor \u2014 issue #1 reproduction and critique",
+    "partial_status_note": "'partial' indicates traceability/governance groups are intentionally out-of-scope, not retrieval failure.",
+    "d2_merge_window_days": 14,
+    "d2_note": "Hold merge of counterfactual shuffle distributions until hugooconnor's stated PR window expires (14 days) or their PR lands."
+  }
+}

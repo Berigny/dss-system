@@ -1,0 +1,54 @@
+{
+  "artifact_version": "ksr-eval-v0.4",
+  "git_commit_sha": "16bcd79deceb3930a09558e2b73d78fa00b5ceed",
+  "eval_script_version": "seed_distribution_harness_v1.1",
+  "run_date": "2026-07-19T06:37:12.282822+00:00",
+  "seeds": [
+    193,
+    194,
+    195,
+    196,
+    197
+  ],
+  "hardware_profile": {
+    "platform": "Darwin-25.5.0-x86_64",
+    "processor": "i386",
+    "cpu_count": 16,
+    "memory_gb": null,
+    "gpu_name": null,
+    "gpu_count": null,
+    "cuda_version": null,
+    "mps_available": true,
+    "backend_accelerator": "mps"
+  },
+  "dataset": {
+    "name": "longbench_needle_synthetic_v1",
+    "version": "v1",
+    "split": "benchmark",
+    "record_count": 5,
+    "path": "generator:longbench_needle_synthetic_v1:v1",
+    "sha256": "568495f5ef0bafacd996905459f3b66ed180ec11255460b1954d8eec787f4ed2"
+  },
+  "conditions": {
+    "lengths": "4,8,16,32,64,128,256",
+    "top_k": 5,
+    "permutations": 5000,
+    "transport": "R1",
+    "issue": "#1"
+  },
+  "metrics": {
+    "mean": 1.0,
+    "standard_deviation": 0.0,
+    "min": 1.0,
+    "max": 1.0,
+    "ci_95_low": 1.0,
+    "ci_95_high": 1.0,
+    "sample_count": 5,
+    "unit": "ratio",
+    "description": "Qp needle recall at rank 1 across pinned seeds."
+  },
+  "notes": {
+    "credit": "hugooconnor \u2014 issue #1 reproduction and critique",
+    "partial_status_note": "'partial' indicates traceability/governance groups are intentionally out-of-scope, not retrieval failure."
+  }
+}

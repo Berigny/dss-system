@@ -1,11 +1,11 @@
 {
   "report": "KSR-EVAL DSS-274 / DSS-291 retention smoke test",
-  "date": "2026-07-19T05:32:55Z",
+  "date": "2026-07-19T06:46:08Z",
   "mode": "dry_run",
   "model": null,
   "ksr_version": "1.3.1",
   "core_artifact_sha256": "79218c3b20a57ef80a83b5b95e62330e808a014e0c645000bd3e8c4bc9a1869c",
-  "repo_commit_sha": "4d94cebc3693e240df70090abb2311f22d64f283",
+  "repo_commit_sha": "16bcd79deceb3930a09558e2b73d78fa00b5ceed",
   "corpus_sha256": "e03138fceda8ecca37d2b95a63d37d35afd553724a21f55529745d55ae8fdd1a",
   "sample_size": 50,
   "recall_gate": 0.89,

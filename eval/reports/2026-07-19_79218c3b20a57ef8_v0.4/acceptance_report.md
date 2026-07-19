@@ -5,7 +5,7 @@
 **Validator:** KSR-VALIDATE v0.3.1  
 **Source registry SHA256:** `00d63d0bba51387527c467761beadc52719b2d71e6ea8b84ddceda1b541be1a1`  
 **Core artifact SHA256:** `79218c3b20a57ef80a83b5b95e62330e808a014e0c645000bd3e8c4bc9a1869c`  
-**Repo commit SHA:** `4d94cebc3693e240df70090abb2311f22d64f283`
+**Repo commit SHA:** `16bcd79deceb3930a09558e2b73d78fa00b5ceed`
 
 ## Artifacts
 
@@ -60,8 +60,8 @@ Both `ksr-pack-domains` and `ksr-pack-steward` pass all four pack-mode gates wit
 | DSS-274 | `tools/retention_smoke_test.py --dry-run` | PASS | `eval/reports/2026-07-19_79218c3b20a57ef8_v0.4/retention_smoke_report.json` |
 | DSS-274 | `tools/retention_smoke_test.py --model moonshotai/kimi-k3` | Deferred | Requires `OPENROUTER_API_KEY` |
 | DSS-291 | `tools/retention_smoke_test.py --delegated-kimi` | Instrumented / deferred | Harness implemented; live run requires `DSS_SESSION_TOKEN` or `DSS_REFRESH_TOKEN` |
-| DSS-276 | `tools/seed_distribution_harness.py` | PASS | `eval/reports/benchmarks/seed_distribution_20260719T043606Z_2b9161f71a14.json` + `.manifest.json` |
-| DSS-277 | `tools/counterfactual_harness.py` | PASS | `eval/reports/benchmarks/counterfactual_baselines_20260719T043712Z_2b9161f71a14.json` + `.manifest.json` |
+| DSS-276 | `tools/seed_distribution_harness.py` | PASS | `eval/reports/benchmarks/seed_distribution_20260719T063712Z_16bcd79deceb.json` + `.manifest.json` |
+| DSS-277 | `tools/counterfactual_harness.py` | PASS | `eval/reports/benchmarks/counterfactual_baselines_20260719T064215Z_16bcd79deceb.json` + `.manifest.json` |
 | DSS-277 | `DenseRetrievalBaseline` renamed to `BoWStandInBaseline` | PASS | `apps/backend/backend/benchmarks/comparison_baselines.py` |
 | DSS-277 | Real embedding baseline (MiniLM) | PASS | `apps/backend/backend/benchmarks/real_embedding_baseline.py` |
 | DSS-277 | Metadata-filter baseline (matched-information control) | PASS | `apps/backend/backend/benchmarks/metadata_filter_baseline.py` |
@@ -74,8 +74,10 @@ Pinned seeds 193–197 on the LongBench needle harness yield:
 
 - `qp_recall@1`: mean `1.000`, CI95 `[1.000, 1.000]`, `n = 5`
 - `vector_recall@1`: mean `0.171`, CI95 `[0.034, 0.309]`, per-seed distribution `0 / 0 / 0.286 / 0.286 / 0.286`
-- `metadata_filter` needle recall@1: mean `0.143`
-- `real_embedding` (sentence-transformers/all-MiniLM-L6-v2) recall@1: mean `0.000`, recall@5: mean `0.000`
+- `metadata_filter` needle recall@1: mean `1.000`
+- `real_embedding` (sentence-transformers/all-MiniLM-L6-v2) recall@1: mean `0.171`, recall@5: mean `0.400`, per-seed recall@5 distribution `0.429 / 0.429 / 0.286 / 0.429 / 0.429`
+
+> **DSS-288 bug fix:** the seed-distribution harness previously passed the full multi-length corpus to the B3 baselines, so each needle query competed against every distractor from every length. This produced the impossible all-zero real-embedding recall. The harness now evaluates each query against its own haystack length; the numbers above are the corrected per-length aggregates.
 
 The per-seed vector distribution is exposed in the artifact under `metrics.retrieval.per_seed_vector_recall_at_1`. Per-seed real embedding recall@1 and recall@5 are exposed under `metrics.retrieval.per_seed_real_embedding_recall_at_1` and `metrics.retrieval.per_seed_real_embedding_recall_at_k`.
 
@@ -86,14 +88,14 @@ Both needle and multi-hop arms show **coordinate-driven** retrieval: shuffling c
 B3 matched-information baselines on the same small needle split:
 
 - `bow_stand_in` needle recall@1: `0.000`
-- `metadata_filter` needle recall@1: `0.333`
-- `real_embedding` (sentence-transformers/all-MiniLM-L6-v2) needle recall@1: `0.000`, recall@5: `0.000`
+- `metadata_filter` needle recall@1: `1.000`
+- `real_embedding` (sentence-transformers/all-MiniLM-L6-v2) needle recall@1: `0.000`, recall@5: `0.667`
 
 The embedding baseline also runs on the multi-hop split:
 
-- `real_embedding` multi-hop recall@1: `0.800`, recall@5: `1.000`
+- `real_embedding` multi-hop recall@1: `1.000`, recall@5: `1.000`
 
-The needle corpus is intentionally adversarial: the synthetic needle texts are not semantically related to the query text, so a dense embedding ranker returns `0.0` at both `@1` and `@5`. This is the expected behaviour for this synthetic control, not a harness failure. On the multi-hop split, where query and chain texts do share semantic signal, the same embedding baseline scores `0.8@1` and `1.0@5`. The contrast confirms that the needle baseline measures the coordinate-driven property of the corpus, not a general retrieval upper bound.
+The needle corpus is intentionally adversarial: query-repeat distractors are literally the query text repeated, so they outrank the needle in dense embedding space and recall@1 stays at `0.0`. At `@5`, however, the per-length evaluation means the needle is within the top-5 candidate set for short haystacks, giving a non-zero `0.667`. On the multi-hop split, where query and chain texts share semantic signal, the same embedding baseline scores `1.0@1` and `1.0@5`. The contrast confirms that the needle baseline measures the coordinate-driven property of the corpus, not a general retrieval upper bound.
 
 These numbers are intentionally produced with identical structural metadata as the DSS retrieval path so they serve as a true control, not an upper bound.
 
@@ -102,13 +104,13 @@ These numbers are intentionally produced with identical structural metadata as t
 DSS-291 adds `--delegated-kimi` mode to `tools/retention_smoke_test.py`. The harness now posts each decode prompt through the chat surface smart stream using the Kimi Code delegated principal, avoiding direct OpenRouter calls and honouring the Epic 38 preference to route agent-heavy benchmarks through the Kimi Code surface identity.
 
 - Deterministic dry-run recall over the 50-item sample: `1.000` (gate `>= 0.89` PASS).
-- Live delegated-kimi recall: **deferred** pending a valid `DSS_SESSION_TOKEN` or `DSS_REFRESH_TOKEN` in the runtime environment.
+- Live delegated-kimi recall: **attempted with a placeholder session token and returned auth failure** (`auth_failed_html`) from `chat.dualsubstrate.com`. A valid `DSS_SESSION_TOKEN` or `DSS_REFRESH_TOKEN` is required to complete the live 50-call gate.
 - Canonical report: `eval/reports/2026-07-19_79218c3b20a57ef8_v0.4/retention_smoke_report.json`
 
 To run the live gate once credentials are available:
 
 ```bash
-DSS_SESSION_TOKEN="..." \
+DSS_SESSION_TOKEN="<valid-token>" \
   python3 tools/retention_smoke_test.py --delegated-kimi
 ```
 
