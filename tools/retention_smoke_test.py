@@ -379,12 +379,15 @@ def _build_concept_to_prime(registry: dict[str, Any]) -> dict[str, int]:
     mapping: dict[str, int] = {}
     prime_registry = registry.get("prime_registry", {})
     if isinstance(prime_registry, dict):
-        for _key, entry in prime_registry.items():
+        for key, entry in prime_registry.items():
             if not isinstance(entry, dict):
                 continue
             name = str(entry.get("name") or "").strip()
-            prime = entry.get("prime")
-            if name and isinstance(prime, int):
+            try:
+                prime = int(key)
+            except (ValueError, TypeError):
+                continue
+            if name and prime > 1:
                 mapping[name.lower()] = prime
     return mapping
 
@@ -533,12 +536,17 @@ async def run_delegated_kimi_decode(
     concept_to_prime = _build_concept_to_prime(registry)
     results: list[dict[str, Any]] = []
 
-    for record in records:
+    for idx, record in enumerate(records):
         enc = encode_concepts(record["encode_seed"], alphabet, registry)
         factors = factorize(enc["number"])
         prompt = format_prompt(registry_text, factors)
         ground_truth_primes = set(factors.keys())
 
+        print(
+            f"[{idx + 1}/{len(records)}] {record['id']} posting to chat surface...",
+            file=sys.stderr,
+            flush=True,
+        )
         response = await _post_chat_smart_stream(
             prompt,
             session_token=session_token,
@@ -550,6 +558,11 @@ async def run_delegated_kimi_decode(
         )
 
         if response.get("error"):
+            print(
+                f"[{idx + 1}/{len(records)}] {record['id']} ERROR: {response['error']}",
+                file=sys.stderr,
+                flush=True,
+            )
             results.append(
                 {
                     "id": record["id"],
@@ -575,6 +588,11 @@ async def run_delegated_kimi_decode(
         fn = len(ground_truth_primes - recovered_primes)
         recall = tp / (tp + fn) if (tp + fn) else 0.0
 
+        print(
+            f"[{idx + 1}/{len(records)}] {record['id']} recall={recall:.2f} events={response.get('event_count')}",
+            file=sys.stderr,
+            flush=True,
+        )
         results.append(
             {
                 "id": record["id"],
