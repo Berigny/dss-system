@@ -461,6 +461,9 @@ async def main() -> int:
         print("No empty trials to retry.")
         return 0
 
+    REFRESH_INTERVAL_SECONDS = 2700  # refresh session token every 45 min (token TTL ~1h)
+    last_refresh_time = time.time()
+
     print(f"Retrying {len(empty_trials)} empty trials via delegated Kimi...")
     embedder = SentenceTransformer("all-MiniLM-L6-v2")
     arm_sums, stratum_sums = _arm_stratum_sums(report)
@@ -469,12 +472,29 @@ async def main() -> int:
     succeeded = 0
     failed = 0
     for idx, trial in enumerate(empty_trials):
+        if refresh_token and (time.time() - last_refresh_time) >= REFRESH_INTERVAL_SECONDS:
+            new_session, new_refresh, info = _refresh_session_token(refresh_token, args.chat_base_url)
+            if not new_session:
+                print(f"warning: periodic refresh failed: {info}; continuing with current token", file=sys.stderr)
+            else:
+                session_token = new_session
+                if new_refresh:
+                    refresh_token = new_refresh
+                    os.environ["DSS_REFRESH_TOKEN"] = new_refresh
+                last_refresh_time = time.time()
+                print(f"[{idx + 1}/{len(empty_trials)}] refreshed session token", file=sys.stderr)
+
         record = id_to_record.get(trial["id"])
         if not record:
             print(f"[{idx + 1}/{len(empty_trials)}] missing corpus record {trial['id']}", file=sys.stderr)
             failed += 1
             continue
         attempted += 1
+        print(
+            f"[{idx + 1}/{len(empty_trials)}] {trial['id']} {trial['arm']} r{trial['replicate']} posting...",
+            file=sys.stderr,
+            flush=True,
+        )
         response = await _post_chat_smart_stream(
             trial["prompt"],
             session_token=session_token,
