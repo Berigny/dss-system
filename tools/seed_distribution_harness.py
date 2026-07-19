@@ -194,11 +194,27 @@ def _build_distribution_artifact(
     metadata_values = [b3_per_seed[s]["metadata_filter_recall_at_1"] for s in seeds]
     metadata_stats = _compute_statistics(metadata_values)
 
+    real_embedding_values_1 = []
+    real_embedding_values_k = []
+    per_seed_real_1: dict[str, float] = {}
+    per_seed_real_k: dict[str, float] = {}
+    real_embedding_available = False
+    for s in seeds:
+        emb = b3_per_seed[s].get("real_embedding", {})
+        if emb.get("available"):
+            real_embedding_available = True
+            v1 = float(emb.get("recall_at_1", -1.0))
+            vk = float(emb.get("recall_at_k", -1.0))
+            real_embedding_values_1.append(v1)
+            real_embedding_values_k.append(vk)
+            per_seed_real_1[str(s)] = v1
+            per_seed_real_k[str(s)] = vk
+
+    real_embedding_stats_1 = _compute_statistics(real_embedding_values_1) if real_embedding_values_1 else None
+    real_embedding_stats_k = _compute_statistics(real_embedding_values_k) if real_embedding_values_k else None
+
     hardware = detect_hardware_profile()
     dataset_sha = _dataset_sha256(config.lengths, seeds)
-
-    real_embedding_first = b3_per_seed[seeds[0]].get("real_embedding", {})
-    real_embedding_available = real_embedding_first.get("available", False)
 
     return BenchmarkArtifact(
         artefact_schema_version="1.0.0",
@@ -273,9 +289,26 @@ def _build_distribution_artifact(
                         statistics=metadata_stats,
                     ),
                     "real_embedding_recall_at_1": MetricEntry(
-                        value=real_embedding_first.get("recall_at_1", -1.0) if real_embedding_available else -1.0,
+                        value=real_embedding_stats_1.mean if real_embedding_stats_1 else (-1.0),
                         unit="ratio",
-                        description=f"B3 real embedding baseline ({PINNED_MODEL_NAME}) needle recall@1 on first seed.",
+                        description=f"B3 real embedding baseline ({PINNED_MODEL_NAME}) needle recall@1 across pinned seeds.",
+                        statistics=real_embedding_stats_1,
+                    ),
+                    "real_embedding_recall_at_k": MetricEntry(
+                        value=real_embedding_stats_k.mean if real_embedding_stats_k else (-1.0),
+                        unit="ratio",
+                        description=f"B3 real embedding baseline ({PINNED_MODEL_NAME}) needle recall@{config.top_k} across pinned seeds.",
+                        statistics=real_embedding_stats_k,
+                    ),
+                    "per_seed_real_embedding_recall_at_1": MetricEntry(
+                        value=json.dumps(per_seed_real_1),
+                        unit="json",
+                        description="Per-seed real embedding baseline recall@1 values.",
+                    ),
+                    "per_seed_real_embedding_recall_at_k": MetricEntry(
+                        value=json.dumps(per_seed_real_k),
+                        unit="json",
+                        description=f"Per-seed real embedding baseline recall@{config.top_k} values.",
                     ),
                 },
             ),

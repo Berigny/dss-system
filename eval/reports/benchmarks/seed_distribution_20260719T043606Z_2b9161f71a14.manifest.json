@@ -1,8 +1,8 @@
 {
   "artifact_version": "ksr-eval-v0.4",
-  "git_commit_sha": "470b1b3e74b32ad89e1dcdae7c5fa88345356316",
+  "git_commit_sha": "2b9161f71a14704655b2a29ddbd586ef6566f518",
   "eval_script_version": "seed_distribution_harness_v1.1",
-  "run_date": "2026-07-18T12:36:30.768111+00:00",
+  "run_date": "2026-07-19T04:36:06.712854+00:00",
   "seeds": [
     193,
     194,

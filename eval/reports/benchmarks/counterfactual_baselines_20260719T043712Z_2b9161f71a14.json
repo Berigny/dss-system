@@ -1,15 +1,15 @@
 {
   "artefact_schema_version": "1.0.0",
-  "run_id": "counterfactual-baselines-20260718T123613Z",
+  "run_id": "counterfactual-baselines-20260719T043712Z",
   "suite_id": "counterfactual-baselines",
   "suite_version": "v1",
-  "executed_at": "2026-07-18T12:36:13.234792Z",
+  "executed_at": "2026-07-19T04:37:12.912844Z",
   "mode": "coordinate_guided",
   "status": "partial",
   "repos": [
     {
       "name": "ds-backend-local",
-      "commit_sha": "470b1b3e74b32ad89e1dcdae7c5fa88345356316",
+      "commit_sha": "2b9161f71a14704655b2a29ddbd586ef6566f518",
       "role": "canonical_benchmark_engine",
       "required_for_run": true
     }
@@ -86,6 +86,24 @@
           "unit": "ratio",
           "description": "B3 real embedding baseline (sentence-transformers/all-MiniLM-L6-v2) needle recall@1.",
           "statistics": null
+        },
+        "b3_real_embedding_needle_recall_at_k": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "B3 real embedding baseline (sentence-transformers/all-MiniLM-L6-v2) needle recall@5.",
+          "statistics": null
+        },
+        "b3_real_embedding_multihop_recall_at_1": {
+          "value": 0.8,
+          "unit": "ratio",
+          "description": "B3 real embedding baseline (sentence-transformers/all-MiniLM-L6-v2) multi-hop recall@1.",
+          "statistics": null
+        },
+        "b3_real_embedding_multihop_recall_at_k": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "B3 real embedding baseline (sentence-transformers/all-MiniLM-L6-v2) multi-hop recall@5.",
+          "statistics": null
         }
       }
     },
@@ -94,7 +112,7 @@
       "absence_reason": null,
       "metrics": {
         "total_runtime_ms": {
-          "value": 13590.735568024684,
+          "value": 11069.967405986972,
           "unit": "ms",
           "description": "Total harness runtime.",
           "statistics": null
@@ -126,7 +144,7 @@
   },
   "freshness": {
     "status": "fresh",
-    "checked_at": "2026-07-18T12:36:13.234792Z",
+    "checked_at": "2026-07-19T04:37:12.912844Z",
     "max_age_hours": 24,
     "age_hours": 0.0
   },

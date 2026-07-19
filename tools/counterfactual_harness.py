@@ -332,6 +332,8 @@ def run_b3_baselines(
             "model": PINNED_MODEL_NAME,
             "weights_sha256": real_emb.model_info.weights_sha256 if real_emb.model_info else None,
             "needle_recall_at_1": real_needle.recall_at_1,
+            "needle_recall_at_k": real_needle.recall_at_k,
+            "multihop_recall_at_1": real_multihop.recall_at_1,
             "multihop_recall_at_k": real_multihop.recall_at_k,
         }
     except Exception as exc:
@@ -344,6 +346,7 @@ def run_b3_baselines(
             "real_embedding": {
                 **real_embedding_result,
                 "recall_at_1": real_embedding_result.get("needle_recall_at_1"),
+                "recall_at_k": real_embedding_result.get("needle_recall_at_k"),
             },
         },
         "multihop": {
@@ -351,6 +354,7 @@ def run_b3_baselines(
             "metadata_filter_recall_at_k": metadata_multihop.recall_at_k,
             "real_embedding": {
                 **real_embedding_result,
+                "recall_at_1": real_embedding_result.get("multihop_recall_at_1"),
                 "recall_at_k": real_embedding_result.get("multihop_recall_at_k"),
             },
         },
@@ -372,7 +376,12 @@ def _build_artifact(
     hardware = detect_hardware_profile()
     real_emb = b3.get("needle", {}).get("real_embedding", {})
     real_available = isinstance(real_emb, dict) and real_emb.get("available", False)
-    real_recall = real_emb.get("recall_at_1", -1.0) if real_available else -1.0
+    real_recall_1 = real_emb.get("recall_at_1", -1.0) if real_available else -1.0
+    real_recall_k = real_emb.get("recall_at_k", -1.0) if real_available else -1.0
+    real_mh = b3.get("multihop", {}).get("real_embedding", {})
+    real_mh_available = isinstance(real_mh, dict) and real_mh.get("available", False)
+    real_mh_recall_1 = real_mh.get("recall_at_1", -1.0) if real_mh_available else -1.0
+    real_mh_recall_k = real_mh.get("recall_at_k", -1.0) if real_mh_available else -1.0
     return BenchmarkArtifact(
         artefact_schema_version="1.0.0",
         run_id=f"counterfactual-baselines-{executed_at.strftime('%Y%m%dT%H%M%SZ')}",
@@ -448,9 +457,24 @@ def _build_artifact(
                         description="B3 metadata-filter needle recall@1 (same QpCoordinate compatibility filter as DSS).",
                     ),
                     "b3_real_embedding_needle_recall_at_1": MetricEntry(
-                        value=real_recall,
+                        value=real_recall_1,
                         unit="ratio",
                         description=f"B3 real embedding baseline ({PINNED_MODEL_NAME}) needle recall@1.",
+                    ),
+                    "b3_real_embedding_needle_recall_at_k": MetricEntry(
+                        value=real_recall_k,
+                        unit="ratio",
+                        description=f"B3 real embedding baseline ({PINNED_MODEL_NAME}) needle recall@{NEEDLE_TOP_K}.",
+                    ),
+                    "b3_real_embedding_multihop_recall_at_1": MetricEntry(
+                        value=real_mh_recall_1,
+                        unit="ratio",
+                        description=f"B3 real embedding baseline ({PINNED_MODEL_NAME}) multi-hop recall@1.",
+                    ),
+                    "b3_real_embedding_multihop_recall_at_k": MetricEntry(
+                        value=real_mh_recall_k,
+                        unit="ratio",
+                        description=f"B3 real embedding baseline ({PINNED_MODEL_NAME}) multi-hop recall@{MULTIHOP_TOP_K}.",
                     ),
                 },
             ),
@@ -586,7 +610,7 @@ def main() -> int:
     print(f"  Metadata filter needle@1: {b3['needle']['metadata_filter_recall_at_1']:.3f}")
     real_emb = b3.get("needle", {}).get("real_embedding", {})
     if isinstance(real_emb, dict) and real_emb.get("available"):
-        print(f"  Real embedding ({PINNED_MODEL_NAME}) needle@1: {real_emb['recall_at_1']:.3f}")
+        print(f"  Real embedding ({PINNED_MODEL_NAME}) needle@1: {real_emb['recall_at_1']:.3f} @{NEEDLE_TOP_K}: {real_emb['recall_at_k']:.3f}")
     else:
         reason = real_emb.get("reason", "unknown") if isinstance(real_emb, dict) else "unknown"
         print(f"  Real embedding: unavailable ({reason})")

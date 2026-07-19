@@ -1,15 +1,15 @@
 {
   "artefact_schema_version": "1.0.0",
-  "run_id": "seed-distribution-needle-20260718T123630Z",
+  "run_id": "seed-distribution-needle-20260719T043606Z",
   "suite_id": "longbench-needle-seed-distribution",
   "suite_version": "v1",
-  "executed_at": "2026-07-18T12:36:30.768111Z",
+  "executed_at": "2026-07-19T04:36:06.712854Z",
   "mode": "coordinate_guided",
   "status": "partial",
   "repos": [
     {
       "name": "ds-backend-local",
-      "commit_sha": "470b1b3e74b32ad89e1dcdae7c5fa88345356316",
+      "commit_sha": "2b9161f71a14704655b2a29ddbd586ef6566f518",
       "role": "canonical_benchmark_engine",
       "required_for_run": true
     }
@@ -110,7 +110,41 @@
         "real_embedding_recall_at_1": {
           "value": 0.0,
           "unit": "ratio",
-          "description": "B3 real embedding baseline (sentence-transformers/all-MiniLM-L6-v2) needle recall@1 on first seed.",
+          "description": "B3 real embedding baseline (sentence-transformers/all-MiniLM-L6-v2) needle recall@1 across pinned seeds.",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 5
+          }
+        },
+        "real_embedding_recall_at_k": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "B3 real embedding baseline (sentence-transformers/all-MiniLM-L6-v2) needle recall@5 across pinned seeds.",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 5
+          }
+        },
+        "per_seed_real_embedding_recall_at_1": {
+          "value": "{\"193\": 0.0, \"194\": 0.0, \"195\": 0.0, \"196\": 0.0, \"197\": 0.0}",
+          "unit": "json",
+          "description": "Per-seed real embedding baseline recall@1 values.",
+          "statistics": null
+        },
+        "per_seed_real_embedding_recall_at_k": {
+          "value": "{\"193\": 0.0, \"194\": 0.0, \"195\": 0.0, \"196\": 0.0, \"197\": 0.0}",
+          "unit": "json",
+          "description": "Per-seed real embedding baseline recall@5 values.",
           "statistics": null
         }
       }
@@ -120,7 +154,7 @@
       "absence_reason": null,
       "metrics": {
         "total_runtime_ms": {
-          "value": 30356.527650001226,
+          "value": 29588.008355000056,
           "unit": "ms",
           "description": "Total harness runtime across all seeds.",
           "statistics": null
@@ -152,7 +186,7 @@
   },
   "freshness": {
     "status": "fresh",
-    "checked_at": "2026-07-18T12:36:30.768111Z",
+    "checked_at": "2026-07-19T04:36:06.712854Z",
     "max_age_hours": 24,
     "age_hours": 0.0
   },

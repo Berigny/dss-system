@@ -1,6 +1,6 @@
 # KSR-EVAL v0.4 Partition Acceptance Report
 
-**Date:** 2026-07-18  
+**Date:** 2026-07-19  
 **KSR version:** 1.3.1  
 **Validator:** KSR-VALIDATE v0.3.1  
 **Source registry SHA256:** `13ad50b5782d40692f59dcabe1dd3d64e051fa5fde90f72a6481db106dd4e9bc`  
@@ -56,8 +56,8 @@ Both `ksr-pack-domains` and `ksr-pack-steward` pass all four pack-mode gates wit
 |--------|---------|--------|------------|
 | DSS-274 | `tools/retention_smoke_test.py --dry-run` | PASS | `eval/reports/2026-07-18_126b44e5f23833e5_v0.4/retention_smoke_report.json` |
 | DSS-274 | `tools/retention_smoke_test.py --model moonshotai/kimi-k3` | Deferred | Requires `OPENROUTER_API_KEY`; ~60 live calls to verify ≥0.89 recall |
-| DSS-276 | `tools/seed_distribution_harness.py` | PASS | `eval/reports/benchmarks/seed_distribution_20260718T123630Z_470b1b3e74b3.json` + `.manifest.json` |
-| DSS-277 | `tools/counterfactual_harness.py` | PASS | `eval/reports/benchmarks/counterfactual_baselines_20260718T123613Z_470b1b3e74b3.json` + `.manifest.json` |
+| DSS-276 | `tools/seed_distribution_harness.py` | PASS | `eval/reports/benchmarks/seed_distribution_20260719T043606Z_2b9161f71a14.json` + `.manifest.json` |
+| DSS-277 | `tools/counterfactual_harness.py` | PASS | `eval/reports/benchmarks/counterfactual_baselines_20260719T043712Z_2b9161f71a14.json` + `.manifest.json` |
 | DSS-277 | `DenseRetrievalBaseline` renamed to `BoWStandInBaseline` | PASS | `apps/backend/backend/benchmarks/comparison_baselines.py` |
 | DSS-277 | Real embedding baseline (MiniLM) | PASS | `apps/backend/backend/benchmarks/real_embedding_baseline.py` |
 | DSS-277 | Metadata-filter baseline (matched-information control) | PASS | `apps/backend/backend/benchmarks/metadata_filter_baseline.py` |
@@ -70,9 +70,13 @@ Pinned seeds 193–197 on the LongBench needle harness yield:
 
 - `qp_recall@1`: mean `1.000`, CI95 `[1.000, 1.000]`, `n = 5`
 - `vector_recall@1`: mean `0.171`, per-seed distribution `0 / 0 / 0.286 / 0.286 / 0.286`
+- `real_embedding` (sentence-transformers/all-MiniLM-L6-v2) recall@1: mean `0.000`, recall@5: mean `0.000`
 
 The per-seed vector distribution is now exposed in the artifact under
-`metrics.retrieval.per_seed_vector_recall_at_1`.
+`metrics.retrieval.per_seed_vector_recall_at_1`. Per-seed real embedding
+recall@1 and recall@5 are exposed under
+`metrics.retrieval.per_seed_real_embedding_recall_at_1` and
+`metrics.retrieval.per_seed_real_embedding_recall_at_k`.
 
 ### Counterfactual shuffles
 
@@ -83,7 +87,19 @@ B3 matched-information baselines on the same small needle split:
 
 - `bow_stand_in` needle recall@1: `0.000`
 - `metadata_filter` needle recall@1: `0.333`
-- `real_embedding` (sentence-transformers/all-MiniLM-L6-v2) needle recall@1: `0.000`
+- `real_embedding` (sentence-transformers/all-MiniLM-L6-v2) needle recall@1: `0.000`, recall@5: `0.000`
+
+The embedding baseline also runs on the multi-hop split:
+
+- `real_embedding` multi-hop recall@1: `0.800`, recall@5: `1.000`
+
+The needle corpus is intentionally adversarial: the synthetic needle texts are
+not semantically related to the query text, so a dense embedding ranker returns
+`0.0` at both `@1` and `@5`. This is the expected behaviour for this synthetic
+control, not a harness failure. On the multi-hop split, where query and chain
+texts do share semantic signal, the same embedding baseline scores `0.8@1` and
+`1.0@5`. The contrast confirms that the needle baseline measures the
+coordinate-driven property of the corpus, not a general retrieval upper bound.
 
 These numbers are intentionally produced with identical structural metadata as
 the DSS retrieval path so they serve as a true control, not an upper bound.
