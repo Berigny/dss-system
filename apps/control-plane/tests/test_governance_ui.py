@@ -276,3 +276,76 @@ def test_entity_links_endpoint_adds_and_removes_links() -> None:
         dashboard_app._load_connection_lookup_context = original_load
         dashboard_app._control_plane_post = original_post
         dashboard_app._update_principal_ledger_metadata = original_update_principal
+
+
+def test_entity_links_endpoint_uses_direct_write_and_break_glass() -> None:
+    """api_control_plane_entity_links must bypass the submission queue so changes apply immediately."""
+    owner_id = "did:web:example.com:principals:alice"
+    operator_did = "did:key:z6MkOperator"
+    ledger_one = "ledger:one"
+    context = _empty_connection_context()
+    context["ledger_map"] = {
+        ledger_one: {"ledger_id": ledger_one, "display_name": "One"},
+    }
+    context["principal_map"] = {
+        owner_id: {
+            "principal_did": owner_id,
+            "display_name": "Alice",
+            "status": "active",
+            "metadata": {"ledger_id": ledger_one},
+        }
+    }
+
+    original_session = dashboard_app._control_plane_json_session
+    original_load = dashboard_app._load_connection_lookup_context
+    original_post = dashboard_app._control_plane_post
+    original_update_principal = dashboard_app._update_principal_ledger_metadata
+
+    calls: list[tuple[str, dict[str, object]]] = []
+
+    async def fake_session(request):
+        return ({"identity_vc": {"principal_did": operator_did}}, None)
+
+    async def fake_load(request, identity_card=None):
+        return context
+
+    async def fake_post(path, payload, request=None):
+        calls.append((path, dict(payload)))
+        return (200, {"relationship": payload})
+
+    async def fake_update_principal(*args, **kwargs):
+        return None
+
+    dashboard_app._control_plane_json_session = fake_session
+    dashboard_app._load_connection_lookup_context = fake_load
+    dashboard_app._control_plane_post = fake_post
+    dashboard_app._update_principal_ledger_metadata = fake_update_principal
+
+    class FakeRequest:
+        async def json(self):
+            return {
+                "owner_entity_type": "principal",
+                "owner_entity_id": owner_id,
+                "links": {"ledger": [ledger_one]},
+            }
+
+    try:
+        response = asyncio.run(
+            dashboard_app.api_control_plane_entity_links(FakeRequest())
+        )
+        assert response.status_code == 200
+        relationship_calls = [c for c in calls if c[0] == "/api/control-plane/relationships"]
+        assert len(relationship_calls) == 1
+        payload = relationship_calls[0][1]
+        assert payload.get("governance_mode") == "direct_write"
+        break_glass = payload.get("break_glass")
+        assert isinstance(break_glass, dict)
+        assert break_glass.get("actor") == operator_did
+        assert break_glass.get("reason_code") == "operator_link_edit"
+        assert "principal" in break_glass.get("scope", "")
+        assert ledger_one in break_glass.get("scope", "")
+    finally:
+        dashboard_app._control_plane_json_session = original_session
+        dashboard_app._load_connection_lookup_context = original_load
+        dashboard_app._control_plane_post = original_post
+        dashboard_app._update_principal_ledger_metadata = original_update_principal
