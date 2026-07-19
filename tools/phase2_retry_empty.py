@@ -419,6 +419,54 @@ def _finalize_aggregate(sums: dict[str, float]) -> dict[str, Any]:
     }
 
 
+def _recompute_and_save_report(
+    report: dict[str, Any],
+    arm_sums: dict[str, dict[str, float]],
+    stratum_sums: dict[tuple[str, str], dict[str, float]],
+    trials: list[dict[str, Any]],
+    attempted: int,
+    succeeded: int,
+    failed: int,
+    original_calls_made: int,
+    output_path: Path,
+) -> None:
+    """Recompute aggregates from current sums and write the report in-place."""
+    new_overall: dict[str, dict[str, Any]] = {}
+    for arm, sums in arm_sums.items():
+        new_overall[arm] = _finalize_aggregate(sums)
+    new_by_stratum: dict[str, dict[str, dict[str, Any]]] = {}
+    for (arm, stratum), sums in stratum_sums.items():
+        new_by_stratum.setdefault(arm, {})[stratum] = _finalize_aggregate(sums)
+
+    report["summary"] = {"overall": new_overall, "by_stratum": new_by_stratum}
+
+    completed = sum(1 for t in trials if "error" not in t and str(t.get("raw_response", "")).strip())
+    transport_failures = sum(1 for t in trials if t.get("transport_failure") is True)
+    retried = sum(t.get("retries", 0) for t in trials) + attempted
+    report["header"]["date"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    report["header"]["completed"] = completed
+    report["header"]["transport_failures"] = transport_failures
+    report["header"]["retried"] = retried
+    report["header"]["calls_made"] = original_calls_made + attempted
+    report["header"]["phase_r_note"] = f"Retried {attempted} empty trials; {succeeded} succeeded, {failed} failed."
+
+    attempted_total = len(trials)
+    a_agg = new_overall.get("A", {})
+    c_agg = new_overall.get("C", {})
+    report["gate"] = {
+        "completed_gte_0_95": (completed / attempted_total if attempted_total else 0.0) >= 0.95,
+        "C1_node_recall_gte_0_90": a_agg.get("node_recall_mean", 0.0) >= 0.90,
+        "C1_precision_gte_0_90": a_agg.get("precision_mean", 0.0) >= 0.90,
+        "C1_f1_gte_0_90": a_agg.get("f1_mean", 0.0) >= 0.90,
+        "C1_cosine_gte_0_85": a_agg.get("cosine_mean", 0.0) >= 0.85,
+        "C1_grammatical_fraction_gte_0_90": a_agg.get("grammatical_fraction", 0.0) >= 0.90,
+        "C2_shuffled_lt_full": c_agg.get("node_recall_mean", 1.0) < a_agg.get("node_recall_mean", 0.0),
+    }
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+
+
 async def main() -> int:
     parser = argparse.ArgumentParser(description="Phase R retry for empty phase2 trials")
     parser.add_argument("--report", type=Path, default=DEFAULT_REPORT)
@@ -451,6 +499,7 @@ async def main() -> int:
         print(f"Refreshed session token (principal {info.get('principal_did') or '?'})", file=sys.stderr)
 
     report = json.loads(args.report.read_text(encoding="utf-8"))
+    original_calls_made = report["header"].get("calls_made", 0)
     header, records = _load_corpus(args.corpus)
     id_to_record = {r["id"]: r for r in records}
     trials = report["raw_trials"]
@@ -471,6 +520,7 @@ async def main() -> int:
     attempted = 0
     succeeded = 0
     failed = 0
+    output_path = args.output or args.report
     for idx, trial in enumerate(empty_trials):
         if refresh_token and (time.time() - last_refresh_time) >= REFRESH_INTERVAL_SECONDS:
             new_session, new_refresh, info = _refresh_session_token(refresh_token, args.chat_base_url)
@@ -533,49 +583,24 @@ async def main() -> int:
         _add_metric_sums(stratum_sums[(arm, stratum)], metrics)
         succeeded += 1
         print(f"[{idx + 1}/{len(empty_trials)}] {trial['id']} {arm} r{trial['replicate']}: recall={metrics['node_recall']:.2f}")
+
+        # Save incremental progress so a crash does not lose completed trials.
+        _recompute_and_save_report(
+            report, arm_sums, stratum_sums, trials,
+            attempted, succeeded, failed, original_calls_made, output_path,
+        )
         if args.delay > 0:
             await asyncio.sleep(args.delay)
 
-    # Rebuild aggregates
-    new_overall: dict[str, dict[str, Any]] = {}
-    for arm, sums in arm_sums.items():
-        new_overall[arm] = _finalize_aggregate(sums)
-    new_by_stratum: dict[str, dict[str, dict[str, Any]]] = {}
-    for (arm, stratum), sums in stratum_sums.items():
-        new_by_stratum.setdefault(arm, {})[stratum] = _finalize_aggregate(sums)
-
-    report["summary"] = {"overall": new_overall, "by_stratum": new_by_stratum}
-
-    completed = sum(1 for t in trials if "error" not in t and str(t.get("raw_response", "")).strip())
-    transport_failures = sum(1 for t in trials if t.get("transport_failure") is True)
-    retried = sum(t.get("retries", 0) for t in trials) + attempted
-    report["header"]["date"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-    report["header"]["completed"] = completed
-    report["header"]["transport_failures"] = transport_failures
-    report["header"]["retried"] = retried
-    report["header"]["calls_made"] = report["header"].get("calls_made", 0) + attempted
-    report["header"]["phase_r_note"] = f"Retried {attempted} empty trials; {succeeded} succeeded, {failed} failed."
-
-    attempted_total = len(trials)
-    a_agg = new_overall.get("A", {})
-    c_agg = new_overall.get("C", {})
-    report["gate"] = {
-        "completed_gte_0_95": (completed / attempted_total if attempted_total else 0.0) >= 0.95,
-        "C1_node_recall_gte_0_90": a_agg.get("node_recall_mean", 0.0) >= 0.90,
-        "C1_precision_gte_0_90": a_agg.get("precision_mean", 0.0) >= 0.90,
-        "C1_f1_gte_0_90": a_agg.get("f1_mean", 0.0) >= 0.90,
-        "C1_cosine_gte_0_85": a_agg.get("cosine_mean", 0.0) >= 0.85,
-        "C1_grammatical_fraction_gte_0_90": a_agg.get("grammatical_fraction", 0.0) >= 0.90,
-        "C2_shuffled_lt_full": c_agg.get("node_recall_mean", 1.0) < a_agg.get("node_recall_mean", 0.0),
-    }
-
-    output_path = args.output or args.report
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+    # Final save and summary
+    _recompute_and_save_report(
+        report, arm_sums, stratum_sums, trials,
+        attempted, succeeded, failed, original_calls_made, output_path,
+    )
     print(f"\nUpdated report: {output_path}")
     print(f"Empty trials attempted: {attempted}, succeeded: {succeeded}, failed: {failed}")
     print("New overall aggregates:")
-    print(json.dumps(new_overall, indent=2))
+    print(json.dumps(report["summary"]["overall"], indent=2))
     print("Gates:")
     print(json.dumps(report["gate"], indent=2))
     return 0
