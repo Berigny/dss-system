@@ -498,6 +498,11 @@ async def _post_chat_smart_stream(
             return {"error": "request_failed", "detail": str(exc.reason)}
 
 
+def _save_report(report: dict[str, Any], output_path: Path) -> None:
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+
+
 async def run_delegated_kimi_decode(
     records: list[dict[str, Any]],
     registry: dict[str, Any],
@@ -506,6 +511,8 @@ async def run_delegated_kimi_decode(
     operator_id: str,
     ledger_id: str,
     surface_id: str,
+    report: dict[str, Any],
+    output_path: Path,
 ) -> list[dict[str, Any]]:
     """Run live LLM decode trials via the chat surface Kimi Code delegated principal.
 
@@ -534,12 +541,20 @@ async def run_delegated_kimi_decode(
     alphabet = build_alphabet(registry)
     registry_text = _registry_to_prompt_text(registry)
     concept_to_prime = _build_concept_to_prime(registry)
-    results: list[dict[str, Any]] = []
+    results: list[dict[str, Any]] = list(existing_results or [])
+    completed_ids = {r["id"] for r in results}
 
     REFRESH_INTERVAL_SECONDS = 2700  # refresh session token every 45 min (token TTL ~1h)
     last_refresh_time = time.time()
 
     for idx, record in enumerate(records):
+        if record["id"] in completed_ids:
+            print(
+                f"[{idx + 1}/{len(records)}] {record['id']} already completed; skipping",
+                file=sys.stderr,
+                flush=True,
+            )
+            continue
         if refresh_token and (time.time() - last_refresh_time) >= REFRESH_INTERVAL_SECONDS:
             new_session, new_refresh, info = _refresh_session_token(refresh_token, chat_base_url)
             if not new_session:
@@ -616,21 +631,22 @@ async def run_delegated_kimi_decode(
             file=sys.stderr,
             flush=True,
         )
-        results.append(
-            {
-                "id": record["id"],
-                "prompt": prompt,
-                "raw_response": raw,
-                "concepts": concepts,
-                "reconstructed_text": reconstructed,
-                "ground_truth_primes": sorted(ground_truth_primes),
-                "recovered_primes": sorted(recovered_primes),
-                "node_recall": recall,
-                "session_id": response.get("session_id"),
-                "request_id": response.get("request_id"),
-                "event_count": response.get("event_count"),
-            }
-        )
+        result = {
+            "id": record["id"],
+            "prompt": prompt,
+            "raw_response": raw,
+            "concepts": concepts,
+            "reconstructed_text": reconstructed,
+            "ground_truth_primes": sorted(ground_truth_primes),
+            "recovered_primes": sorted(recovered_primes),
+            "node_recall": recall,
+            "session_id": response.get("session_id"),
+            "request_id": response.get("request_id"),
+            "event_count": response.get("event_count"),
+        }
+        results.append(result)
+        report["live_results"] = results
+        _save_report(report, output_path)
 
     return results
 
@@ -668,39 +684,9 @@ def main() -> int:
     header, records = load_corpus(args.corpus, args.sample)
     corpus_sha = header.get("corpus_sha256", _file_sha256(args.corpus))
 
-    per_item, mean_recall = evaluate_deterministic_recall(records, core_only)
-
-    live_results: list[dict[str, Any]] | None = None
-    live_mean_recall: float | None = None
-    if not args.dry_run:
-        if args.delegated_kimi:
-            live_results = asyncio.run(
-                run_delegated_kimi_decode(
-                    records,
-                    core_only,
-                    args.chat_base_url,
-                    args.operator_did,
-                    args.operator_id,
-                    args.ledger_id,
-                    args.surface_id,
-                )
-            )
-        else:
-            live_results = asyncio.run(run_live_decode(records, core_only, args.model))
-
-        live_recalls = [
-            r.get("node_recall")
-            for r in live_results or []
-            if isinstance(r.get("node_recall"), (int, float))
-        ]
-        if live_recalls:
-            live_mean_recall = sum(live_recalls) / len(live_recalls)
-
-    gate_pass = (
-        (live_mean_recall is not None and live_mean_recall >= RECALL_GATE)
-        if not args.dry_run
-        else (mean_recall >= RECALL_GATE)
-    )
+    output_path = args.output
+    if output_path is None:
+        output_path = _default_output_dir(core_sha) / "retention_smoke_report.json"
 
     if args.dry_run:
         mode = "dry_run"
@@ -721,6 +707,18 @@ def main() -> int:
         model_value = args.model
         note = "Live decode completed under R1 transport rules."
 
+    per_item, mean_recall = evaluate_deterministic_recall(records, core_only)
+
+    # Load existing report for resume if output path already exists and mode matches.
+    existing_live_results: list[dict[str, Any]] = []
+    if output_path.exists():
+        try:
+            existing_report = json.loads(output_path.read_text(encoding="utf-8"))
+            if existing_report.get("mode") == mode and existing_report.get("corpus_sha256") == corpus_sha:
+                existing_live_results = list(existing_report.get("live_results") or [])
+        except Exception:
+            existing_live_results = []
+
     report: dict[str, Any] = {
         "report": "KSR-EVAL DSS-274 / DSS-291 retention smoke test",
         "date": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -732,21 +730,54 @@ def main() -> int:
         "corpus_sha256": corpus_sha,
         "sample_size": len(records),
         "recall_gate": RECALL_GATE,
-        "mean_node_recall": live_mean_recall if live_mean_recall is not None else mean_recall,
         "deterministic_mean_node_recall": mean_recall,
-        "gate_pass": gate_pass,
         "per_item": per_item,
-        "live_results": live_results,
+        "live_results": existing_live_results,
         "note": note,
     }
+
+    live_results: list[dict[str, Any]] | None = existing_live_results or None
+    live_mean_recall: float | None = None
+    if not args.dry_run:
+        if args.delegated_kimi:
+            live_results = asyncio.run(
+                run_delegated_kimi_decode(
+                    records,
+                    core_only,
+                    args.chat_base_url,
+                    args.operator_did,
+                    args.operator_id,
+                    args.ledger_id,
+                    args.surface_id,
+                    report,
+                    output_path,
+                )
+            )
+        else:
+            live_results = asyncio.run(run_live_decode(records, core_only, args.model))
+            report["live_results"] = live_results
+            _save_report(report, output_path)
+
+        live_recalls = [
+            r.get("node_recall")
+            for r in live_results or []
+            if isinstance(r.get("node_recall"), (int, float))
+        ]
+        if live_recalls:
+            live_mean_recall = sum(live_recalls) / len(live_recalls)
+
+    gate_pass = (
+        (live_mean_recall is not None and live_mean_recall >= RECALL_GATE)
+        if not args.dry_run
+        else (mean_recall >= RECALL_GATE)
+    )
+
+    report["mean_node_recall"] = live_mean_recall if live_mean_recall is not None else mean_recall
+    report["gate_pass"] = gate_pass
     if live_mean_recall is not None:
         report["live_mean_node_recall"] = live_mean_recall
 
-    output_path = args.output
-    if output_path is None:
-        output_path = _default_output_dir(core_sha) / "retention_smoke_report.json"
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+    _save_report(report, output_path)
 
     print(f"DSS-274/DSS-291 retention smoke test | mode: {mode}")
     print(f"Mean node recall: {report['mean_node_recall']:.3f} | gate: {RECALL_GATE}")
