@@ -536,7 +536,30 @@ async def run_delegated_kimi_decode(
     concept_to_prime = _build_concept_to_prime(registry)
     results: list[dict[str, Any]] = []
 
+    REFRESH_INTERVAL_SECONDS = 2700  # refresh session token every 45 min (token TTL ~1h)
+    last_refresh_time = time.time()
+
     for idx, record in enumerate(records):
+        if refresh_token and (time.time() - last_refresh_time) >= REFRESH_INTERVAL_SECONDS:
+            new_session, new_refresh, info = _refresh_session_token(refresh_token, chat_base_url)
+            if not new_session:
+                print(
+                    f"warning: periodic refresh failed: {info}; continuing with current token",
+                    file=sys.stderr,
+                    flush=True,
+                )
+            else:
+                session_token = new_session
+                if new_refresh:
+                    refresh_token = new_refresh
+                    os.environ["DSS_REFRESH_TOKEN"] = new_refresh
+                last_refresh_time = time.time()
+                print(
+                    f"[{idx + 1}/{len(records)}] refreshed session token",
+                    file=sys.stderr,
+                    flush=True,
+                )
+
         enc = encode_concepts(record["encode_seed"], alphabet, registry)
         factors = factorize(enc["number"])
         prompt = format_prompt(registry_text, factors)
