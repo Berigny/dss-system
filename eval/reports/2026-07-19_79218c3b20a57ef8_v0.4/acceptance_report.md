@@ -59,7 +59,7 @@ Both `ksr-pack-domains` and `ksr-pack-steward` pass all four pack-mode gates wit
 |--------|---------|--------|------------|
 | DSS-274 | `tools/retention_smoke_test.py --dry-run` | PASS | `eval/reports/2026-07-19_79218c3b20a57ef8_v0.4/retention_smoke_report.json` |
 | DSS-274 | `tools/retention_smoke_test.py --model moonshotai/kimi-k3` | Deferred | Requires `OPENROUTER_API_KEY` |
-| DSS-291 | `tools/retention_smoke_test.py --delegated-kimi` | Instrumented / deferred | Harness implemented; live run requires `DSS_SESSION_TOKEN` or `DSS_REFRESH_TOKEN` |
+| DSS-291 | `tools/retention_smoke_test.py --delegated-kimi` | PASS | `eval/reports/2026-07-19_79218c3b20a57ef8_v0.4/retention_smoke_report.json` (live mean recall 0.980) |
 | DSS-276 | `tools/seed_distribution_harness.py` | PASS | `eval/reports/benchmarks/seed_distribution_20260719T063712Z_16bcd79deceb.json` + `.manifest.json` |
 | DSS-277 | `tools/counterfactual_harness.py` | PASS | `eval/reports/benchmarks/counterfactual_baselines_20260719T064215Z_16bcd79deceb.json` + `.manifest.json` |
 | DSS-277 | `DenseRetrievalBaseline` renamed to `BoWStandInBaseline` | PASS | `apps/backend/backend/benchmarks/comparison_baselines.py` |
@@ -101,17 +101,19 @@ These numbers are intentionally produced with identical structural metadata as t
 
 ### Retention smoke test A4 gate (DSS-291)
 
-DSS-291 adds `--delegated-kimi` mode to `tools/retention_smoke_test.py`. The harness now posts each decode prompt through the chat surface smart stream using the Kimi Code delegated principal, avoiding direct OpenRouter calls and honouring the Epic 38 preference to route agent-heavy benchmarks through the Kimi Code surface identity.
+DSS-291 adds `--delegated-kimi` mode to `tools/retention_smoke_test.py`. The harness posts each decode prompt through the chat surface smart stream using the Kimi Code delegated principal, avoiding direct OpenRouter calls and honouring the Epic 38 preference to route agent-heavy benchmarks through the Kimi Code surface identity.
 
 - Deterministic dry-run recall over the 50-item sample: `1.000` (gate `>= 0.89` PASS).
-- Live delegated-kimi recall: **attempted with a placeholder session token and returned auth failure** (`auth_failed_html`) from `chat.dualsubstrate.com`. A valid `DSS_SESSION_TOKEN` or `DSS_REFRESH_TOKEN` is required to complete the live 50-call gate.
+- Live delegated-kimi recall: **0.980** (gate `>= 0.89` PASS). The run used `DSS_REFRESH_TOKEN` to keep the chat-surface session alive and saved incrementally so timeouts could be resumed.
+- Model: `moonshotai/kimi-k2.5`
+- Surface: `chat.dualsubstrate.com` / `surface:chat:primary`
 - Canonical report: `eval/reports/2026-07-19_79218c3b20a57ef8_v0.4/retention_smoke_report.json`
 
-To run the live gate once credentials are available:
+To reproduce:
 
 ```bash
-DSS_SESSION_TOKEN="<valid-token>" \
-  python3 tools/retention_smoke_test.py --delegated-kimi
+DSS_REFRESH_TOKEN="<valid-token>" \
+  python3 tools/retention_smoke_test.py --delegated-kimi --sample 50
 ```
 
 ### Public-core frame hardening (DSS-289)
