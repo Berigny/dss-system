@@ -1,0 +1,4143 @@
+{
+  "header": {
+    "report": "KSR-EVAL Phase 3/4 — adversarial, structural, and 336 check-digit checks",
+    "date": "2026-07-19T22:52:25Z",
+    "ksr_version": "1.3.1",
+    "registry_sha256": "412e0396653ce4b2b7d60145117e6aece929e01868973634ffaa332a5ac6be76",
+    "spec_version": "v0.3"
+  },
+  "gate": {
+    "C3_trap_precision_gte_0_95": true,
+    "C3_trap_recall_gte_0_90": true,
+    "perturbation_sparsity_ratio": 0.24,
+    "G-PERT_protected_detection_gte_0_95": true,
+    "G-PERT_false_rejection_eq_0": true,
+    "stripping_graceful_degradation": false,
+    "336_fail_closed_all_gates": true
+  },
+  "trap_evaluation": {
+    "total": 100,
+    "true_positives": 50,
+    "false_positives": 0,
+    "true_negatives": 50,
+    "false_negatives": 0,
+    "precision": 1.0,
+    "recall": 1.0
+  },
+  "perturbation": {
+    "samples": [
+      {
+        "base_concept": "potential",
+        "base_prime": 11,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 137,
+        "factors": {
+          "137": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "100",
+        "base_prime": 23,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 4439,
+        "factors": {
+          "23": 1,
+          "193": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "001",
+        "base_prime": 2,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 7,
+        "factors": {
+          "7": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "connection",
+        "base_prime": 5,
+        "strategy": "decrement_exponent",
+        "mutated_number": 1,
+        "factors": {},
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Mastery",
+        "base_prime": 19,
+        "strategy": "decrement_exponent",
+        "mutated_number": 1,
+        "factors": {},
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Geometric Closure",
+        "base_prime": 7,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 17,
+        "factors": {
+          "17": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Zayin",
+        "base_prime": 13,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 139,
+        "factors": {
+          "139": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Eq6",
+        "base_prime": 17,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 2159,
+        "factors": {
+          "17": 1,
+          "127": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "Recall",
+        "base_prime": 23,
+        "strategy": "increment_exponent",
+        "mutated_number": 529,
+        "factors": {
+          "23": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Origin",
+        "base_prime": 2,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 386,
+        "factors": {
+          "2": 1,
+          "193": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "Shin",
+        "base_prime": 5,
+        "strategy": "increment_exponent",
+        "mutated_number": 25,
+        "factors": {
+          "5": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "101",
+        "base_prime": 29,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 19,
+        "factors": {
+          "19": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "211",
+        "base_prime": 79,
+        "strategy": "decrement_exponent",
+        "mutated_number": 1,
+        "factors": {},
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "CLOSURE",
+        "base_prime": 7,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 763,
+        "factors": {
+          "7": 1,
+          "109": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "Recall",
+        "base_prime": 23,
+        "strategy": "increment_exponent",
+        "mutated_number": 529,
+        "factors": {
+          "23": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Coherence Norm",
+        "base_prime": 19,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 779,
+        "factors": {
+          "19": 1,
+          "41": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "Samekh",
+        "base_prime": 43,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 5,
+        "factors": {
+          "5": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Zayin",
+        "base_prime": 13,
+        "strategy": "decrement_exponent",
+        "mutated_number": 1,
+        "factors": {},
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Uniqueness",
+        "base_prime": 3,
+        "strategy": "decrement_exponent",
+        "mutated_number": 1,
+        "factors": {},
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Shin",
+        "base_prime": 5,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 635,
+        "factors": {
+          "5": 1,
+          "127": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "001",
+        "base_prime": 2,
+        "strategy": "increment_exponent",
+        "mutated_number": 4,
+        "factors": {
+          "2": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "221",
+        "base_prime": 97,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 13,
+        "factors": {
+          "13": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Mastery",
+        "base_prime": 19,
+        "strategy": "increment_exponent",
+        "mutated_number": 361,
+        "factors": {
+          "19": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "220",
+        "base_prime": 7,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 497,
+        "factors": {
+          "7": 1,
+          "71": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "constraint",
+        "base_prime": 137,
+        "strategy": "decrement_exponent",
+        "mutated_number": 1,
+        "factors": {},
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Void",
+        "base_prime": 2,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 254,
+        "factors": {
+          "2": 1,
+          "127": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "Eq1",
+        "base_prime": 3,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 213,
+        "factors": {
+          "3": 1,
+          "71": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "Shin",
+        "base_prime": 5,
+        "strategy": "increment_exponent",
+        "mutated_number": 25,
+        "factors": {
+          "5": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Coherence Norm",
+        "base_prime": 19,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 5,
+        "factors": {
+          "5": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "relaxation",
+        "base_prime": 139,
+        "strategy": "increment_exponent",
+        "mutated_number": 19321,
+        "factors": {
+          "139": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Eq1",
+        "base_prime": 3,
+        "strategy": "decrement_exponent",
+        "mutated_number": 1,
+        "factors": {},
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "121",
+        "base_prime": 53,
+        "strategy": "increment_exponent",
+        "mutated_number": 2809,
+        "factors": {
+          "53": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "potential",
+        "base_prime": 11,
+        "strategy": "increment_exponent",
+        "mutated_number": 121,
+        "factors": {
+          "11": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "State Auditor",
+        "base_prime": 17,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 1751,
+        "factors": {
+          "17": 1,
+          "103": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "Eq4",
+        "base_prime": 11,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 1661,
+        "factors": {
+          "11": 1,
+          "151": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "K4",
+        "base_prime": 11,
+        "strategy": "decrement_exponent",
+        "mutated_number": 1,
+        "factors": {},
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Mastery",
+        "base_prime": 19,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 59,
+        "factors": {
+          "59": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Grace",
+        "base_prime": 139,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 14317,
+        "factors": {
+          "103": 1,
+          "139": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "ORIGIN",
+        "base_prime": 2,
+        "strategy": "increment_exponent",
+        "mutated_number": 4,
+        "factors": {
+          "2": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Gimel",
+        "base_prime": 11,
+        "strategy": "decrement_exponent",
+        "mutated_number": 1,
+        "factors": {},
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "121",
+        "base_prime": 53,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 139,
+        "factors": {
+          "139": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Mem",
+        "base_prime": 37,
+        "strategy": "decrement_exponent",
+        "mutated_number": 1,
+        "factors": {},
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Geometric Closure",
+        "base_prime": 7,
+        "strategy": "increment_exponent",
+        "mutated_number": 49,
+        "factors": {
+          "7": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "PERSISTENCE",
+        "base_prime": 13,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 1417,
+        "factors": {
+          "13": 1,
+          "109": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "State Auditor",
+        "base_prime": 17,
+        "strategy": "decrement_exponent",
+        "mutated_number": 1,
+        "factors": {},
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "211",
+        "base_prime": 79,
+        "strategy": "increment_exponent",
+        "mutated_number": 6241,
+        "factors": {
+          "79": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "011",
+        "base_prime": 7,
+        "strategy": "decrement_exponent",
+        "mutated_number": 1,
+        "factors": {},
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Aleph",
+        "base_prime": 2,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 83,
+        "factors": {
+          "83": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Eq1",
+        "base_prime": 3,
+        "strategy": "increment_exponent",
+        "mutated_number": 9,
+        "factors": {
+          "3": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Eq3",
+        "base_prime": 7,
+        "strategy": "increment_exponent",
+        "mutated_number": 49,
+        "factors": {
+          "7": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Coupling Constant",
+        "base_prime": 11,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 1661,
+        "factors": {
+          "11": 1,
+          "151": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "Persistence Cost",
+        "base_prime": 13,
+        "strategy": "decrement_exponent",
+        "mutated_number": 1,
+        "factors": {},
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "200",
+        "base_prime": 17,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 43,
+        "factors": {
+          "43": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Gimel",
+        "base_prime": 11,
+        "strategy": "increment_exponent",
+        "mutated_number": 121,
+        "factors": {
+          "11": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "novelty",
+        "base_prime": 2,
+        "strategy": "increment_exponent",
+        "mutated_number": 4,
+        "factors": {
+          "2": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Kaf Sofit",
+        "base_prime": 79,
+        "strategy": "decrement_exponent",
+        "mutated_number": 1,
+        "factors": {},
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Eq3",
+        "base_prime": 7,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 11,
+        "factors": {
+          "11": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "121",
+        "base_prime": 53,
+        "strategy": "increment_exponent",
+        "mutated_number": 2809,
+        "factors": {
+          "53": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "novelty",
+        "base_prime": 2,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 3,
+        "factors": {
+          "3": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Action",
+        "base_prime": 7,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 1043,
+        "factors": {
+          "7": 1,
+          "149": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "Tsade Sofit",
+        "base_prime": 19,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 139,
+        "factors": {
+          "139": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "COUPLING",
+        "base_prime": 11,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 1177,
+        "factors": {
+          "11": 1,
+          "107": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "Eq5",
+        "base_prime": 13,
+        "strategy": "increment_exponent",
+        "mutated_number": 169,
+        "factors": {
+          "13": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "110",
+        "base_prime": 37,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 83,
+        "factors": {
+          "83": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Void",
+        "base_prime": 2,
+        "strategy": "decrement_exponent",
+        "mutated_number": 1,
+        "factors": {},
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "101",
+        "base_prime": 29,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 17,
+        "factors": {
+          "17": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Coupling Constant",
+        "base_prime": 11,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 79,
+        "factors": {
+          "79": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "K1",
+        "base_prime": 3,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 19,
+        "factors": {
+          "19": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "220",
+        "base_prime": 7,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 139,
+        "factors": {
+          "139": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Gimel",
+        "base_prime": 11,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 1639,
+        "factors": {
+          "11": 1,
+          "149": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "State Auditor",
+        "base_prime": 17,
+        "strategy": "decrement_exponent",
+        "mutated_number": 1,
+        "factors": {},
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "State Auditor",
+        "base_prime": 17,
+        "strategy": "increment_exponent",
+        "mutated_number": 289,
+        "factors": {
+          "17": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "CLOSURE",
+        "base_prime": 7,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 1169,
+        "factors": {
+          "7": 1,
+          "167": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "020",
+        "base_prime": 13,
+        "strategy": "increment_exponent",
+        "mutated_number": 169,
+        "factors": {
+          "13": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Eq2",
+        "base_prime": 5,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 2,
+        "factors": {
+          "2": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Zayin",
+        "base_prime": 13,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 1469,
+        "factors": {
+          "13": 1,
+          "113": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "201",
+        "base_prime": 67,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 8777,
+        "factors": {
+          "67": 1,
+          "131": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "Terminal Optimizer",
+        "base_prime": 139,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 47,
+        "factors": {
+          "47": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "K7",
+        "base_prime": 19,
+        "strategy": "increment_exponent",
+        "mutated_number": 361,
+        "factors": {
+          "19": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "K7",
+        "base_prime": 19,
+        "strategy": "decrement_exponent",
+        "mutated_number": 1,
+        "factors": {},
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Eq2",
+        "base_prime": 5,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 37,
+        "factors": {
+          "37": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Connection",
+        "base_prime": 5,
+        "strategy": "increment_exponent",
+        "mutated_number": 25,
+        "factors": {
+          "5": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Eq4",
+        "base_prime": 11,
+        "strategy": "decrement_exponent",
+        "mutated_number": 1,
+        "factors": {},
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Pe",
+        "base_prime": 53,
+        "strategy": "decrement_exponent",
+        "mutated_number": 1,
+        "factors": {},
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Mastery",
+        "base_prime": 19,
+        "strategy": "increment_exponent",
+        "mutated_number": 361,
+        "factors": {
+          "19": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "K7",
+        "base_prime": 19,
+        "strategy": "increment_exponent",
+        "mutated_number": 361,
+        "factors": {
+          "19": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Eq4",
+        "base_prime": 11,
+        "strategy": "increment_exponent",
+        "mutated_number": 121,
+        "factors": {
+          "11": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Connection",
+        "base_prime": 5,
+        "strategy": "increment_exponent",
+        "mutated_number": 25,
+        "factors": {
+          "5": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "100",
+        "base_prime": 23,
+        "strategy": "increment_exponent",
+        "mutated_number": 529,
+        "factors": {
+          "23": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "211",
+        "base_prime": 79,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 137,
+        "factors": {
+          "137": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Mem",
+        "base_prime": 37,
+        "strategy": "swap_to_random_prime",
+        "mutated_number": 2,
+        "factors": {
+          "2": 1
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "unity",
+        "base_prime": 19,
+        "strategy": "increment_exponent",
+        "mutated_number": 361,
+        "factors": {
+          "19": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "uniqueness",
+        "base_prime": 3,
+        "strategy": "increment_exponent",
+        "mutated_number": 9,
+        "factors": {
+          "3": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "221",
+        "base_prime": 97,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 10379,
+        "factors": {
+          "97": 1,
+          "107": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "122",
+        "base_prime": 59,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 11269,
+        "factors": {
+          "59": 1,
+          "191": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "Tsade Sofit",
+        "base_prime": 19,
+        "strategy": "increment_exponent",
+        "mutated_number": 361,
+        "factors": {
+          "19": 2
+        },
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "Eq9",
+        "base_prime": 139,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 18209,
+        "factors": {
+          "131": 1,
+          "139": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "021",
+        "base_prime": 17,
+        "strategy": "decrement_exponent",
+        "mutated_number": 1,
+        "factors": {},
+        "structurally_valid": true
+      },
+      {
+        "base_concept": "State Auditor",
+        "base_prime": 17,
+        "strategy": "multiply_small_prime",
+        "mutated_number": 2533,
+        "factors": {
+          "17": 1,
+          "149": 1
+        },
+        "structurally_valid": false
+      },
+      {
+        "base_concept": "autonomy",
+        "base_prime": 13,
+        "strategy": "increment_exponent",
+        "mutated_number": 169,
+        "factors": {
+          "13": 2
+        },
+        "structurally_valid": true
+      }
+    ],
+    "invalid_count": 24,
+    "sparsity_ratio": 0.24
+  },
+  "digit_edit_mutation": {
+    "baseline_detection_rate": 0.0625,
+    "protected_detection_rate": 0.99,
+    "check_only_detection_rate": 1.0,
+    "baseline": {
+      "samples": [
+        {
+          "base_number": 11,
+          "base_concept": "K4",
+          "mutated_number": 31,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "3",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 41,
+          "base_concept": "111",
+          "mutated_number": 51,
+          "flipped_position": 0,
+          "old_digit": "4",
+          "new_digit": "5",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 67,
+          "base_concept": "201",
+          "mutated_number": 57,
+          "flipped_position": 0,
+          "old_digit": "6",
+          "new_digit": "5",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 17,
+          "base_concept": "Qof",
+          "mutated_number": 47,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "4",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 13,
+          "base_concept": "Autonomy",
+          "mutated_number": 3,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "0",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 137,
+          "base_concept": "ethics",
+          "mutated_number": 135,
+          "flipped_position": 2,
+          "old_digit": "7",
+          "new_digit": "5",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 83,
+          "base_concept": "212",
+          "mutated_number": 93,
+          "flipped_position": 0,
+          "old_digit": "8",
+          "new_digit": "9",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 13,
+          "base_concept": "Persistence Cost",
+          "mutated_number": 23,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "2",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 13,
+          "base_concept": "autonomy",
+          "mutated_number": 14,
+          "flipped_position": 1,
+          "old_digit": "3",
+          "new_digit": "4",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 43,
+          "base_concept": "112",
+          "mutated_number": 63,
+          "flipped_position": 0,
+          "old_digit": "4",
+          "new_digit": "6",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 17,
+          "base_concept": "Eq6",
+          "mutated_number": 67,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "6",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 19,
+          "base_concept": "Coherence Norm",
+          "mutated_number": 13,
+          "flipped_position": 1,
+          "old_digit": "9",
+          "new_digit": "3",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 83,
+          "base_concept": "212",
+          "mutated_number": 87,
+          "flipped_position": 1,
+          "old_digit": "3",
+          "new_digit": "7",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 11,
+          "base_concept": "Potential",
+          "mutated_number": 51,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "5",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 17,
+          "base_concept": "Context",
+          "mutated_number": 18,
+          "flipped_position": 1,
+          "old_digit": "7",
+          "new_digit": "8",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 137,
+          "base_concept": "ethics",
+          "mutated_number": 337,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "3",
+          "append_336_check": false,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": false
+        },
+        {
+          "base_number": 139,
+          "base_concept": "Terminal Optimizer",
+          "mutated_number": 109,
+          "flipped_position": 1,
+          "old_digit": "3",
+          "new_digit": "0",
+          "append_336_check": false,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": false
+        },
+        {
+          "base_number": 13,
+          "base_concept": "020",
+          "mutated_number": 73,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "7",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 13,
+          "base_concept": "Persistence Cost",
+          "mutated_number": 12,
+          "flipped_position": 1,
+          "old_digit": "3",
+          "new_digit": "2",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 41,
+          "base_concept": "111",
+          "mutated_number": 43,
+          "flipped_position": 1,
+          "old_digit": "1",
+          "new_digit": "3",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 53,
+          "base_concept": "Pe",
+          "mutated_number": 23,
+          "flipped_position": 0,
+          "old_digit": "5",
+          "new_digit": "2",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 17,
+          "base_concept": "context",
+          "mutated_number": 16,
+          "flipped_position": 1,
+          "old_digit": "7",
+          "new_digit": "6",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 43,
+          "base_concept": "Samekh",
+          "mutated_number": 44,
+          "flipped_position": 1,
+          "old_digit": "3",
+          "new_digit": "4",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 13,
+          "base_concept": "K5",
+          "mutated_number": 15,
+          "flipped_position": 1,
+          "old_digit": "3",
+          "new_digit": "5",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 23,
+          "base_concept": "Recall",
+          "mutated_number": 53,
+          "flipped_position": 0,
+          "old_digit": "2",
+          "new_digit": "5",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 11,
+          "base_concept": "002",
+          "mutated_number": 16,
+          "flipped_position": 1,
+          "old_digit": "1",
+          "new_digit": "6",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 13,
+          "base_concept": "Persistence Cost",
+          "mutated_number": 17,
+          "flipped_position": 1,
+          "old_digit": "3",
+          "new_digit": "7",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 13,
+          "base_concept": "020",
+          "mutated_number": 33,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "3",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 19,
+          "base_concept": "Eq7",
+          "mutated_number": 17,
+          "flipped_position": 1,
+          "old_digit": "9",
+          "new_digit": "7",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 19,
+          "base_concept": "Tsade Sofit",
+          "mutated_number": 79,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "7",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 19,
+          "base_concept": "Coherence Norm",
+          "mutated_number": 18,
+          "flipped_position": 1,
+          "old_digit": "9",
+          "new_digit": "8",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 17,
+          "base_concept": "Eq6",
+          "mutated_number": 67,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "6",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 13,
+          "base_concept": "020",
+          "mutated_number": 93,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "9",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 13,
+          "base_concept": "020",
+          "mutated_number": 16,
+          "flipped_position": 1,
+          "old_digit": "3",
+          "new_digit": "6",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 17,
+          "base_concept": "AUDIT",
+          "mutated_number": 18,
+          "flipped_position": 1,
+          "old_digit": "7",
+          "new_digit": "8",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 13,
+          "base_concept": "Eq5",
+          "mutated_number": 53,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "5",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 11,
+          "base_concept": "012",
+          "mutated_number": 18,
+          "flipped_position": 1,
+          "old_digit": "1",
+          "new_digit": "8",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 13,
+          "base_concept": "Eq5",
+          "mutated_number": 17,
+          "flipped_position": 1,
+          "old_digit": "3",
+          "new_digit": "7",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 29,
+          "base_concept": "Kaf",
+          "mutated_number": 21,
+          "flipped_position": 1,
+          "old_digit": "9",
+          "new_digit": "1",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 17,
+          "base_concept": "State Auditor",
+          "mutated_number": 57,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "5",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 19,
+          "base_concept": "Eq7",
+          "mutated_number": 49,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "4",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 11,
+          "base_concept": "Coupling Constant",
+          "mutated_number": 61,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "6",
+          "append_336_check": false,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": false
+        },
+        {
+          "base_number": 19,
+          "base_concept": "K7",
+          "mutated_number": 13,
+          "flipped_position": 1,
+          "old_digit": "9",
+          "new_digit": "3",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 17,
+          "base_concept": "K6",
+          "mutated_number": 19,
+          "flipped_position": 1,
+          "old_digit": "7",
+          "new_digit": "9",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 23,
+          "base_concept": "100",
+          "mutated_number": 53,
+          "flipped_position": 0,
+          "old_digit": "2",
+          "new_digit": "5",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 137,
+          "base_concept": "constraint",
+          "mutated_number": 117,
+          "flipped_position": 1,
+          "old_digit": "3",
+          "new_digit": "1",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 137,
+          "base_concept": "Law",
+          "mutated_number": 134,
+          "flipped_position": 2,
+          "old_digit": "7",
+          "new_digit": "4",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 29,
+          "base_concept": "101",
+          "mutated_number": 22,
+          "flipped_position": 1,
+          "old_digit": "9",
+          "new_digit": "2",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 37,
+          "base_concept": "110",
+          "mutated_number": 67,
+          "flipped_position": 0,
+          "old_digit": "3",
+          "new_digit": "6",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 29,
+          "base_concept": "101",
+          "mutated_number": 59,
+          "flipped_position": 0,
+          "old_digit": "2",
+          "new_digit": "5",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 19,
+          "base_concept": "K7",
+          "mutated_number": 59,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "5",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 19,
+          "base_concept": "COHERENCE",
+          "mutated_number": 9,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "0",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 19,
+          "base_concept": "Coherence Norm",
+          "mutated_number": 16,
+          "flipped_position": 1,
+          "old_digit": "9",
+          "new_digit": "6",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 137,
+          "base_concept": "Law",
+          "mutated_number": 134,
+          "flipped_position": 2,
+          "old_digit": "7",
+          "new_digit": "4",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 79,
+          "base_concept": "Kaf Sofit",
+          "mutated_number": 71,
+          "flipped_position": 1,
+          "old_digit": "9",
+          "new_digit": "1",
+          "append_336_check": false,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": false
+        },
+        {
+          "base_number": 11,
+          "base_concept": "potential",
+          "mutated_number": 17,
+          "flipped_position": 1,
+          "old_digit": "1",
+          "new_digit": "7",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 41,
+          "base_concept": "111",
+          "mutated_number": 40,
+          "flipped_position": 1,
+          "old_digit": "1",
+          "new_digit": "0",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 11,
+          "base_concept": "012",
+          "mutated_number": 1,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "0",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 19,
+          "base_concept": "Tsade Sofit",
+          "mutated_number": 17,
+          "flipped_position": 1,
+          "old_digit": "9",
+          "new_digit": "7",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 19,
+          "base_concept": "Coherence Norm",
+          "mutated_number": 49,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "4",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 17,
+          "base_concept": "Eq6",
+          "mutated_number": 12,
+          "flipped_position": 1,
+          "old_digit": "7",
+          "new_digit": "2",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 19,
+          "base_concept": "Coherence Norm",
+          "mutated_number": 59,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "5",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 19,
+          "base_concept": "COHERENCE",
+          "mutated_number": 29,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "2",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        },
+        {
+          "base_number": 13,
+          "base_concept": "PERSISTENCE",
+          "mutated_number": 53,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "5",
+          "append_336_check": false,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": false
+        }
+      ],
+      "detection_rate": 0.0625,
+      "check_detection_rate": 0.0
+    },
+    "protected": {
+      "samples": [
+        {
+          "base_number": 575263,
+          "base_concept": "Eq5",
+          "mutated_number": 175263,
+          "flipped_position": 0,
+          "old_digit": "5",
+          "new_digit": "1",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 6062387,
+          "base_concept": "Law",
+          "mutated_number": 6062383,
+          "flipped_position": 6,
+          "old_digit": "7",
+          "new_digit": "3",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 88502,
+          "base_concept": "Void",
+          "mutated_number": 82502,
+          "flipped_position": 1,
+          "old_digit": "8",
+          "new_digit": "2",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 309757,
+          "base_concept": "action",
+          "mutated_number": 309157,
+          "flipped_position": 3,
+          "old_digit": "7",
+          "new_digit": "1",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 486761,
+          "base_concept": "Eq4",
+          "mutated_number": 486721,
+          "flipped_position": 4,
+          "old_digit": "6",
+          "new_digit": "2",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 221255,
+          "base_concept": "Shin",
+          "mutated_number": 821255,
+          "flipped_position": 0,
+          "old_digit": "2",
+          "new_digit": "8",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 486761,
+          "base_concept": "potential",
+          "mutated_number": 486061,
+          "flipped_position": 3,
+          "old_digit": "7",
+          "new_digit": "0",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 3230323,
+          "base_concept": "210",
+          "mutated_number": 3130323,
+          "flipped_position": 1,
+          "old_digit": "2",
+          "new_digit": "1",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 575263,
+          "base_concept": "020",
+          "mutated_number": 775263,
+          "flipped_position": 0,
+          "old_digit": "5",
+          "new_digit": "7",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 840769,
+          "base_concept": "K7",
+          "mutated_number": 800769,
+          "flipped_position": 1,
+          "old_digit": "4",
+          "new_digit": "0",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 88502,
+          "base_concept": "Origin",
+          "mutated_number": 88002,
+          "flipped_position": 2,
+          "old_digit": "5",
+          "new_digit": "0",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 840769,
+          "base_concept": "Mastery",
+          "mutated_number": 340769,
+          "flipped_position": 0,
+          "old_digit": "8",
+          "new_digit": "3",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 752267,
+          "base_concept": "200",
+          "mutated_number": 752767,
+          "flipped_position": 3,
+          "old_digit": "2",
+          "new_digit": "7",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 132753,
+          "base_concept": "Uniqueness",
+          "mutated_number": 152753,
+          "flipped_position": 1,
+          "old_digit": "3",
+          "new_digit": "5",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 309757,
+          "base_concept": "Geometric Closure",
+          "mutated_number": 109757,
+          "flipped_position": 0,
+          "old_digit": "3",
+          "new_digit": "1",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 575263,
+          "base_concept": "Persistence Cost",
+          "mutated_number": 525263,
+          "flipped_position": 1,
+          "old_digit": "7",
+          "new_digit": "2",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 309757,
+          "base_concept": "He",
+          "mutated_number": 309758,
+          "flipped_position": 5,
+          "old_digit": "7",
+          "new_digit": "8",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 486761,
+          "base_concept": "COUPLING",
+          "mutated_number": 486765,
+          "flipped_position": 5,
+          "old_digit": "1",
+          "new_digit": "5",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 221255,
+          "base_concept": "K2",
+          "mutated_number": 291255,
+          "flipped_position": 1,
+          "old_digit": "2",
+          "new_digit": "9",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 88502,
+          "base_concept": "ORIGIN",
+          "mutated_number": 78502,
+          "flipped_position": 0,
+          "old_digit": "8",
+          "new_digit": "7",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 132753,
+          "base_concept": "Boundary Operator",
+          "mutated_number": 137753,
+          "flipped_position": 2,
+          "old_digit": "2",
+          "new_digit": "7",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 132753,
+          "base_concept": "K1",
+          "mutated_number": 932753,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "9",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 486761,
+          "base_concept": "Potential",
+          "mutated_number": 486764,
+          "flipped_position": 5,
+          "old_digit": "1",
+          "new_digit": "4",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 221255,
+          "base_concept": "Shin",
+          "mutated_number": 261255,
+          "flipped_position": 1,
+          "old_digit": "2",
+          "new_digit": "6",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 486761,
+          "base_concept": "Gimel",
+          "mutated_number": 483761,
+          "flipped_position": 2,
+          "old_digit": "6",
+          "new_digit": "3",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 132753,
+          "base_concept": "K1",
+          "mutated_number": 135753,
+          "flipped_position": 2,
+          "old_digit": "2",
+          "new_digit": "5",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 752267,
+          "base_concept": "K6",
+          "mutated_number": 754267,
+          "flipped_position": 2,
+          "old_digit": "2",
+          "new_digit": "4",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 132753,
+          "base_concept": "Boundary Operator",
+          "mutated_number": 133753,
+          "flipped_position": 2,
+          "old_digit": "2",
+          "new_digit": "3",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 1814291,
+          "base_concept": "111",
+          "mutated_number": 1814191,
+          "flipped_position": 4,
+          "old_digit": "2",
+          "new_digit": "1",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 221255,
+          "base_concept": "010",
+          "mutated_number": 221295,
+          "flipped_position": 4,
+          "old_digit": "5",
+          "new_digit": "9",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 1371781,
+          "base_concept": "102",
+          "mutated_number": 9371781,
+          "flipped_position": 0,
+          "old_digit": "1",
+          "new_digit": "9",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 221255,
+          "base_concept": "connection",
+          "mutated_number": 226255,
+          "flipped_position": 2,
+          "old_digit": "1",
+          "new_digit": "6",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 309757,
+          "base_concept": "220",
+          "mutated_number": 319757,
+          "flipped_position": 1,
+          "old_digit": "0",
+          "new_digit": "1",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 752267,
+          "base_concept": "021",
+          "mutated_number": 752467,
+          "flipped_position": 3,
+          "old_digit": "2",
+          "new_digit": "4",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 2964817,
+          "base_concept": "201",
+          "mutated_number": 2964517,
+          "flipped_position": 4,
+          "old_digit": "8",
+          "new_digit": "5",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 6150889,
+          "base_concept": "RELAXATION",
+          "mutated_number": 5150889,
+          "flipped_position": 0,
+          "old_digit": "6",
+          "new_digit": "5",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 88502,
+          "base_concept": "Aleph",
+          "mutated_number": 8502,
+          "flipped_position": 0,
+          "old_digit": "8",
+          "new_digit": "0",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 6150889,
+          "base_concept": "Terminal Optimizer",
+          "mutated_number": 6150809,
+          "flipped_position": 5,
+          "old_digit": "8",
+          "new_digit": "0",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 840769,
+          "base_concept": "Mastery",
+          "mutated_number": 840669,
+          "flipped_position": 3,
+          "old_digit": "7",
+          "new_digit": "6",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 221255,
+          "base_concept": "connection",
+          "mutated_number": 221955,
+          "flipped_position": 3,
+          "old_digit": "2",
+          "new_digit": "9",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 840769,
+          "base_concept": "COHERENCE",
+          "mutated_number": 840799,
+          "flipped_position": 4,
+          "old_digit": "6",
+          "new_digit": "9",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 88502,
+          "base_concept": "001",
+          "mutated_number": 88802,
+          "flipped_position": 2,
+          "old_digit": "5",
+          "new_digit": "8",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 752267,
+          "base_concept": "021",
+          "mutated_number": 754267,
+          "flipped_position": 2,
+          "old_digit": "2",
+          "new_digit": "4",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 2964817,
+          "base_concept": "201",
+          "mutated_number": 2967817,
+          "flipped_position": 3,
+          "old_digit": "4",
+          "new_digit": "7",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 3672833,
+          "base_concept": "212",
+          "mutated_number": 3673833,
+          "flipped_position": 3,
+          "old_digit": "2",
+          "new_digit": "3",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 486761,
+          "base_concept": "COUPLING",
+          "mutated_number": 186761,
+          "flipped_position": 0,
+          "old_digit": "4",
+          "new_digit": "1",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 132753,
+          "base_concept": "Boundary Operator",
+          "mutated_number": 132733,
+          "flipped_position": 4,
+          "old_digit": "5",
+          "new_digit": "3",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 840769,
+          "base_concept": "Mastery",
+          "mutated_number": 940769,
+          "flipped_position": 0,
+          "old_digit": "8",
+          "new_digit": "9",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 2345303,
+          "base_concept": "Pe",
+          "mutated_number": 2345373,
+          "flipped_position": 5,
+          "old_digit": "0",
+          "new_digit": "7",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 221255,
+          "base_concept": "Connection",
+          "mutated_number": 221155,
+          "flipped_position": 3,
+          "old_digit": "2",
+          "new_digit": "1",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 309757,
+          "base_concept": "011",
+          "mutated_number": 389757,
+          "flipped_position": 1,
+          "old_digit": "0",
+          "new_digit": "8",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 4292347,
+          "base_concept": "221",
+          "mutated_number": 4292340,
+          "flipped_position": 6,
+          "old_digit": "7",
+          "new_digit": "0",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 3495829,
+          "base_concept": "211",
+          "mutated_number": 3495029,
+          "flipped_position": 4,
+          "old_digit": "8",
+          "new_digit": "0",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 132753,
+          "base_concept": "Eq1",
+          "mutated_number": 132757,
+          "flipped_position": 5,
+          "old_digit": "3",
+          "new_digit": "7",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 2610809,
+          "base_concept": "122",
+          "mutated_number": 2610509,
+          "flipped_position": 4,
+          "old_digit": "8",
+          "new_digit": "5",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 6062387,
+          "base_concept": "Admissibility Gate",
+          "mutated_number": 6062385,
+          "flipped_position": 6,
+          "old_digit": "7",
+          "new_digit": "5",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 6062387,
+          "base_concept": "constraint",
+          "mutated_number": 6072387,
+          "flipped_position": 2,
+          "old_digit": "6",
+          "new_digit": "7",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 309757,
+          "base_concept": "Nun Sofit",
+          "mutated_number": 409757,
+          "flipped_position": 0,
+          "old_digit": "3",
+          "new_digit": "4",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 309757,
+          "base_concept": "220",
+          "mutated_number": 329757,
+          "flipped_position": 1,
+          "old_digit": "0",
+          "new_digit": "2",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 1017773,
+          "base_concept": "recall",
+          "mutated_number": 1017473,
+          "flipped_position": 4,
+          "old_digit": "7",
+          "new_digit": "4",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 132753,
+          "base_concept": "Uniqueness",
+          "mutated_number": 162753,
+          "flipped_position": 1,
+          "old_digit": "3",
+          "new_digit": "6",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 309757,
+          "base_concept": "action",
+          "mutated_number": 399757,
+          "flipped_position": 1,
+          "old_digit": "0",
+          "new_digit": "9",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 132753,
+          "base_concept": "uniqueness",
+          "mutated_number": 132853,
+          "flipped_position": 3,
+          "old_digit": "7",
+          "new_digit": "8",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 132753,
+          "base_concept": "K1",
+          "mutated_number": 132553,
+          "flipped_position": 3,
+          "old_digit": "7",
+          "new_digit": "5",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 309757,
+          "base_concept": "K3",
+          "mutated_number": 309727,
+          "flipped_position": 4,
+          "old_digit": "5",
+          "new_digit": "2",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 4292347,
+          "base_concept": "221",
+          "mutated_number": 4293347,
+          "flipped_position": 3,
+          "old_digit": "2",
+          "new_digit": "3",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 2345303,
+          "base_concept": "121",
+          "mutated_number": 2345307,
+          "flipped_position": 6,
+          "old_digit": "3",
+          "new_digit": "7",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 221255,
+          "base_concept": "Connection",
+          "mutated_number": 229255,
+          "flipped_position": 2,
+          "old_digit": "1",
+          "new_digit": "9",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 6062387,
+          "base_concept": "CONSTRAINT",
+          "mutated_number": 9062387,
+          "flipped_position": 0,
+          "old_digit": "6",
+          "new_digit": "9",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 1637287,
+          "base_concept": "110",
+          "mutated_number": 1637787,
+          "flipped_position": 4,
+          "old_digit": "2",
+          "new_digit": "7",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 752267,
+          "base_concept": "200",
+          "mutated_number": 752207,
+          "flipped_position": 4,
+          "old_digit": "6",
+          "new_digit": "0",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 221255,
+          "base_concept": "K2",
+          "mutated_number": 241255,
+          "flipped_position": 1,
+          "old_digit": "2",
+          "new_digit": "4",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 486761,
+          "base_concept": "Potential",
+          "mutated_number": 481761,
+          "flipped_position": 2,
+          "old_digit": "6",
+          "new_digit": "1",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 575263,
+          "base_concept": "K5",
+          "mutated_number": 579263,
+          "flipped_position": 2,
+          "old_digit": "5",
+          "new_digit": "9",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 309757,
+          "base_concept": "220",
+          "mutated_number": 309157,
+          "flipped_position": 3,
+          "old_digit": "7",
+          "new_digit": "1",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 840769,
+          "base_concept": "222",
+          "mutated_number": 840729,
+          "flipped_position": 4,
+          "old_digit": "6",
+          "new_digit": "2",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 6150889,
+          "base_concept": "RELAXATION",
+          "mutated_number": 6151889,
+          "flipped_position": 3,
+          "old_digit": "0",
+          "new_digit": "1",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 752267,
+          "base_concept": "context",
+          "mutated_number": 752207,
+          "flipped_position": 4,
+          "old_digit": "6",
+          "new_digit": "0",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 221255,
+          "base_concept": "202",
+          "mutated_number": 821255,
+          "flipped_position": 0,
+          "old_digit": "2",
+          "new_digit": "8",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 575263,
+          "base_concept": "Persistence Cost",
+          "mutated_number": 575763,
+          "flipped_position": 3,
+          "old_digit": "2",
+          "new_digit": "7",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 2079797,
+          "base_concept": "120",
+          "mutated_number": 8079797,
+          "flipped_position": 0,
+          "old_digit": "2",
+          "new_digit": "8",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 88502,
+          "base_concept": "Void",
+          "mutated_number": 88532,
+          "flipped_position": 3,
+          "old_digit": "0",
+          "new_digit": "3",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 88502,
+          "base_concept": "Eq0",
+          "mutated_number": 88302,
+          "flipped_position": 2,
+          "old_digit": "5",
+          "new_digit": "3",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 6150889,
+          "base_concept": "Terminal Optimizer",
+          "mutated_number": 6350889,
+          "flipped_position": 1,
+          "old_digit": "1",
+          "new_digit": "3",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 575263,
+          "base_concept": "autonomy",
+          "mutated_number": 575262,
+          "flipped_position": 5,
+          "old_digit": "3",
+          "new_digit": "2",
+          "append_336_check": true,
+          "structurally_valid": true,
+          "check_336_valid": false,
+          "detected": false,
+          "check_detected": true
+        },
+        {
+          "base_number": 486761,
+          "base_concept": "Eq4",
+          "mutated_number": 486767,
+          "flipped_position": 5,
+          "old_digit": "1",
+          "new_digit": "7",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 575263,
+          "base_concept": "K5",
+          "mutated_number": 575663,
+          "flipped_position": 3,
+          "old_digit": "2",
+          "new_digit": "6",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 575263,
+          "base_concept": "autonomy",
+          "mutated_number": 577263,
+          "flipped_position": 2,
+          "old_digit": "5",
+          "new_digit": "7",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 752267,
+          "base_concept": "Qof",
+          "mutated_number": 752767,
+          "flipped_position": 3,
+          "old_digit": "2",
+          "new_digit": "7",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 221255,
+          "base_concept": "connection",
+          "mutated_number": 221555,
+          "flipped_position": 3,
+          "old_digit": "2",
+          "new_digit": "5",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 2079797,
+          "base_concept": "120",
+          "mutated_number": 2979797,
+          "flipped_position": 1,
+          "old_digit": "0",
+          "new_digit": "9",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 3230323,
+          "base_concept": "210",
+          "mutated_number": 3230313,
+          "flipped_position": 5,
+          "old_digit": "2",
+          "new_digit": "1",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 309757,
+          "base_concept": "action",
+          "mutated_number": 309737,
+          "flipped_position": 4,
+          "old_digit": "5",
+          "new_digit": "3",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 575263,
+          "base_concept": "Persistence Cost",
+          "mutated_number": 575260,
+          "flipped_position": 5,
+          "old_digit": "3",
+          "new_digit": "0",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 2610809,
+          "base_concept": "122",
+          "mutated_number": 2610209,
+          "flipped_position": 4,
+          "old_digit": "8",
+          "new_digit": "2",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 221255,
+          "base_concept": "K2",
+          "mutated_number": 221225,
+          "flipped_position": 4,
+          "old_digit": "5",
+          "new_digit": "2",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 3495829,
+          "base_concept": "Kaf Sofit",
+          "mutated_number": 3497829,
+          "flipped_position": 3,
+          "old_digit": "5",
+          "new_digit": "7",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 6062387,
+          "base_concept": "Eq8",
+          "mutated_number": 6262387,
+          "flipped_position": 1,
+          "old_digit": "0",
+          "new_digit": "2",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 88502,
+          "base_concept": "Void",
+          "mutated_number": 88582,
+          "flipped_position": 3,
+          "old_digit": "0",
+          "new_digit": "8",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        },
+        {
+          "base_number": 6062387,
+          "base_concept": "Eq8",
+          "mutated_number": 6062187,
+          "flipped_position": 4,
+          "old_digit": "3",
+          "new_digit": "1",
+          "append_336_check": true,
+          "structurally_valid": false,
+          "check_336_valid": false,
+          "detected": true,
+          "check_detected": true
+        }
+      ],
+      "detection_rate": 0.99,
+      "check_detection_rate": 1.0
+    }
+  },
+  "false_rejection_check": {
+    "total": 150,
+    "false_rejections": 0,
+    "false_rejection_rate": 0.0,
+    "samples": [
+      {
+        "id": "na001",
+        "semantic_number": 12,
+        "checked_number": 531012,
+        "check_valid": true
+      },
+      {
+        "id": "na002",
+        "semantic_number": 175,
+        "checked_number": 7743925,
+        "check_valid": true
+      },
+      {
+        "id": "na003",
+        "semantic_number": 1573,
+        "checked_number": 69606823,
+        "check_valid": true
+      },
+      {
+        "id": "na004",
+        "semantic_number": 6137,
+        "checked_number": 271568387,
+        "check_valid": true
+      },
+      {
+        "id": "na005",
+        "semantic_number": 362635849,
+        "checked_number": 16046998954099,
+        "check_valid": true
+      },
+      {
+        "id": "na006",
+        "semantic_number": 44,
+        "checked_number": 1947044,
+        "check_valid": true
+      },
+      {
+        "id": "na007",
+        "semantic_number": 39,
+        "checked_number": 1725789,
+        "check_valid": true
+      },
+      {
+        "id": "na008",
+        "semantic_number": 85,
+        "checked_number": 3761335,
+        "check_valid": true
+      },
+      {
+        "id": "na009",
+        "semantic_number": 133,
+        "checked_number": 5885383,
+        "check_valid": true
+      },
+      {
+        "id": "na010",
+        "semantic_number": 5424241,
+        "checked_number": 240028088491,
+        "check_valid": true
+      },
+      {
+        "id": "na011",
+        "semantic_number": 12,
+        "checked_number": 531012,
+        "check_valid": true
+      },
+      {
+        "id": "na012",
+        "semantic_number": 175,
+        "checked_number": 7743925,
+        "check_valid": true
+      },
+      {
+        "id": "na013",
+        "semantic_number": 1573,
+        "checked_number": 69606823,
+        "check_valid": true
+      },
+      {
+        "id": "na014",
+        "semantic_number": 6137,
+        "checked_number": 271568387,
+        "check_valid": true
+      },
+      {
+        "id": "na015",
+        "semantic_number": 362635849,
+        "checked_number": 16046998954099,
+        "check_valid": true
+      },
+      {
+        "id": "na016",
+        "semantic_number": 44,
+        "checked_number": 1947044,
+        "check_valid": true
+      },
+      {
+        "id": "na017",
+        "semantic_number": 39,
+        "checked_number": 1725789,
+        "check_valid": true
+      },
+      {
+        "id": "na018",
+        "semantic_number": 85,
+        "checked_number": 3761335,
+        "check_valid": true
+      },
+      {
+        "id": "na019",
+        "semantic_number": 133,
+        "checked_number": 5885383,
+        "check_valid": true
+      },
+      {
+        "id": "na020",
+        "semantic_number": 5424241,
+        "checked_number": 240028088491,
+        "check_valid": true
+      },
+      {
+        "id": "na021",
+        "semantic_number": 12,
+        "checked_number": 531012,
+        "check_valid": true
+      },
+      {
+        "id": "na022",
+        "semantic_number": 175,
+        "checked_number": 7743925,
+        "check_valid": true
+      },
+      {
+        "id": "na023",
+        "semantic_number": 1573,
+        "checked_number": 69606823,
+        "check_valid": true
+      },
+      {
+        "id": "na024",
+        "semantic_number": 6137,
+        "checked_number": 271568387,
+        "check_valid": true
+      },
+      {
+        "id": "na025",
+        "semantic_number": 362635849,
+        "checked_number": 16046998954099,
+        "check_valid": true
+      },
+      {
+        "id": "nc001",
+        "semantic_number": 4,
+        "checked_number": 177004,
+        "check_valid": true
+      },
+      {
+        "id": "nc002",
+        "semantic_number": 27,
+        "checked_number": 1194777,
+        "check_valid": true
+      },
+      {
+        "id": "nc003",
+        "semantic_number": 125,
+        "checked_number": 5531375,
+        "check_valid": true
+      },
+      {
+        "id": "nc004",
+        "semantic_number": 343,
+        "checked_number": 15178093,
+        "check_valid": true
+      },
+      {
+        "id": "nc005",
+        "semantic_number": 1331,
+        "checked_number": 58898081,
+        "check_valid": true
+      },
+      {
+        "id": "nc006",
+        "semantic_number": 2197,
+        "checked_number": 97219447,
+        "check_valid": true
+      },
+      {
+        "id": "nc007",
+        "semantic_number": 4913,
+        "checked_number": 217405163,
+        "check_valid": true
+      },
+      {
+        "id": "nc008",
+        "semantic_number": 6859,
+        "checked_number": 303517609,
+        "check_valid": true
+      },
+      {
+        "id": "nc009",
+        "semantic_number": 5617,
+        "checked_number": 248557867,
+        "check_valid": true
+      },
+      {
+        "id": "nc010",
+        "semantic_number": 139,
+        "checked_number": 6150889,
+        "check_valid": true
+      },
+      {
+        "id": "nc011",
+        "semantic_number": 4,
+        "checked_number": 177004,
+        "check_valid": true
+      },
+      {
+        "id": "nc012",
+        "semantic_number": 27,
+        "checked_number": 1194777,
+        "check_valid": true
+      },
+      {
+        "id": "nc013",
+        "semantic_number": 125,
+        "checked_number": 5531375,
+        "check_valid": true
+      },
+      {
+        "id": "nc014",
+        "semantic_number": 343,
+        "checked_number": 15178093,
+        "check_valid": true
+      },
+      {
+        "id": "nc015",
+        "semantic_number": 1331,
+        "checked_number": 58898081,
+        "check_valid": true
+      },
+      {
+        "id": "nc016",
+        "semantic_number": 2197,
+        "checked_number": 97219447,
+        "check_valid": true
+      },
+      {
+        "id": "nc017",
+        "semantic_number": 4913,
+        "checked_number": 217405163,
+        "check_valid": true
+      },
+      {
+        "id": "nc018",
+        "semantic_number": 6859,
+        "checked_number": 303517609,
+        "check_valid": true
+      },
+      {
+        "id": "nc019",
+        "semantic_number": 5617,
+        "checked_number": 248557867,
+        "check_valid": true
+      },
+      {
+        "id": "nc020",
+        "semantic_number": 139,
+        "checked_number": 6150889,
+        "check_valid": true
+      },
+      {
+        "id": "nc021",
+        "semantic_number": 4,
+        "checked_number": 177004,
+        "check_valid": true
+      },
+      {
+        "id": "nc022",
+        "semantic_number": 27,
+        "checked_number": 1194777,
+        "check_valid": true
+      },
+      {
+        "id": "nc023",
+        "semantic_number": 125,
+        "checked_number": 5531375,
+        "check_valid": true
+      },
+      {
+        "id": "nc024",
+        "semantic_number": 343,
+        "checked_number": 15178093,
+        "check_valid": true
+      },
+      {
+        "id": "nc025",
+        "semantic_number": 1331,
+        "checked_number": 58898081,
+        "check_valid": true
+      },
+      {
+        "id": "nn001",
+        "semantic_number": 548,
+        "checked_number": 24249548,
+        "check_valid": true
+      },
+      {
+        "id": "nn002",
+        "semantic_number": 411,
+        "checked_number": 18187161,
+        "check_valid": true
+      },
+      {
+        "id": "nn003",
+        "semantic_number": 3425,
+        "checked_number": 151559675,
+        "check_valid": true
+      },
+      {
+        "id": "nn004",
+        "semantic_number": 959,
+        "checked_number": 42436709,
+        "check_valid": true
+      },
+      {
+        "id": "nn005",
+        "semantic_number": 1507,
+        "checked_number": 66686257,
+        "check_valid": true
+      },
+      {
+        "id": "nn006",
+        "semantic_number": 1781,
+        "checked_number": 78811031,
+        "check_valid": true
+      },
+      {
+        "id": "nn007",
+        "semantic_number": 2329,
+        "checked_number": 103060579,
+        "check_valid": true
+      },
+      {
+        "id": "nn008",
+        "semantic_number": 2603,
+        "checked_number": 115185353,
+        "check_valid": true
+      },
+      {
+        "id": "nn009",
+        "semantic_number": 2646977,
+        "checked_number": 117131379227,
+        "check_valid": true
+      },
+      {
+        "id": "nn010",
+        "semantic_number": 556,
+        "checked_number": 24603556,
+        "check_valid": true
+      },
+      {
+        "id": "nn011",
+        "semantic_number": 548,
+        "checked_number": 24249548,
+        "check_valid": true
+      },
+      {
+        "id": "nn012",
+        "semantic_number": 411,
+        "checked_number": 18187161,
+        "check_valid": true
+      },
+      {
+        "id": "nn013",
+        "semantic_number": 3425,
+        "checked_number": 151559675,
+        "check_valid": true
+      },
+      {
+        "id": "nn014",
+        "semantic_number": 959,
+        "checked_number": 42436709,
+        "check_valid": true
+      },
+      {
+        "id": "nn015",
+        "semantic_number": 1507,
+        "checked_number": 66686257,
+        "check_valid": true
+      },
+      {
+        "id": "nn016",
+        "semantic_number": 1781,
+        "checked_number": 78811031,
+        "check_valid": true
+      },
+      {
+        "id": "nn017",
+        "semantic_number": 2329,
+        "checked_number": 103060579,
+        "check_valid": true
+      },
+      {
+        "id": "nn018",
+        "semantic_number": 2603,
+        "checked_number": 115185353,
+        "check_valid": true
+      },
+      {
+        "id": "nn019",
+        "semantic_number": 2646977,
+        "checked_number": 117131379227,
+        "check_valid": true
+      },
+      {
+        "id": "nn020",
+        "semantic_number": 556,
+        "checked_number": 24603556,
+        "check_valid": true
+      },
+      {
+        "id": "nn021",
+        "semantic_number": 548,
+        "checked_number": 24249548,
+        "check_valid": true
+      },
+      {
+        "id": "nn022",
+        "semantic_number": 411,
+        "checked_number": 18187161,
+        "check_valid": true
+      },
+      {
+        "id": "nn023",
+        "semantic_number": 3425,
+        "checked_number": 151559675,
+        "check_valid": true
+      },
+      {
+        "id": "nn024",
+        "semantic_number": 959,
+        "checked_number": 42436709,
+        "check_valid": true
+      },
+      {
+        "id": "nn025",
+        "semantic_number": 1507,
+        "checked_number": 66686257,
+        "check_valid": true
+      },
+      {
+        "id": "nq001",
+        "semantic_number": 44,
+        "checked_number": 1947044,
+        "check_valid": true
+      },
+      {
+        "id": "nq002",
+        "semantic_number": 33,
+        "checked_number": 1460283,
+        "check_valid": true
+      },
+      {
+        "id": "nq003",
+        "semantic_number": 275,
+        "checked_number": 12169025,
+        "check_valid": true
+      },
+      {
+        "id": "nq004",
+        "semantic_number": 77,
+        "checked_number": 3407327,
+        "check_valid": true
+      },
+      {
+        "id": "nq005",
+        "semantic_number": 143,
+        "checked_number": 6327893,
+        "check_valid": true
+      },
+      {
+        "id": "nq006",
+        "semantic_number": 221,
+        "checked_number": 9779471,
+        "check_valid": true
+      },
+      {
+        "id": "nq007",
+        "semantic_number": 323,
+        "checked_number": 14293073,
+        "check_valid": true
+      },
+      {
+        "id": "nq008",
+        "semantic_number": 2603,
+        "checked_number": 115185353,
+        "check_valid": true
+      },
+      {
+        "id": "nq009",
+        "semantic_number": 2608891,
+        "checked_number": 115446035641,
+        "check_valid": true
+      },
+      {
+        "id": "nq010",
+        "semantic_number": 38642,
+        "checked_number": 1709947142,
+        "check_valid": true
+      },
+      {
+        "id": "nq011",
+        "semantic_number": 44,
+        "checked_number": 1947044,
+        "check_valid": true
+      },
+      {
+        "id": "nq012",
+        "semantic_number": 33,
+        "checked_number": 1460283,
+        "check_valid": true
+      },
+      {
+        "id": "nq013",
+        "semantic_number": 275,
+        "checked_number": 12169025,
+        "check_valid": true
+      },
+      {
+        "id": "nq014",
+        "semantic_number": 77,
+        "checked_number": 3407327,
+        "check_valid": true
+      },
+      {
+        "id": "nq015",
+        "semantic_number": 143,
+        "checked_number": 6327893,
+        "check_valid": true
+      },
+      {
+        "id": "nq016",
+        "semantic_number": 221,
+        "checked_number": 9779471,
+        "check_valid": true
+      },
+      {
+        "id": "nq017",
+        "semantic_number": 323,
+        "checked_number": 14293073,
+        "check_valid": true
+      },
+      {
+        "id": "nq018",
+        "semantic_number": 2603,
+        "checked_number": 115185353,
+        "check_valid": true
+      },
+      {
+        "id": "nq019",
+        "semantic_number": 2608891,
+        "checked_number": 115446035641,
+        "check_valid": true
+      },
+      {
+        "id": "nq020",
+        "semantic_number": 38642,
+        "checked_number": 1709947142,
+        "check_valid": true
+      },
+      {
+        "id": "nq021",
+        "semantic_number": 44,
+        "checked_number": 1947044,
+        "check_valid": true
+      },
+      {
+        "id": "nq022",
+        "semantic_number": 33,
+        "checked_number": 1460283,
+        "check_valid": true
+      },
+      {
+        "id": "nq023",
+        "semantic_number": 275,
+        "checked_number": 12169025,
+        "check_valid": true
+      },
+      {
+        "id": "nq024",
+        "semantic_number": 77,
+        "checked_number": 3407327,
+        "check_valid": true
+      },
+      {
+        "id": "nq025",
+        "semantic_number": 143,
+        "checked_number": 6327893,
+        "check_valid": true
+      },
+      {
+        "id": "nr001",
+        "semantic_number": 33,
+        "checked_number": 1460283,
+        "check_valid": true
+      },
+      {
+        "id": "nr002",
+        "semantic_number": 39,
+        "checked_number": 1725789,
+        "check_valid": true
+      },
+      {
+        "id": "nr003",
+        "semantic_number": 187,
+        "checked_number": 8274937,
+        "check_valid": true
+      },
+      {
+        "id": "nr004",
+        "semantic_number": 247,
+        "checked_number": 10929997,
+        "check_valid": true
+      },
+      {
+        "id": "nr005",
+        "semantic_number": 2329,
+        "checked_number": 103060579,
+        "check_valid": true
+      },
+      {
+        "id": "nr006",
+        "semantic_number": 2641,
+        "checked_number": 116866891,
+        "check_valid": true
+      },
+      {
+        "id": "nr007",
+        "semantic_number": 2608891,
+        "checked_number": 115446035641,
+        "check_valid": true
+      },
+      {
+        "id": "nr008",
+        "semantic_number": 76,
+        "checked_number": 3363076,
+        "check_valid": true
+      },
+      {
+        "id": "nr009",
+        "semantic_number": 77,
+        "checked_number": 3407327,
+        "check_valid": true
+      },
+      {
+        "id": "nr010",
+        "semantic_number": 325,
+        "checked_number": 14381575,
+        "check_valid": true
+      },
+      {
+        "id": "nr011",
+        "semantic_number": 33,
+        "checked_number": 1460283,
+        "check_valid": true
+      },
+      {
+        "id": "nr012",
+        "semantic_number": 39,
+        "checked_number": 1725789,
+        "check_valid": true
+      },
+      {
+        "id": "nr013",
+        "semantic_number": 187,
+        "checked_number": 8274937,
+        "check_valid": true
+      },
+      {
+        "id": "nr014",
+        "semantic_number": 247,
+        "checked_number": 10929997,
+        "check_valid": true
+      },
+      {
+        "id": "nr015",
+        "semantic_number": 2329,
+        "checked_number": 103060579,
+        "check_valid": true
+      },
+      {
+        "id": "nr016",
+        "semantic_number": 2641,
+        "checked_number": 116866891,
+        "check_valid": true
+      },
+      {
+        "id": "nr017",
+        "semantic_number": 2608891,
+        "checked_number": 115446035641,
+        "check_valid": true
+      },
+      {
+        "id": "nr018",
+        "semantic_number": 76,
+        "checked_number": 3363076,
+        "check_valid": true
+      },
+      {
+        "id": "nr019",
+        "semantic_number": 77,
+        "checked_number": 3407327,
+        "check_valid": true
+      },
+      {
+        "id": "nr020",
+        "semantic_number": 325,
+        "checked_number": 14381575,
+        "check_valid": true
+      },
+      {
+        "id": "nr021",
+        "semantic_number": 33,
+        "checked_number": 1460283,
+        "check_valid": true
+      },
+      {
+        "id": "nr022",
+        "semantic_number": 39,
+        "checked_number": 1725789,
+        "check_valid": true
+      },
+      {
+        "id": "nr023",
+        "semantic_number": 187,
+        "checked_number": 8274937,
+        "check_valid": true
+      },
+      {
+        "id": "nr024",
+        "semantic_number": 247,
+        "checked_number": 10929997,
+        "check_valid": true
+      },
+      {
+        "id": "nr025",
+        "semantic_number": 2329,
+        "checked_number": 103060579,
+        "check_valid": true
+      },
+      {
+        "id": "nt001",
+        "semantic_number": 50,
+        "checked_number": 2212550,
+        "check_valid": true
+      },
+      {
+        "id": "nt002",
+        "semantic_number": 15,
+        "checked_number": 663765,
+        "check_valid": true
+      },
+      {
+        "id": "nt003",
+        "semantic_number": 35,
+        "checked_number": 1548785,
+        "check_valid": true
+      },
+      {
+        "id": "nt004",
+        "semantic_number": 55,
+        "checked_number": 2433805,
+        "check_valid": true
+      },
+      {
+        "id": "nt005",
+        "semantic_number": 65,
+        "checked_number": 2876315,
+        "check_valid": true
+      },
+      {
+        "id": "nt006",
+        "semantic_number": 85,
+        "checked_number": 3761335,
+        "check_valid": true
+      },
+      {
+        "id": "nt007",
+        "semantic_number": 95,
+        "checked_number": 4203845,
+        "check_valid": true
+      },
+      {
+        "id": "nt008",
+        "semantic_number": 93845,
+        "checked_number": 4152735095,
+        "check_valid": true
+      },
+      {
+        "id": "nt009",
+        "semantic_number": 96605,
+        "checked_number": 4274867855,
+        "check_valid": true
+      },
+      {
+        "id": "nt010",
+        "semantic_number": 20,
+        "checked_number": 885020,
+        "check_valid": true
+      },
+      {
+        "id": "nt011",
+        "semantic_number": 50,
+        "checked_number": 2212550,
+        "check_valid": true
+      },
+      {
+        "id": "nt012",
+        "semantic_number": 15,
+        "checked_number": 663765,
+        "check_valid": true
+      },
+      {
+        "id": "nt013",
+        "semantic_number": 35,
+        "checked_number": 1548785,
+        "check_valid": true
+      },
+      {
+        "id": "nt014",
+        "semantic_number": 55,
+        "checked_number": 2433805,
+        "check_valid": true
+      },
+      {
+        "id": "nt015",
+        "semantic_number": 65,
+        "checked_number": 2876315,
+        "check_valid": true
+      },
+      {
+        "id": "nt016",
+        "semantic_number": 85,
+        "checked_number": 3761335,
+        "check_valid": true
+      },
+      {
+        "id": "nt017",
+        "semantic_number": 95,
+        "checked_number": 4203845,
+        "check_valid": true
+      },
+      {
+        "id": "nt018",
+        "semantic_number": 93845,
+        "checked_number": 4152735095,
+        "check_valid": true
+      },
+      {
+        "id": "nt019",
+        "semantic_number": 96605,
+        "checked_number": 4274867855,
+        "check_valid": true
+      },
+      {
+        "id": "nt020",
+        "semantic_number": 20,
+        "checked_number": 885020,
+        "check_valid": true
+      },
+      {
+        "id": "nt021",
+        "semantic_number": 50,
+        "checked_number": 2212550,
+        "check_valid": true
+      },
+      {
+        "id": "nt022",
+        "semantic_number": 15,
+        "checked_number": 663765,
+        "check_valid": true
+      },
+      {
+        "id": "nt023",
+        "semantic_number": 35,
+        "checked_number": 1548785,
+        "check_valid": true
+      },
+      {
+        "id": "nt024",
+        "semantic_number": 55,
+        "checked_number": 2433805,
+        "check_valid": true
+      },
+      {
+        "id": "nt025",
+        "semantic_number": 65,
+        "checked_number": 2876315,
+        "check_valid": true
+      }
+    ]
+  },
+  "stripping_degradation": {
+    "priority_scores": [
+      0.6666666666666666,
+      0.6666666666666666,
+      0.6666666666666666
+    ],
+    "random_avg_scores": [
+      0.9266666666666665,
+      0.7866666666666668,
+      0.666666666666667
+    ],
+    "priority_mean": 0.6666666666666666,
+    "random_mean": 0.7933333333333334,
+    "graceful_degradation": false
+  },
+  "guard_drill": {
+    "per_gate": [
+      {
+        "gate": "awareness",
+        "prime": 17,
+        "zeroed_state_number": 1,
+        "level_0_action": "POISON_PILL",
+        "fail_closed": true
+      },
+      {
+        "gate": "unity",
+        "prime": 19,
+        "zeroed_state_number": 1,
+        "level_0_action": "POISON_PILL",
+        "fail_closed": true
+      },
+      {
+        "gate": "ethics",
+        "prime": 137,
+        "zeroed_state_number": 1,
+        "level_0_action": "POISON_PILL",
+        "fail_closed": true
+      }
+    ],
+    "non_compensatory": [
+      {
+        "zeroed_gate": "awareness",
+        "number": 17636910227,
+        "factors": {
+          "19": 3,
+          "137": 3
+        },
+        "zeroed_factor_missing": true
+      },
+      {
+        "zeroed_gate": "unity",
+        "number": 12633057289,
+        "factors": {
+          "17": 3,
+          "137": 3
+        },
+        "zeroed_factor_missing": true
+      },
+      {
+        "zeroed_gate": "ethics",
+        "number": 33698267,
+        "factors": {
+          "17": 3,
+          "19": 3
+        },
+        "zeroed_factor_missing": true
+      }
+    ],
+    "all_fail_closed": true
+  }
+}

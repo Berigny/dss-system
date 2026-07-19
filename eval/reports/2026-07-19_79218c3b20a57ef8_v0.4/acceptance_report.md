@@ -174,10 +174,19 @@ Benchmark artifacts use `status: "partial"`. In this release that means the **tr
 
 `eval/reports/2026-07-19_79218c3b20a57ef8_v0.4/build_manifest.json`
 
+## Adversarial / check-digit checks
+
+`tools/eval_adversarial.py` was run against `ksr-core 1.3.1`:
+
+- Lattice-path trap adjudication: precision **1.00**, recall **1.00**
+- Digit-edit mutation detection: baseline structural check **6.25%**; with the 336-derived check-digit appended, **99%** (check-only **100%**)
+- 336 guard drill: fail-closed on all corrupted gates
+- Report: `eval/reports/2026-07-19_79218c3b20a57ef8_v0.4/adversarial_check.json`
+
 ## Backend test suite
 
 `apps/backend` pytest run: **1246 passed** against the `ksr-core` runtime registry.
 
 ## Sign-off
 
-Partitioner, validators, and KSR-EVAL v0.4 benchmark harnesses are accepted. The A4 live retention gate is instrumented and ready to run as soon as a DSS session token is supplied.
+Partitioner, validators, and KSR-EVAL v0.4 benchmark harnesses are accepted. The A4 live retention gate was executed via delegated Kimi and passed with mean recall **0.980**.

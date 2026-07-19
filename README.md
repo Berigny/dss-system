@@ -92,7 +92,7 @@ All figures derive from **synthetic micro-corpora**, reported as distributions a
 |---|---|---|---|
 | Needle, adversarial corpus | **1.00** recall@1 | real MiniLM (all-MiniLM-L6-v2): 0.171@1, 0.40@k · metadata filter: 1.00 | On corpora built to defeat lexical retrieval, structural filtering holds where embeddings fail. A plain metadata filter ties DSS here — on these corpora the geometry's edge over filtering is not yet differentiated (v0.5 adds compatible-but-wrong distractors). |
 | Multi-hop synthetic | **1.00** full-chain@5 | real MiniLM: 1.00 | Parity. No differentiation claimed on this corpus. |
-| Counterfactual shuffles | texts-shuffled: 1.00 · coords-shuffled: 0.00 | — | Confirms current retrieval is coordinate-driven, exactly as [issue #1](https://github.com/Berigny/dss-system/issues/1) diagnosed. Label-blind ingestion is the fix in flight. |
+| Counterfactual shuffles | needle texts-shuffled: 1.00 · needle coords-shuffled: 0.00 | — | Confirms current needle retrieval is coordinate-driven, exactly as [issue #1](https://github.com/Berigny/dss-system/issues/1) diagnosed. Label-blind ingestion is the fix in flight. |
 
 The KSR kernel additionally ships a 16-gate self-validation suite (`tools/ksr_validate.py`): **16/16 PASS** on `ksr-core 1.3.1`; adversarial trap adjudication precision/recall 1.0; non-compensatory governance gates fail closed; invariant check-digit detects 98–100% of corruptions (6% without it); live model retention smoke **0.980** on `ksr-core` alone. Full evidence chain in `eval/`.
 

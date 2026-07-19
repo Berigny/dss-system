@@ -29,12 +29,12 @@ claims:
 
   - id: C03
     source: README.md
-    quote: "Multi-hop full-chain@5 100%"
-    claim: Multi-hop retrieval achieves full-chain@5 of 100%.
-    harness: apps/backend/backend/benchmarks/comparison_benchmark.py
-    measurement: full-chain@5 on multi-hop synthetic corpora
-    status: pending
-    evidence: issue #1
+    quote: "Multi-hop synthetic | **1.00** full-chain@5 | real MiniLM: 1.00"
+    claim: Multi-hop retrieval achieves full-chain@5 of 1.00 on a synthetic corpus; the real MiniLM comparator also scores 1.00 on this corpus (parity, no differentiation claimed).
+    harness: tools/counterfactual_harness.py
+    measurement: multihop_original_qp_chain_recall
+    status: supported
+    evidence: eval/reports/benchmarks/counterfactual_baselines_20260719T064215Z_16bcd79deceb.json
 
   - id: C04
     source: README.md
@@ -107,5 +107,50 @@ claims:
     measurement: Node recall on 900 completed Phase 2 decode trials
     status: supported
     evidence: eval/reports/2026-07-17_6b0fb395_v0.2/phase2_report_v0.2.json
+
+  - id: C12
+    source: README.md
+    quote: "Needle, adversarial corpus | **1.00** recall@1 | real MiniLM (all-MiniLM-L6-v2): 0.171@1, 0.40@k · metadata filter: 1.00"
+    claim: On an adversarial needle corpus, DSS achieves recall@1 of 1.00; real MiniLM scores 0.171@1 and 0.40@k; metadata filter scores 1.00.
+    harness: tools/seed_distribution_harness.py
+    measurement: qp_recall_at_1, real_embedding_recall_at_1, real_embedding_recall_at_k, metadata_filter_recall_at_1
+    status: supported
+    evidence: eval/reports/benchmarks/seed_distribution_20260719T063712Z_16bcd79deceb.json
+
+  - id: C13
+    source: README.md
+    quote: "needle texts-shuffled: 1.00 · needle coords-shuffled: 0.00"
+    claim: On the needle counterfactual shuffle test, DSS recall@1 remains 1.00 when text distractors are shuffled and drops to 0.00 when coordinates are shuffled.
+    harness: tools/counterfactual_harness.py
+    measurement: needle_shuffle_texts_qp_recall_at_1, needle_shuffle_coords_qp_recall_at_1
+    status: supported
+    evidence: eval/reports/benchmarks/counterfactual_baselines_20260719T064215Z_16bcd79deceb.json
+
+  - id: C14
+    source: README.md
+    quote: "adversarial trap adjudication precision/recall 1.0"
+    claim: Adversarial lattice-path trap adjudication achieves precision 1.0 and recall 1.0.
+    harness: tools/eval_adversarial.py
+    measurement: trap_evaluation precision and recall
+    status: supported
+    evidence: eval/reports/2026-07-19_79218c3b20a57ef8_v0.4/adversarial_check.json
+
+  - id: C15
+    source: README.md
+    quote: "invariant check-digit detects 98–100% of corruptions (6% without it)"
+    claim: The 336-derived check-digit detects 98–100% of digit-edit corruptions when appended; the baseline structural check detects approximately 6%.
+    harness: tools/eval_adversarial.py
+    measurement: digit_edit_mutation baseline_detection_rate and protected_detection_rate
+    status: supported
+    evidence: eval/reports/2026-07-19_79218c3b20a57ef8_v0.4/adversarial_check.json
+
+  - id: C16
+    source: README.md
+    quote: "live model retention smoke **0.980** on `ksr-core` alone"
+    claim: Live delegated-kimi retention smoke test on the ksr-core registry achieves mean node recall of 0.980.
+    harness: tools/retention_smoke_test.py --delegated-kimi
+    measurement: live_mean_node_recall
+    status: supported
+    evidence: eval/reports/2026-07-19_79218c3b20a57ef8_v0.4/retention_smoke_report.json
 
 unknown_claims_policy: fail_ci

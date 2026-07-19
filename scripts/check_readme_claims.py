@@ -70,9 +70,28 @@ def _significant_words(text: str) -> set[str]:
 
 
 def extract_claim_sentences(readme_text: str) -> list[str]:
-    """Split README into sentences and return those that look like claims."""
+    """Split README into sentences and return those that look like claims.
+
+    Markdown tables are removed first because their rows contain many numbers
+    and benchmarks in tabular form; their claims should be registered through
+    the surrounding prose instead.
+    """
+    # Remove markdown tables (any block of lines starting with '|').
+    cleaned_lines: list[str] = []
+    in_table = False
+    for line in readme_text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("|"):
+            in_table = True
+            continue
+        if in_table and not stripped:
+            in_table = False
+            continue
+        cleaned_lines.append(line)
+    cleaned_text = "\n".join(cleaned_lines)
+
     sentences: list[str] = []
-    for raw in re.split(r"(?<=[.!?])\s+", readme_text):
+    for raw in re.split(r"(?<=[.!?])\s+", cleaned_text):
         sentence = raw.strip()
         if not sentence:
             continue
