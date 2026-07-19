@@ -666,7 +666,7 @@ class APIClient:
     ) -> list[dict[str, Any]]:
         """Fetch active principals authorized for a ledger."""
         safe_ledger = httpx.URL(path=f"/{ledger_id}").path.lstrip("/")
-        url = f"{self.base_url}/control-plane/ledger-principals"
+        url = f"{self.base_url}/api/control-plane/ledger-principals"
         params = {"ledger_id": safe_ledger}
         headers = self._request_headers(auth_headers=auth_headers)
         admin_token = (os.getenv("ADMIN_TOKEN") or os.getenv("TRUST_ANCHOR_ADMIN_TOKEN") or "").strip()
