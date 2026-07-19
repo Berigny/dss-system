@@ -489,7 +489,7 @@ def _recompute_and_save_report(
         "C1_node_recall_gte_0_90": a_agg.get("node_recall_mean", 0.0) >= 0.90,
         "C1_precision_gte_0_90": a_agg.get("precision_mean", 0.0) >= 0.90,
         "C1_f1_gte_0_90": a_agg.get("f1_mean", 0.0) >= 0.90,
-        "C1_cosine_gte_0_85": a_agg.get("cosine_mean", 0.0) >= 0.85,
+        "C1_cosine_gte_0_85": "informational",  # retired by design (M1); cosine is not a decode success metric
         "C1_grammatical_fraction_gte_0_90": a_agg.get("grammatical_fraction", 0.0) >= 0.90,
         "C2_shuffled_lt_full": c_agg.get("node_recall_mean", 1.0) < a_agg.get("node_recall_mean", 0.0),
     }

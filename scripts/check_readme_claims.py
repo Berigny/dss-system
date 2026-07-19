@@ -26,7 +26,7 @@ CLAIM_PATTERNS = (
     r"full-chain@\d+",
     r"\b\d+(?:\.\d+)?%",
     r"O\([^)]+\)",
-    r"\d+/\d+\s+(?:gates|pass)",
+    r"\d+/\d+\s+(?:gates|pass|completed)",
     r"zero\s+(?:false|rejections|hits)",
     r"abstains?\s+rather\s+than\s+guesses",
     r"deterministic\s+(?:encode|decode|round-trip|recall)",
@@ -34,6 +34,7 @@ CLAIM_PATTERNS = (
     r"checksum\s+invariant",
     r"quaternary-gate",
     r"swap\s+models",
+    r"node\s+recall",
 )
 
 

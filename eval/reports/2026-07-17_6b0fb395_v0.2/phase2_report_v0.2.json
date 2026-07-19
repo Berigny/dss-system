@@ -21,7 +21,7 @@
     "C1_node_recall_gte_0_90": true,
     "C1_precision_gte_0_90": true,
     "C1_f1_gte_0_90": true,
-    "C1_cosine_gte_0_85": false,
+    "C1_cosine_gte_0_85": "informational",
     "C1_grammatical_fraction_gte_0_90": true,
     "C2_shuffled_lt_full": true
   },

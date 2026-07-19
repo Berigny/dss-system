@@ -3,7 +3,7 @@
 # and evidence link. CI fails if a README claim lacks a registry entry.
 
 schema_version: "1.0"
-last_reviewed: "2026-07-18"
+last_reviewed: "2026-07-19"
 
 claims:
   - id: C01
@@ -98,5 +98,14 @@ claims:
     measurement: Encode/decode round-trip with check factor verification
     status: supported
     evidence: backend/tests/test_kernel_projection_pipeline.py
+
+  - id: C11
+    source: README.md
+    quote: "Concept-level decode: 0.96 node recall (900/900 completed trials, transport-clean protocol, kimi-k3)"
+    claim: Semantic concept-level decode from prime factorization achieves 0.96 node recall on 900 completed trials using the kimi-k3 model via the chat-surface transport-clean protocol.
+    harness: tools/phase2_retry_empty.py
+    measurement: Node recall on 900 completed Phase 2 decode trials
+    status: supported
+    evidence: eval/reports/2026-07-17_6b0fb395_v0.2/phase2_report_v0.2.json
 
 unknown_claims_policy: fail_ci

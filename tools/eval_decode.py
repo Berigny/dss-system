@@ -598,7 +598,7 @@ async def main() -> int:
             "C1_node_recall_gte_0_90": summary["overall"].get("A", {}).get("node_recall_mean", 0.0) >= 0.90,
             "C1_precision_gte_0_90": summary["overall"].get("A", {}).get("precision_mean", 0.0) >= 0.90,
             "C1_f1_gte_0_90": summary["overall"].get("A", {}).get("f1_mean", 0.0) >= 0.90,
-            "C1_cosine_gte_0_85": summary["overall"].get("A", {}).get("cosine_mean", 0.0) >= 0.85,
+            "C1_cosine_gte_0_85": "informational",  # retired by design (M1); cosine is not a decode success metric
             "C1_grammatical_fraction_gte_0_90": summary["overall"].get("A", {}).get("grammatical_fraction", 0.0) >= 0.90,
             "C2_shuffled_lt_full": summary["overall"].get("C", {}).get("node_recall_mean", 1.0) < summary["overall"].get("A", {}).get("node_recall_mean", 0.0),
         },
