@@ -1,0 +1,1296 @@
+{
+  "artefact_schema_version": "1.0.0",
+  "run_id": "dss294-bm25-ranking-aggregate-20260720T081139Z",
+  "suite_id": "dss294-bm25-ranking",
+  "suite_version": "v1",
+  "executed_at": "2026-07-20T08:11:39.316207Z",
+  "mode": "baseline_dense",
+  "status": "success",
+  "repos": [
+    {
+      "name": "ds-backend-local",
+      "commit_sha": "413e31cbde2800e6934fb88dc12174cd1f51e3c3",
+      "role": "canonical_benchmark_engine",
+      "required_for_run": true
+    }
+  ],
+  "datasets": [
+    {
+      "name": "longbench_needle_synthetic_v1",
+      "version": "v1",
+      "split": "benchmark",
+      "record_count": 1
+    }
+  ],
+  "metrics": {
+    "cost": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "bm25_token_cost": {
+          "value": 143.0,
+          "unit": "tokens",
+          "description": "bm25 estimated token cost.",
+          "statistics": {
+            "mean": 143.0,
+            "standard_deviation": 0.0,
+            "min": 143.0,
+            "max": 143.0,
+            "ci_95_low": 143.0,
+            "ci_95_high": 143.0,
+            "sample_count": 1
+          }
+        },
+        "bow_stand_in_token_cost": {
+          "value": 177.0,
+          "unit": "tokens",
+          "description": "bow_stand_in estimated token cost.",
+          "statistics": {
+            "mean": 177.0,
+            "standard_deviation": 0.0,
+            "min": 177.0,
+            "max": 177.0,
+            "ci_95_low": 177.0,
+            "ci_95_high": 177.0,
+            "sample_count": 1
+          }
+        },
+        "dss_qp_router_token_cost": {
+          "value": 0.0,
+          "unit": "tokens",
+          "description": "dss_qp_router estimated token cost.",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 1
+          }
+        },
+        "embedding_queries": {
+          "value": 1.0,
+          "unit": "count",
+          "description": "Number of query embeddings computed.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_token_cost": {
+          "value": 175.0,
+          "unit": "tokens",
+          "description": "hnsw_dense estimated token cost.",
+          "statistics": {
+            "mean": 175.0,
+            "standard_deviation": 0.0,
+            "min": 175.0,
+            "max": 175.0,
+            "ci_95_low": 175.0,
+            "ci_95_high": 175.0,
+            "sample_count": 1
+          }
+        },
+        "metadata_filter_token_cost": {
+          "value": 175.0,
+          "unit": "tokens",
+          "description": "metadata_filter estimated token cost.",
+          "statistics": {
+            "mean": 175.0,
+            "standard_deviation": 0.0,
+            "min": 175.0,
+            "max": 175.0,
+            "ci_95_low": 175.0,
+            "ci_95_high": 175.0,
+            "sample_count": 1
+          }
+        },
+        "real_embedding_token_cost": {
+          "value": 10.0,
+          "unit": "tokens",
+          "description": "real_embedding estimated token cost.",
+          "statistics": {
+            "mean": 10.0,
+            "standard_deviation": 0.0,
+            "min": 10.0,
+            "max": 10.0,
+            "ci_95_low": 10.0,
+            "ci_95_high": 10.0,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "governance": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "dss_no_fabricated_rankings": {
+          "value": 1.0,
+          "unit": "boolean",
+          "description": "DSS does not fabricate rankings for metrics it cannot produce.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "latency": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "bm25_avg_latency_ms": {
+          "value": 0.3870250075124204,
+          "unit": "ms",
+          "description": "bm25 average latency per query.",
+          "statistics": {
+            "mean": 0.3870250075124204,
+            "standard_deviation": 0.0,
+            "min": 0.3870250075124204,
+            "max": 0.3870250075124204,
+            "ci_95_low": 0.3870250075124204,
+            "ci_95_high": 0.3870250075124204,
+            "sample_count": 1
+          }
+        },
+        "bow_stand_in_avg_latency_ms": {
+          "value": 0.35509001463651657,
+          "unit": "ms",
+          "description": "bow_stand_in average latency per query.",
+          "statistics": {
+            "mean": 0.35509001463651657,
+            "standard_deviation": 0.0,
+            "min": 0.35509001463651657,
+            "max": 0.35509001463651657,
+            "ci_95_low": 0.35509001463651657,
+            "ci_95_high": 0.35509001463651657,
+            "sample_count": 1
+          }
+        },
+        "dss_qp_router_avg_latency_ms": {
+          "value": 0.06778602255508304,
+          "unit": "ms",
+          "description": "dss_qp_router average latency per query.",
+          "statistics": {
+            "mean": 0.06778602255508304,
+            "standard_deviation": 0.0,
+            "min": 0.06778602255508304,
+            "max": 0.06778602255508304,
+            "ci_95_low": 0.06778602255508304,
+            "ci_95_high": 0.06778602255508304,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_avg_latency_ms": {
+          "value": 9.133193001616746,
+          "unit": "ms",
+          "description": "hnsw_dense average latency per query.",
+          "statistics": {
+            "mean": 9.133193001616746,
+            "standard_deviation": 0.0,
+            "min": 9.133193001616746,
+            "max": 9.133193001616746,
+            "ci_95_low": 9.133193001616746,
+            "ci_95_high": 9.133193001616746,
+            "sample_count": 1
+          }
+        },
+        "metadata_filter_avg_latency_ms": {
+          "value": 0.0777060049585998,
+          "unit": "ms",
+          "description": "metadata_filter average latency per query.",
+          "statistics": {
+            "mean": 0.0777060049585998,
+            "standard_deviation": 0.0,
+            "min": 0.0777060049585998,
+            "max": 0.0777060049585998,
+            "ci_95_low": 0.0777060049585998,
+            "ci_95_high": 0.0777060049585998,
+            "sample_count": 1
+          }
+        },
+        "real_embedding_avg_latency_ms": {
+          "value": 0.027021043933928013,
+          "unit": "ms",
+          "description": "real_embedding average latency per query.",
+          "statistics": {
+            "mean": 0.027021043933928013,
+            "standard_deviation": 0.0,
+            "min": 0.027021043933928013,
+            "max": 0.027021043933928013,
+            "ci_95_low": 0.027021043933928013,
+            "ci_95_high": 0.027021043933928013,
+            "sample_count": 1
+          }
+        },
+        "total_runtime_ms": {
+          "value": 15.676687995437533,
+          "unit": "ms",
+          "description": "Total harness runtime.",
+          "statistics": {
+            "mean": 15.676687995437533,
+            "standard_deviation": 0.0,
+            "min": 15.676687995437533,
+            "max": 15.676687995437533,
+            "ci_95_low": 15.676687995437533,
+            "ci_95_high": 15.676687995437533,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "retrieval": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "bm25_mrr": {
+          "value": 0.3333333333333333,
+          "unit": "ratio",
+          "description": "bm25 mean reciprocal rank.",
+          "statistics": {
+            "mean": 0.3333333333333333,
+            "standard_deviation": 0.0,
+            "min": 0.3333333333333333,
+            "max": 0.3333333333333333,
+            "ci_95_low": 0.3333333333333333,
+            "ci_95_high": 0.3333333333333333,
+            "sample_count": 1
+          }
+        },
+        "bm25_ndcg_at_1": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "bm25 NDCG at rank 1.",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 1
+          }
+        },
+        "bm25_ndcg_at_2": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "bm25 NDCG at rank 2.",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 1
+          }
+        },
+        "bm25_ndcg_at_3": {
+          "value": 0.5,
+          "unit": "ratio",
+          "description": "bm25 NDCG at rank 3.",
+          "statistics": {
+            "mean": 0.5,
+            "standard_deviation": 0.0,
+            "min": 0.5,
+            "max": 0.5,
+            "ci_95_low": 0.5,
+            "ci_95_high": 0.5,
+            "sample_count": 1
+          }
+        },
+        "bm25_ndcg_at_4": {
+          "value": 0.5,
+          "unit": "ratio",
+          "description": "bm25 NDCG at rank 4.",
+          "statistics": {
+            "mean": 0.5,
+            "standard_deviation": 0.0,
+            "min": 0.5,
+            "max": 0.5,
+            "ci_95_low": 0.5,
+            "ci_95_high": 0.5,
+            "sample_count": 1
+          }
+        },
+        "bm25_ndcg_at_5": {
+          "value": 0.5,
+          "unit": "ratio",
+          "description": "bm25 NDCG at rank 5.",
+          "statistics": {
+            "mean": 0.5,
+            "standard_deviation": 0.0,
+            "min": 0.5,
+            "max": 0.5,
+            "ci_95_low": 0.5,
+            "ci_95_high": 0.5,
+            "sample_count": 1
+          }
+        },
+        "bm25_p_at_1": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "bm25 precision at rank 1.",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 1
+          }
+        },
+        "bm25_p_at_2": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "bm25 precision at rank 2.",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 1
+          }
+        },
+        "bm25_p_at_3": {
+          "value": 0.3333333333333333,
+          "unit": "ratio",
+          "description": "bm25 precision at rank 3.",
+          "statistics": {
+            "mean": 0.3333333333333333,
+            "standard_deviation": 0.0,
+            "min": 0.3333333333333333,
+            "max": 0.3333333333333333,
+            "ci_95_low": 0.3333333333333333,
+            "ci_95_high": 0.3333333333333333,
+            "sample_count": 1
+          }
+        },
+        "bm25_p_at_4": {
+          "value": 0.25,
+          "unit": "ratio",
+          "description": "bm25 precision at rank 4.",
+          "statistics": {
+            "mean": 0.25,
+            "standard_deviation": 0.0,
+            "min": 0.25,
+            "max": 0.25,
+            "ci_95_low": 0.25,
+            "ci_95_high": 0.25,
+            "sample_count": 1
+          }
+        },
+        "bm25_p_at_5": {
+          "value": 0.2,
+          "unit": "ratio",
+          "description": "bm25 precision at rank 5.",
+          "statistics": {
+            "mean": 0.2,
+            "standard_deviation": 0.0,
+            "min": 0.2,
+            "max": 0.2,
+            "ci_95_low": 0.2,
+            "ci_95_high": 0.2,
+            "sample_count": 1
+          }
+        },
+        "bm25_recall_at_1": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "bm25 recall at rank 1.",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 1
+          }
+        },
+        "bm25_recall_at_k": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bm25 recall within top 5.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "bow_stand_in_mrr": {
+          "value": 0.3333333333333333,
+          "unit": "ratio",
+          "description": "bow_stand_in mean reciprocal rank.",
+          "statistics": {
+            "mean": 0.3333333333333333,
+            "standard_deviation": 0.0,
+            "min": 0.3333333333333333,
+            "max": 0.3333333333333333,
+            "ci_95_low": 0.3333333333333333,
+            "ci_95_high": 0.3333333333333333,
+            "sample_count": 1
+          }
+        },
+        "bow_stand_in_ndcg_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bow_stand_in NDCG at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "bow_stand_in_ndcg_at_2": {
+          "value": 0.5,
+          "unit": "ratio",
+          "description": "bow_stand_in NDCG at rank 2.",
+          "statistics": {
+            "mean": 0.5,
+            "standard_deviation": 0.0,
+            "min": 0.5,
+            "max": 0.5,
+            "ci_95_low": 0.5,
+            "ci_95_high": 0.5,
+            "sample_count": 1
+          }
+        },
+        "bow_stand_in_ndcg_at_3": {
+          "value": 0.3333333333333333,
+          "unit": "ratio",
+          "description": "bow_stand_in NDCG at rank 3.",
+          "statistics": {
+            "mean": 0.3333333333333333,
+            "standard_deviation": 0.0,
+            "min": 0.3333333333333333,
+            "max": 0.3333333333333333,
+            "ci_95_low": 0.3333333333333333,
+            "ci_95_high": 0.3333333333333333,
+            "sample_count": 1
+          }
+        },
+        "bow_stand_in_ndcg_at_4": {
+          "value": 0.25,
+          "unit": "ratio",
+          "description": "bow_stand_in NDCG at rank 4.",
+          "statistics": {
+            "mean": 0.25,
+            "standard_deviation": 0.0,
+            "min": 0.25,
+            "max": 0.25,
+            "ci_95_low": 0.25,
+            "ci_95_high": 0.25,
+            "sample_count": 1
+          }
+        },
+        "bow_stand_in_ndcg_at_5": {
+          "value": 0.2,
+          "unit": "ratio",
+          "description": "bow_stand_in NDCG at rank 5.",
+          "statistics": {
+            "mean": 0.2,
+            "standard_deviation": 0.0,
+            "min": 0.2,
+            "max": 0.2,
+            "ci_95_low": 0.2,
+            "ci_95_high": 0.2,
+            "sample_count": 1
+          }
+        },
+        "bow_stand_in_p_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bow_stand_in precision at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "bow_stand_in_p_at_2": {
+          "value": 0.5,
+          "unit": "ratio",
+          "description": "bow_stand_in precision at rank 2.",
+          "statistics": {
+            "mean": 0.5,
+            "standard_deviation": 0.0,
+            "min": 0.5,
+            "max": 0.5,
+            "ci_95_low": 0.5,
+            "ci_95_high": 0.5,
+            "sample_count": 1
+          }
+        },
+        "bow_stand_in_p_at_3": {
+          "value": 0.3333333333333333,
+          "unit": "ratio",
+          "description": "bow_stand_in precision at rank 3.",
+          "statistics": {
+            "mean": 0.3333333333333333,
+            "standard_deviation": 0.0,
+            "min": 0.3333333333333333,
+            "max": 0.3333333333333333,
+            "ci_95_low": 0.3333333333333333,
+            "ci_95_high": 0.3333333333333333,
+            "sample_count": 1
+          }
+        },
+        "bow_stand_in_p_at_4": {
+          "value": 0.25,
+          "unit": "ratio",
+          "description": "bow_stand_in precision at rank 4.",
+          "statistics": {
+            "mean": 0.25,
+            "standard_deviation": 0.0,
+            "min": 0.25,
+            "max": 0.25,
+            "ci_95_low": 0.25,
+            "ci_95_high": 0.25,
+            "sample_count": 1
+          }
+        },
+        "bow_stand_in_p_at_5": {
+          "value": 0.2,
+          "unit": "ratio",
+          "description": "bow_stand_in precision at rank 5.",
+          "statistics": {
+            "mean": 0.2,
+            "standard_deviation": 0.0,
+            "min": 0.2,
+            "max": 0.2,
+            "ci_95_low": 0.2,
+            "ci_95_high": 0.2,
+            "sample_count": 1
+          }
+        },
+        "bow_stand_in_recall_at_1": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "bow_stand_in recall at rank 1.",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 1
+          }
+        },
+        "bow_stand_in_recall_at_k": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bow_stand_in recall within top 5.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "dss_qp_router_abstention_rate": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "dss_qp_router fraction of queries that abstained.",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 1
+          }
+        },
+        "dss_qp_router_mrr": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "dss_qp_router mean reciprocal rank.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "dss_qp_router_p_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "dss_qp_router precision at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "dss_qp_router_recall_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "dss_qp_router recall at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "dss_qp_router_recall_at_k": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "dss_qp_router recall within top 5.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_mrr": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "hnsw_dense mean reciprocal rank.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_ndcg_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "hnsw_dense NDCG at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_ndcg_at_2": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "hnsw_dense NDCG at rank 2.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_ndcg_at_3": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "hnsw_dense NDCG at rank 3.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_ndcg_at_4": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "hnsw_dense NDCG at rank 4.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_ndcg_at_5": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "hnsw_dense NDCG at rank 5.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_p_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "hnsw_dense precision at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_p_at_2": {
+          "value": 0.5,
+          "unit": "ratio",
+          "description": "hnsw_dense precision at rank 2.",
+          "statistics": {
+            "mean": 0.5,
+            "standard_deviation": 0.0,
+            "min": 0.5,
+            "max": 0.5,
+            "ci_95_low": 0.5,
+            "ci_95_high": 0.5,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_p_at_3": {
+          "value": 0.3333333333333333,
+          "unit": "ratio",
+          "description": "hnsw_dense precision at rank 3.",
+          "statistics": {
+            "mean": 0.3333333333333333,
+            "standard_deviation": 0.0,
+            "min": 0.3333333333333333,
+            "max": 0.3333333333333333,
+            "ci_95_low": 0.3333333333333333,
+            "ci_95_high": 0.3333333333333333,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_p_at_4": {
+          "value": 0.25,
+          "unit": "ratio",
+          "description": "hnsw_dense precision at rank 4.",
+          "statistics": {
+            "mean": 0.25,
+            "standard_deviation": 0.0,
+            "min": 0.25,
+            "max": 0.25,
+            "ci_95_low": 0.25,
+            "ci_95_high": 0.25,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_p_at_5": {
+          "value": 0.2,
+          "unit": "ratio",
+          "description": "hnsw_dense precision at rank 5.",
+          "statistics": {
+            "mean": 0.2,
+            "standard_deviation": 0.0,
+            "min": 0.2,
+            "max": 0.2,
+            "ci_95_low": 0.2,
+            "ci_95_high": 0.2,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_recall_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "hnsw_dense recall at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_recall_at_k": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "hnsw_dense recall within top 5.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "metadata_filter_mrr": {
+          "value": 0.3333333333333333,
+          "unit": "ratio",
+          "description": "metadata_filter mean reciprocal rank.",
+          "statistics": {
+            "mean": 0.3333333333333333,
+            "standard_deviation": 0.0,
+            "min": 0.3333333333333333,
+            "max": 0.3333333333333333,
+            "ci_95_low": 0.3333333333333333,
+            "ci_95_high": 0.3333333333333333,
+            "sample_count": 1
+          }
+        },
+        "metadata_filter_ndcg_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "metadata_filter NDCG at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "metadata_filter_ndcg_at_2": {
+          "value": 0.5,
+          "unit": "ratio",
+          "description": "metadata_filter NDCG at rank 2.",
+          "statistics": {
+            "mean": 0.5,
+            "standard_deviation": 0.0,
+            "min": 0.5,
+            "max": 0.5,
+            "ci_95_low": 0.5,
+            "ci_95_high": 0.5,
+            "sample_count": 1
+          }
+        },
+        "metadata_filter_ndcg_at_3": {
+          "value": 0.3333333333333333,
+          "unit": "ratio",
+          "description": "metadata_filter NDCG at rank 3.",
+          "statistics": {
+            "mean": 0.3333333333333333,
+            "standard_deviation": 0.0,
+            "min": 0.3333333333333333,
+            "max": 0.3333333333333333,
+            "ci_95_low": 0.3333333333333333,
+            "ci_95_high": 0.3333333333333333,
+            "sample_count": 1
+          }
+        },
+        "metadata_filter_ndcg_at_4": {
+          "value": 0.25,
+          "unit": "ratio",
+          "description": "metadata_filter NDCG at rank 4.",
+          "statistics": {
+            "mean": 0.25,
+            "standard_deviation": 0.0,
+            "min": 0.25,
+            "max": 0.25,
+            "ci_95_low": 0.25,
+            "ci_95_high": 0.25,
+            "sample_count": 1
+          }
+        },
+        "metadata_filter_ndcg_at_5": {
+          "value": 0.2,
+          "unit": "ratio",
+          "description": "metadata_filter NDCG at rank 5.",
+          "statistics": {
+            "mean": 0.2,
+            "standard_deviation": 0.0,
+            "min": 0.2,
+            "max": 0.2,
+            "ci_95_low": 0.2,
+            "ci_95_high": 0.2,
+            "sample_count": 1
+          }
+        },
+        "metadata_filter_p_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "metadata_filter precision at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "metadata_filter_p_at_2": {
+          "value": 0.5,
+          "unit": "ratio",
+          "description": "metadata_filter precision at rank 2.",
+          "statistics": {
+            "mean": 0.5,
+            "standard_deviation": 0.0,
+            "min": 0.5,
+            "max": 0.5,
+            "ci_95_low": 0.5,
+            "ci_95_high": 0.5,
+            "sample_count": 1
+          }
+        },
+        "metadata_filter_p_at_3": {
+          "value": 0.3333333333333333,
+          "unit": "ratio",
+          "description": "metadata_filter precision at rank 3.",
+          "statistics": {
+            "mean": 0.3333333333333333,
+            "standard_deviation": 0.0,
+            "min": 0.3333333333333333,
+            "max": 0.3333333333333333,
+            "ci_95_low": 0.3333333333333333,
+            "ci_95_high": 0.3333333333333333,
+            "sample_count": 1
+          }
+        },
+        "metadata_filter_p_at_4": {
+          "value": 0.25,
+          "unit": "ratio",
+          "description": "metadata_filter precision at rank 4.",
+          "statistics": {
+            "mean": 0.25,
+            "standard_deviation": 0.0,
+            "min": 0.25,
+            "max": 0.25,
+            "ci_95_low": 0.25,
+            "ci_95_high": 0.25,
+            "sample_count": 1
+          }
+        },
+        "metadata_filter_p_at_5": {
+          "value": 0.2,
+          "unit": "ratio",
+          "description": "metadata_filter precision at rank 5.",
+          "statistics": {
+            "mean": 0.2,
+            "standard_deviation": 0.0,
+            "min": 0.2,
+            "max": 0.2,
+            "ci_95_low": 0.2,
+            "ci_95_high": 0.2,
+            "sample_count": 1
+          }
+        },
+        "metadata_filter_recall_at_1": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "metadata_filter recall at rank 1.",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 1
+          }
+        },
+        "metadata_filter_recall_at_k": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "metadata_filter recall within top 5.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "real_embedding_mrr": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "real_embedding mean reciprocal rank.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "real_embedding_ndcg_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "real_embedding NDCG at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "real_embedding_ndcg_at_2": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "real_embedding NDCG at rank 2.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "real_embedding_ndcg_at_3": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "real_embedding NDCG at rank 3.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "real_embedding_ndcg_at_4": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "real_embedding NDCG at rank 4.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "real_embedding_ndcg_at_5": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "real_embedding NDCG at rank 5.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "real_embedding_p_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "real_embedding precision at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "real_embedding_p_at_2": {
+          "value": 0.5,
+          "unit": "ratio",
+          "description": "real_embedding precision at rank 2.",
+          "statistics": {
+            "mean": 0.5,
+            "standard_deviation": 0.0,
+            "min": 0.5,
+            "max": 0.5,
+            "ci_95_low": 0.5,
+            "ci_95_high": 0.5,
+            "sample_count": 1
+          }
+        },
+        "real_embedding_p_at_3": {
+          "value": 0.3333333333333333,
+          "unit": "ratio",
+          "description": "real_embedding precision at rank 3.",
+          "statistics": {
+            "mean": 0.3333333333333333,
+            "standard_deviation": 0.0,
+            "min": 0.3333333333333333,
+            "max": 0.3333333333333333,
+            "ci_95_low": 0.3333333333333333,
+            "ci_95_high": 0.3333333333333333,
+            "sample_count": 1
+          }
+        },
+        "real_embedding_p_at_4": {
+          "value": 0.25,
+          "unit": "ratio",
+          "description": "real_embedding precision at rank 4.",
+          "statistics": {
+            "mean": 0.25,
+            "standard_deviation": 0.0,
+            "min": 0.25,
+            "max": 0.25,
+            "ci_95_low": 0.25,
+            "ci_95_high": 0.25,
+            "sample_count": 1
+          }
+        },
+        "real_embedding_p_at_5": {
+          "value": 0.2,
+          "unit": "ratio",
+          "description": "real_embedding precision at rank 5.",
+          "statistics": {
+            "mean": 0.2,
+            "standard_deviation": 0.0,
+            "min": 0.2,
+            "max": 0.2,
+            "ci_95_low": 0.2,
+            "ci_95_high": 0.2,
+            "sample_count": 1
+          }
+        },
+        "real_embedding_recall_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "real_embedding recall at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "real_embedding_recall_at_k": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "real_embedding recall within top 5.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "traceability": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "dss_mapping_note": {
+          "value": "DSS returns a single verified candidate or abstains. P@1 is reported as precision-of-returned over all queries; abstention rate is reported separately. NDCG@k and P@k for k>1 are not fabricated.",
+          "unit": "string",
+          "description": "How DSS rankings are mapped to ranking metrics.",
+          "statistics": null
+        },
+        "systems_compared": {
+          "value": 6.0,
+          "unit": "count",
+          "description": "Number of retrieval systems compared.",
+          "statistics": {
+            "mean": 6.0,
+            "standard_deviation": 0.0,
+            "min": 6.0,
+            "max": 6.0,
+            "ci_95_low": 6.0,
+            "ci_95_high": 6.0,
+            "sample_count": 1
+          }
+        }
+      }
+    }
+  },
+  "freshness": {
+    "status": "fresh",
+    "checked_at": "2026-07-20T08:11:39.316207Z",
+    "max_age_hours": 24,
+    "age_hours": 0.0
+  },
+  "failure_reason": null,
+  "hardware": {
+    "platform": "Darwin-25.5.0-x86_64",
+    "processor": "i386",
+    "cpu_count": 16,
+    "memory_gb": 16.0,
+    "gpu_name": null,
+    "gpu_count": null,
+    "cuda_version": null,
+    "mps_available": true,
+    "backend_accelerator": "mps"
+  },
+  "run_config": {
+    "lengths": "4",
+    "top_k": 5,
+    "seed": 193,
+    "systems": "dss_qp_router,real_embedding,hnsw_dense,bm25,metadata_filter,bow_stand_in",
+    "deterministic_mode": false,
+    "aggregate": true,
+    "seeds": "193",
+    "seed_count": 1,
+    "seed_run_ids": "dss294-bm25-ranking-20260720T081139Z-193"
+  }
+}
