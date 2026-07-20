@@ -455,7 +455,6 @@ BASELINES: dict[str, Baseline] = {
         HierarchicalRagBaseline,
         LongContextBaseline,
         GrokBaseline,
-        BM25Baseline,
     )
 }
 

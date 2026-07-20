@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from backend.benchmarks.artifact_schema import validate_benchmark_artifact
-from backend.benchmarks.comparison_baselines import BASELINES, BM25Baseline, BaselineResult
+from backend.benchmarks.comparison_baselines import BM25Baseline, BaselineResult
 from backend.benchmarks.dss294_bm25_baseline import (
     BenchmarkConfig,
     _dss_result,
@@ -89,7 +89,7 @@ def test_dss_result_documents_one_return_or_abstention() -> None:
 def test_ranking_result_from_bm25_baseline() -> None:
     memories, queries = _tiny_corpus()
     result = _ranking_result_from_baseline(
-        BASELINES["bm25"], memories, queries, top_k=2
+        BM25Baseline(), memories, queries, top_k=2
     )
     assert result.system_name == "bm25"
     assert result.p_at_k is not None

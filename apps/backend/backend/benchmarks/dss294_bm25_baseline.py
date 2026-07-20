@@ -34,6 +34,7 @@ from backend.benchmarks.comparison_baselines import (
     BASELINES,
     Baseline,
     BaselineResult,
+    BM25Baseline,
     BoWStandInBaseline,
 )
 from backend.benchmarks.harness import BenchmarkHarness
@@ -383,7 +384,7 @@ def evaluate(
         "dss_qp_router": _dss_result(memories, queries, top_k=top_k),
         "real_embedding": _real_embedding_result(memories, queries, top_k=top_k),
         "bm25": _ranking_result_from_baseline(
-            BASELINES["bm25"], memories, queries, top_k=top_k
+            BM25Baseline(), memories, queries, top_k=top_k
         ),
         "metadata_filter": _metadata_filter_result(memories, queries, top_k=top_k),
         "bow_stand_in": _ranking_result_from_baseline(
