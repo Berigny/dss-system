@@ -20,6 +20,10 @@ Large Language Models are probabilistic engines, and standard Retrieval-Augmente
 
 * **The Result:** AI amnesia, hallucinations, and broken workflows.
 
+*DSS Control Plane:*
+
+![DSS Control Plane](https://github.com/user-attachments/assets/a03bc691-21b1-420a-ad9d-01c50a91cc09)
+
 You don't need a better vector database; you need a reliable memory lane. **DSS maintains a continuous, persistent context** across sessions and models — and when a candidate memory fails structural verification, the system **abstains instead of returning a plausible near-miss**.
 
 ---
