@@ -204,4 +204,29 @@ claims:
       - "'make eval-fast' is a deterministic smoke run with mocked embeddings and tiny corpora."
       - "Full reproduction requires 'make eval' with sentence-transformers available."
 
+  - id: C22
+    source: DSS-297 benchmark
+    quote: "Every citation in an end-to-end response hash-matches a committed ledger entry deterministically"
+    claim: DSS citation integrity is verified by a deterministic ledger hash-chain check; any LLM judge score is informational only.
+    harness: apps/backend/backend/benchmarks/dss297_citation_faithfulness_benchmark.py
+    measurement: citation_integrity ratio and chain_valid_rate on synthetic end-to-end responses.
+    status: supported
+    evidence: backend/benchmarks/output/dss297_citation_faithfulness/aggregate
+    caveats:
+      - "Synthetic assistant responses; live chat-surface citations may require additional normalisation."
+      - "LLM-as-judge is replaced by a deterministic lexical-overlap surrogate in this benchmark."
+
+  - id: C23
+    source: DSS-298 benchmark
+    quote: "Label-blind ingestion derives document and query coordinates independently and reaches coverage >= 0.8"
+    claim: DSS label-blind ingestion derives coordinates from raw text without shared labels and passes the 0.8 coverage gate on synthetic corpora.
+    harness: apps/backend/backend/benchmarks/dss298_label_blind_ingestion_benchmark.py
+    measurement: coverage_score and gate_pass on independently derived document/query coordinates.
+    status: supported
+    evidence: backend/benchmarks/output/dss298_label_blind_ingestion/aggregate
+    caveats:
+      - "Synthetic corpus using public ksr-core concept rules only."
+      - "Coverage gate unlocks Phase R real-data runs; below-gate results are exploratory."
+      - "Credit: hugooconnor — issue #1 reproduction and critique."
+
 unknown_claims_policy: fail_ci

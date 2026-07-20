@@ -312,7 +312,7 @@ jobs:
               assert b['status'] == 'success', f"Benchmark {b['suite']} did not succeed"
 
           aggregate_files = list(run_dir.glob('*_aggregate.json'))
-          assert len(aggregate_files) >= 4, f'Expected at least 4 aggregate artifacts, found {len(aggregate_files)}'
+          assert len(aggregate_files) >= 6, f'Expected at least 6 aggregate artifacts, found {len(aggregate_files)}'
           for artifact_file in aggregate_files:
               payload = json.loads(artifact_file.read_text())
               validate_benchmark_artifact(payload)

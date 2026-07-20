@@ -1,8 +1,8 @@
 {
   "artifact_version": "ksr-eval-v0.4",
   "run_id": "dss_v0.5_20260720T023702Z",
-  "run_date": "2026-07-20T04:15:46.811018+00:00",
-  "git_commit_sha": "01190bd91192d3a34c7833545eb7689167bbdb64",
+  "run_date": "2026-07-20T05:38:47.423988+00:00",
+  "git_commit_sha": "c3998eece9bf80340fd7f19cc775e36c3f405478",
   "corpus_verification": {
     "status": "ok",
     "files": {
@@ -22,53 +22,77 @@
     {
       "suite": "dss292-known-unknown",
       "status": "success",
-      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/backend/benchmarks/output/dss292_known_unknown/aggregate"
+      "artifact_path": "apps/backend/backend/benchmarks/output/dss292_known_unknown/aggregate"
     },
     {
       "suite": "dss293-adversarial-poisoning",
       "status": "success",
-      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/backend/benchmarks/output/dss293_adversarial_poisoning/aggregate"
+      "artifact_path": "apps/backend/backend/benchmarks/output/dss293_adversarial_poisoning/aggregate"
     },
     {
       "suite": "dss294-bm25-ranking",
       "status": "success",
-      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/backend/benchmarks/output/dss294_bm25_ranking/aggregate"
+      "artifact_path": "apps/backend/backend/benchmarks/output/dss294_bm25_ranking/aggregate"
     },
     {
       "suite": "dss295-latency-storage",
       "status": "success",
-      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/backend/benchmarks/output/dss295_latency_storage/aggregate"
+      "artifact_path": "apps/backend/backend/benchmarks/output/dss295_latency_storage/aggregate"
+    },
+    {
+      "suite": "dss297-citation-faithfulness",
+      "status": "success",
+      "artifact_path": "apps/backend/backend/benchmarks/output/dss297_citation_faithfulness/aggregate"
+    },
+    {
+      "suite": "dss298-label-blind-ingestion",
+      "status": "success",
+      "artifact_path": "apps/backend/backend/benchmarks/output/dss298_label_blind_ingestion/aggregate"
     }
   ],
   "copied_artifacts": [
     {
       "suite": "dss292-known-unknown",
       "status": "copied",
-      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/backend/benchmarks/output/dss292_known_unknown/aggregate/20260720T024310Z.json",
-      "destination": "/Users/davidberigny/Documents/GitHub/dss-system/eval/reports/benchmarks/dss_v0.5_20260720T023702Z/dss292-known-unknown_aggregate.json",
+      "source": "eval/reports/benchmarks/dss_v0.5_20260720T023702Z/dss292-known-unknown_aggregate.json",
+      "destination": "eval/reports/benchmarks/dss_v0.5_20260720T023702Z/dss292-known-unknown_aggregate.json",
       "sha256": "f98d9d395375e290364e915786e1c7918ca857724008af2c1b45a467278aab20"
     },
     {
       "suite": "dss293-adversarial-poisoning",
       "status": "copied",
-      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/backend/benchmarks/output/dss293_adversarial_poisoning/aggregate/20260720T024310Z.json",
-      "destination": "/Users/davidberigny/Documents/GitHub/dss-system/eval/reports/benchmarks/dss_v0.5_20260720T023702Z/dss293-adversarial-poisoning_aggregate.json",
+      "source": "eval/reports/benchmarks/dss_v0.5_20260720T023702Z/dss293-adversarial-poisoning_aggregate.json",
+      "destination": "eval/reports/benchmarks/dss_v0.5_20260720T023702Z/dss293-adversarial-poisoning_aggregate.json",
       "sha256": "012ddc3c8026914f5dbfb58953734ed4d14011263eac7b81350b45328d2e2310"
     },
     {
       "suite": "dss294-bm25-ranking",
       "status": "copied",
-      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/backend/benchmarks/output/dss294_bm25_ranking/aggregate/20260720T024311Z.json",
-      "destination": "/Users/davidberigny/Documents/GitHub/dss-system/eval/reports/benchmarks/dss_v0.5_20260720T023702Z/dss294-bm25-ranking_aggregate.json",
+      "source": "eval/reports/benchmarks/dss_v0.5_20260720T023702Z/dss294-bm25-ranking_aggregate.json",
+      "destination": "eval/reports/benchmarks/dss_v0.5_20260720T023702Z/dss294-bm25-ranking_aggregate.json",
       "sha256": "b810dff4e0fc55409050c6d722143f672ab62c2c615d210b765dc89ff8733bb2"
     },
     {
       "suite": "dss295-latency-storage",
       "status": "copied",
-      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/backend/benchmarks/output/dss295_latency_storage/aggregate/20260720T041546Z.json",
-      "destination": "/Users/davidberigny/Documents/GitHub/dss-system/eval/reports/benchmarks/dss_v0.5_20260720T023702Z/dss295-latency-storage_aggregate.json",
+      "source": "eval/reports/benchmarks/dss_v0.5_20260720T023702Z/dss295-latency-storage_aggregate.json",
+      "destination": "eval/reports/benchmarks/dss_v0.5_20260720T023702Z/dss295-latency-storage_aggregate.json",
       "sha256": "712eb62a6af68d6574ba1ba91ae9f1ef92a45c76c870d460079b1386c63e329e"
+    },
+    {
+      "suite": "dss297-citation-faithfulness",
+      "status": "copied",
+      "source": "eval/reports/benchmarks/dss_v0.5_20260720T023702Z/dss297-citation-faithfulness_aggregate.json",
+      "destination": "eval/reports/benchmarks/dss_v0.5_20260720T023702Z/dss297-citation-faithfulness_aggregate.json",
+      "sha256": "ee8f5a495a2a3305daefd9910e8698b0b4172feaeff8b28cbfe10a7a5e9c5fbd"
+    },
+    {
+      "suite": "dss298-label-blind-ingestion",
+      "status": "copied",
+      "source": "eval/reports/benchmarks/dss_v0.5_20260720T023702Z/dss298-label-blind-ingestion_aggregate.json",
+      "destination": "eval/reports/benchmarks/dss_v0.5_20260720T023702Z/dss298-label-blind-ingestion_aggregate.json",
+      "sha256": "78a685c33e39420157a019683fe5d0efb22d8e36536aa16d0861b238057316b2"
     }
   ],
-  "reports_directory": "/Users/davidberigny/Documents/GitHub/dss-system/eval/reports/benchmarks/dss_v0.5_20260720T023702Z"
+  "reports_directory": "eval/reports/benchmarks/dss_v0.5_20260720T023702Z"
 }

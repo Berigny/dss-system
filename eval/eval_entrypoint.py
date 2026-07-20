@@ -1,7 +1,7 @@
 """DSS-296 — One-click reproduction entrypoint for the v0.5 benchmark suite.
 
-Runs DSS-292, DSS-293, DSS-294 and DSS-295, copies the resulting artifacts and
-manifests to ``eval/reports/benchmarks/``, and emits a top-level summary manifest.
+Runs DSS-292 through DSS-298, copies the resulting artifacts and manifests to
+``eval/reports/benchmarks/``, and emits a top-level summary manifest.
 
 Environment variables
 ---------------------
@@ -231,6 +231,44 @@ def _run_dss295(config: EvalConfig) -> dict[str, Any]:
     }
 
 
+def _run_dss297(config: EvalConfig) -> dict[str, Any]:
+    from backend.benchmarks.dss297_citation_faithfulness_benchmark import (
+        BenchmarkConfig as Dss297Config,
+        run_benchmark as run_dss297,
+    )
+
+    bench_config = Dss297Config(
+        output_root=BENCHMARK_OUTPUT_ROOT / "dss297_citation_faithfulness",
+        seeds=(193,) if config.dry_run else (193, 42, 7),
+    )
+    aggregate = run_dss297(bench_config)
+    return {
+        "suite": "dss297-citation-faithfulness",
+        "status": aggregate.status,
+        "artifact_path": str(BENCHMARK_OUTPUT_ROOT / "dss297_citation_faithfulness" / "aggregate"),
+    }
+
+
+def _run_dss298(config: EvalConfig) -> dict[str, Any]:
+    from backend.benchmarks.dss298_label_blind_ingestion_benchmark import (
+        BenchmarkConfig as Dss298Config,
+        run_benchmark as run_dss298,
+    )
+
+    bench_config = Dss298Config(
+        output_root=BENCHMARK_OUTPUT_ROOT / "dss298_label_blind_ingestion",
+        coverage_gate=0.8,
+        seeds=(193,) if config.dry_run else (193, 42, 7),
+        transport="R1",
+    )
+    aggregate = run_dss298(bench_config)
+    return {
+        "suite": "dss298-label-blind-ingestion",
+        "status": aggregate.status,
+        "artifact_path": str(BENCHMARK_OUTPUT_ROOT / "dss298_label_blind_ingestion" / "aggregate"),
+    }
+
+
 def _latest_file(directory: Path, pattern: str = "*.json") -> Path | None:
     candidates = list(directory.glob(pattern))
     if not candidates:
@@ -320,6 +358,8 @@ def run_eval(config: EvalConfig) -> int:
         results.append(_run_dss293(config))
         results.append(_run_dss294(config))
         results.append(_run_dss295(config))
+        results.append(_run_dss297(config))
+        results.append(_run_dss298(config))
     except Exception as exc:
         print(f"Benchmark failed: {exc}", file=sys.stderr)
         return 1
