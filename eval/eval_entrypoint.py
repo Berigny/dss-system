@@ -30,6 +30,8 @@ from unittest.mock import MagicMock
 
 import numpy as np
 
+from backend.benchmarks.pinned_queries import QUERIES_ROOT, verify_query_manifest
+
 # Eval entrypoint is executed from /app/apps/backend with PYTHONPATH set so that
 # `backend.*` imports resolve.
 REPO_ROOT = Path(__file__).parent.parent
@@ -37,6 +39,7 @@ BACKEND_ROOT = REPO_ROOT / "apps" / "backend"
 BENCHMARK_OUTPUT_ROOT = BACKEND_ROOT / "backend" / "benchmarks" / "output"
 REPORTS_ROOT = REPO_ROOT / "eval" / "reports" / "benchmarks"
 CORPUS_ROOT = REPO_ROOT / "eval" / "corpus"
+QUERIES_ROOT = REPO_ROOT / "eval" / "queries"
 
 
 @dataclass(frozen=True)
@@ -45,6 +48,8 @@ class EvalConfig:
     dry_run: bool
     skip_real_embedding: bool
     max_events: int
+    force_generate_queries: bool = False
+    pinned_query_path: Path | None = None
 
 
 def _mock_real_embedding_baseline() -> type:
@@ -160,6 +165,8 @@ def _run_dss292(config: EvalConfig) -> dict[str, Any]:
         lengths=(4,) if config.dry_run else (4, 8, 16, 32),
         top_k=5,
         seeds=(193,) if config.dry_run else (193, 42, 7),
+        force_generate_queries=config.force_generate_queries,
+        pinned_query_path=config.pinned_query_path or QUERIES_ROOT,
     )
     aggregate = run_dss292(bench_config)
     return {
@@ -178,6 +185,8 @@ def _run_dss293(config: EvalConfig) -> dict[str, Any]:
     bench_config = Dss293Config(
         output_root=BENCHMARK_OUTPUT_ROOT / "dss293_adversarial_poisoning",
         seeds=(193,) if config.dry_run else (193, 42, 7),
+        force_generate_queries=config.force_generate_queries,
+        pinned_query_path=config.pinned_query_path or QUERIES_ROOT,
     )
     aggregate = run_dss293(bench_config)
     return {
@@ -195,9 +204,11 @@ def _run_dss294(config: EvalConfig) -> dict[str, Any]:
 
     bench_config = Dss294Config(
         output_root=BENCHMARK_OUTPUT_ROOT / "dss294_bm25_ranking",
-        lengths=(2,) if config.dry_run else (4, 8, 16, 32),
+        lengths=(4,) if config.dry_run else (4, 8, 16, 32),
         top_k=5,
         seeds=(193,) if config.dry_run else (193, 42, 7),
+        force_generate_queries=config.force_generate_queries,
+        pinned_query_path=config.pinned_query_path or QUERIES_ROOT,
     )
     aggregate = run_dss294(bench_config)
     return {
@@ -215,13 +226,15 @@ def _run_dss295(config: EvalConfig) -> dict[str, Any]:
 
     bench_config = Dss295Config(
         output_root=BENCHMARK_OUTPUT_ROOT / "dss295_latency_storage",
-        corpus_sizes=(99,) if config.dry_run else (999, 9999, 99999),
+        corpus_sizes=(999,) if config.dry_run else (999, 9999, 99999),
         top_k=5,
         query_iterations=5 if config.dry_run else 50,
         warmup_iterations=1 if config.dry_run else 5,
         seeds=(193,) if config.dry_run else (193, 42, 7),
         measure_100k=True if config.dry_run else False,
-        max_measured_events=200 if config.dry_run else 10000,
+        max_measured_events=2000 if config.dry_run else 10000,
+        force_generate_queries=config.force_generate_queries,
+        pinned_query_path=config.pinned_query_path or QUERIES_ROOT,
     )
     aggregate = run_dss295(bench_config)
     return {
@@ -315,6 +328,7 @@ def _write_summary_manifest(
     results: list[dict[str, Any]],
     copy_info: dict[str, Any],
     corpus_verification: dict[str, Any],
+    query_verification: dict[str, Any],
 ) -> Path:
     run_dir = output_root / run_id
     summary = {
@@ -323,6 +337,7 @@ def _write_summary_manifest(
         "run_date": datetime.now(timezone.utc).isoformat(),
         "git_commit_sha": _repo_sha(),
         "corpus_verification": corpus_verification,
+        "query_verification": query_verification,
         "benchmarks": [
             {
                 "suite": r["suite"],
@@ -348,6 +363,10 @@ def run_eval(config: EvalConfig) -> int:
     if corpus_verification.get("status") != "ok":
         print(f"WARNING: corpus manifest issue: {corpus_verification}", file=sys.stderr)
 
+    query_verification = verify_query_manifest(root=config.pinned_query_path or QUERIES_ROOT)
+    if query_verification.get("status") != "ok":
+        print(f"WARNING: query manifest issue: {query_verification}", file=sys.stderr)
+
     run_id = f"dss_v0.5_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
     print(f"Starting DSS v0.5 evaluation run: {run_id}")
     print(f"Dry run: {config.dry_run}")
@@ -369,7 +388,9 @@ def run_eval(config: EvalConfig) -> int:
         print(f"Failed benchmarks: {[r['suite'] for r in failed]}", file=sys.stderr)
 
     copy_info = _copy_artifacts(config.output_root, run_id, results)
-    summary_path = _write_summary_manifest(config.output_root, run_id, results, copy_info, corpus_verification)
+    summary_path = _write_summary_manifest(
+        config.output_root, run_id, results, copy_info, corpus_verification, query_verification
+    )
 
     print("\nBenchmark results")
     print("-" * 50)
@@ -404,6 +425,17 @@ def main(argv: list[str] | None = None) -> int:
         default=10000,
         help="Largest event count to measure directly in DSS-295.",
     )
+    parser.add_argument(
+        "--force-generate-queries",
+        action="store_true",
+        help="Ignore pinned query sets and generate queries at runtime.",
+    )
+    parser.add_argument(
+        "--pinned-query-path",
+        type=Path,
+        default=None,
+        help="Directory containing pinned query sets (default: eval/queries).",
+    )
     args = parser.parse_args(argv)
 
     dry_run = args.dry_run or os.environ.get("DRY_RUN", "0") == "1"
@@ -414,6 +446,8 @@ def main(argv: list[str] | None = None) -> int:
         dry_run=dry_run,
         skip_real_embedding=skip_real,
         max_events=args.max_events,
+        force_generate_queries=args.force_generate_queries,
+        pinned_query_path=args.pinned_query_path,
     )
     return run_eval(config)
 

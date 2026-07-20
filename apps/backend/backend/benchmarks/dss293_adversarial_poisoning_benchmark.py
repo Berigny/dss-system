@@ -26,6 +26,7 @@ from typing import Any, Sequence
 from backend.benchmarks.artifact_schema import BenchmarkArtifact
 from backend.benchmarks.harness import BenchmarkHarness
 from backend.benchmarks.manifest import build_manifest, write_manifest
+from backend.benchmarks.pinned_queries import QUERIES_ROOT, load_pinned_queries_for_config
 from backend.fieldx_kernel.governance_engine import GovernanceEngine, GovernanceState
 from backend.fieldx_kernel.models import ContinuousState, LedgerEntry, LedgerKey
 from backend.fieldx_kernel.qp_coordinate import _METRIC_PRIME
@@ -42,6 +43,8 @@ DEFAULT_SEEDS = (193, 42, 7)
 class BenchmarkConfig:
     output_root: Path
     seeds: tuple[int, ...]
+    force_generate_queries: bool = False
+    pinned_query_path: Path | None = None
 
 
 @dataclass(frozen=True)
@@ -395,10 +398,11 @@ def evaluate_case(store: LedgerStoreV2, case: PoisonCase, *, seed: int) -> CaseR
     )
 
 
-def evaluate(seed: int) -> BenchmarkSummary:
+def evaluate(seed: int, cases: Sequence[PoisonCase] | None = None) -> BenchmarkSummary:
     """Run all poisoning cases for one seed."""
     store = LedgerStoreV2(db={})
-    cases = build_cases(seed=seed)
+    if cases is None:
+        cases = build_cases(seed=seed)
     results = [evaluate_case(store, case, seed=seed) for case in cases]
 
     flagged_or_preserved = sum(
@@ -579,7 +583,19 @@ def _build_artifact(
 def run_single_seed(seed: int, config: BenchmarkConfig) -> BenchmarkArtifact:
     """Run DSS-293 for a single seed and return a validated artifact."""
     start = time.perf_counter()
-    summary = evaluate(seed)
+
+    cases: Sequence[PoisonCase] | None = None
+    if not config.force_generate_queries:
+        try:
+            cases = load_pinned_queries_for_config(
+                "dss293-adversarial-poisoning",
+                seed,
+                root=config.pinned_query_path or QUERIES_ROOT,
+            )
+        except (FileNotFoundError, ValueError, KeyError) as exc:
+            print(f"WARNING: DSS-293 falling back to runtime case generation: {exc}")
+
+    summary = evaluate(seed, cases=cases)
     runtime_ms = (time.perf_counter() - start) * 1000.0
     executed_at = datetime.now(timezone.utc)
     artifact = _build_artifact(
@@ -659,11 +675,24 @@ def main(argv: Sequence[str] | None = None) -> None:
         default=DEFAULT_SEEDS,
         help="Comma-separated random seeds for multi-seed aggregation.",
     )
+    parser.add_argument(
+        "--force-generate-queries",
+        action="store_true",
+        help="Ignore pinned query sets and generate cases at runtime.",
+    )
+    parser.add_argument(
+        "--pinned-query-path",
+        type=Path,
+        default=None,
+        help="Directory containing pinned query sets (default: eval/queries).",
+    )
     args = parser.parse_args(argv)
 
     config = BenchmarkConfig(
         output_root=args.output_root,
         seeds=args.seeds,
+        force_generate_queries=args.force_generate_queries,
+        pinned_query_path=args.pinned_query_path,
     )
     aggregate = run_benchmark(config)
     print_summary(

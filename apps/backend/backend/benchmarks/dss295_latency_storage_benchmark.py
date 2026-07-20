@@ -52,6 +52,7 @@ from backend.benchmarks.longbench_needle_benchmark import (
     generate_corpus,
 )
 from backend.benchmarks.manifest import build_manifest, write_manifest
+from backend.benchmarks.pinned_queries import QUERIES_ROOT, load_pinned_queries_for_config
 from backend.benchmarks.metadata_filter_baseline import MetadataFilterBaseline
 from backend.benchmarks.real_embedding_baseline import RealEmbeddingBaseline
 from backend.search.token_index import normalise_tokens
@@ -85,6 +86,8 @@ class BenchmarkConfig:
     seeds: tuple[int, ...]
     measure_100k: bool
     max_measured_events: int
+    force_generate_queries: bool = False
+    pinned_query_path: Path | None = None
 
 
 @dataclass(frozen=True)
@@ -322,12 +325,17 @@ def _evaluate_size(
     *,
     seed: int,
     config: BenchmarkConfig,
+    pinned_queries: dict[int, list[NeedleQuery]] | None = None,
 ) -> PerSizeResult:
     measured = _should_measure(corpus_size, config.max_measured_events, config.measure_100k)
 
     if measured:
         actual_events = corpus_size + 1
-        memories, queries = generate_corpus([corpus_size], seed=seed)
+        if pinned_queries is not None and corpus_size in pinned_queries:
+            queries = pinned_queries[corpus_size]
+            memories, _ = generate_corpus([corpus_size], seed=seed)
+        else:
+            memories, queries = generate_corpus([corpus_size], seed=seed)
         memory_dicts, query_dicts = _normalize_for_baseline(memories, queries)
 
         systems: dict[str, PerSystemResult] = {}
@@ -442,7 +450,7 @@ def _evaluate_size(
     # sub-linearly (log-ish) and storage linearly.  The exact extrapolation is
     # documented in the notes.
     measured_size = config.max_measured_events
-    base = _evaluate_size(measured_size, seed=seed, config=config)
+    base = _evaluate_size(measured_size, seed=seed, config=config, pinned_queries=pinned_queries)
     base_events = measured_size + 1
     actual_events = corpus_size + 1
     scale_factor = actual_events / base_events
@@ -482,7 +490,23 @@ def evaluate(
     seed: int,
 ) -> BenchmarkSummary:
     """Run latency and storage measurements across all configured corpus sizes."""
-    sizes = [_evaluate_size(size, seed=seed, config=config) for size in config.corpus_sizes]
+    pinned: dict[int, list[NeedleQuery]] | None = None
+    if not config.force_generate_queries:
+        try:
+            loaded = load_pinned_queries_for_config(
+                "dss295-latency-storage",
+                seed,
+                root=config.pinned_query_path or QUERIES_ROOT,
+                corpus_sizes=config.corpus_sizes,
+            )
+            pinned = {k: v for k, v in loaded.items() if isinstance(k, int)}
+        except (FileNotFoundError, ValueError, KeyError) as exc:
+            print(f"WARNING: DSS-295 falling back to runtime query generation: {exc}")
+
+    sizes = [
+        _evaluate_size(size, seed=seed, config=config, pinned_queries=pinned)
+        for size in config.corpus_sizes
+    ]
     return BenchmarkSummary(sizes=tuple(sizes))
 
 
@@ -792,6 +816,17 @@ def main(argv: Sequence[str] | None = None) -> None:
         action="store_true",
         help="Use tiny corpus sizes for quick smoke testing.",
     )
+    parser.add_argument(
+        "--force-generate-queries",
+        action="store_true",
+        help="Ignore pinned query sets and generate queries at runtime.",
+    )
+    parser.add_argument(
+        "--pinned-query-path",
+        type=Path,
+        default=None,
+        help="Directory containing pinned query sets (default: eval/queries).",
+    )
     args = parser.parse_args(argv)
 
     corpus_sizes = args.corpus_sizes
@@ -811,6 +846,8 @@ def main(argv: Sequence[str] | None = None) -> None:
         seeds=args.seeds,
         measure_100k=measure_100k,
         max_measured_events=max_measured,
+        force_generate_queries=args.force_generate_queries,
+        pinned_query_path=args.pinned_query_path,
     )
     aggregate = run_benchmark(config)
     print(f"Aggregate artifact status: {aggregate.status}")

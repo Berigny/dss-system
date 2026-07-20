@@ -29,6 +29,7 @@ from typing import Any, Sequence
 from backend.benchmarks.artifact_schema import BenchmarkArtifact
 from backend.benchmarks.harness import BenchmarkHarness
 from backend.benchmarks.manifest import build_manifest, write_manifest
+from backend.benchmarks.pinned_queries import QUERIES_ROOT, load_pinned_queries_for_config
 from backend.fieldx_kernel.qp_arithmetic import qp_score
 from backend.fieldx_kernel.qp_coordinate import (
     QpCoordinate,
@@ -71,6 +72,8 @@ class BenchmarkConfig:
     lengths: tuple[int, ...]
     top_k: int
     seeds: tuple[int, ...]
+    force_generate_queries: bool = False
+    pinned_query_path: Path | None = None
 
 
 @dataclass(frozen=True)
@@ -830,10 +833,29 @@ def _build_artifact(
     )
 
 
+def _load_or_generate_queries(
+    seed: int, config: BenchmarkConfig
+) -> tuple[list[Memory], list[BenchmarkQuery]]:
+    """Return memories and queries, preferring the pinned query set."""
+    if not config.force_generate_queries:
+        try:
+            pinned_queries = load_pinned_queries_for_config(
+                "dss292-known-unknown",
+                seed,
+                root=config.pinned_query_path or QUERIES_ROOT,
+                lengths=config.lengths,
+            )
+            memories, _ = generate_corpus(config.lengths, seed=seed)
+            return memories, pinned_queries
+        except (FileNotFoundError, ValueError, KeyError) as exc:
+            print(f"WARNING: DSS-292 falling back to runtime query generation: {exc}")
+    return generate_corpus(config.lengths, seed=seed)
+
+
 def run_single_seed(seed: int, config: BenchmarkConfig) -> BenchmarkArtifact:
     """Run DSS-292 for a single seed and return a validated artifact."""
     start = time.perf_counter()
-    memories, queries = generate_corpus(config.lengths, seed=seed)
+    memories, queries = _load_or_generate_queries(seed, config)
     summary = evaluate(memories, queries)
     runtime_ms = (time.perf_counter() - start) * 1000.0
 
@@ -939,6 +961,17 @@ def main(argv: Sequence[str] | None = None) -> None:
         default=DEFAULT_SEEDS,
         help="Comma-separated random seeds for multi-seed aggregation.",
     )
+    parser.add_argument(
+        "--force-generate-queries",
+        action="store_true",
+        help="Ignore pinned query sets and generate queries at runtime.",
+    )
+    parser.add_argument(
+        "--pinned-query-path",
+        type=Path,
+        default=None,
+        help="Directory containing pinned query sets (default: eval/queries).",
+    )
     args = parser.parse_args(argv)
 
     config = BenchmarkConfig(
@@ -946,6 +979,8 @@ def main(argv: Sequence[str] | None = None) -> None:
         lengths=args.lengths,
         top_k=args.top_k,
         seeds=args.seeds,
+        force_generate_queries=args.force_generate_queries,
+        pinned_query_path=args.pinned_query_path,
     )
     aggregate = run_benchmark(config)
     print_summary(
