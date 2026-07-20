@@ -1,3 +1,4 @@
+
 # DSS: Infinite, Deterministic AI Memory
 
 **A deterministic memory substrate that bypasses the context window — and abstains rather than guesses when structural verification fails.**
@@ -22,7 +23,8 @@ Large Language Models are probabilistic engines, and standard Retrieval-Augmente
 
 *DSS Control Plane:*
 
-![DSS Control Plane](https://github.com/user-attachments/assets/a03bc691-21b1-420a-ad9d-01c50a91cc09)
+![DSS Control Plane](https://github.com/user-attachments/assets/38ff8214-faa0-476e-bc70-84154d577331)
+
 
 You don't need a better vector database; you need a reliable memory lane. **DSS maintains a continuous, persistent context** across sessions and models — and when a candidate memory fails structural verification, the system **abstains instead of returning a plausible near-miss**.
 
