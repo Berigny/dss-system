@@ -1,0 +1,248 @@
+{
+  "artefact_schema_version": "1.0.0",
+  "run_id": "dss298-label-blind-ingestion-aggregate-20260720T100035Z",
+  "suite_id": "dss298-label-blind-ingestion",
+  "suite_version": "v1",
+  "executed_at": "2026-07-20T10:00:35.568196Z",
+  "mode": "full_dss",
+  "status": "success",
+  "repos": [
+    {
+      "name": "ds-backend-local",
+      "commit_sha": "c5df526c693402b96dadee5894c86aba4a213e9f",
+      "role": "canonical_benchmark_engine",
+      "required_for_run": true
+    }
+  ],
+  "datasets": [
+    {
+      "name": "dss298_label_blind_synthetic_v1",
+      "version": "v1",
+      "split": "benchmark",
+      "record_count": 16
+    }
+  ],
+  "metrics": {
+    "cost": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "llm_calls": {
+          "value": 0.0,
+          "unit": "count",
+          "description": "Number of LLM API calls (zero for R1 deterministic transport).",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "governance": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "coverage_gate": {
+          "value": 0.8,
+          "unit": "ratio",
+          "description": "Minimum coverage score required to unlock Phase R real-data runs.",
+          "statistics": {
+            "mean": 0.8,
+            "standard_deviation": 0.0,
+            "min": 0.8,
+            "max": 0.8,
+            "ci_95_low": 0.8,
+            "ci_95_high": 0.8,
+            "sample_count": 1
+          }
+        },
+        "gate_pass": {
+          "value": 1.0,
+          "unit": "boolean",
+          "description": "True if coverage_score >= coverage_gate.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "status": {
+          "value": "supported",
+          "unit": "string",
+          "description": "supported if gate passes, exploratory otherwise.",
+          "statistics": null
+        }
+      }
+    },
+    "latency": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "total_runtime_ms": {
+          "value": 3.299250965937972,
+          "unit": "ms",
+          "description": "Total harness runtime.",
+          "statistics": {
+            "mean": 3.299250965937972,
+            "standard_deviation": 0.0,
+            "min": 3.299250965937972,
+            "max": 3.299250965937972,
+            "ci_95_low": 3.299250965937972,
+            "ci_95_high": 3.299250965937972,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "retrieval": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "compatible_queries": {
+          "value": 5.0,
+          "unit": "count",
+          "description": "Number of query coordinates compatible with at least one document coordinate.",
+          "statistics": {
+            "mean": 5.0,
+            "standard_deviation": 0.0,
+            "min": 5.0,
+            "max": 5.0,
+            "ci_95_low": 5.0,
+            "ci_95_high": 5.0,
+            "sample_count": 1
+          }
+        },
+        "coverage_score": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Fraction of query coordinates structurally compatible with at least one document coordinate.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "total_queries": {
+          "value": 5.0,
+          "unit": "count",
+          "description": "Total number of query coordinates evaluated.",
+          "statistics": {
+            "mean": 5.0,
+            "standard_deviation": 0.0,
+            "min": 5.0,
+            "max": 5.0,
+            "ci_95_low": 5.0,
+            "ci_95_high": 5.0,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "traceability": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "documents_derived": {
+          "value": 8.0,
+          "unit": "count",
+          "description": "Number of documents with independently derived coordinates.",
+          "statistics": {
+            "mean": 8.0,
+            "standard_deviation": 0.0,
+            "min": 8.0,
+            "max": 8.0,
+            "ci_95_low": 8.0,
+            "ci_95_high": 8.0,
+            "sample_count": 1
+          }
+        },
+        "documents_with_valid_coord": {
+          "value": 5.0,
+          "unit": "count",
+          "description": "Number of documents whose text produced a non-empty coordinate.",
+          "statistics": {
+            "mean": 5.0,
+            "standard_deviation": 0.0,
+            "min": 5.0,
+            "max": 5.0,
+            "ci_95_low": 5.0,
+            "ci_95_high": 5.0,
+            "sample_count": 1
+          }
+        },
+        "queries_derived": {
+          "value": 8.0,
+          "unit": "count",
+          "description": "Number of queries with independently derived coordinates.",
+          "statistics": {
+            "mean": 8.0,
+            "standard_deviation": 0.0,
+            "min": 8.0,
+            "max": 8.0,
+            "ci_95_low": 8.0,
+            "ci_95_high": 8.0,
+            "sample_count": 1
+          }
+        },
+        "queries_with_valid_coord": {
+          "value": 5.0,
+          "unit": "count",
+          "description": "Number of queries whose text produced a non-empty coordinate.",
+          "statistics": {
+            "mean": 5.0,
+            "standard_deviation": 0.0,
+            "min": 5.0,
+            "max": 5.0,
+            "ci_95_low": 5.0,
+            "ci_95_high": 5.0,
+            "sample_count": 1
+          }
+        }
+      }
+    }
+  },
+  "freshness": {
+    "status": "fresh",
+    "checked_at": "2026-07-20T10:00:35.568196Z",
+    "max_age_hours": 24,
+    "age_hours": 0.0
+  },
+  "failure_reason": null,
+  "hardware": {
+    "platform": "Darwin-25.5.0-x86_64",
+    "processor": "i386",
+    "cpu_count": 16,
+    "memory_gb": null,
+    "gpu_name": null,
+    "gpu_count": null,
+    "cuda_version": null,
+    "mps_available": true,
+    "backend_accelerator": "mps"
+  },
+  "run_config": {
+    "seed": 193,
+    "coverage_gate": 0.8,
+    "transport": "R1",
+    "gate_pass": true,
+    "status": "supported",
+    "credit": "hugooconnor \u2014 issue #1 reproduction and critique (per eval/label_blind_ingestion_spec.md)",
+    "deterministic_mode": false,
+    "aggregate": true,
+    "seeds": "193",
+    "seed_count": 1,
+    "seed_run_ids": "dss298-label-blind-ingestion-20260720T100035Z-193"
+  }
+}

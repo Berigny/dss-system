@@ -101,10 +101,14 @@ def test_run_benchmark_emits_aggregate_artifact(tmp_path: Path) -> None:
 
 
 def test_cli_smoke(tmp_path: Path) -> None:
+    import os
     import subprocess
     import sys
 
     script = "apps/backend/backend/benchmarks/dss299_real_data_track_benchmark.py"
+    repo_root = Path(__file__).parent.parent.parent.parent.parent
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(repo_root / "apps" / "backend")
     result = subprocess.run(
         [
             sys.executable,
@@ -115,9 +119,10 @@ def test_cli_smoke(tmp_path: Path) -> None:
             "--seeds", "193",
             "--output-root", str(tmp_path),
         ],
-        cwd=Path(__file__).parent.parent.parent.parent.parent,
+        cwd=repo_root,
         capture_output=True,
         text=True,
+        env=env,
     )
     assert result.returncode == 0, result.stderr
     assert (tmp_path / "aggregate").exists()

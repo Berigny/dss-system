@@ -89,6 +89,7 @@ class BenchmarkConfig:
     max_measured_events: int
     force_generate_queries: bool = False
     pinned_query_path: Path | None = None
+    skip_real_embedding: bool = False
 
 
 @dataclass(frozen=True)
@@ -383,6 +384,11 @@ def _evaluate_size(
             warmup=config.warmup_iterations,
             top_k=config.top_k,
         )
+        real_embedding_notes = (
+            "Mocked embedder (skip_real_embedding=true); latency excludes model load and real encoding cost"
+            if config.skip_real_embedding
+            else "Measured; embedding vector only"
+        )
         systems["real_embedding"] = PerSystemResult(
             system_name="real_embedding",
             events=actual_events,
@@ -390,7 +396,7 @@ def _evaluate_size(
             p95_latency_ms=_percentile(minilm_latencies, 0.95),
             bytes_per_event=_measure_minilm_storage(actual_events) / actual_events,
             measured=True,
-            notes="Measured; embedding vector only",
+            notes=real_embedding_notes,
         )
 
         # HNSW dense index
@@ -403,6 +409,11 @@ def _evaluate_size(
             warmup=config.warmup_iterations,
             top_k=config.top_k,
         )
+        hnsw_notes = (
+            "Mocked embedder (skip_real_embedding=true); HNSW index latency excludes real MiniLM encoding cost"
+            if config.skip_real_embedding
+            else "Measured; HNSW index + vectors"
+        )
         systems["hnsw_dense"] = PerSystemResult(
             system_name="hnsw_dense",
             events=actual_events,
@@ -410,7 +421,7 @@ def _evaluate_size(
             p95_latency_ms=_percentile(hnsw_latencies, 0.95),
             bytes_per_event=_measure_hnsw_storage(memories) / actual_events,
             measured=True,
-            notes="Measured; HNSW index + vectors",
+            notes=hnsw_notes,
         )
 
         # BM25
@@ -709,6 +720,7 @@ def _build_artifact(
             "warmup_iterations": config.warmup_iterations,
             "top_k": config.top_k,
             "seed": seed,
+            "skip_real_embedding": config.skip_real_embedding,
         },
     )
 
@@ -865,6 +877,11 @@ def main(argv: Sequence[str] | None = None) -> None:
         default=None,
         help="Directory containing pinned query sets (default: eval/queries).",
     )
+    parser.add_argument(
+        "--skip-real-embedding",
+        action="store_true",
+        help="Skip the sentence-transformers download by mocking the real embedding baseline.",
+    )
     args = parser.parse_args(argv)
 
     corpus_sizes = args.corpus_sizes
@@ -886,6 +903,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         max_measured_events=max_measured,
         force_generate_queries=args.force_generate_queries,
         pinned_query_path=args.pinned_query_path,
+        skip_real_embedding=args.skip_real_embedding,
     )
     aggregate = run_benchmark(config)
     print(f"Aggregate artifact status: {aggregate.status}")

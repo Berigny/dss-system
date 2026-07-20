@@ -1,0 +1,156 @@
+{
+  "artifact_version": "ksr-eval-v0.4",
+  "run_id": "dss_v0.5_20260720T100032Z",
+  "run_date": "2026-07-20T10:00:35.649837+00:00",
+  "git_commit_sha": "c5df526c693402b96dadee5894c86aba4a213e9f",
+  "corpus_verification": {
+    "status": "ok",
+    "files": {
+      "dss292_known_unknown_synthetic_v1.jsonl": {
+        "expected": "21865552d451b8d18125d5204ea2eaefc123c99305fc9a7dd7f003db969a5655",
+        "actual": "21865552d451b8d18125d5204ea2eaefc123c99305fc9a7dd7f003db969a5655",
+        "valid": true
+      },
+      "dss294_longbench_needle_synthetic_v1.jsonl": {
+        "expected": "8568bee47a339d7c910677e707bb5deb0c1625c5ef58455764d1e301b6b2adcf",
+        "actual": "8568bee47a339d7c910677e707bb5deb0c1625c5ef58455764d1e301b6b2adcf",
+        "valid": true
+      },
+      "dss295_longbench_needle_synthetic_v1.jsonl": {
+        "expected": "f476ad7162773fdf6eed5a42d1afbd042c43abff938a76a09c92affd0faf43d4",
+        "actual": "f476ad7162773fdf6eed5a42d1afbd042c43abff938a76a09c92affd0faf43d4",
+        "valid": true
+      },
+      "longbench_multihop_v1.jsonl": {
+        "expected": "c16def59e764db18fc4cbc9bfba163974caf33f8e47ce8d2c7209ba174ac25e2",
+        "actual": "c16def59e764db18fc4cbc9bfba163974caf33f8e47ce8d2c7209ba174ac25e2",
+        "valid": true
+      },
+      "longbench_needle_v1.jsonl": {
+        "expected": "2bd302aee36318a126c45c15a28f7a5e78f67ea862120dc6704ca040a316fa0c",
+        "actual": "2bd302aee36318a126c45c15a28f7a5e78f67ea862120dc6704ca040a316fa0c",
+        "valid": true
+      },
+      "novel_v0.1.jsonl": {
+        "expected": "7ff5e906968eabebeb6a170a6daae8534993d7c18de8b00f8790221b43de9657",
+        "actual": "7ff5e906968eabebeb6a170a6daae8534993d7c18de8b00f8790221b43de9657",
+        "valid": true
+      }
+    }
+  },
+  "query_verification": {
+    "status": "ok",
+    "manifest_path": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../eval/queries/manifest.json",
+    "files": {
+      "dss292_known_unknown_queries.json": {
+        "expected": "b045bc1461f597599dfe171039c82a0742c4716d138d83a9390e206c697e7784",
+        "actual": "b045bc1461f597599dfe171039c82a0742c4716d138d83a9390e206c697e7784",
+        "valid": true
+      },
+      "dss293_adversarial_poisoning_queries.json": {
+        "expected": "eb5ab7405925040f7bbceb3b4bf736916543973817f2e055f7182f8b0c9a99d7",
+        "actual": "eb5ab7405925040f7bbceb3b4bf736916543973817f2e055f7182f8b0c9a99d7",
+        "valid": true
+      },
+      "dss294_bm25_ranking_queries.json": {
+        "expected": "78f1f180bf961159ca30866b12c1e9f7fcc8f9da393632968b81e0e13cb1176c",
+        "actual": "78f1f180bf961159ca30866b12c1e9f7fcc8f9da393632968b81e0e13cb1176c",
+        "valid": true
+      },
+      "dss295_latency_storage_queries.json": {
+        "expected": "164b60415c282a460b9d7ca0577fcca04589b961f9c8af05bb4f6faf27535a73",
+        "actual": "164b60415c282a460b9d7ca0577fcca04589b961f9c8af05bb4f6faf27535a73",
+        "valid": true
+      }
+    }
+  },
+  "benchmarks": [
+    {
+      "suite": "dss292-known-unknown",
+      "status": "success",
+      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../apps/backend/backend/benchmarks/output/dss292_known_unknown/aggregate"
+    },
+    {
+      "suite": "dss293-adversarial-poisoning",
+      "status": "success",
+      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../apps/backend/backend/benchmarks/output/dss293_adversarial_poisoning/aggregate"
+    },
+    {
+      "suite": "dss294-bm25-ranking",
+      "status": "success",
+      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../apps/backend/backend/benchmarks/output/dss294_bm25_ranking/aggregate"
+    },
+    {
+      "suite": "dss295-latency-storage",
+      "status": "success",
+      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../apps/backend/backend/benchmarks/output/dss295_latency_storage/aggregate"
+    },
+    {
+      "suite": "dss297-citation-faithfulness",
+      "status": "success",
+      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../apps/backend/backend/benchmarks/output/dss297_citation_faithfulness/aggregate"
+    },
+    {
+      "suite": "dss298-label-blind-ingestion",
+      "status": "success",
+      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../apps/backend/backend/benchmarks/output/dss298_label_blind_ingestion/aggregate"
+    },
+    {
+      "suite": "dss299-real-data-track",
+      "status": "success",
+      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../apps/backend/backend/benchmarks/output/dss299_real_data_track/aggregate"
+    }
+  ],
+  "copied_artifacts": [
+    {
+      "suite": "dss292-known-unknown",
+      "status": "copied",
+      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../apps/backend/backend/benchmarks/output/dss292_known_unknown/aggregate/20260720T100034Z.json",
+      "destination": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../eval/reports/benchmarks/dss_v0.5_20260720T100032Z/dss292-known-unknown_aggregate.json",
+      "sha256": "2e47ea757ba318da396d8ead12d1e8a06e4e62f9334797e18628265536757d04"
+    },
+    {
+      "suite": "dss293-adversarial-poisoning",
+      "status": "copied",
+      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../apps/backend/backend/benchmarks/output/dss293_adversarial_poisoning/aggregate/20260720T100034Z.json",
+      "destination": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../eval/reports/benchmarks/dss_v0.5_20260720T100032Z/dss293-adversarial-poisoning_aggregate.json",
+      "sha256": "1e21e0aaf38754acbd91f5e275d4cf4567c2dea32922b98a461136059e776853"
+    },
+    {
+      "suite": "dss294-bm25-ranking",
+      "status": "copied",
+      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../apps/backend/backend/benchmarks/output/dss294_bm25_ranking/aggregate/20260720T100034Z.json",
+      "destination": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../eval/reports/benchmarks/dss_v0.5_20260720T100032Z/dss294-bm25-ranking_aggregate.json",
+      "sha256": "1be5824cd2340c65d2c48aef86b79c6c05433ed0d05c029b38659e25ea8c6b03"
+    },
+    {
+      "suite": "dss295-latency-storage",
+      "status": "copied",
+      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../apps/backend/backend/benchmarks/output/dss295_latency_storage/aggregate/20260720T100035Z.json",
+      "destination": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../eval/reports/benchmarks/dss_v0.5_20260720T100032Z/dss295-latency-storage_aggregate.json",
+      "sha256": "35b0ee5fae10bd7417f45c17a049c93bb100a4e51abed5dfbb7fa6454a8287e2"
+    },
+    {
+      "suite": "dss297-citation-faithfulness",
+      "status": "copied",
+      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../apps/backend/backend/benchmarks/output/dss297_citation_faithfulness/aggregate/20260720T100035Z.json",
+      "destination": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../eval/reports/benchmarks/dss_v0.5_20260720T100032Z/dss297-citation-faithfulness_aggregate.json",
+      "sha256": "f1e1c58e8517a3ccc90d7e4a236705be9dd6ff5ea6036062dcdeaedd7ff10103"
+    },
+    {
+      "suite": "dss298-label-blind-ingestion",
+      "status": "copied",
+      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../apps/backend/backend/benchmarks/output/dss298_label_blind_ingestion/aggregate/20260720T100035Z.json",
+      "destination": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../eval/reports/benchmarks/dss_v0.5_20260720T100032Z/dss298-label-blind-ingestion_aggregate.json",
+      "sha256": "24e1db64d5b00ca9243f1e4fd5548f8549f8ede81d7393ca003b9def39db2a54"
+    },
+    {
+      "suite": "dss299-real-data-track",
+      "status": "copied",
+      "source": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../apps/backend/backend/benchmarks/output/dss299_real_data_track/aggregate/20260720T100035Z.json",
+      "destination": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../eval/reports/benchmarks/dss_v0.5_20260720T100032Z/dss299-real-data-track_aggregate.json",
+      "sha256": "77eeaca7306872add8a976f74d8fe34003ff0b74665cef488e10bd22be5c850a"
+    }
+  ],
+  "reports_directory": "/Users/davidberigny/Documents/GitHub/dss-system/apps/backend/../../eval/reports/benchmarks/dss_v0.5_20260720T100032Z"
+}

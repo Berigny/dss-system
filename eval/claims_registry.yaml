@@ -189,9 +189,10 @@ claims:
     status: supported
     evidence: backend/benchmarks/output/dss295_latency_storage/aggregate
     caveats:
-      - 100 k bucket is measured directly by default; smaller buckets are measured directly.
-      - Extrapolated rows (if any) are explicitly labelled and use constant per-event storage.
-      - Synthetic LongBench needle corpus; enterprise data may differ.
+      - "1 k and 10 k buckets are measured directly by default; the 100 k bucket is extrapolated unless the harness is invoked with --max-events 100000 (or --measure-100k)."
+      - "Extrapolated rows are explicitly labelled and use constant per-event storage (sqrt latency scaling)."
+      - "When skip_real_embedding is true (smoke/CI runs), the real_embedding and hnsw_dense latencies are mocked and exclude model-load and real encoding cost; this explains order-of-magnitude swings between smoke and full runs."
+      - "Synthetic LongBench needle corpus; enterprise data may differ."
 
   - id: C21
     source: DSS-296 benchmark
@@ -211,9 +212,10 @@ claims:
     claim: DSS citation integrity is verified by a deterministic ledger hash-chain check; any LLM judge score is informational only.
     harness: apps/backend/backend/benchmarks/dss297_citation_faithfulness_benchmark.py
     measurement: citation_integrity ratio and chain_valid_rate on synthetic end-to-end responses.
-    status: supported
+    status: failing
     evidence: backend/benchmarks/output/dss297_citation_faithfulness/aggregate
     caveats:
+      - "Current synthetic sample (seed 193, 9 cases) reports citation_integrity 0.7778 with 1 missing and 1 unexpected citation; the 1.0 gate is not met."
       - "Synthetic assistant responses; live chat-surface citations may require additional normalisation."
       - "LLM-as-judge is replaced by a deterministic lexical-overlap surrogate in this benchmark."
 
@@ -236,9 +238,10 @@ claims:
     claim: DSS retrieval and baselines are evaluated on real public QA corpora using label-blind coordinate derivation, with results marked exploratory until the Phase I coverage gate is earned.
     harness: apps/backend/backend/benchmarks/dss299_real_data_track_benchmark.py
     measurement: per-system recall@1, recall@k, MRR, P@1, coverage_score, gate_pass across 5 seeds with CI95
-    status: supported
+    status: partial
     evidence: backend/benchmarks/output/dss299_real_data_track/aggregate
     caveats:
+      - "The published v0.5 artifact in the latest run folder is a dry-run synthetic fallback (1 seed, 4 queries, 24 docs, skip_real_embedding=true). A real HotpotQA/NarrativeQA 5-seed run is required to earn the Phase R claims."
       - "Real-data coverage depends on the public ksr-core concept vocabulary; low coverage is reported honestly as partial/exploratory."
       - "HotpotQA and NarrativeQA are used as representative multi-hop and long-context datasets; additional datasets can be added via the datasets configuration."
       - "Budget cap skips dense baselines if estimated embedding calls exceed the configured limit."

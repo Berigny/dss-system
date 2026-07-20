@@ -1,1 +1,29 @@
-{}
+{
+  "dss_v0.5_20260720T094006Z": {
+    "run_date": "2026-07-20T09:40:09.934458+00:00",
+    "git_commit_sha": "755312cd6142313453fcef59b3ee85d62349fa1b",
+    "failures": [
+      {
+        "claim_id": "C20",
+        "severity": "mismatch",
+        "description": "Claim states 100 k bucket is measured directly by default, but the default eval entrypoint only measures up to 10 k directly; 100 k is extrapolated unless --max-events 100000 is passed.",
+        "artifact_evidence": "eval/reports/benchmarks/dss_v0.5_20260720T094006Z/dss295-latency-storage_aggregate.json shows measured_sizes='1000' and single-seed smoke config.",
+        "resolution": "Updated claims_registry.yaml caveat to state the default is 10 k measured / 100 k extrapolated. A full --max-events 100000 run is in progress."
+      },
+      {
+        "claim_id": "C22",
+        "severity": "gate_failed",
+        "description": "DSS-297 citation_integrity gate failed: 0.7778 < 1.0 with 1 missing and 1 unexpected citation on the synthetic 9-case sample.",
+        "artifact_evidence": "eval/reports/benchmarks/dss_v0.5_20260720T094006Z/dss297-citation-faithfulness_aggregate.json: citation_integrity=0.7778, missing_citations_total=1, unexpected_citations_total=1, citation_gate_passed=0.",
+        "resolution": "Changed C22 status to 'failing' in claims_registry.yaml. The harness now emits artifact status 'partial' when the gate fails. Root cause under investigation."
+      },
+      {
+        "claim_id": "C24",
+        "severity": "mismatch",
+        "description": "Claim states DSS-299 is evaluated across 5 seeds with CI95 on real HotpotQA/NarrativeQA data, but the published artifact is a 1-seed dry-run synthetic fallback.",
+        "artifact_evidence": "eval/reports/benchmarks/dss_v0.5_20260720T094006Z/dss299-real-data-track_aggregate.json: dry_run=true, skip_real_embedding=true, samples_per_dataset=2, seeds='193', seed_count=1.",
+        "resolution": "Changed C24 status to 'partial' in claims_registry.yaml. A real 5-seed run is in progress."
+      }
+    ]
+  }
+}

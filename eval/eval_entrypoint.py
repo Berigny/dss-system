@@ -205,7 +205,7 @@ def _run_dss294(config: EvalConfig) -> dict[str, Any]:
 
     bench_config = Dss294Config(
         output_root=BENCHMARK_OUTPUT_ROOT / "dss294_bm25_ranking",
-        lengths=(4,) if config.dry_run else (4, 8, 16, 32),
+        lengths=(4,) if config.dry_run else (4, 8, 16, 32, 64, 128, 256),
         top_k=5,
         seeds=(193,) if config.dry_run else (193, 42, 7),
         force_generate_queries=config.force_generate_queries,
@@ -236,6 +236,7 @@ def _run_dss295(config: EvalConfig) -> dict[str, Any]:
         max_measured_events=2000 if config.dry_run else 100000,
         force_generate_queries=config.force_generate_queries,
         pinned_query_path=config.pinned_query_path or QUERIES_ROOT,
+        skip_real_embedding=config.skip_real_embedding,
     )
     aggregate = run_dss295(bench_config)
     return {

@@ -1,0 +1,314 @@
+{
+  "artefact_schema_version": "1.0.0",
+  "run_id": "dss292-known-unknown-aggregate-20260720T100034Z",
+  "suite_id": "dss292-known-unknown",
+  "suite_version": "v1",
+  "executed_at": "2026-07-20T10:00:34.686600Z",
+  "mode": "full_dss",
+  "status": "success",
+  "repos": [
+    {
+      "name": "ds-backend-local",
+      "commit_sha": "c5df526c693402b96dadee5894c86aba4a213e9f",
+      "role": "canonical_benchmark_engine",
+      "required_for_run": true
+    }
+  ],
+  "datasets": [
+    {
+      "name": "dss292_known_unknown_synthetic_v1",
+      "version": "v1",
+      "split": "benchmark",
+      "record_count": 75
+    }
+  ],
+  "metrics": {
+    "cost": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "embedding_queries": {
+          "value": 75.0,
+          "unit": "count",
+          "description": "Number of query embeddings computed.",
+          "statistics": {
+            "mean": 75.0,
+            "standard_deviation": 0.0,
+            "min": 75.0,
+            "max": 75.0,
+            "ci_95_low": 75.0,
+            "ci_95_high": 75.0,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "governance": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "qp_abstention_precision": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Qp: true abstentions / total abstentions.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "qp_abstention_recall": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Qp: abstained-on-absent / total absent queries.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "qp_borderline_abstention_recall": {
+          "value": 0.5,
+          "unit": "ratio",
+          "description": "Qp abstention recall when borderline cases are treated as expected-to-abstain.",
+          "statistics": {
+            "mean": 0.5,
+            "standard_deviation": 0.0,
+            "min": 0.5,
+            "max": 0.5,
+            "ci_95_low": 0.5,
+            "ci_95_high": 0.5,
+            "sample_count": 1
+          }
+        },
+        "qp_false_abstention_rate": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "Qp: abstained-on-present / total present queries.",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 1
+          }
+        },
+        "vector_abstention_precision": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Vector-RAG: true abstentions / total abstentions.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "vector_abstention_recall": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "Vector-RAG: abstained-on-absent / total absent queries.",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 1
+          }
+        },
+        "vector_borderline_abstention_recall": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "Vector-RAG abstention recall when borderline cases are treated as expected-to-abstain.",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 1
+          }
+        },
+        "vector_false_abstention_rate": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "Vector-RAG: abstained-on-present / total present queries.",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "latency": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "total_runtime_ms": {
+          "value": 38.82060799514875,
+          "unit": "ms",
+          "description": "Total harness runtime.",
+          "statistics": {
+            "mean": 38.82060799514875,
+            "standard_deviation": 0.0,
+            "min": 38.82060799514875,
+            "max": 38.82060799514875,
+            "ci_95_low": 38.82060799514875,
+            "ci_95_high": 38.82060799514875,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "retrieval": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "qp_present_recall": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Qp recall on known-present facts.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "vector_present_recall": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Vector-RAG recall on known-present facts.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "traceability": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "query_class_absent": {
+          "value": 25.0,
+          "unit": "count",
+          "description": "Number of known-absent queries.",
+          "statistics": {
+            "mean": 25.0,
+            "standard_deviation": 0.0,
+            "min": 25.0,
+            "max": 25.0,
+            "ci_95_low": 25.0,
+            "ci_95_high": 25.0,
+            "sample_count": 1
+          }
+        },
+        "query_class_borderline": {
+          "value": 25.0,
+          "unit": "count",
+          "description": "Number of borderline calibration queries.",
+          "statistics": {
+            "mean": 25.0,
+            "standard_deviation": 0.0,
+            "min": 25.0,
+            "max": 25.0,
+            "ci_95_low": 25.0,
+            "ci_95_high": 25.0,
+            "sample_count": 1
+          }
+        },
+        "query_class_present": {
+          "value": 25.0,
+          "unit": "count",
+          "description": "Number of known-present queries.",
+          "statistics": {
+            "mean": 25.0,
+            "standard_deviation": 0.0,
+            "min": 25.0,
+            "max": 25.0,
+            "ci_95_low": 25.0,
+            "ci_95_high": 25.0,
+            "sample_count": 1
+          }
+        },
+        "total_queries": {
+          "value": 75.0,
+          "unit": "count",
+          "description": "Total number of evaluated queries.",
+          "statistics": {
+            "mean": 75.0,
+            "standard_deviation": 0.0,
+            "min": 75.0,
+            "max": 75.0,
+            "ci_95_low": 75.0,
+            "ci_95_high": 75.0,
+            "sample_count": 1
+          }
+        }
+      }
+    }
+  },
+  "freshness": {
+    "status": "fresh",
+    "checked_at": "2026-07-20T10:00:34.686600Z",
+    "max_age_hours": 24,
+    "age_hours": 0.0
+  },
+  "failure_reason": null,
+  "hardware": {
+    "platform": "Darwin-25.5.0-x86_64",
+    "processor": "i386",
+    "cpu_count": 16,
+    "memory_gb": null,
+    "gpu_name": null,
+    "gpu_count": null,
+    "cuda_version": null,
+    "mps_available": true,
+    "backend_accelerator": "mps"
+  },
+  "run_config": {
+    "lengths": "4",
+    "top_k": 5,
+    "seed": 193,
+    "alpha": 0.05,
+    "gate_passed": true,
+    "gate_abstention_precision_min": 0.98,
+    "gate_abstention_recall_min": 0.95,
+    "gate_false_abstention_rate_max": 0.1,
+    "deterministic_mode": false,
+    "aggregate": true,
+    "seeds": "193",
+    "seed_count": 1,
+    "seed_run_ids": "dss292-known-unknown-20260720T100034Z-193"
+  }
+}
