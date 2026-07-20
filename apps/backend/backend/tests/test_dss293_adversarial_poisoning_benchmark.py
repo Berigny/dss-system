@@ -54,10 +54,10 @@ def test_compatible_coord_conflict_forces_invariant_flag() -> None:
 
 
 def test_evaluate_meets_gate_target() -> None:
-    summary = evaluate(seed=193)
+    summary = evaluate(seed=193, num_cases=108)
     assert summary.flagged_or_preserved == summary.cases
     assert summary.silent_displacements == 0
-    assert summary.cases == 3
+    assert summary.cases == 108
 
 
 def test_single_seed_artifact_validates(tmp_path) -> None:

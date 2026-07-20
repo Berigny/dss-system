@@ -38,6 +38,7 @@ from backend.benchmarks.comparison_baselines import (
     BoWStandInBaseline,
 )
 from backend.benchmarks.harness import BenchmarkHarness
+from backend.benchmarks.hnsw_dense_baseline import HnswDenseBaseline
 from backend.benchmarks.longbench_needle_benchmark import (
     DEFAULT_LENGTHS,
     NeedleMemory,
@@ -308,6 +309,34 @@ def _metadata_filter_result(
     )
 
 
+def _hnsw_result(
+    memories: Sequence[NeedleMemory],
+    queries: Sequence[NeedleQuery],
+    *,
+    top_k: int,
+) -> SystemResult:
+    """Evaluate the HNSW-indexed MiniLM baseline and compute ranking metrics."""
+    memory_dicts, query_dicts = _normalize_for_baseline(memories, queries)
+    # Share the embedder with the brute-force MiniLM arm to avoid double-loading.
+    embedder = RealEmbeddingBaseline()._ensure_embedder()
+    baseline = HnswDenseBaseline(embedder=embedder)
+    start = time.perf_counter()
+    result = baseline.run(memory_dicts, query_dicts, top_k=top_k)
+    latency_ms = (time.perf_counter() - start) * 1000.0
+
+    return SystemResult(
+        system_name=baseline.name,
+        p_at_k=result.precision_at_k or {k: 0.0 for k in range(1, top_k + 1)},
+        ndcg_at_k=result.ndcg_at_k or {k: 0.0 for k in range(1, top_k + 1)},
+        recall_at_1=result.recall_at_1,
+        recall_at_k=result.recall_at_k,
+        mrr=result.mrr,
+        abstention_rate=None,
+        avg_latency_ms=latency_ms,
+        token_cost=result.token_cost,
+    )
+
+
 def _real_embedding_result(
     memories: Sequence[NeedleMemory],
     queries: Sequence[NeedleQuery],
@@ -386,6 +415,7 @@ def evaluate(
     systems: dict[str, SystemResult] = {
         "dss_qp_router": _dss_result(memories, queries, top_k=top_k),
         "real_embedding": _real_embedding_result(memories, queries, top_k=top_k),
+        "hnsw_dense": _hnsw_result(memories, queries, top_k=top_k),
         "bm25": _ranking_result_from_baseline(
             BM25Baseline(), memories, queries, top_k=top_k
         ),

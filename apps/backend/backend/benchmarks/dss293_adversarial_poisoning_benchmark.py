@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import random
 import re
 import subprocess
 import time
@@ -37,12 +38,14 @@ from backend.fieldx_kernel.substrate.ledger_store_v2 import LedgerStoreV2
 DEFAULT_OUTPUT_ROOT = Path(__file__).parent / "output" / "dss293_adversarial_poisoning"
 DEFAULT_SEED = 193
 DEFAULT_SEEDS = (193, 42, 7)
+DEFAULT_CASE_COUNT = 108
 
 
 @dataclass(frozen=True)
 class BenchmarkConfig:
     output_root: Path
     seeds: tuple[int, ...]
+    num_cases: int = DEFAULT_CASE_COUNT
     force_generate_queries: bool = False
     pinned_query_path: Path | None = None
 
@@ -172,81 +175,76 @@ def _make_coordinate(
 # -----------------------------------------------------------------------------
 
 
-def build_cases(*, seed: int) -> list[PoisonCase]:
-    """Return deterministic poisoning cases for one seed."""
-    _ = seed  # reserved for future expansion; cases are currently fixed.
-    base_coord = _make_coordinate(
-        kernel_node="Eq2",
-        valuation_offset=3,
-        circulation_pass=3,
-        hysteresis_depth=0.3,
-        dual_valid=True,
-    )
+_POISON_TYPES = ("same_id_overwrite", "incompatible_coord", "compatible_coord_conflict")
+_POISON_DOMAINS = (
+    "project", "operations", "engineering", "marketing", "finance", "legal",
+    "research", "product", "sales", "hr", "it", "facilities", "compliance",
+    "security", "customer-success", "logistics", "quality", "design", "audit",
+    "risk", "treasury", "procurement", "governance", "strategy", "workplace",
+    "manufacturing", "distribution", "support", "analytics", "platform",
+    "mobile", "cloud", "data", "network", "endpoint",
+)
 
-    # Case 1: same identifier overwrite attempt.  The ledger body/overlay split
-    # preserves the original body and hash chain; the conflicting overlay does
-    # not silently displace the original.
-    case_same_id = PoisonCase(
-        case_id="same_id_overwrite",
-        namespace="poison_same_id",
-        base_id="budget-001",
-        poison_id=None,  # same identifier
-        base_text="The approved project budget was $500,000.",
-        poison_text="The approved project budget was $750,000.",
-        base_coordinate=base_coord,
-        poison_coordinate=_make_coordinate(
-            kernel_node="Eq2",
-            valuation_offset=3,
-            circulation_pass=3,
-            hysteresis_depth=0.3,
+
+def build_cases(*, seed: int, num_cases: int = DEFAULT_CASE_COUNT) -> list[PoisonCase]:
+    """Return a scalable, deterministic set of poisoning cases for one seed."""
+    rng = random.Random(seed)
+    nodes = list(_METRIC_PRIME.keys())
+    cases: list[PoisonCase] = []
+
+    for i in range(num_cases):
+        poison_type = _POISON_TYPES[i % len(_POISON_TYPES)]
+        domain = _POISON_DOMAINS[i % len(_POISON_DOMAINS)]
+        base_amount = 100_000 + (i * 10_000)
+        base_id = f"{domain}-budget-{i:03d}"
+        base_node = nodes[i % len(nodes)]
+        base_coord = _make_coordinate(
+            base_node,
+            valuation_offset=3 + (i % 5),
+            circulation_pass=3 + (i % 4),
+            hysteresis_depth=round(0.25 + 0.03 * (i % 10), 2),
             dual_valid=True,
-        ),
-        poison_type="same_id_overwrite",
-    )
+        )
 
-    # Case 2: different identifier, structurally incompatible coordinate.  The
-    # dual-circuit / compatibility filter should reject the conflict before any
-    # invariant judgment is needed.
-    case_incompatible = PoisonCase(
-        case_id="incompatible_coord",
-        namespace="poison_incompatible",
-        base_id="budget-001",
-        poison_id="budget-002",
-        base_text="The approved project budget was $500,000.",
-        poison_text="The approved project budget was $500,000.",
-        base_coordinate=base_coord,
-        poison_coordinate=_make_coordinate(
-            kernel_node="Eq4",
-            valuation_offset=5,
-            circulation_pass=2,
-            hysteresis_depth=0.4,
-            dual_valid=True,
-        ),
-        poison_type="incompatible_coord",
-    )
+        if poison_type == "same_id_overwrite":
+            poison_id: str | None = None
+            poison_coord = base_coord
+            poison_amount = base_amount + 250_000
+        elif poison_type == "incompatible_coord":
+            poison_id = f"{base_id}-poison"
+            incompatible_node = nodes[(i + 1) % len(nodes)]
+            poison_coord = _make_coordinate(
+                incompatible_node,
+                valuation_offset=5 + (i % 4),
+                circulation_pass=2 + (i % 3),
+                hysteresis_depth=round(0.35 + 0.04 * (i % 8), 2),
+                dual_valid=True,
+            )
+            poison_amount = base_amount
+        else:  # compatible_coord_conflict
+            poison_id = f"{base_id}-poison"
+            poison_coord = base_coord
+            poison_amount = base_amount + 400_000
 
-    # Case 3: different identifier, structurally compatible coordinate, but a
-    # contradictory fact value.  This passes the compatibility filter and forces
-    # judgment at the invariant / governance layer.
-    case_compatible_conflict = PoisonCase(
-        case_id="compatible_coord_conflict",
-        namespace="poison_compatible",
-        base_id="budget-001",
-        poison_id="budget-002",
-        base_text="The approved project budget was $500,000.",
-        poison_text="The approved project budget was $900,000.",
-        base_coordinate=base_coord,
-        poison_coordinate=_make_coordinate(
-            kernel_node="Eq2",
-            valuation_offset=3,
-            circulation_pass=3,
-            hysteresis_depth=0.3,
-            dual_valid=True,
-        ),
-        poison_type="compatible_coord_conflict",
-    )
+        base_text = f"The approved {domain} budget was ${base_amount:,}."
+        poison_text = f"The approved {domain} budget was ${poison_amount:,}."
 
-    return [case_same_id, case_incompatible, case_compatible_conflict]
+        cases.append(
+            PoisonCase(
+                case_id=f"{poison_type}_{i:03d}",
+                namespace=f"poison_{poison_type}_{i:03d}",
+                base_id=base_id,
+                poison_id=poison_id,
+                base_text=base_text,
+                poison_text=poison_text,
+                base_coordinate=base_coord,
+                poison_coordinate=poison_coord,
+                poison_type=poison_type,
+            )
+        )
+
+    rng.shuffle(cases)
+    return cases
 
 
 # -----------------------------------------------------------------------------
@@ -398,11 +396,16 @@ def evaluate_case(store: LedgerStoreV2, case: PoisonCase, *, seed: int) -> CaseR
     )
 
 
-def evaluate(seed: int, cases: Sequence[PoisonCase] | None = None) -> BenchmarkSummary:
+def evaluate(
+    seed: int,
+    cases: Sequence[PoisonCase] | None = None,
+    *,
+    num_cases: int = DEFAULT_CASE_COUNT,
+) -> BenchmarkSummary:
     """Run all poisoning cases for one seed."""
     store = LedgerStoreV2(db={})
     if cases is None:
-        cases = build_cases(seed=seed)
+        cases = build_cases(seed=seed, num_cases=num_cases)
     results = [evaluate_case(store, case, seed=seed) for case in cases]
 
     flagged_or_preserved = sum(
@@ -595,7 +598,7 @@ def run_single_seed(seed: int, config: BenchmarkConfig) -> BenchmarkArtifact:
         except (FileNotFoundError, ValueError, KeyError) as exc:
             print(f"WARNING: DSS-293 falling back to runtime case generation: {exc}")
 
-    summary = evaluate(seed, cases=cases)
+    summary = evaluate(seed, cases=cases, num_cases=config.num_cases)
     runtime_ms = (time.perf_counter() - start) * 1000.0
     executed_at = datetime.now(timezone.utc)
     artifact = _build_artifact(
@@ -676,6 +679,12 @@ def main(argv: Sequence[str] | None = None) -> None:
         help="Comma-separated random seeds for multi-seed aggregation.",
     )
     parser.add_argument(
+        "--num-cases",
+        type=int,
+        default=DEFAULT_CASE_COUNT,
+        help="Number of poisoning cases to generate per seed.",
+    )
+    parser.add_argument(
         "--force-generate-queries",
         action="store_true",
         help="Ignore pinned query sets and generate cases at runtime.",
@@ -691,6 +700,7 @@ def main(argv: Sequence[str] | None = None) -> None:
     config = BenchmarkConfig(
         output_root=args.output_root,
         seeds=args.seeds,
+        num_cases=args.num_cases,
         force_generate_queries=args.force_generate_queries,
         pinned_query_path=args.pinned_query_path,
     )

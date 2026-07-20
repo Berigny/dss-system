@@ -21,7 +21,7 @@ from backend.benchmarks.dss292_known_unknown_benchmark import (
 
 
 def test_generate_corpus_creates_three_query_classes() -> None:
-    memories, queries = generate_corpus((4, 8), seed=193)
+    memories, queries = generate_corpus((4, 8), seed=193, variants_per_length=5)
     classes = {q.query_class for q in queries}
     assert classes == {QueryClass.PRESENT, QueryClass.ABSENT, QueryClass.BORDERLINE}
     assert all(q.target_id is not None for q in queries if q.query_class == QueryClass.PRESENT)
@@ -29,19 +29,19 @@ def test_generate_corpus_creates_three_query_classes() -> None:
 
 
 def test_present_queries_have_matching_memory() -> None:
-    memories, queries = generate_corpus((4,), seed=193)
+    memories, queries = generate_corpus((4,), seed=193, variants_per_length=5)
     present = [q for q in queries if q.query_class == QueryClass.PRESENT]
     memory_ids = {m.memory_id for m in memories}
-    assert len(present) == 1
-    assert present[0].target_id in memory_ids
+    assert len(present) == 5
+    assert all(q.target_id in memory_ids for q in present)
 
 
 def test_absent_queries_have_no_matching_memory() -> None:
-    memories, queries = generate_corpus((4,), seed=193)
+    memories, queries = generate_corpus((4,), seed=193, variants_per_length=5)
     absent = [q for q in queries if q.query_class == QueryClass.ABSENT]
     memory_ids = {m.memory_id for m in memories}
-    assert len(absent) == 1
-    assert absent[0].target_id not in memory_ids
+    assert len(absent) == 5
+    assert all(q.target_id not in memory_ids for q in absent)
 
 
 def test_qp_router_abstains_on_absent_queries() -> None:

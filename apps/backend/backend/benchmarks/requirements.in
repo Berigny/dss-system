@@ -12,3 +12,4 @@ pypdf
 python-docx
 cryptography
 rank-bm25
+hnswlib

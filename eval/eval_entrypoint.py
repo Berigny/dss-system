@@ -231,8 +231,8 @@ def _run_dss295(config: EvalConfig) -> dict[str, Any]:
         query_iterations=5 if config.dry_run else 50,
         warmup_iterations=1 if config.dry_run else 5,
         seeds=(193,) if config.dry_run else (193, 42, 7),
-        measure_100k=True if config.dry_run else False,
-        max_measured_events=2000 if config.dry_run else 10000,
+        measure_100k=True,
+        max_measured_events=2000 if config.dry_run else 100000,
         force_generate_queries=config.force_generate_queries,
         pinned_query_path=config.pinned_query_path or QUERIES_ROOT,
     )

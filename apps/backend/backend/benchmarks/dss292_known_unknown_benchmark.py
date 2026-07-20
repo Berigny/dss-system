@@ -52,6 +52,7 @@ DEFAULT_SEEDS = (193, 42, 7)
 ALPHA = 0.05
 WORKING_PRECISION = 16
 
+# Legacy single-fact texts (kept for deterministic small-corpus tests).
 PRESENT_TEXT = (
     "The project budget was approved at 9:00 and the contingency reserve was 2 percent."
 )
@@ -65,6 +66,67 @@ QUERY_PRESENT = "What was the approved budget contingency reserve?"
 QUERY_ABSENT = "What was the emergency override code procedure?"
 QUERY_BORDERLINE = "Was a 2 percent contingency reserve approved for the project budget?"
 
+DEFAULT_VARIANTS_PER_LENGTH = 25
+
+_ABSENT_KERNEL_NODE = "Eq0"
+_VARIANT_KERNEL_NODES = tuple(
+    node for node in _METRIC_PRIME.keys() if node.startswith("Eq") and node != _ABSENT_KERNEL_NODE
+)
+
+_VARIANT_DOMAINS = (
+    "project",
+    "operations",
+    "engineering",
+    "marketing",
+    "finance",
+    "legal",
+    "research",
+    "product",
+    "sales",
+    "hr",
+    "it",
+    "facilities",
+    "compliance",
+    "security",
+    "customer-success",
+    "logistics",
+    "quality",
+    "design",
+    "audit",
+    "risk",
+    "treasury",
+    "procurement",
+    "governance",
+    "strategy",
+    "workplace",
+)
+
+_VARIANT_TEMPLATE = {
+    "present": "The {domain} budget was approved at {time} and the contingency reserve was {pct} percent.",
+    "absent": "The {domain} emergency override code was {code} and required {witnesses} witness signatures.",
+    "borderline": "The {domain} budget discussion started at {time} and a contingency of {pct} percent was mentioned informally.",
+    "query_present": "What was the approved {domain} budget contingency reserve?",
+    "query_absent": "What was the {domain} emergency override code procedure?",
+    "query_borderline": "Was a {pct} percent contingency reserve approved for the {domain} budget?",
+}
+
+
+def _variant_texts(rng: random.Random, variant: int) -> dict[str, str]:
+    """Return deterministic present/absent/borderline/query texts for a variant."""
+    domain = _VARIANT_DOMAINS[variant % len(_VARIANT_DOMAINS)]
+    time = f"{rng.randint(1, 12)}:{rng.randint(0, 5)}{rng.randint(0, 9)}"
+    pct = rng.randint(1, 20)
+    code = "-".join(str(rng.randint(0, 9)) for _ in range(3))
+    witnesses = rng.randint(1, 5)
+    return {
+        "present": _VARIANT_TEMPLATE["present"].format(domain=domain, time=time, pct=pct),
+        "absent": _VARIANT_TEMPLATE["absent"].format(domain=domain, code=code, witnesses=witnesses),
+        "borderline": _VARIANT_TEMPLATE["borderline"].format(domain=domain, time=time, pct=pct),
+        "query_present": _VARIANT_TEMPLATE["query_present"].format(domain=domain),
+        "query_absent": _VARIANT_TEMPLATE["query_absent"].format(domain=domain),
+        "query_borderline": _VARIANT_TEMPLATE["query_borderline"].format(domain=domain, pct=pct),
+    }
+
 
 @dataclass(frozen=True)
 class BenchmarkConfig:
@@ -72,6 +134,7 @@ class BenchmarkConfig:
     lengths: tuple[int, ...]
     top_k: int
     seeds: tuple[int, ...]
+    variants_per_length: int = DEFAULT_VARIANTS_PER_LENGTH
     force_generate_queries: bool = False
     pinned_query_path: Path | None = None
 
@@ -273,10 +336,17 @@ def _distractor_text(rng: random.Random, query_tokens: set[str]) -> str:
 _KNOWN_KERNEL_NODES = tuple(_METRIC_PRIME.keys())
 
 
-def _random_kernel_node(rng: random.Random, avoid: str | None = None) -> str:
+def _random_kernel_node(
+    rng: random.Random, avoid: str | Sequence[str] | None = None
+) -> str:
+    avoid_set: set[str] = {_ABSENT_KERNEL_NODE}
+    if isinstance(avoid, str):
+        avoid_set.add(avoid)
+    elif avoid is not None:
+        avoid_set.update(avoid)
     while True:
         node = rng.choice(_KNOWN_KERNEL_NODES)
-        if node != avoid:
+        if node not in avoid_set:
             return node
 
 
@@ -284,135 +354,140 @@ def generate_corpus(
     lengths: Sequence[int] = DEFAULT_LENGTHS,
     *,
     seed: int = DEFAULT_SEED,
+    variants_per_length: int = DEFAULT_VARIANTS_PER_LENGTH,
 ) -> tuple[list[Memory], list[BenchmarkQuery]]:
     """Generate a deterministic known-present / known-absent / borderline corpus.
 
-    For each requested haystack length, one present memory is inserted and
-    ``length`` distractors are added.  Absent and borderline queries have no
-    matching memory in the corpus; absent facts are structurally incompatible
-    with the query coordinate, while borderline facts are structurally close
-    but not identical.
+    For each requested haystack length, ``variants_per_length`` independent fact
+    variants are inserted.  Each variant gets one present memory, ``length``
+    distractors, and one present / absent / borderline query triple.  This scales
+    the suite to hundreds of cases while keeping every present query coordinate
+    structurally unique so that the target memory is unambiguous.
     """
     rng = random.Random(seed)
-    query_tokens_present = set(normalise_tokens(QUERY_PRESENT))
-    query_tokens_absent = set(normalise_tokens(QUERY_ABSENT))
-    query_tokens_borderline = set(normalise_tokens(QUERY_BORDERLINE))
 
     memories: list[Memory] = []
     queries: list[BenchmarkQuery] = []
 
     for length in lengths:
-        # One present memory per length.
-        present_coord = _make_coordinate(
-            kernel_node="Eq2",
-            valuation_offset=3,
-            circulation_pass=3,
-            hysteresis_depth=0.3,
-            dual_valid=True,
-        )
-        present_id = f"len{length}:present"
-        memories.append(
-            Memory(
-                memory_id=present_id,
-                text=PRESENT_TEXT,
-                coordinate=present_coord,
-                length=length,
+        for variant in range(variants_per_length):
+            texts = _variant_texts(rng, variant)
+            present_node = _VARIANT_KERNEL_NODES[variant % len(_VARIANT_KERNEL_NODES)]
+            # Deterministic coordinate parameters that vary per variant but stay
+            # compatible between the present memory and its query.
+            present_coord = _make_coordinate(
+                kernel_node=present_node,
+                valuation_offset=2 + (variant % 5),
+                circulation_pass=2 + (variant % 4),
+                hysteresis_depth=round(0.1 + 0.05 * (variant % 7), 2),
+                dual_valid=True,
             )
-        )
-
-        # Distractors for the present query.
-        for i in range(length):
-            distractor_type = rng.choice(
-                ["semantic", "semantic", "lexical", "depth", "random"]
-            )
-            if distractor_type == "semantic":
-                coord = _make_coordinate(
-                    kernel_node="Eq2",
-                    valuation_offset=3,
-                    circulation_pass=3,
-                    hysteresis_depth=0.3,
-                    dual_valid=False,
-                )
-            elif distractor_type == "depth":
-                coord = _make_coordinate(
-                    kernel_node="Eq2",
-                    valuation_offset=rng.randint(6, 9),
-                    circulation_pass=rng.randint(6, 9),
-                    hysteresis_depth=round(rng.uniform(0.6, 0.9), 2),
-                    dual_valid=True,
-                )
-            elif distractor_type == "lexical":
-                coord = _make_coordinate(
-                    kernel_node=_random_kernel_node(rng, avoid="Eq2"),
-                    valuation_offset=rng.randint(1, 4),
-                    circulation_pass=rng.randint(0, 4),
-                    hysteresis_depth=round(rng.uniform(0.0, 0.4), 2),
-                    dual_valid=None,
-                )
-            else:  # random
-                coord = _make_coordinate(
-                    kernel_node=_random_kernel_node(rng),
-                    valuation_offset=rng.randint(0, 3),
-                    circulation_pass=rng.randint(0, 3),
-                    hysteresis_depth=round(rng.uniform(0.0, 0.3), 2),
-                    dual_valid=None,
-                )
-
-            if distractor_type == "random":
-                text = "The quick brown fox jumps over the lazy dog under a bright moon."
-            else:
-                text = _distractor_text(rng, query_tokens_present)
+            present_id = f"len{length}:v{variant}:present"
             memories.append(
                 Memory(
-                    memory_id=f"len{length}:d{i}:{distractor_type}",
-                    text=text,
-                    coordinate=coord,
+                    memory_id=present_id,
+                    text=texts["present"],
+                    coordinate=present_coord,
                     length=length,
                 )
             )
 
-        queries.append(
-            BenchmarkQuery(
-                query_id=f"len{length}:q_present",
-                text=QUERY_PRESENT,
-                coordinate=present_coord,
-                query_class=QueryClass.PRESENT,
-                target_id=present_id,
-                length=length,
+            query_tokens_present = set(normalise_tokens(texts["query_present"]))
+
+            # Distractors for this variant's present query.
+            for i in range(length):
+                distractor_type = rng.choice(
+                    ["semantic", "semantic", "lexical", "depth", "random"]
+                )
+                if distractor_type == "semantic":
+                    coord = _make_coordinate(
+                        kernel_node=present_node,
+                        valuation_offset=2 + (variant % 5),
+                        circulation_pass=2 + (variant % 4),
+                        hysteresis_depth=round(0.1 + 0.05 * (variant % 7), 2),
+                        dual_valid=False,
+                    )
+                elif distractor_type == "depth":
+                    coord = _make_coordinate(
+                        kernel_node=present_node,
+                        valuation_offset=rng.randint(6, 9),
+                        circulation_pass=rng.randint(6, 9),
+                        hysteresis_depth=round(rng.uniform(0.6, 0.9), 2),
+                        dual_valid=True,
+                    )
+                elif distractor_type == "lexical":
+                    coord = _make_coordinate(
+                        kernel_node=_random_kernel_node(rng, avoid=present_node),
+                        valuation_offset=rng.randint(1, 4),
+                        circulation_pass=rng.randint(0, 4),
+                        hysteresis_depth=round(rng.uniform(0.0, 0.4), 2),
+                        dual_valid=None,
+                    )
+                else:  # random
+                    coord = _make_coordinate(
+                        kernel_node=_random_kernel_node(rng),
+                        valuation_offset=rng.randint(0, 3),
+                        circulation_pass=rng.randint(0, 3),
+                        hysteresis_depth=round(rng.uniform(0.0, 0.3), 2),
+                        dual_valid=None,
+                    )
+
+                if distractor_type == "random":
+                    text = "The quick brown fox jumps over the lazy dog under a bright moon."
+                else:
+                    text = _distractor_text(rng, query_tokens_present)
+                memories.append(
+                    Memory(
+                        memory_id=f"len{length}:v{variant}:d{i}:{distractor_type}",
+                        text=text,
+                        coordinate=coord,
+                        length=length,
+                    )
+                )
+
+            queries.append(
+                BenchmarkQuery(
+                    query_id=f"len{length}:v{variant}:q_present",
+                    text=texts["query_present"],
+                    coordinate=present_coord,
+                    query_class=QueryClass.PRESENT,
+                    target_id=present_id,
+                    length=length,
+                )
             )
-        )
-        # Absent-query coordinate uses a different metric prime family so no
-        # memory in this corpus can be structurally compatible.
-        absent_coord = _make_coordinate(
-            kernel_node="Eq4",
-            valuation_offset=5,
-            circulation_pass=2,
-            hysteresis_depth=0.4,
-            dual_valid=True,
-        )
-        queries.append(
-            BenchmarkQuery(
-                query_id=f"len{length}:q_absent",
-                text=QUERY_ABSENT,
-                coordinate=absent_coord,
-                query_class=QueryClass.ABSENT,
-                target_id=None,
-                length=length,
+            # Absent-query coordinate uses a reserved kernel node (Eq0) that no
+            # memory in the corpus uses, guaranteeing structural incompatibility
+            # and therefore abstention.
+            absent_coord = _make_coordinate(
+                kernel_node=_ABSENT_KERNEL_NODE,
+                valuation_offset=5 + (variant % 4),
+                circulation_pass=2 + (variant % 3),
+                hysteresis_depth=round(0.3 + 0.05 * (variant % 5), 2),
+                dual_valid=True,
             )
-        )
-        # Borderline query uses the present coordinate family (structurally
-        # compatible with the present memory) but asks an ambiguous factual
-        # question; the correct behavior is abstention.
-        queries.append(
-            BenchmarkQuery(
-                query_id=f"len{length}:q_borderline",
-                text=QUERY_BORDERLINE,
-                coordinate=present_coord,
-                query_class=QueryClass.BORDERLINE,
-                target_id=None,
-                length=length,
+            queries.append(
+                BenchmarkQuery(
+                    query_id=f"len{length}:v{variant}:q_absent",
+                    text=texts["query_absent"],
+                    coordinate=absent_coord,
+                    query_class=QueryClass.ABSENT,
+                    target_id=None,
+                    length=length,
+                )
             )
-        )
+            # Borderline query uses the present coordinate family (structurally
+            # compatible with the present memory) but asks an ambiguous factual
+            # question; the correct behavior is abstention.
+            queries.append(
+                BenchmarkQuery(
+                    query_id=f"len{length}:v{variant}:q_borderline",
+                    text=texts["query_borderline"],
+                    coordinate=present_coord,
+                    query_class=QueryClass.BORDERLINE,
+                    target_id=None,
+                    length=length,
+                )
+            )
 
     return memories, queries
 
@@ -845,11 +920,13 @@ def _load_or_generate_queries(
                 root=config.pinned_query_path or QUERIES_ROOT,
                 lengths=config.lengths,
             )
-            memories, _ = generate_corpus(config.lengths, seed=seed)
+            memories, _ = generate_corpus(
+                config.lengths, seed=seed, variants_per_length=config.variants_per_length
+            )
             return memories, pinned_queries
         except (FileNotFoundError, ValueError, KeyError) as exc:
             print(f"WARNING: DSS-292 falling back to runtime query generation: {exc}")
-    return generate_corpus(config.lengths, seed=seed)
+    return generate_corpus(config.lengths, seed=seed, variants_per_length=config.variants_per_length)
 
 
 def run_single_seed(seed: int, config: BenchmarkConfig) -> BenchmarkArtifact:
@@ -962,6 +1039,12 @@ def main(argv: Sequence[str] | None = None) -> None:
         help="Comma-separated random seeds for multi-seed aggregation.",
     )
     parser.add_argument(
+        "--variants-per-length",
+        type=int,
+        default=DEFAULT_VARIANTS_PER_LENGTH,
+        help="Number of independent fact variants per haystack length.",
+    )
+    parser.add_argument(
         "--force-generate-queries",
         action="store_true",
         help="Ignore pinned query sets and generate queries at runtime.",
@@ -979,6 +1062,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         lengths=args.lengths,
         top_k=args.top_k,
         seeds=args.seeds,
+        variants_per_length=args.variants_per_length,
         force_generate_queries=args.force_generate_queries,
         pinned_query_path=args.pinned_query_path,
     )

@@ -30,7 +30,7 @@ COPY . /app
 # Install shared types first, then backend requirements, then benchmark extras.
 RUN pip install --no-cache-dir -e /app/packages/shared-types
 RUN pip install --no-cache-dir -r /app/apps/backend/requirements.txt
-RUN pip install --no-cache-dir rank-bm25 sentence-transformers
+RUN pip install --no-cache-dir rank-bm25 sentence-transformers hnswlib
 
 # The entrypoint is intentionally at repo-root level so it can see both
 # apps/backend and eval/ paths.

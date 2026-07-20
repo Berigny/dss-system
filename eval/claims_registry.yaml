@@ -173,23 +173,24 @@ claims:
 
   - id: C19
     source: DSS-294 benchmark
-    quote: "P@k and NDCG@k reported for BM25, real MiniLM, metadata-filter, BoW stand-in; DSS P@1 + abstention rate documented honestly"
-    claim: DSS ranking trade-offs are evaluated against BM25 and embedding baselines using Precision@k and NDCG@k without fabricating DSS rankings.
+    quote: "P@k and NDCG@k reported for BM25, real MiniLM, HNSW dense index, metadata-filter, BoW stand-in; DSS P@1 + abstention rate documented honestly"
+    claim: DSS ranking trade-offs are evaluated against BM25, brute-force dense, HNSW-indexed dense, metadata-filter, and BoW baselines using Precision@k and NDCG@k without fabricating DSS rankings.
     harness: apps/backend/backend/benchmarks/dss294_bm25_baseline.py
-    measurement: bm25_p_at_k, bm25_ndcg_at_k, real_embedding_p_at_k, dss_qp_router_p_at_1, dss_qp_router_abstention_rate
+    measurement: bm25_p_at_k, bm25_ndcg_at_k, real_embedding_p_at_k, hnsw_dense_p_at_k, dss_qp_router_p_at_1, dss_qp_router_abstention_rate
     status: supported
     evidence: backend/benchmarks/output/dss294_bm25_ranking/aggregate
 
   - id: C20
     source: DSS-295 benchmark
-    quote: "Measured wall-clock p50/p95 latency and bytes-per-event for DSS, MiniLM, BM25, metadata-filter, and BoW across corpus sizes"
+    quote: "Measured wall-clock p50/p95 latency and bytes-per-event for DSS, MiniLM, HNSW, BM25, metadata-filter, and BoW across corpus sizes"
     claim: DSS latency and storage costs are measured and reported with honest extrapolation labels.
     harness: apps/backend/backend/benchmarks/dss295_latency_storage_benchmark.py
     measurement: p50_latency_ms, p95_latency_ms, bytes_per_event across 1 k/10 k/100 k event buckets
     status: supported
     evidence: backend/benchmarks/output/dss295_latency_storage/aggregate
     caveats:
-      - 100 k bucket is extrapolated from direct measurements up to 10 k events unless --measure-100k is used.
+      - 100 k bucket is measured directly by default; smaller buckets are measured directly.
+      - Extrapolated rows (if any) are explicitly labelled and use constant per-event storage.
       - Synthetic LongBench needle corpus; enterprise data may differ.
 
   - id: C21

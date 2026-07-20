@@ -108,6 +108,7 @@ def test_evaluate_includes_all_systems() -> None:
         assert set(summary.systems.keys()) == {
             "dss_qp_router",
             "real_embedding",
+            "hnsw_dense",
             "bm25",
             "metadata_filter",
             "bow_stand_in",

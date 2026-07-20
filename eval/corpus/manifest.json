@@ -2,13 +2,29 @@
   "schema_version": "1.0",
   "generated_at": "2026-07-20T00:00:00Z",
   "files": {
-    "longbench_needle_v1.jsonl": {
-      "sha256": "2bd302aee36318a126c45c15a28f7a5e78f67ea862120dc6704ca040a316fa0c",
-      "records": 522
+    "dss292_known_unknown_synthetic_v1.jsonl": {
+      "sha256": "21865552d451b8d18125d5204ea2eaefc123c99305fc9a7dd7f003db969a5655",
+      "records": 1600
+    },
+    "dss294_longbench_needle_synthetic_v1.jsonl": {
+      "sha256": "8568bee47a339d7c910677e707bb5deb0c1625c5ef58455764d1e301b6b2adcf",
+      "records": 64
+    },
+    "dss295_longbench_needle_synthetic_v1.jsonl": {
+      "sha256": "f476ad7162773fdf6eed5a42d1afbd042c43abff938a76a09c92affd0faf43d4",
+      "records": 111000
     },
     "longbench_multihop_v1.jsonl": {
       "sha256": "c16def59e764db18fc4cbc9bfba163974caf33f8e47ce8d2c7209ba174ac25e2",
-      "records": 81
+      "records": 82
+    },
+    "longbench_needle_v1.jsonl": {
+      "sha256": "2bd302aee36318a126c45c15a28f7a5e78f67ea862120dc6704ca040a316fa0c",
+      "records": 523
+    },
+    "novel_v0.1.jsonl": {
+      "sha256": "7ff5e906968eabebeb6a170a6daae8534993d7c18de8b00f8790221b43de9657",
+      "records": 151
     }
   }
 }

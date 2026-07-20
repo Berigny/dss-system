@@ -43,6 +43,7 @@ from backend.benchmarks.comparison_baselines import (
     BoWStandInBaseline,
 )
 from backend.benchmarks.harness import BenchmarkHarness
+from backend.benchmarks.hnsw_dense_baseline import HnswDenseBaseline
 from backend.benchmarks.longbench_needle_benchmark import (
     DEFAULT_LENGTHS,
     NeedleMemory,
@@ -70,7 +71,7 @@ DEFAULT_SEEDS = (193, 42, 7)
 # Largest size we will actually measure by default.  100 k is generated and
 # measured only when ``--measure-100k`` is passed, otherwise it is labelled as
 # extrapolated from the measured trend.
-DEFAULT_MAX_MEASURED_EVENTS = 10000
+DEFAULT_MAX_MEASURED_EVENTS = 100000
 
 PINNED_MINILM_DIMS = 384
 PINNED_MINILM_DTYPE_BYTES = 4  # float32
@@ -187,6 +188,12 @@ def _build_metadata_filter(
 
 def _build_bow(memories: Sequence[NeedleMemory]) -> BoWStandInBaseline:
     return BASELINES["bow_stand_in"]  # type: ignore[return-value]
+
+
+def _build_hnsw(memories: Sequence[NeedleMemory]) -> HnswDenseBaseline:
+    # Share the MiniLM embedder with the brute-force dense arm.
+    embedder = RealEmbeddingBaseline()._ensure_embedder()
+    return HnswDenseBaseline(embedder=embedder)
 
 
 # -----------------------------------------------------------------------------
@@ -307,6 +314,14 @@ def _measure_bow_storage(memories: Sequence[NeedleMemory]) -> int:
     return int(matrix.nbytes)
 
 
+def _measure_hnsw_storage(memories: Sequence[NeedleMemory]) -> int:
+    """Approximate HNSW index storage by serialising a temporary index."""
+    memory_dicts, _ = _normalize_for_baseline(memories, [])
+    embedder = RealEmbeddingBaseline()._ensure_embedder()
+    baseline = HnswDenseBaseline(embedder=embedder)
+    return baseline.estimate_storage_bytes(memory_dicts)
+
+
 # -----------------------------------------------------------------------------
 # Per-size evaluation
 # -----------------------------------------------------------------------------
@@ -376,6 +391,26 @@ def _evaluate_size(
             bytes_per_event=_measure_minilm_storage(actual_events) / actual_events,
             measured=True,
             notes="Measured; embedding vector only",
+        )
+
+        # HNSW dense index
+        hnsw = _build_hnsw(memories)
+        hnsw_latencies = _measure_baseline_latency(
+            hnsw,
+            memory_dicts,
+            query_dicts,
+            iterations=config.query_iterations,
+            warmup=config.warmup_iterations,
+            top_k=config.top_k,
+        )
+        systems["hnsw_dense"] = PerSystemResult(
+            system_name="hnsw_dense",
+            events=actual_events,
+            p50_latency_ms=_percentile(hnsw_latencies, 0.5),
+            p95_latency_ms=_percentile(hnsw_latencies, 0.95),
+            bytes_per_event=_measure_hnsw_storage(memories) / actual_events,
+            measured=True,
+            notes="Measured; HNSW index + vectors",
         )
 
         # BM25
@@ -460,7 +495,10 @@ def _evaluate_size(
         # scan/filter costs for the baselines and ~constant for DSS coordinate
         # routing.  We use a conservative sqrt scaling for all systems.
         latency_scale = math.sqrt(scale_factor)
-        bytes_scale = scale_factor if name != "real_embedding" else 1.0
+        # Storage is reported as bytes per event; hold the measured per-event
+        # value constant rather than multiplying by N (which would imply
+        # super-linear total storage).
+        bytes_scale = 1.0
         systems[name] = PerSystemResult(
             system_name=name,
             events=actual_events,
@@ -468,7 +506,7 @@ def _evaluate_size(
             p95_latency_ms=base_result.p95_latency_ms * latency_scale,
             bytes_per_event=base_result.bytes_per_event * bytes_scale,
             measured=False,
-            notes=f"Extrapolated from {base_events} events (sqrt latency scaling, linear storage scaling)",
+            notes=f"Extrapolated from {base_events} events (sqrt latency scaling; per-event storage held constant)",
         )
     return PerSizeResult(
         corpus_size=corpus_size,
@@ -546,7 +584,7 @@ def _build_artifact(
     cost_metrics: dict[str, Any] = {}
     retrieval_metrics: dict[str, Any] = {
         "systems_compared": {
-            "value": 5,
+            "value": 6,
             "unit": "count",
             "description": "Number of retrieval systems compared.",
         }

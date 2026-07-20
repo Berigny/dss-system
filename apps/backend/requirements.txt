@@ -12,6 +12,7 @@ pypdf
 python-docx
 cryptography
 rank-bm25
+hnswlib
 
 # Monorepo shared types
 -e ../../packages/shared-types

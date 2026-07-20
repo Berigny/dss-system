@@ -87,6 +87,15 @@ def _mock_real_embedding_baseline() -> MagicMock:
         completion_tokens=5.0,
     )
     mock_baseline.name = "real_embedding"
+
+    mock_embedder = MagicMock()
+
+    def _encode(texts, *, convert_to_numpy=True):
+        rng = np.random.RandomState(42)
+        return rng.randn(len(texts), 8).astype(np.float32)
+
+    mock_embedder.encode.side_effect = _encode
+    mock_baseline._ensure_embedder.return_value = mock_embedder
     return mock_baseline
 
 
@@ -173,6 +182,7 @@ def test_evaluate_produces_all_systems() -> None:
         assert set(size_result.systems.keys()) == {
             "dss_qp_router",
             "real_embedding",
+            "hnsw_dense",
             "bm25",
             "metadata_filter",
             "bow_stand_in",
