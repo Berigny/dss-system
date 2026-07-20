@@ -1,0 +1,240 @@
+{
+  "artefact_schema_version": "1.0.0",
+  "run_id": "dss297-citation-faithfulness-aggregate-20260720T094009Z",
+  "suite_id": "dss297-citation-faithfulness",
+  "suite_version": "v1",
+  "executed_at": "2026-07-20T09:40:09.787940Z",
+  "mode": "full_dss",
+  "status": "success",
+  "repos": [
+    {
+      "name": "ds-backend-local",
+      "commit_sha": "755312cd6142313453fcef59b3ee85d62349fa1b",
+      "role": "canonical_benchmark_engine",
+      "required_for_run": true
+    }
+  ],
+  "datasets": [
+    {
+      "name": "dss297_citation_faithfulness_synthetic_v1",
+      "version": "v1",
+      "split": "benchmark",
+      "record_count": 9
+    }
+  ],
+  "metrics": {
+    "cost": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "judge_score_mean": {
+          "value": 0.7817166910476164,
+          "unit": "ratio",
+          "description": "Informational lexical-overlap judge score; not a gate.",
+          "statistics": {
+            "mean": 0.7817166910476164,
+            "standard_deviation": 0.0,
+            "min": 0.7817166910476164,
+            "max": 0.7817166910476164,
+            "ci_95_low": 0.7817166910476164,
+            "ci_95_high": 0.7817166910476164,
+            "sample_count": 1
+          }
+        },
+        "llm_calls": {
+          "value": 0.0,
+          "unit": "count",
+          "description": "Number of LLM API calls (zero for deterministic check).",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "governance": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "chain_valid_rate": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Fraction of responses whose ledger namespace chain validated.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "citation_gate_passed": {
+          "value": 0.0,
+          "unit": "boolean",
+          "description": "True if citation integrity and chain validity are both 100%.",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 1
+          }
+        },
+        "judge_score_is_informational": {
+          "value": 1.0,
+          "unit": "boolean",
+          "description": "Judge score is reported separately and does not control the gate.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "latency": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "total_runtime_ms": {
+          "value": 11.266262969002128,
+          "unit": "ms",
+          "description": "Total harness runtime.",
+          "statistics": {
+            "mean": 11.266262969002128,
+            "standard_deviation": 0.0,
+            "min": 11.266262969002128,
+            "max": 11.266262969002128,
+            "ci_95_low": 11.266262969002128,
+            "ci_95_high": 11.266262969002128,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "retrieval": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "citation_integrity": {
+          "value": 0.7777777777777778,
+          "unit": "ratio",
+          "description": "Fraction of responses with all expected citations resolved and no unexpected citations.",
+          "statistics": {
+            "mean": 0.7777777777777778,
+            "standard_deviation": 0.0,
+            "min": 0.7777777777777778,
+            "max": 0.7777777777777778,
+            "ci_95_low": 0.7777777777777778,
+            "ci_95_high": 0.7777777777777778,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "traceability": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "expected_citations_total": {
+          "value": 17.0,
+          "unit": "count",
+          "description": "Total expected citations across all cases.",
+          "statistics": {
+            "mean": 17.0,
+            "standard_deviation": 0.0,
+            "min": 17.0,
+            "max": 17.0,
+            "ci_95_low": 17.0,
+            "ci_95_high": 17.0,
+            "sample_count": 1
+          }
+        },
+        "missing_citations_total": {
+          "value": 1.0,
+          "unit": "count",
+          "description": "Total missing citations across all cases.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "total_cases": {
+          "value": 9.0,
+          "unit": "count",
+          "description": "Total number of citation-faithfulness cases evaluated.",
+          "statistics": {
+            "mean": 9.0,
+            "standard_deviation": 0.0,
+            "min": 9.0,
+            "max": 9.0,
+            "ci_95_low": 9.0,
+            "ci_95_high": 9.0,
+            "sample_count": 1
+          }
+        },
+        "unexpected_citations_total": {
+          "value": 1.0,
+          "unit": "count",
+          "description": "Total unexpected/unresolved citations across all cases.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        }
+      }
+    }
+  },
+  "freshness": {
+    "status": "fresh",
+    "checked_at": "2026-07-20T09:40:09.787940Z",
+    "max_age_hours": 24,
+    "age_hours": 0.0
+  },
+  "failure_reason": null,
+  "hardware": {
+    "platform": "Darwin-25.5.0-x86_64",
+    "processor": "i386",
+    "cpu_count": 16,
+    "memory_gb": 16.0,
+    "gpu_name": null,
+    "gpu_count": null,
+    "cuda_version": null,
+    "mps_available": true,
+    "backend_accelerator": "mps"
+  },
+  "run_config": {
+    "seed": 193,
+    "gate_passed": false,
+    "citation_integrity_target": 1.0,
+    "chain_validity_target": 1.0,
+    "deterministic_mode": false,
+    "aggregate": true,
+    "seeds": "193",
+    "seed_count": 1,
+    "seed_run_ids": "dss297-citation-faithfulness-20260720T094009Z-193"
+  }
+}
