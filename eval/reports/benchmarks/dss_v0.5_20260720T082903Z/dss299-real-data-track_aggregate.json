@@ -1,0 +1,799 @@
+{
+  "artefact_schema_version": "1.0.0",
+  "run_id": "dss299-real-data-track-aggregate-20260720T082906Z",
+  "suite_id": "dss299-real-data-track",
+  "suite_version": "v1",
+  "executed_at": "2026-07-20T08:29:06.489430Z",
+  "mode": "full_dss",
+  "status": "success",
+  "repos": [
+    {
+      "name": "ds-backend-local",
+      "commit_sha": "d28420b72ff613399005a5c772dae22252c537ca",
+      "role": "canonical_benchmark_engine",
+      "required_for_run": true
+    }
+  ],
+  "datasets": [
+    {
+      "name": "dss299_real_data_track",
+      "version": "v1",
+      "split": "hotpotqa,narrativeqa",
+      "record_count": 28
+    }
+  ],
+  "metrics": {
+    "cost": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "bm25_token_cost": {
+          "value": 344.0,
+          "unit": "tokens",
+          "description": "bm25 estimated token cost.",
+          "statistics": {
+            "mean": 344.0,
+            "standard_deviation": 0.0,
+            "min": 344.0,
+            "max": 344.0,
+            "ci_95_low": 344.0,
+            "ci_95_high": 344.0,
+            "sample_count": 1
+          }
+        },
+        "dss_qp_router_token_cost": {
+          "value": 0.0,
+          "unit": "tokens",
+          "description": "dss_qp_router estimated token cost.",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_token_cost": {
+          "value": 542.0,
+          "unit": "tokens",
+          "description": "hnsw_dense estimated token cost.",
+          "statistics": {
+            "mean": 542.0,
+            "standard_deviation": 0.0,
+            "min": 542.0,
+            "max": 542.0,
+            "ci_95_low": 542.0,
+            "ci_95_high": 542.0,
+            "sample_count": 1
+          }
+        },
+        "long_context_token_cost": {
+          "value": 542.0,
+          "unit": "tokens",
+          "description": "long_context estimated token cost.",
+          "statistics": {
+            "mean": 542.0,
+            "standard_deviation": 0.0,
+            "min": 542.0,
+            "max": 542.0,
+            "ci_95_low": 542.0,
+            "ci_95_high": 542.0,
+            "sample_count": 1
+          }
+        },
+        "total_documents": {
+          "value": 24.0,
+          "unit": "count",
+          "description": "Total documents indexed across the track.",
+          "statistics": {
+            "mean": 24.0,
+            "standard_deviation": 0.0,
+            "min": 24.0,
+            "max": 24.0,
+            "ci_95_low": 24.0,
+            "ci_95_high": 24.0,
+            "sample_count": 1
+          }
+        },
+        "total_queries": {
+          "value": 4.0,
+          "unit": "count",
+          "description": "Total queries evaluated.",
+          "statistics": {
+            "mean": 4.0,
+            "standard_deviation": 0.0,
+            "min": 4.0,
+            "max": 4.0,
+            "ci_95_low": 4.0,
+            "ci_95_high": 4.0,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "governance": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "coverage_gate": {
+          "value": 0.8,
+          "unit": "ratio",
+          "description": "Minimum coverage required to unlock Phase R claims.",
+          "statistics": {
+            "mean": 0.8,
+            "standard_deviation": 0.0,
+            "min": 0.8,
+            "max": 0.8,
+            "ci_95_low": 0.8,
+            "ci_95_high": 0.8,
+            "sample_count": 1
+          }
+        },
+        "coverage_score": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Fraction of queries with a structurally compatible document coordinate.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "gate_pass": {
+          "value": 1.0,
+          "unit": "boolean",
+          "description": "True if the Phase I coverage gate passes on the real-data corpus.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "phase_r_gated": {
+          "value": 1.0,
+          "unit": "boolean",
+          "description": "Results are explicitly gated behind the DSS-298 label-blind coverage gate.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "latency": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "bm25_avg_latency_ms": {
+          "value": 1.2523779878392816,
+          "unit": "ms",
+          "description": "bm25 average latency per query.",
+          "statistics": {
+            "mean": 1.2523779878392816,
+            "standard_deviation": 0.0,
+            "min": 1.2523779878392816,
+            "max": 1.2523779878392816,
+            "ci_95_low": 1.2523779878392816,
+            "ci_95_high": 1.2523779878392816,
+            "sample_count": 1
+          }
+        },
+        "dss_qp_router_avg_latency_ms": {
+          "value": 2.04227096401155,
+          "unit": "ms",
+          "description": "dss_qp_router average latency per query.",
+          "statistics": {
+            "mean": 2.04227096401155,
+            "standard_deviation": 0.0,
+            "min": 2.04227096401155,
+            "max": 2.04227096401155,
+            "ci_95_low": 2.04227096401155,
+            "ci_95_high": 2.04227096401155,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_avg_latency_ms": {
+          "value": 8.404377033002675,
+          "unit": "ms",
+          "description": "hnsw_dense average latency per query.",
+          "statistics": {
+            "mean": 8.404377033002675,
+            "standard_deviation": 0.0,
+            "min": 8.404377033002675,
+            "max": 8.404377033002675,
+            "ci_95_low": 8.404377033002675,
+            "ci_95_high": 8.404377033002675,
+            "sample_count": 1
+          }
+        },
+        "long_context_avg_latency_ms": {
+          "value": 0.49859104910865426,
+          "unit": "ms",
+          "description": "long_context average latency per query.",
+          "statistics": {
+            "mean": 0.49859104910865426,
+            "standard_deviation": 0.0,
+            "min": 0.49859104910865426,
+            "max": 0.49859104910865426,
+            "ci_95_low": 0.49859104910865426,
+            "ci_95_high": 0.49859104910865426,
+            "sample_count": 1
+          }
+        },
+        "total_runtime_ms": {
+          "value": 14.589328027796,
+          "unit": "ms",
+          "description": "Total harness runtime.",
+          "statistics": {
+            "mean": 14.589328027796,
+            "standard_deviation": 0.0,
+            "min": 14.589328027796,
+            "max": 14.589328027796,
+            "ci_95_low": 14.589328027796,
+            "ci_95_high": 14.589328027796,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "retrieval": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "bm25_mrr": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bm25 mean reciprocal rank.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "bm25_ndcg_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bm25 NDCG at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "bm25_ndcg_at_2": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bm25 NDCG at rank 2.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "bm25_ndcg_at_3": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bm25 NDCG at rank 3.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "bm25_ndcg_at_4": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bm25 NDCG at rank 4.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "bm25_ndcg_at_5": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bm25 NDCG at rank 5.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "bm25_p_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bm25 precision at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "bm25_p_at_2": {
+          "value": 0.5,
+          "unit": "ratio",
+          "description": "bm25 precision at rank 2.",
+          "statistics": {
+            "mean": 0.5,
+            "standard_deviation": 0.0,
+            "min": 0.5,
+            "max": 0.5,
+            "ci_95_low": 0.5,
+            "ci_95_high": 0.5,
+            "sample_count": 1
+          }
+        },
+        "bm25_p_at_3": {
+          "value": 0.3333333333333333,
+          "unit": "ratio",
+          "description": "bm25 precision at rank 3.",
+          "statistics": {
+            "mean": 0.3333333333333333,
+            "standard_deviation": 0.0,
+            "min": 0.3333333333333333,
+            "max": 0.3333333333333333,
+            "ci_95_low": 0.3333333333333333,
+            "ci_95_high": 0.3333333333333333,
+            "sample_count": 1
+          }
+        },
+        "bm25_p_at_4": {
+          "value": 0.25,
+          "unit": "ratio",
+          "description": "bm25 precision at rank 4.",
+          "statistics": {
+            "mean": 0.25,
+            "standard_deviation": 0.0,
+            "min": 0.25,
+            "max": 0.25,
+            "ci_95_low": 0.25,
+            "ci_95_high": 0.25,
+            "sample_count": 1
+          }
+        },
+        "bm25_p_at_5": {
+          "value": 0.2,
+          "unit": "ratio",
+          "description": "bm25 precision at rank 5.",
+          "statistics": {
+            "mean": 0.2,
+            "standard_deviation": 0.0,
+            "min": 0.2,
+            "max": 0.2,
+            "ci_95_low": 0.2,
+            "ci_95_high": 0.2,
+            "sample_count": 1
+          }
+        },
+        "bm25_recall_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bm25 recall at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "bm25_recall_at_k": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bm25 recall within top 5.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "dss_qp_router_abstention_rate": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "dss_qp_router fraction of queries that abstained.",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 1
+          }
+        },
+        "dss_qp_router_mrr": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "dss_qp_router mean reciprocal rank.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "dss_qp_router_p_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "dss_qp_router precision at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "dss_qp_router_recall_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "dss_qp_router recall at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "dss_qp_router_recall_at_k": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "dss_qp_router recall within top 5.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_mrr": {
+          "value": 0.625,
+          "unit": "ratio",
+          "description": "hnsw_dense mean reciprocal rank.",
+          "statistics": {
+            "mean": 0.625,
+            "standard_deviation": 0.0,
+            "min": 0.625,
+            "max": 0.625,
+            "ci_95_low": 0.625,
+            "ci_95_high": 0.625,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_ndcg_at_1": {
+          "value": 0.5,
+          "unit": "ratio",
+          "description": "hnsw_dense NDCG at rank 1.",
+          "statistics": {
+            "mean": 0.5,
+            "standard_deviation": 0.0,
+            "min": 0.5,
+            "max": 0.5,
+            "ci_95_low": 0.5,
+            "ci_95_high": 0.5,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_ndcg_at_2": {
+          "value": 0.5,
+          "unit": "ratio",
+          "description": "hnsw_dense NDCG at rank 2.",
+          "statistics": {
+            "mean": 0.5,
+            "standard_deviation": 0.0,
+            "min": 0.5,
+            "max": 0.5,
+            "ci_95_low": 0.5,
+            "ci_95_high": 0.5,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_ndcg_at_3": {
+          "value": 0.5,
+          "unit": "ratio",
+          "description": "hnsw_dense NDCG at rank 3.",
+          "statistics": {
+            "mean": 0.5,
+            "standard_deviation": 0.0,
+            "min": 0.5,
+            "max": 0.5,
+            "ci_95_low": 0.5,
+            "ci_95_high": 0.5,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_ndcg_at_4": {
+          "value": 0.7153382790366964,
+          "unit": "ratio",
+          "description": "hnsw_dense NDCG at rank 4.",
+          "statistics": {
+            "mean": 0.7153382790366964,
+            "standard_deviation": 0.0,
+            "min": 0.7153382790366964,
+            "max": 0.7153382790366964,
+            "ci_95_low": 0.7153382790366964,
+            "ci_95_high": 0.7153382790366964,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_ndcg_at_5": {
+          "value": 0.7153382790366964,
+          "unit": "ratio",
+          "description": "hnsw_dense NDCG at rank 5.",
+          "statistics": {
+            "mean": 0.7153382790366964,
+            "standard_deviation": 0.0,
+            "min": 0.7153382790366964,
+            "max": 0.7153382790366964,
+            "ci_95_low": 0.7153382790366964,
+            "ci_95_high": 0.7153382790366964,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_p_at_1": {
+          "value": 0.5,
+          "unit": "ratio",
+          "description": "hnsw_dense precision at rank 1.",
+          "statistics": {
+            "mean": 0.5,
+            "standard_deviation": 0.0,
+            "min": 0.5,
+            "max": 0.5,
+            "ci_95_low": 0.5,
+            "ci_95_high": 0.5,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_p_at_2": {
+          "value": 0.25,
+          "unit": "ratio",
+          "description": "hnsw_dense precision at rank 2.",
+          "statistics": {
+            "mean": 0.25,
+            "standard_deviation": 0.0,
+            "min": 0.25,
+            "max": 0.25,
+            "ci_95_low": 0.25,
+            "ci_95_high": 0.25,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_p_at_3": {
+          "value": 0.16666666666666666,
+          "unit": "ratio",
+          "description": "hnsw_dense precision at rank 3.",
+          "statistics": {
+            "mean": 0.16666666666666666,
+            "standard_deviation": 0.0,
+            "min": 0.16666666666666666,
+            "max": 0.16666666666666666,
+            "ci_95_low": 0.16666666666666666,
+            "ci_95_high": 0.16666666666666666,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_p_at_4": {
+          "value": 0.25,
+          "unit": "ratio",
+          "description": "hnsw_dense precision at rank 4.",
+          "statistics": {
+            "mean": 0.25,
+            "standard_deviation": 0.0,
+            "min": 0.25,
+            "max": 0.25,
+            "ci_95_low": 0.25,
+            "ci_95_high": 0.25,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_p_at_5": {
+          "value": 0.2,
+          "unit": "ratio",
+          "description": "hnsw_dense precision at rank 5.",
+          "statistics": {
+            "mean": 0.2,
+            "standard_deviation": 0.0,
+            "min": 0.2,
+            "max": 0.2,
+            "ci_95_low": 0.2,
+            "ci_95_high": 0.2,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_recall_at_1": {
+          "value": 0.5,
+          "unit": "ratio",
+          "description": "hnsw_dense recall at rank 1.",
+          "statistics": {
+            "mean": 0.5,
+            "standard_deviation": 0.0,
+            "min": 0.5,
+            "max": 0.5,
+            "ci_95_low": 0.5,
+            "ci_95_high": 0.5,
+            "sample_count": 1
+          }
+        },
+        "hnsw_dense_recall_at_k": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "hnsw_dense recall within top 5.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "long_context_mrr": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "long_context mean reciprocal rank.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "long_context_recall_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "long_context recall at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "long_context_recall_at_k": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "long_context recall within top 5.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "traceability": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "datasets": {
+          "value": "hotpotqa,narrativeqa",
+          "unit": "string",
+          "description": "Real datasets evaluated in this run.",
+          "statistics": null
+        },
+        "samples_per_dataset": {
+          "value": 2.0,
+          "unit": "count",
+          "description": "Number of examples sampled per dataset per seed.",
+          "statistics": {
+            "mean": 2.0,
+            "standard_deviation": 0.0,
+            "min": 2.0,
+            "max": 2.0,
+            "ci_95_low": 2.0,
+            "ci_95_high": 2.0,
+            "sample_count": 1
+          }
+        }
+      }
+    }
+  },
+  "freshness": {
+    "status": "fresh",
+    "checked_at": "2026-07-20T08:29:06.489430Z",
+    "max_age_hours": 24,
+    "age_hours": 0.0
+  },
+  "failure_reason": null,
+  "hardware": {
+    "platform": "Darwin-25.5.0-x86_64",
+    "processor": "i386",
+    "cpu_count": 16,
+    "memory_gb": 16.0,
+    "gpu_name": null,
+    "gpu_count": null,
+    "cuda_version": null,
+    "mps_available": true,
+    "backend_accelerator": "mps"
+  },
+  "run_config": {
+    "datasets": "hotpotqa,narrativeqa",
+    "samples_per_dataset": 2,
+    "top_k": 5,
+    "seed": 193,
+    "coverage_gate": 0.8,
+    "max_total_documents": 1000,
+    "max_queries": 100,
+    "max_embedding_calls": 2500,
+    "budget_tokens": 500000,
+    "skip_real_embedding": true,
+    "dry_run": true,
+    "deterministic_mode": false,
+    "aggregate": true,
+    "seeds": "193",
+    "seed_count": 1,
+    "seed_run_ids": "dss299-real-data-track-20260720T082906Z-193"
+  }
+}

@@ -1,0 +1,431 @@
+{
+  "artefact_schema_version": "1.0.0",
+  "run_id": "dss295-latency-storage-aggregate-20260720T082906Z",
+  "suite_id": "dss295-latency-storage",
+  "suite_version": "v1",
+  "executed_at": "2026-07-20T08:29:06.299162Z",
+  "mode": "full_dss",
+  "status": "success",
+  "repos": [
+    {
+      "name": "ds-backend-local",
+      "commit_sha": "d28420b72ff613399005a5c772dae22252c537ca",
+      "role": "canonical_benchmark_engine",
+      "required_for_run": true
+    }
+  ],
+  "datasets": [
+    {
+      "name": "longbench_needle_synthetic_v1",
+      "version": "v1",
+      "split": "benchmark",
+      "record_count": 1000
+    }
+  ],
+  "metrics": {
+    "cost": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "events_1000_bm25_bytes_per_event": {
+          "value": 151.395,
+          "unit": "bytes/event",
+          "description": "bm25 storage bytes per event at 1000 events.",
+          "statistics": {
+            "mean": 151.395,
+            "standard_deviation": 0.0,
+            "min": 151.395,
+            "max": 151.395,
+            "ci_95_low": 151.395,
+            "ci_95_high": 151.395,
+            "sample_count": 1
+          }
+        },
+        "events_1000_bow_stand_in_bytes_per_event": {
+          "value": 352.0,
+          "unit": "bytes/event",
+          "description": "bow_stand_in storage bytes per event at 1000 events.",
+          "statistics": {
+            "mean": 352.0,
+            "standard_deviation": 0.0,
+            "min": 352.0,
+            "max": 352.0,
+            "ci_95_low": 352.0,
+            "ci_95_high": 352.0,
+            "sample_count": 1
+          }
+        },
+        "events_1000_dss_qp_router_bytes_per_event": {
+          "value": 322.802,
+          "unit": "bytes/event",
+          "description": "dss_qp_router storage bytes per event at 1000 events.",
+          "statistics": {
+            "mean": 322.802,
+            "standard_deviation": 0.0,
+            "min": 322.802,
+            "max": 322.802,
+            "ci_95_low": 322.802,
+            "ci_95_high": 322.802,
+            "sample_count": 1
+          }
+        },
+        "events_1000_hnsw_dense_bytes_per_event": {
+          "value": 180.244,
+          "unit": "bytes/event",
+          "description": "hnsw_dense storage bytes per event at 1000 events.",
+          "statistics": {
+            "mean": 180.244,
+            "standard_deviation": 0.0,
+            "min": 180.244,
+            "max": 180.244,
+            "ci_95_low": 180.244,
+            "ci_95_high": 180.244,
+            "sample_count": 1
+          }
+        },
+        "events_1000_metadata_filter_bytes_per_event": {
+          "value": 82.925,
+          "unit": "bytes/event",
+          "description": "metadata_filter storage bytes per event at 1000 events.",
+          "statistics": {
+            "mean": 82.925,
+            "standard_deviation": 0.0,
+            "min": 82.925,
+            "max": 82.925,
+            "ci_95_low": 82.925,
+            "ci_95_high": 82.925,
+            "sample_count": 1
+          }
+        },
+        "events_1000_real_embedding_bytes_per_event": {
+          "value": 1536.0,
+          "unit": "bytes/event",
+          "description": "real_embedding storage bytes per event at 1000 events.",
+          "statistics": {
+            "mean": 1536.0,
+            "standard_deviation": 0.0,
+            "min": 1536.0,
+            "max": 1536.0,
+            "ci_95_low": 1536.0,
+            "ci_95_high": 1536.0,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "governance": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "extrapolation_labelled": {
+          "value": 1.0,
+          "unit": "boolean",
+          "description": "All extrapolated rows are explicitly labelled.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "measured_sizes": {
+          "value": "1000",
+          "unit": "string",
+          "description": "Corpus sizes that were measured directly.",
+          "statistics": null
+        }
+      }
+    },
+    "latency": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "events_1000_bm25_p50_ms": {
+          "value": 12.540515046566725,
+          "unit": "ms",
+          "description": "bm25 p50 latency at 1000 events.",
+          "statistics": {
+            "mean": 12.540515046566725,
+            "standard_deviation": 0.0,
+            "min": 12.540515046566725,
+            "max": 12.540515046566725,
+            "ci_95_low": 12.540515046566725,
+            "ci_95_high": 12.540515046566725,
+            "sample_count": 1
+          }
+        },
+        "events_1000_bm25_p95_ms": {
+          "value": 13.701084407512099,
+          "unit": "ms",
+          "description": "bm25 p95 latency at 1000 events.",
+          "statistics": {
+            "mean": 13.701084407512099,
+            "standard_deviation": 0.0,
+            "min": 13.701084407512099,
+            "max": 13.701084407512099,
+            "ci_95_low": 13.701084407512099,
+            "ci_95_high": 13.701084407512099,
+            "sample_count": 1
+          }
+        },
+        "events_1000_bow_stand_in_p50_ms": {
+          "value": 22.892794047947973,
+          "unit": "ms",
+          "description": "bow_stand_in p50 latency at 1000 events.",
+          "statistics": {
+            "mean": 22.892794047947973,
+            "standard_deviation": 0.0,
+            "min": 22.892794047947973,
+            "max": 22.892794047947973,
+            "ci_95_low": 22.892794047947973,
+            "ci_95_high": 22.892794047947973,
+            "sample_count": 1
+          }
+        },
+        "events_1000_bow_stand_in_p95_ms": {
+          "value": 23.75577138736844,
+          "unit": "ms",
+          "description": "bow_stand_in p95 latency at 1000 events.",
+          "statistics": {
+            "mean": 23.75577138736844,
+            "standard_deviation": 0.0,
+            "min": 23.75577138736844,
+            "max": 23.75577138736844,
+            "ci_95_low": 23.75577138736844,
+            "ci_95_high": 23.75577138736844,
+            "sample_count": 1
+          }
+        },
+        "events_1000_dss_qp_router_p50_ms": {
+          "value": 0.2523090224713087,
+          "unit": "ms",
+          "description": "dss_qp_router p50 latency at 1000 events.",
+          "statistics": {
+            "mean": 0.2523090224713087,
+            "standard_deviation": 0.0,
+            "min": 0.2523090224713087,
+            "max": 0.2523090224713087,
+            "ci_95_low": 0.2523090224713087,
+            "ci_95_high": 0.2523090224713087,
+            "sample_count": 1
+          }
+        },
+        "events_1000_dss_qp_router_p95_ms": {
+          "value": 0.3493318101391196,
+          "unit": "ms",
+          "description": "dss_qp_router p95 latency at 1000 events.",
+          "statistics": {
+            "mean": 0.3493318101391196,
+            "standard_deviation": 0.0,
+            "min": 0.3493318101391196,
+            "max": 0.3493318101391196,
+            "ci_95_low": 0.3493318101391196,
+            "ci_95_high": 0.3493318101391196,
+            "sample_count": 1
+          }
+        },
+        "events_1000_hnsw_dense_p50_ms": {
+          "value": 11.949513980653137,
+          "unit": "ms",
+          "description": "hnsw_dense p50 latency at 1000 events.",
+          "statistics": {
+            "mean": 11.949513980653137,
+            "standard_deviation": 0.0,
+            "min": 11.949513980653137,
+            "max": 11.949513980653137,
+            "ci_95_low": 11.949513980653137,
+            "ci_95_high": 11.949513980653137,
+            "sample_count": 1
+          }
+        },
+        "events_1000_hnsw_dense_p95_ms": {
+          "value": 13.03408876992762,
+          "unit": "ms",
+          "description": "hnsw_dense p95 latency at 1000 events.",
+          "statistics": {
+            "mean": 13.03408876992762,
+            "standard_deviation": 0.0,
+            "min": 13.03408876992762,
+            "max": 13.03408876992762,
+            "ci_95_low": 13.03408876992762,
+            "ci_95_high": 13.03408876992762,
+            "sample_count": 1
+          }
+        },
+        "events_1000_metadata_filter_p50_ms": {
+          "value": 2.5145760155282915,
+          "unit": "ms",
+          "description": "metadata_filter p50 latency at 1000 events.",
+          "statistics": {
+            "mean": 2.5145760155282915,
+            "standard_deviation": 0.0,
+            "min": 2.5145760155282915,
+            "max": 2.5145760155282915,
+            "ci_95_low": 2.5145760155282915,
+            "ci_95_high": 2.5145760155282915,
+            "sample_count": 1
+          }
+        },
+        "events_1000_metadata_filter_p95_ms": {
+          "value": 3.5679630003869534,
+          "unit": "ms",
+          "description": "metadata_filter p95 latency at 1000 events.",
+          "statistics": {
+            "mean": 3.5679630003869534,
+            "standard_deviation": 0.0,
+            "min": 3.5679630003869534,
+            "max": 3.5679630003869534,
+            "ci_95_low": 3.5679630003869534,
+            "ci_95_high": 3.5679630003869534,
+            "sample_count": 1
+          }
+        },
+        "events_1000_real_embedding_p50_ms": {
+          "value": 0.004308007191866636,
+          "unit": "ms",
+          "description": "real_embedding p50 latency at 1000 events.",
+          "statistics": {
+            "mean": 0.004308007191866636,
+            "standard_deviation": 0.0,
+            "min": 0.004308007191866636,
+            "max": 0.004308007191866636,
+            "ci_95_low": 0.004308007191866636,
+            "ci_95_high": 0.004308007191866636,
+            "sample_count": 1
+          }
+        },
+        "events_1000_real_embedding_p95_ms": {
+          "value": 0.00618459889665246,
+          "unit": "ms",
+          "description": "real_embedding p95 latency at 1000 events.",
+          "statistics": {
+            "mean": 0.00618459889665246,
+            "standard_deviation": 0.0,
+            "min": 0.00618459889665246,
+            "max": 0.00618459889665246,
+            "ci_95_low": 0.00618459889665246,
+            "ci_95_high": 0.00618459889665246,
+            "sample_count": 1
+          }
+        },
+        "total_runtime_ms": {
+          "value": 445.55137504357845,
+          "unit": "ms",
+          "description": "Total harness runtime.",
+          "statistics": {
+            "mean": 445.55137504357845,
+            "standard_deviation": 0.0,
+            "min": 445.55137504357845,
+            "max": 445.55137504357845,
+            "ci_95_low": 445.55137504357845,
+            "ci_95_high": 445.55137504357845,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "retrieval": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "systems_compared": {
+          "value": 6.0,
+          "unit": "count",
+          "description": "Number of retrieval systems compared.",
+          "statistics": {
+            "mean": 6.0,
+            "standard_deviation": 0.0,
+            "min": 6.0,
+            "max": 6.0,
+            "ci_95_low": 6.0,
+            "ci_95_high": 6.0,
+            "sample_count": 1
+          }
+        }
+      }
+    },
+    "traceability": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "corpus_size_buckets": {
+          "value": 1.0,
+          "unit": "count",
+          "description": "Number of corpus size buckets evaluated.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "events_1000_measured": {
+          "value": 1.0,
+          "unit": "boolean",
+          "description": "Whether 1000 events were measured directly.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 1
+          }
+        },
+        "query_iterations_per_bucket": {
+          "value": 5.0,
+          "unit": "count",
+          "description": "Measured query iterations per bucket.",
+          "statistics": {
+            "mean": 5.0,
+            "standard_deviation": 0.0,
+            "min": 5.0,
+            "max": 5.0,
+            "ci_95_low": 5.0,
+            "ci_95_high": 5.0,
+            "sample_count": 1
+          }
+        }
+      }
+    }
+  },
+  "freshness": {
+    "status": "fresh",
+    "checked_at": "2026-07-20T08:29:06.299162Z",
+    "max_age_hours": 24,
+    "age_hours": 0.0
+  },
+  "failure_reason": null,
+  "hardware": {
+    "platform": "Darwin-25.5.0-x86_64",
+    "processor": "i386",
+    "cpu_count": 16,
+    "memory_gb": 16.0,
+    "gpu_name": null,
+    "gpu_count": null,
+    "cuda_version": null,
+    "mps_available": true,
+    "backend_accelerator": "mps"
+  },
+  "run_config": {
+    "corpus_sizes": "999",
+    "max_measured_events": 2000,
+    "measure_100k": true,
+    "query_iterations": 5,
+    "warmup_iterations": 1,
+    "top_k": 5,
+    "seed": 193,
+    "deterministic_mode": false,
+    "aggregate": true,
+    "seeds": "193",
+    "seed_count": 1,
+    "seed_run_ids": "dss295-latency-storage-20260720T082906Z-193"
+  }
+}
