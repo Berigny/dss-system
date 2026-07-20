@@ -33,7 +33,7 @@ COPY . /app
 RUN pip install --no-cache-dir -e /app/packages/shared-types
 RUN sed -i '/^-e /d' /app/apps/backend/requirements.txt && \
     pip install --no-cache-dir -r /app/apps/backend/requirements.txt
-RUN pip install --no-cache-dir rank-bm25 sentence-transformers hnswlib
+RUN pip install --no-cache-dir rank-bm25 sentence-transformers hnswlib datasets
 
 # The entrypoint is intentionally at repo-root level so it can see both
 # apps/backend and eval/ paths.

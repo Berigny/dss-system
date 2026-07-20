@@ -230,4 +230,17 @@ claims:
       - "Coverage gate unlocks Phase R real-data runs; below-gate results are exploratory."
       - "Credit: hugooconnor — issue #1 reproduction and critique."
 
+  - id: C24
+    source: DSS-299 benchmark
+    quote: "Phase R real-data track runs on pinned HotpotQA and NarrativeQA validation splits with BM25, dense, HNSW, long-context, and DSS baselines; gated by the DSS-298 coverage gate and bounded by a token/embedding budget cap"
+    claim: DSS retrieval and baselines are evaluated on real public QA corpora using label-blind coordinate derivation, with results marked exploratory until the Phase I coverage gate is earned.
+    harness: apps/backend/backend/benchmarks/dss299_real_data_track_benchmark.py
+    measurement: per-system recall@1, recall@k, MRR, P@1, coverage_score, gate_pass across 5 seeds with CI95
+    status: supported
+    evidence: backend/benchmarks/output/dss299_real_data_track/aggregate
+    caveats:
+      - "Real-data coverage depends on the public ksr-core concept vocabulary; low coverage is reported honestly as partial/exploratory."
+      - "HotpotQA and NarrativeQA are used as representative multi-hop and long-context datasets; additional datasets can be added via the datasets configuration."
+      - "Budget cap skips dense baselines if estimated embedding calls exceed the configured limit."
+
 unknown_claims_policy: fail_ci

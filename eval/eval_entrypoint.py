@@ -282,6 +282,34 @@ def _run_dss298(config: EvalConfig) -> dict[str, Any]:
     }
 
 
+def _run_dss299(config: EvalConfig) -> dict[str, Any]:
+    from backend.benchmarks.dss299_real_data_track_benchmark import (
+        BenchmarkConfig as Dss299Config,
+        run_benchmark as run_dss299,
+    )
+
+    bench_config = Dss299Config(
+        output_root=BENCHMARK_OUTPUT_ROOT / "dss299_real_data_track",
+        datasets=("hotpotqa", "narrativeqa"),
+        samples_per_dataset=2 if config.dry_run else 50,
+        top_k=5,
+        seeds=(193,) if config.dry_run else (193, 42, 7, 13, 21),
+        coverage_gate=0.8,
+        max_total_documents=1000,
+        max_queries=100,
+        max_embedding_calls=2500,
+        budget_tokens=500_000,
+        skip_real_embedding=config.skip_real_embedding or config.dry_run,
+        dry_run=config.dry_run,
+    )
+    aggregate = run_dss299(bench_config)
+    return {
+        "suite": "dss299-real-data-track",
+        "status": aggregate.status,
+        "artifact_path": str(BENCHMARK_OUTPUT_ROOT / "dss299_real_data_track" / "aggregate"),
+    }
+
+
 def _latest_file(directory: Path, pattern: str = "*.json") -> Path | None:
     candidates = list(directory.glob(pattern))
     if not candidates:
@@ -379,6 +407,7 @@ def run_eval(config: EvalConfig) -> int:
         results.append(_run_dss295(config))
         results.append(_run_dss297(config))
         results.append(_run_dss298(config))
+        results.append(_run_dss299(config))
     except Exception as exc:
         print(f"Benchmark failed: {exc}", file=sys.stderr)
         return 1

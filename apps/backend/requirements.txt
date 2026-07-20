@@ -13,6 +13,7 @@ python-docx
 cryptography
 rank-bm25
 hnswlib
+datasets
 
 # Monorepo shared types
 -e ../../packages/shared-types
