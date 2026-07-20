@@ -1270,3 +1270,6 @@ websockets==16.1 \
     --hash=sha256:fef2debfe7f7ebdda12176f26166f95b7af17af05ba06150fcf889032e0213e9 \
     --hash=sha256:ff9b000064b88787ba9f7a3cb2af2b68a658ca5aad76458a46469e7124b678a0
     # via uvicorn
+
+# Added manually for DSS-294. Regenerate with: uv pip compile backend/benchmarks/requirements.in -o backend/benchmarks/requirements.txt
+rank-bm25

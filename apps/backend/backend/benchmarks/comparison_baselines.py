@@ -36,6 +36,8 @@ class BaselineResult:
     token_cost: float
     prompt_tokens: float
     completion_tokens: float
+    precision_at_k: dict[int, float] | None = None
+    ndcg_at_k: dict[int, float] | None = None
 
 
 class Baseline(ABC):
@@ -342,6 +344,110 @@ class GrokBaseline(Baseline):
         )
 
 
+class BM25Baseline(Baseline):
+    """BM25 ranking baseline using ``rank-bm25``.
+
+    This is a real lexical baseline (not a stand-in) that operates on the same
+    tokenized memories and queries as DSS.  It reports Precision@k and NDCG@k
+    in addition to the standard recall-style metrics.
+    """
+
+    name = "bm25"
+
+    def run(
+        self,
+        memories: Sequence[Mapping[str, Any]],
+        queries: Sequence[Mapping[str, Any]],
+        *,
+        top_k: int = 10,
+    ) -> BaselineResult:
+        from rank_bm25 import BM25Okapi
+
+        start = time.perf_counter()
+        memory_texts = [str(m.get("text", "")) for m in memories]
+        memory_ids = [str(m.get("id", i)) for i, m in enumerate(memories)]
+        tokenized_corpus = [_tokenize(text) for text in memory_texts]
+        bm25 = BM25Okapi(tokenized_corpus)
+
+        hits = 0
+        hits_at_1 = 0
+        rr_total = 0.0
+        prompt_tokens = 0.0
+        precision_at_k: dict[int, float] = {k: 0.0 for k in range(1, top_k + 1)}
+        ndcg_at_k: dict[int, float] = {k: 0.0 for k in range(1, top_k + 1)}
+
+        for query in queries:
+            query_tokens = _tokenize(str(query.get("text", "")))
+            relevant_ids = set(query.get("relevant_ids", []))
+            prompt_tokens += len(query_tokens)
+
+            scores = bm25.get_scores(query_tokens)
+            ranked = sorted(
+                [(memory_ids[i], float(scores[i])) for i in range(len(memory_ids))],
+                key=lambda pair: pair[1],
+                reverse=True,
+            )[:top_k]
+
+            # Relevance labels for the returned ranking.
+            relevance = [1.0 if mid in relevant_ids else 0.0 for mid, _ in ranked]
+            for k in range(1, top_k + 1):
+                precision_at_k[k] += self._precision_at_k(relevance, k)
+                ndcg_at_k[k] += self._ndcg_at_k(relevance, k)
+
+            rank_hit = None
+            for idx, (mid, _) in enumerate(ranked):
+                prompt_tokens += len(_tokenize(memory_texts[memory_ids.index(mid)]))
+                if mid in relevant_ids:
+                    rank_hit = idx
+                    break
+
+            if rank_hit is not None:
+                hits += 1
+                if rank_hit < 1:
+                    hits_at_1 += 1
+                rr_total += 1.0 / float(rank_hit + 1)
+
+        query_count = len(queries)
+        recall_at_1 = hits_at_1 / query_count if query_count else 0.0
+        recall_at_k = hits / query_count if query_count else 0.0
+        mrr = rr_total / query_count if query_count else 0.0
+        latency_ms = (time.perf_counter() - start) * 1000.0
+
+        for k in precision_at_k:
+            precision_at_k[k] /= query_count if query_count else 1.0
+            ndcg_at_k[k] /= query_count if query_count else 1.0
+
+        return BaselineResult(
+            baseline_name=self.name,
+            recall_at_1=recall_at_1,
+            recall_at_k=recall_at_k,
+            mrr=mrr,
+            avg_latency_ms=latency_ms,
+            token_cost=prompt_tokens + query_count * 64.0,
+            prompt_tokens=prompt_tokens,
+            completion_tokens=query_count * 64.0,
+            precision_at_k=precision_at_k,
+            ndcg_at_k=ndcg_at_k,
+        )
+
+    @staticmethod
+    def _precision_at_k(relevance: Sequence[float], k: int) -> float:
+        if not relevance or k <= 0:
+            return 0.0
+        top = relevance[:k]
+        return sum(top) / len(top)
+
+    @staticmethod
+    def _ndcg_at_k(relevance: Sequence[float], k: int) -> float:
+        if not relevance or k <= 0:
+            return 0.0
+        top = relevance[:k]
+        dcg = sum((2**rel - 1) / math.log2(i + 2) for i, rel in enumerate(top))
+        ideal = sorted(relevance, reverse=True)[:k]
+        idcg = sum((2**rel - 1) / math.log2(i + 2) for i, rel in enumerate(ideal))
+        return dcg / idcg if idcg > 0 else 0.0
+
+
 BASELINES: dict[str, Baseline] = {
     cls().name: cls()
     for cls in (
@@ -349,6 +455,7 @@ BASELINES: dict[str, Baseline] = {
         HierarchicalRagBaseline,
         LongContextBaseline,
         GrokBaseline,
+        BM25Baseline,
     )
 }
 
@@ -360,5 +467,6 @@ __all__ = (
     "HierarchicalRagBaseline",
     "LongContextBaseline",
     "GrokBaseline",
+    "BM25Baseline",
     "BASELINES",
 )

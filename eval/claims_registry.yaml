@@ -153,4 +153,31 @@ claims:
     status: supported
     evidence: eval/reports/2026-07-19_79218c3b20a57ef8_v0.4/retention_smoke_report.json
 
+  - id: C17
+    source: DSS-292 benchmark
+    quote: "abstention precision >= 0.98, abstention recall >= 0.95, false abstention <= 0.10"
+    claim: DSS abstains on known-absent facts with high precision and recall while rarely abstaining on known-present facts.
+    harness: apps/backend/backend/benchmarks/dss292_known_unknown_benchmark.py
+    measurement: qp_abstention_precision, qp_abstention_recall, qp_false_abstention_rate
+    status: supported
+    evidence: backend/benchmarks/output/dss292_known_unknown/aggregate
+
+  - id: C18
+    source: DSS-293 benchmark
+    quote: "100% of poisoned entries are flagged or original is preserved; zero silent displacements"
+    claim: DSS ledger immutability and governance semantics prevent silent displacement of committed facts by conflicting newer entries.
+    harness: apps/backend/backend/benchmarks/dss293_adversarial_poisoning_benchmark.py
+    measurement: flagged_or_preserved_rate, silent_displacement_rate
+    status: supported
+    evidence: backend/benchmarks/output/dss293_adversarial_poisoning/aggregate
+
+  - id: C19
+    source: DSS-294 benchmark
+    quote: "P@k and NDCG@k reported for BM25, real MiniLM, metadata-filter, BoW stand-in; DSS P@1 + abstention rate documented honestly"
+    claim: DSS ranking trade-offs are evaluated against BM25 and embedding baselines using Precision@k and NDCG@k without fabricating DSS rankings.
+    harness: apps/backend/backend/benchmarks/dss294_bm25_baseline.py
+    measurement: bm25_p_at_k, bm25_ndcg_at_k, real_embedding_p_at_k, dss_qp_router_p_at_1, dss_qp_router_abstention_rate
+    status: supported
+    evidence: backend/benchmarks/output/dss294_bm25_ranking/aggregate
+
 unknown_claims_policy: fail_ci

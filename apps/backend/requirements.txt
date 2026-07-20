@@ -11,6 +11,7 @@ python-multipart
 pypdf
 python-docx
 cryptography
+rank-bm25
 
 # Monorepo shared types
 -e ../../packages/shared-types
