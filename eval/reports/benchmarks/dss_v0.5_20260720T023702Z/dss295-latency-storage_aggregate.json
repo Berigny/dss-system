@@ -1,0 +1,843 @@
+{
+  "artefact_schema_version": "1.0.0",
+  "run_id": "dss295-latency-storage-aggregate-20260720T041546Z",
+  "suite_id": "dss295-latency-storage",
+  "suite_version": "v1",
+  "executed_at": "2026-07-20T04:15:46.778750Z",
+  "mode": "full_dss",
+  "status": "success",
+  "repos": [
+    {
+      "name": "ds-backend-local",
+      "commit_sha": "01190bd91192d3a34c7833545eb7689167bbdb64",
+      "role": "canonical_benchmark_engine",
+      "required_for_run": true
+    }
+  ],
+  "datasets": [
+    {
+      "name": "longbench_needle_synthetic_v1",
+      "version": "v1",
+      "split": "benchmark",
+      "record_count": 111000
+    }
+  ],
+  "metrics": {
+    "cost": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "events_100000_bm25_bytes_per_event": {
+          "value": 1480.027313070446,
+          "unit": "bytes/event",
+          "description": "bm25 storage bytes per event at 100000 events.",
+          "statistics": {
+            "mean": 1480.027313070446,
+            "standard_deviation": 5.09552441145731,
+            "min": 1476.5456760993234,
+            "max": 1485.8758099792462,
+            "ci_95_low": 1474.2612903388042,
+            "ci_95_high": 1485.793335802088,
+            "sample_count": 3
+          }
+        },
+        "events_100000_bow_stand_in_bytes_per_event": {
+          "value": 3519.64803519648,
+          "unit": "bytes/event",
+          "description": "bow_stand_in storage bytes per event at 100000 events.",
+          "statistics": {
+            "mean": 3519.64803519648,
+            "standard_deviation": 0.0,
+            "min": 3519.64803519648,
+            "max": 3519.64803519648,
+            "ci_95_low": 3519.64803519648,
+            "ci_95_high": 3519.64803519648,
+            "sample_count": 3
+          }
+        },
+        "events_100000_dss_qp_router_bytes_per_event": {
+          "value": 3228.9005209401403,
+          "unit": "bytes/event",
+          "description": "dss_qp_router storage bytes per event at 100000 events.",
+          "statistics": {
+            "mean": 3228.9005209401403,
+            "standard_deviation": 4.307251357236046,
+            "min": 3225.4188839690173,
+            "max": 3233.717224217984,
+            "ci_95_low": 3224.0264967512117,
+            "ci_95_high": 3233.774545129069,
+            "sample_count": 3
+          }
+        },
+        "events_100000_metadata_filter_bytes_per_event": {
+          "value": 829.2178148115262,
+          "unit": "bytes/event",
+          "description": "metadata_filter storage bytes per event at 100000 events.",
+          "statistics": {
+            "mean": 829.2178148115262,
+            "standard_deviation": 0.02999955483024787,
+            "min": 829.1851546772131,
+            "max": 829.2441428789828,
+            "ci_95_low": 829.1838677432517,
+            "ci_95_high": 829.2517618798007,
+            "sample_count": 3
+          }
+        },
+        "events_100000_real_embedding_bytes_per_event": {
+          "value": 1536.0,
+          "unit": "bytes/event",
+          "description": "real_embedding storage bytes per event at 100000 events.",
+          "statistics": {
+            "mean": 1536.0,
+            "standard_deviation": 0.0,
+            "min": 1536.0,
+            "max": 1536.0,
+            "ci_95_low": 1536.0,
+            "ci_95_high": 1536.0,
+            "sample_count": 3
+          }
+        },
+        "events_10000_bm25_bytes_per_event": {
+          "value": 148.01576666666668,
+          "unit": "bytes/event",
+          "description": "bm25 storage bytes per event at 10000 events.",
+          "statistics": {
+            "mean": 148.01576666666668,
+            "standard_deviation": 0.5136576129420483,
+            "min": 147.6571,
+            "max": 148.6042,
+            "ci_95_low": 147.43451903966184,
+            "ci_95_high": 148.59701429367152,
+            "sample_count": 3
+          }
+        },
+        "events_10000_bow_stand_in_bytes_per_event": {
+          "value": 352.0,
+          "unit": "bytes/event",
+          "description": "bow_stand_in storage bytes per event at 10000 events.",
+          "statistics": {
+            "mean": 352.0,
+            "standard_deviation": 0.0,
+            "min": 352.0,
+            "max": 352.0,
+            "ci_95_low": 352.0,
+            "ci_95_high": 352.0,
+            "sample_count": 3
+          }
+        },
+        "events_10000_dss_qp_router_bytes_per_event": {
+          "value": 321.9211666666667,
+          "unit": "bytes/event",
+          "description": "dss_qp_router storage bytes per event at 10000 events.",
+          "statistics": {
+            "mean": 321.9211666666667,
+            "standard_deviation": 0.43519687881846475,
+            "min": 321.5643,
+            "max": 322.406,
+            "ci_95_low": 321.42870408708126,
+            "ci_95_high": 322.4136292462521,
+            "sample_count": 3
+          }
+        },
+        "events_10000_metadata_filter_bytes_per_event": {
+          "value": 82.93006666666666,
+          "unit": "bytes/event",
+          "description": "metadata_filter storage bytes per event at 10000 events.",
+          "statistics": {
+            "mean": 82.93006666666666,
+            "standard_deviation": 0.0030005555041235587,
+            "min": 82.9268,
+            "max": 82.9327,
+            "ci_95_low": 82.92667128086389,
+            "ci_95_high": 82.93346205246944,
+            "sample_count": 3
+          }
+        },
+        "events_10000_real_embedding_bytes_per_event": {
+          "value": 1536.0,
+          "unit": "bytes/event",
+          "description": "real_embedding storage bytes per event at 10000 events.",
+          "statistics": {
+            "mean": 1536.0,
+            "standard_deviation": 0.0,
+            "min": 1536.0,
+            "max": 1536.0,
+            "ci_95_low": 1536.0,
+            "ci_95_high": 1536.0,
+            "sample_count": 3
+          }
+        },
+        "events_1000_bm25_bytes_per_event": {
+          "value": 149.647,
+          "unit": "bytes/event",
+          "description": "bm25 storage bytes per event at 1000 events.",
+          "statistics": {
+            "mean": 149.647,
+            "standard_deviation": 1.5354728913269773,
+            "min": 148.516,
+            "max": 151.395,
+            "ci_95_low": 147.9094807811137,
+            "ci_95_high": 151.38451921888628,
+            "sample_count": 3
+          }
+        },
+        "events_1000_bow_stand_in_bytes_per_event": {
+          "value": 352.0,
+          "unit": "bytes/event",
+          "description": "bow_stand_in storage bytes per event at 1000 events.",
+          "statistics": {
+            "mean": 352.0,
+            "standard_deviation": 0.0,
+            "min": 352.0,
+            "max": 352.0,
+            "ci_95_low": 352.0,
+            "ci_95_high": 352.0,
+            "sample_count": 3
+          }
+        },
+        "events_1000_dss_qp_router_bytes_per_event": {
+          "value": 321.1956666666667,
+          "unit": "bytes/event",
+          "description": "dss_qp_router storage bytes per event at 1000 events.",
+          "statistics": {
+            "mean": 321.1956666666667,
+            "standard_deviation": 1.4350910540217792,
+            "min": 320.04,
+            "max": 322.802,
+            "ci_95_low": 319.5717381028353,
+            "ci_95_high": 322.81959523049807,
+            "sample_count": 3
+          }
+        },
+        "events_1000_metadata_filter_bytes_per_event": {
+          "value": 82.932,
+          "unit": "bytes/event",
+          "description": "metadata_filter storage bytes per event at 1000 events.",
+          "statistics": {
+            "mean": 82.932,
+            "standard_deviation": 0.006999999999997897,
+            "min": 82.925,
+            "max": 82.939,
+            "ci_95_low": 82.92407889986147,
+            "ci_95_high": 82.93992110013853,
+            "sample_count": 3
+          }
+        },
+        "events_1000_real_embedding_bytes_per_event": {
+          "value": 1536.0,
+          "unit": "bytes/event",
+          "description": "real_embedding storage bytes per event at 1000 events.",
+          "statistics": {
+            "mean": 1536.0,
+            "standard_deviation": 0.0,
+            "min": 1536.0,
+            "max": 1536.0,
+            "ci_95_low": 1536.0,
+            "ci_95_high": 1536.0,
+            "sample_count": 3
+          }
+        }
+      }
+    },
+    "governance": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "extrapolated_sizes": {
+          "value": "100000",
+          "unit": "string",
+          "description": "Corpus sizes that were extrapolated rather than measured.",
+          "statistics": null
+        },
+        "extrapolation_labelled": {
+          "value": 1.0,
+          "unit": "boolean",
+          "description": "All extrapolated rows are explicitly labelled.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 3
+          }
+        },
+        "measured_sizes": {
+          "value": "1000,10000",
+          "unit": "string",
+          "description": "Corpus sizes that were measured directly.",
+          "statistics": null
+        }
+      }
+    },
+    "latency": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "events_100000_bm25_p50_ms": {
+          "value": 613.8578891999302,
+          "unit": "ms",
+          "description": "bm25 p50 latency at 100000 events.",
+          "statistics": {
+            "mean": 613.8578891999302,
+            "standard_deviation": 54.05867782717295,
+            "min": 562.1904788045059,
+            "max": 670.0263875516295,
+            "ci_95_low": 552.6858605676815,
+            "ci_95_high": 675.029917832179,
+            "sample_count": 3
+          }
+        },
+        "events_100000_bm25_p95_ms": {
+          "value": 1378.5360044700374,
+          "unit": "ms",
+          "description": "bm25 p95 latency at 100000 events.",
+          "statistics": {
+            "mean": 1378.5360044700374,
+            "standard_deviation": 559.3539108950237,
+            "min": 986.7909106831322,
+            "max": 2019.1316492052533,
+            "ci_95_low": 745.5790986015145,
+            "ci_95_high": 2011.4929103385603,
+            "sample_count": 3
+          }
+        },
+        "events_100000_bow_stand_in_p50_ms": {
+          "value": 768.7672224469994,
+          "unit": "ms",
+          "description": "bow_stand_in p50 latency at 100000 events.",
+          "statistics": {
+            "mean": 768.7672224469994,
+            "standard_deviation": 19.155369640206185,
+            "min": 748.620306302492,
+            "max": 786.7466601203256,
+            "ci_95_low": 747.0912794311863,
+            "ci_95_high": 790.4431654628125,
+            "sample_count": 3
+          }
+        },
+        "events_100000_bow_stand_in_p95_ms": {
+          "value": 987.0209973190274,
+          "unit": "ms",
+          "description": "bow_stand_in p95 latency at 100000 events.",
+          "statistics": {
+            "mean": 987.0209973190274,
+            "standard_deviation": 154.9983596349091,
+            "min": 808.783235477511,
+            "max": 1090.2099414879651,
+            "ci_95_low": 811.6270647509564,
+            "ci_95_high": 1162.4149298870984,
+            "sample_count": 3
+          }
+        },
+        "events_100000_dss_qp_router_p50_ms": {
+          "value": 11.806322555322463,
+          "unit": "ms",
+          "description": "dss_qp_router p50 latency at 100000 events.",
+          "statistics": {
+            "mean": 11.806322555322463,
+            "standard_deviation": 0.374219673510553,
+            "min": 11.445516291275107,
+            "max": 12.192649202056062,
+            "ci_95_low": 11.38286091136728,
+            "ci_95_high": 12.229784199277647,
+            "sample_count": 3
+          }
+        },
+        "events_100000_dss_qp_router_p95_ms": {
+          "value": 14.530547622079375,
+          "unit": "ms",
+          "description": "dss_qp_router p95 latency at 100000 events.",
+          "statistics": {
+            "mean": 14.530547622079375,
+            "standard_deviation": 1.9236290888303131,
+            "min": 12.309467760877578,
+            "max": 15.662349232223386,
+            "ci_95_low": 12.353796387505048,
+            "ci_95_high": 16.7072988566537,
+            "sample_count": 3
+          }
+        },
+        "events_100000_metadata_filter_p50_ms": {
+          "value": 77.08651049221854,
+          "unit": "ms",
+          "description": "metadata_filter p50 latency at 100000 events.",
+          "statistics": {
+            "mean": 77.08651049221854,
+            "standard_deviation": 3.593553781614541,
+            "min": 73.9305749404593,
+            "max": 80.99764818823101,
+            "ci_95_low": 73.02009629830805,
+            "ci_95_high": 81.15292468612903,
+            "sample_count": 3
+          }
+        },
+        "events_100000_metadata_filter_p95_ms": {
+          "value": 79.21030232934288,
+          "unit": "ms",
+          "description": "metadata_filter p95 latency at 100000 events.",
+          "statistics": {
+            "mean": 79.21030232934288,
+            "standard_deviation": 3.305425847434906,
+            "min": 76.66057957628777,
+            "max": 82.94484365350704,
+            "ci_95_low": 75.4699295953389,
+            "ci_95_high": 82.95067506334686,
+            "sample_count": 3
+          }
+        },
+        "events_100000_real_embedding_p50_ms": {
+          "value": 52617.428698497475,
+          "unit": "ms",
+          "description": "real_embedding p50 latency at 100000 events.",
+          "statistics": {
+            "mean": 52617.428698497475,
+            "standard_deviation": 1014.1613976719987,
+            "min": 51642.40248415994,
+            "max": 53666.650138828554,
+            "ci_95_low": 51469.81812884109,
+            "ci_95_high": 53765.03926815386,
+            "sample_count": 3
+          }
+        },
+        "events_100000_real_embedding_p95_ms": {
+          "value": 58793.55800657176,
+          "unit": "ms",
+          "description": "real_embedding p95 latency at 100000 events.",
+          "statistics": {
+            "mean": 58793.55800657176,
+            "standard_deviation": 1873.8099185214953,
+            "min": 56630.851769157096,
+            "max": 59931.39040232225,
+            "ci_95_low": 56673.1814344024,
+            "ci_95_high": 60913.934578741115,
+            "sample_count": 3
+          }
+        },
+        "events_10000_bm25_p50_ms": {
+          "value": 193.03632282632557,
+          "unit": "ms",
+          "description": "bm25 p50 latency at 10000 events.",
+          "statistics": {
+            "mean": 193.03632282632557,
+            "standard_deviation": 8.933787388376114,
+            "min": 184.23094600439072,
+            "max": 202.0932094892487,
+            "ci_95_low": 182.92697646636955,
+            "ci_95_high": 203.1456691862816,
+            "sample_count": 3
+          }
+        },
+        "events_10000_bm25_p95_ms": {
+          "value": 336.52462658841006,
+          "unit": "ms",
+          "description": "bm25 p95 latency at 10000 events.",
+          "statistics": {
+            "mean": 336.52462658841006,
+            "standard_deviation": 9.567146747797521,
+            "min": 327.36342179996427,
+            "max": 346.45168033021025,
+            "ci_95_low": 325.69857981278915,
+            "ci_95_high": 347.35067336403097,
+            "sample_count": 3
+          }
+        },
+        "events_10000_bow_stand_in_p50_ms": {
+          "value": 246.0208113382881,
+          "unit": "ms",
+          "description": "bow_stand_in p50 latency at 10000 events.",
+          "statistics": {
+            "mean": 246.0208113382881,
+            "standard_deviation": 7.106063181685264,
+            "min": 237.9378965124488,
+            "max": 251.28537949058227,
+            "ci_95_low": 237.97969161644912,
+            "ci_95_high": 254.06193106012708,
+            "sample_count": 3
+          }
+        },
+        "events_10000_bow_stand_in_p95_ms": {
+          "value": 335.1827575213971,
+          "unit": "ms",
+          "description": "bow_stand_in p95 latency at 10000 events.",
+          "statistics": {
+            "mean": 335.1827575213971,
+            "standard_deviation": 6.42506664702655,
+            "min": 327.9613405349661,
+            "max": 340.26650163868874,
+            "ci_95_low": 327.91224376313323,
+            "ci_95_high": 342.45327127966095,
+            "sample_count": 3
+          }
+        },
+        "events_10000_dss_qp_router_p50_ms": {
+          "value": 4.2158806609222665,
+          "unit": "ms",
+          "description": "dss_qp_router p50 latency at 10000 events.",
+          "statistics": {
+            "mean": 4.2158806609222665,
+            "standard_deviation": 0.5306095170290653,
+            "min": 3.68912098929286,
+            "max": 4.750257998239249,
+            "ci_95_low": 3.6154505010871287,
+            "ci_95_high": 4.816310820757405,
+            "sample_count": 3
+          }
+        },
+        "events_10000_dss_qp_router_p95_ms": {
+          "value": 4.483819203354263,
+          "unit": "ms",
+          "description": "dss_qp_router p95 latency at 10000 events.",
+          "statistics": {
+            "mean": 4.483819203354263,
+            "standard_deviation": 0.595540642770064,
+            "min": 3.836838560528122,
+            "max": 5.009127990342677,
+            "ci_95_low": 3.8099139079331046,
+            "ci_95_high": 5.157724498775421,
+            "sample_count": 3
+          }
+        },
+        "events_10000_metadata_filter_p50_ms": {
+          "value": 24.59875983186066,
+          "unit": "ms",
+          "description": "metadata_filter p50 latency at 10000 events.",
+          "statistics": {
+            "mean": 24.59875983186066,
+            "standard_deviation": 0.4457918197544867,
+            "min": 24.125906493281946,
+            "max": 25.011361518409103,
+            "ci_95_low": 24.094308168258628,
+            "ci_95_high": 25.103211495462695,
+            "sample_count": 3
+          }
+        },
+        "events_10000_metadata_filter_p95_ms": {
+          "value": 31.903625687603682,
+          "unit": "ms",
+          "description": "metadata_filter p95 latency at 10000 events.",
+          "statistics": {
+            "mean": 31.903625687603682,
+            "standard_deviation": 7.490760416862995,
+            "min": 24.794342652603518,
+            "max": 39.72500631934963,
+            "ci_95_low": 23.42718806249904,
+            "ci_95_high": 40.38006331270832,
+            "sample_count": 3
+          }
+        },
+        "events_10000_real_embedding_p50_ms": {
+          "value": 16096.414419657473,
+          "unit": "ms",
+          "description": "real_embedding p50 latency at 10000 events.",
+          "statistics": {
+            "mean": 16096.414419657473,
+            "standard_deviation": 495.55652931232737,
+            "min": 15528.89655099716,
+            "max": 16443.567953974707,
+            "ci_95_low": 15535.649720659343,
+            "ci_95_high": 16657.179118655604,
+            "sample_count": 3
+          }
+        },
+        "events_10000_real_embedding_p95_ms": {
+          "value": 19011.764722904383,
+          "unit": "ms",
+          "description": "real_embedding p95 latency at 10000 events.",
+          "statistics": {
+            "mean": 19011.764722904383,
+            "standard_deviation": 777.3247170579176,
+            "min": 18383.145628951024,
+            "max": 19880.927621485895,
+            "ci_95_low": 18132.155162336847,
+            "ci_95_high": 19891.37428347192,
+            "sample_count": 3
+          }
+        },
+        "events_1000_bm25_p50_ms": {
+          "value": 19.95217799655317,
+          "unit": "ms",
+          "description": "bm25 p50 latency at 1000 events.",
+          "statistics": {
+            "mean": 19.95217799655317,
+            "standard_deviation": 4.1711282966155725,
+            "min": 15.184819509158842,
+            "max": 22.929600498173386,
+            "ci_95_low": 15.232188721101547,
+            "ci_95_high": 24.672167272004796,
+            "sample_count": 3
+          }
+        },
+        "events_1000_bm25_p95_ms": {
+          "value": 22.56018944317475,
+          "unit": "ms",
+          "description": "bm25 p95 latency at 1000 events.",
+          "statistics": {
+            "mean": 22.56018944317475,
+            "standard_deviation": 4.342368643603896,
+            "min": 17.832407655077986,
+            "max": 26.370532880537212,
+            "ci_95_low": 17.646427033972884,
+            "ci_95_high": 27.473951852376615,
+            "sample_count": 3
+          }
+        },
+        "events_1000_bow_stand_in_p50_ms": {
+          "value": 34.29329100860438,
+          "unit": "ms",
+          "description": "bow_stand_in p50 latency at 1000 events.",
+          "statistics": {
+            "mean": 34.29329100860438,
+            "standard_deviation": 6.472402481289476,
+            "min": 27.29475799424108,
+            "max": 40.06354752345942,
+            "ci_95_low": 26.96921269557799,
+            "ci_95_high": 41.61736932163076,
+            "sample_count": 3
+          }
+        },
+        "events_1000_bow_stand_in_p95_ms": {
+          "value": 37.60439773226002,
+          "unit": "ms",
+          "description": "bow_stand_in p95 latency at 1000 events.",
+          "statistics": {
+            "mean": 37.60439773226002,
+            "standard_deviation": 6.608437181250239,
+            "min": 30.7662380480906,
+            "max": 43.9562443702016,
+            "ci_95_low": 30.126384493418698,
+            "ci_95_high": 45.08241097110134,
+            "sample_count": 3
+          }
+        },
+        "events_1000_dss_qp_router_p50_ms": {
+          "value": 0.2959993192537998,
+          "unit": "ms",
+          "description": "dss_qp_router p50 latency at 1000 events.",
+          "statistics": {
+            "mean": 0.2959993192537998,
+            "standard_deviation": 0.005850101289319756,
+            "min": 0.29046647250652313,
+            "max": 0.3021219890797511,
+            "ci_95_low": 0.2893794280919049,
+            "ci_95_high": 0.3026192104156947,
+            "sample_count": 3
+          }
+        },
+        "events_1000_dss_qp_router_p95_ms": {
+          "value": 0.3476670991706972,
+          "unit": "ms",
+          "description": "dss_qp_router p95 latency at 1000 events.",
+          "statistics": {
+            "mean": 0.3476670991706972,
+            "standard_deviation": 0.047923212151143015,
+            "min": 0.3161560511216521,
+            "max": 0.40281709807459265,
+            "ci_95_low": 0.29343787596935794,
+            "ci_95_high": 0.4018963223720365,
+            "sample_count": 3
+          }
+        },
+        "events_1000_metadata_filter_p50_ms": {
+          "value": 3.3866556671758494,
+          "unit": "ms",
+          "description": "metadata_filter p50 latency at 1000 events.",
+          "statistics": {
+            "mean": 3.3866556671758494,
+            "standard_deviation": 0.793316247428087,
+            "min": 2.5431234971620142,
+            "max": 4.117761011002585,
+            "ci_95_low": 2.488950318975384,
+            "ci_95_high": 4.284361015376315,
+            "sample_count": 3
+          }
+        },
+        "events_1000_metadata_filter_p95_ms": {
+          "value": 3.7216701777651906,
+          "unit": "ms",
+          "description": "metadata_filter p95 latency at 1000 events.",
+          "statistics": {
+            "mean": 3.7216701777651906,
+            "standard_deviation": 0.9085245069915804,
+            "min": 2.846453251549974,
+            "max": 4.660191087168641,
+            "ci_95_low": 2.6935968065949307,
+            "ci_95_high": 4.7497435489354505,
+            "sample_count": 3
+          }
+        },
+        "events_1000_real_embedding_p50_ms": {
+          "value": 1505.916454999048,
+          "unit": "ms",
+          "description": "real_embedding p50 latency at 1000 events.",
+          "statistics": {
+            "mean": 1505.916454999048,
+            "standard_deviation": 280.40833150692134,
+            "min": 1197.8933864884311,
+            "max": 1746.3581594929565,
+            "ci_95_low": 1188.610387349714,
+            "ci_95_high": 1823.222522648382,
+            "sample_count": 3
+          }
+        },
+        "events_1000_real_embedding_p95_ms": {
+          "value": 1765.5185107481277,
+          "unit": "ms",
+          "description": "real_embedding p95 latency at 1000 events.",
+          "statistics": {
+            "mean": 1765.5185107481277,
+            "standard_deviation": 361.46511668504803,
+            "min": 1420.8029339410132,
+            "max": 2141.6786762478296,
+            "ci_95_low": 1356.4897413411486,
+            "ci_95_high": 2174.547280155107,
+            "sample_count": 3
+          }
+        },
+        "total_runtime_ms": {
+          "value": 1963703.8171283202,
+          "unit": "ms",
+          "description": "Total harness runtime.",
+          "statistics": {
+            "mean": 1963703.8171283202,
+            "standard_deviation": 49407.97168294535,
+            "min": 1915355.9533369844,
+            "max": 2014107.7073909692,
+            "ci_95_low": 1907794.4612222598,
+            "ci_95_high": 2019613.1730343807,
+            "sample_count": 3
+          }
+        }
+      }
+    },
+    "retrieval": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "systems_compared": {
+          "value": 5.0,
+          "unit": "count",
+          "description": "Number of retrieval systems compared.",
+          "statistics": {
+            "mean": 5.0,
+            "standard_deviation": 0.0,
+            "min": 5.0,
+            "max": 5.0,
+            "ci_95_low": 5.0,
+            "ci_95_high": 5.0,
+            "sample_count": 3
+          }
+        }
+      }
+    },
+    "traceability": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "corpus_size_buckets": {
+          "value": 3.0,
+          "unit": "count",
+          "description": "Number of corpus size buckets evaluated.",
+          "statistics": {
+            "mean": 3.0,
+            "standard_deviation": 0.0,
+            "min": 3.0,
+            "max": 3.0,
+            "ci_95_low": 3.0,
+            "ci_95_high": 3.0,
+            "sample_count": 3
+          }
+        },
+        "events_100000_measured": {
+          "value": 0.0,
+          "unit": "boolean",
+          "description": "Whether 100000 events were measured directly.",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 3
+          }
+        },
+        "events_10000_measured": {
+          "value": 1.0,
+          "unit": "boolean",
+          "description": "Whether 10000 events were measured directly.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 3
+          }
+        },
+        "events_1000_measured": {
+          "value": 1.0,
+          "unit": "boolean",
+          "description": "Whether 1000 events were measured directly.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 3
+          }
+        },
+        "query_iterations_per_bucket": {
+          "value": 50.0,
+          "unit": "count",
+          "description": "Measured query iterations per bucket.",
+          "statistics": {
+            "mean": 50.0,
+            "standard_deviation": 0.0,
+            "min": 50.0,
+            "max": 50.0,
+            "ci_95_low": 50.0,
+            "ci_95_high": 50.0,
+            "sample_count": 3
+          }
+        }
+      }
+    }
+  },
+  "freshness": {
+    "status": "fresh",
+    "checked_at": "2026-07-20T04:15:46.778750Z",
+    "max_age_hours": 24,
+    "age_hours": 0.0
+  },
+  "failure_reason": null,
+  "hardware": {
+    "platform": "Darwin-25.5.0-x86_64",
+    "processor": "i386",
+    "cpu_count": 16,
+    "memory_gb": null,
+    "gpu_name": null,
+    "gpu_count": null,
+    "cuda_version": null,
+    "mps_available": true,
+    "backend_accelerator": "mps"
+  },
+  "run_config": {
+    "corpus_sizes": "999,9999,99999",
+    "max_measured_events": 10000,
+    "measure_100k": false,
+    "query_iterations": 50,
+    "warmup_iterations": 5,
+    "top_k": 5,
+    "seed": 193,
+    "deterministic_mode": false,
+    "aggregate": true,
+    "seeds": "193,42,7",
+    "seed_count": 3,
+    "seed_run_ids": "dss295-latency-storage-20260720T030930Z-193,dss295-latency-storage-20260720T034304Z-42,dss295-latency-storage-20260720T041546Z-7"
+  }
+}

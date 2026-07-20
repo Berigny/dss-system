@@ -1,0 +1,14 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-07-20T00:00:00Z",
+  "files": {
+    "longbench_needle_v1.jsonl": {
+      "sha256": "2bd302aee36318a126c45c15a28f7a5e78f67ea862120dc6704ca040a316fa0c",
+      "records": 522
+    },
+    "longbench_multihop_v1.jsonl": {
+      "sha256": "c16def59e764db18fc4cbc9bfba163974caf33f8e47ce8d2c7209ba174ac25e2",
+      "records": 81
+    }
+  }
+}

@@ -3,7 +3,7 @@
 # and evidence link. CI fails if a README claim lacks a registry entry.
 
 schema_version: "1.0"
-last_reviewed: "2026-07-19"
+last_reviewed: "2026-07-20"
 
 claims:
   - id: C01
@@ -179,5 +179,29 @@ claims:
     measurement: bm25_p_at_k, bm25_ndcg_at_k, real_embedding_p_at_k, dss_qp_router_p_at_1, dss_qp_router_abstention_rate
     status: supported
     evidence: backend/benchmarks/output/dss294_bm25_ranking/aggregate
+
+  - id: C20
+    source: DSS-295 benchmark
+    quote: "Measured wall-clock p50/p95 latency and bytes-per-event for DSS, MiniLM, BM25, metadata-filter, and BoW across corpus sizes"
+    claim: DSS latency and storage costs are measured and reported with honest extrapolation labels.
+    harness: apps/backend/backend/benchmarks/dss295_latency_storage_benchmark.py
+    measurement: p50_latency_ms, p95_latency_ms, bytes_per_event across 1 k/10 k/100 k event buckets
+    status: supported
+    evidence: backend/benchmarks/output/dss295_latency_storage/aggregate
+    caveats:
+      - 100 k bucket is extrapolated from direct measurements up to 10 k events unless --measure-100k is used.
+      - Synthetic LongBench needle corpus; enterprise data may differ.
+
+  - id: C21
+    source: DSS-296 benchmark
+    quote: "Full v0.5 benchmark suite runs in a fresh container with 'make eval' and reproduces published artifacts"
+    claim: The v0.5 benchmark suite is containerized and reproducible via a single command.
+    harness: eval/eval_entrypoint.py
+    measurement: Fresh-container run emits validated aggregate artifacts and a summary manifest.
+    status: supported
+    evidence: eval/reports/benchmarks/dss_v0.5_20260720T023702Z/summary_manifest.json
+    caveats:
+      - "'make eval-fast' is a deterministic smoke run with mocked embeddings and tiny corpora."
+      - "Full reproduction requires 'make eval' with sentence-transformers available."
 
 unknown_claims_policy: fail_ci

@@ -17,6 +17,7 @@ jobs:
       coord-demo: ${{ steps.filter.outputs.coord-demo }}
       shared-types: ${{ steps.filter.outputs.shared-types }}
       ksr: ${{ steps.filter.outputs.ksr }}
+      eval: ${{ steps.filter.outputs.eval }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -54,6 +55,12 @@ jobs:
               - 'scripts/check_readme_claims.py'
               - 'eval/claims_registry.yaml'
               - 'README.md'
+              - '.github/workflows/ci.yml'
+            eval:
+              - 'eval/**'
+              - 'apps/backend/backend/benchmarks/dss29*.py'
+              - 'apps/backend/backend/tests/test_dss29*.py'
+              - 'Makefile'
               - '.github/workflows/ci.yml'
 
   scaffold-check:
@@ -274,3 +281,41 @@ jobs:
         run: pip install pyyaml
       - name: Check README claims are registered
         run: python3 scripts/check_readme_claims.py
+
+  eval:
+    needs: changes
+    if: ${{ needs.changes.outputs.eval == 'true' || needs.changes.outputs.backend == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and run eval container (dry-run)
+        run: make eval-fast
+
+      - name: Verify eval artifacts
+        run: |
+          python3 - <<'PY'
+          import json
+          import pathlib
+          import sys
+          sys.path.insert(0, 'apps/backend')
+          sys.path.insert(0, 'packages/shared-types/src')
+          from backend.benchmarks.artifact_schema import validate_benchmark_artifact
+
+          reports = pathlib.Path('eval/reports/benchmarks')
+          run_dirs = sorted(d for d in reports.iterdir() if d.is_dir() and d.name.startswith('dss_v0.5_'))
+          assert run_dirs, f'No eval run directory found under {reports}'
+          run_dir = run_dirs[-1]
+          summary = json.loads((run_dir / 'summary_manifest.json').read_text())
+          assert summary['benchmarks'], 'No benchmarks recorded in summary manifest'
+          for b in summary['benchmarks']:
+              assert b['status'] == 'success', f"Benchmark {b['suite']} did not succeed"
+
+          aggregate_files = list(run_dir.glob('*_aggregate.json'))
+          assert len(aggregate_files) >= 4, f'Expected at least 4 aggregate artifacts, found {len(aggregate_files)}'
+          for artifact_file in aggregate_files:
+              payload = json.loads(artifact_file.read_text())
+              validate_benchmark_artifact(payload)
+              print(f"VALID: {artifact_file.name}")
+          print('All eval artifacts validated.')
+          PY
