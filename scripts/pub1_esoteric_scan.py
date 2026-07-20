@@ -93,6 +93,15 @@ DEFAULT_PRIVATE_PATHS = {
     "node_modules",
 }
 
+# Historical commits that are allowed to name lexicon terms because they are
+# themselves cleanup commits that *removed* those terms from the public tree.
+# Rewriting public history is not an option, so we explicitly ignore them.
+DEFAULT_IGNORED_COMMITS: dict[str, str] = {
+    "4d94cebc3693e240df70090abb2311f22d64f283": (
+        "DSS-290: removed 'god mode' / 'holy grail' references from public files"
+    ),
+}
+
 
 def load_lexicon(path: Path) -> list[str]:
     """Load non-empty, non-comment phrases from the lexicon file."""
@@ -170,12 +179,17 @@ def scan_tree(root: Path, terms: list[str], gitignore_patterns: list[str] | None
     return findings
 
 
-def scan_git_history(root: Path, terms: list[str]) -> list[tuple[str, str]]:
+def scan_git_history(
+    root: Path,
+    terms: list[str],
+    ignored_commits: dict[str, str] | None = None,
+) -> list[tuple[str, str]]:
     """Scan all commit messages for lexicon hits.
 
     Returns a list of (commit_hash, matched_term) tuples.
     """
     patterns = [_term_pattern(t) for t in terms]
+    ignored = ignored_commits or {}
     findings: list[tuple[str, str]] = []
     if not (root / ".git").exists():
         return findings
@@ -198,6 +212,8 @@ def scan_git_history(root: Path, terms: list[str]) -> list[tuple[str, str]]:
         body = commits[i + 1]
         if not commit_hash:
             continue
+        if commit_hash in ignored:
+            continue
         for term, pat in zip(terms, patterns):
             if pat.search(body):
                 findings.append((commit_hash, term))
@@ -219,7 +235,11 @@ def main() -> int:
     print(f"PUB-1 esoteric scan | lexicon: {args.lexicon} ({len(terms)} terms)")
 
     file_findings = scan_tree(args.root, terms)
-    history_findings = [] if args.skip_history else scan_git_history(args.root, terms)
+    history_findings = (
+        []
+        if args.skip_history
+        else scan_git_history(args.root, terms, ignored_commits=DEFAULT_IGNORED_COMMITS)
+    )
 
     if not file_findings and not history_findings:
         print("PUB-1: clean (0 hits)")

@@ -28,8 +28,11 @@ WORKDIR /app
 COPY . /app
 
 # Install shared types first, then backend requirements, then benchmark extras.
+# requirements.txt contains a relative editable install for local dev/CI; strip
+# it here because shared-types is already installed at a known absolute path.
 RUN pip install --no-cache-dir -e /app/packages/shared-types
-RUN pip install --no-cache-dir -r /app/apps/backend/requirements.txt
+RUN sed -i '/^-e /d' /app/apps/backend/requirements.txt && \
+    pip install --no-cache-dir -r /app/apps/backend/requirements.txt
 RUN pip install --no-cache-dir rank-bm25 sentence-transformers hnswlib
 
 # The entrypoint is intentionally at repo-root level so it can see both
