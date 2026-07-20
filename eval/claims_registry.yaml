@@ -243,4 +243,28 @@ claims:
       - "HotpotQA and NarrativeQA are used as representative multi-hop and long-context datasets; additional datasets can be added via the datasets configuration."
       - "Budget cap skips dense baselines if estimated embedding calls exceed the configured limit."
 
+  - id: C25
+    source: README.md / DSS-300 policy
+    quote: "All v0.5 LLM-facing evals default to the Kimi Code delegated agent with OpenRouter as an explicit fallback and budget tracking"
+    claim: DSS-EVAL v0.5 defaults to Kimi Code delegated agent for any LLM-facing eval; OpenRouter is an explicit opt-in fallback; token/call budgets are tracked and enforced.
+    harness: apps/backend/backend/benchmarks/llm_surface_policy.py
+    measurement: resolved surface, calls/prompt/completion budget consumption
+    status: supported
+    evidence: eval/DSS-EVAL-v0.5-llm-surface-policy.md
+    caveats:
+      - "v0.5 deterministic benchmarks do not consume LLM calls by default."
+      - "OpenRouter fallback requires OPENROUTER_API_KEY and explicit surface selection."
+
+  - id: C26
+    source: README.md / eval/v0.5-milestone.md
+    quote: "The original issue #1 critique is addressed by the v0.5 suite; a draft issue comment crediting hugooconnor is maintained in the ds-review outreach package"
+    claim: DSS-EVAL v0.5 publicly acknowledges the issue #1 coordinate-critique, credits hugooconnor, pins the benchmark-validity v0.5 milestone, and updates the README.
+    harness: eval/v0.5-milestone.md
+    measurement: milestone document, README v0.5 line, draft issue comment
+    status: supported
+    evidence: eval/v0.5-milestone.md
+    caveats:
+      - "The actual GitHub issue comment is a draft saved in ds-review; it has not been posted without explicit approval."
+      - "GitHub milestone pinning is documented locally; repository settings changes require maintainer action."
+
 unknown_claims_policy: fail_ci

@@ -30,6 +30,7 @@ from unittest.mock import MagicMock
 
 import numpy as np
 
+from backend.benchmarks.llm_surface_policy import log_surface_and_budget
 from backend.benchmarks.pinned_queries import QUERIES_ROOT, verify_query_manifest
 
 # Eval entrypoint is executed from /app/apps/backend with PYTHONPATH set so that
@@ -398,6 +399,9 @@ def run_eval(config: EvalConfig) -> int:
     run_id = f"dss_v0.5_{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
     print(f"Starting DSS v0.5 evaluation run: {run_id}")
     print(f"Dry run: {config.dry_run}")
+    surface_info = log_surface_and_budget()
+    print(f"LLM surface: {surface_info['llm_surface']}")
+    print(f"LLM budget: {surface_info['llm_budget']}")
 
     results: list[dict[str, Any]] = []
     try:

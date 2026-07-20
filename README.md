@@ -100,17 +100,21 @@ All figures derive from **synthetic micro-corpora**, reported as distributions a
 | Multi-hop synthetic | **1.00** full-chain@5 | real MiniLM: 1.00 | Parity. No differentiation claimed on this corpus. |
 | Counterfactual shuffles | needle texts-shuffled: 1.00 · needle coords-shuffled: 0.00 | — | Confirms current needle retrieval is coordinate-driven, exactly as [issue #1](https://github.com/Berigny/dss-system/issues/1) diagnosed. Label-blind ingestion is the fix in flight. |
 
+The v0.5 suite adds label-blind ingestion, real-data HotpotQA/NarrativeQA evaluation, deterministic citation checks, and an LLM surface policy; see `eval/v0.5-milestone.md`.
+
 The KSR kernel additionally ships a 16-gate self-validation suite (`tools/ksr_validate.py`): **16/16 PASS** on `ksr-core 1.3.1`; adversarial trap adjudication precision/recall 1.0; non-compensatory governance gates fail closed; invariant check-digit detects 98–100% of corruptions (6% without it); live model retention smoke **0.980** on `ksr-core` alone. Full evidence chain in `eval/`.
 
 ---
 
 ## Evaluation & Limitations
 
-* All benchmark figures derive from **synthetic micro-corpora**; the hotpotqa, musique, and 2wiki datasets are present in the repo as unintegrated targets for future work.
-* Retrieval comparators are **deterministic stand-ins** that encode documented failure distributions of dense-retrieval systems — reproducible by design, but not live vector-database runs (whitepaper §12, Threats to Validity).
-* Current figures measure **structural filtering given coordinates**, not evidence discovery from raw text. A label-blind ingestion path is specified in `eval/label_blind_ingestion_spec.md` and targeted for v0.5 / Hugo PR; matched-information baselines and counterfactual shuffle tests are implemented in `tools/counterfactual_harness.py` and tracked under [issue #1](https://github.com/Berigny/dss-system/issues/1).
+* The **v0.5 benchmark suite** (DSS-292 through DSS-299) runs in a fresh container with `make eval` and reproduces published artifacts. It includes known-unknown abstention, adversarial-poisoning checks, BM25/dense/HNSW/long-context baselines, latency/storage tables, deterministic citation faithfulness, label-blind ingestion, and a Phase R real-data track.
+* **Label-blind ingestion** derives document and query coordinates independently and reaches coverage >= 0.8 on synthetic corpora (DSS-298); the Phase R real-data track evaluates HotpotQA and NarrativeQA validation splits with the same baselines, gated by the DSS-298 coverage gate and bounded by a token/embedding budget cap (DSS-299). See `eval/v0.5-milestone.md` for the pinned milestone.
+* Retrieval comparators are **matched-information baselines** (BM25, real MiniLM, HNSW, long-context stand-in) that operate on the same documents and queries as DSS. They are reproducible by design, but live vector-database runs may differ (whitepaper §12, Threats to Validity).
+* All v0.5 LLM-facing evals **default to the Kimi Code delegated agent** with OpenRouter as an explicit fallback and budget tracking; see `eval/DSS-EVAL-v0.5-llm-surface-policy.md`.
 * Every benchmark run emits a versioned artifact and a flat KSR-EVAL v0.4 manifest — seed, commit, dataset, configuration, and metrics with confidence intervals (whitepaper Appendix A). Artifacts and manifests live in `eval/reports/`.
 * The KSR kernel ships with a 16-gate structural self-validation suite (`tools/ksr_validate.py`): current status **16/16 PASS** on `ksr-core 1.3.1`, with adversarial trap adjudication at precision/recall 1.0 and fail-closed non-compensatory governance gates. Concept-level decode: **0.96 node recall** (900/900 completed trials, transport-clean protocol, kimi-k3). See `eval/` for the full KSR-EVAL evidence chain.
+* The original issue #1 critique — that benchmarks encoded relevance in router-visible coordinates — is addressed by the v0.5 suite; a draft issue comment crediting hugooconnor is maintained in the ds-review outreach package.
 
 ---
 
