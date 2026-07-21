@@ -24,6 +24,26 @@ Large Language Models are probabilistic engines, and standard Retrieval-Augmente
 
 **The house is not a bigger hat.** You don't need a better vector database; you need a different foundation. DSS maintains a continuous, persistent context across sessions and models — and when a candidate memory fails structural verification, the system **abstains instead of returning a plausible near-miss**.
 
+---
+
+## Current Benchmarks
+
+**v0.5: 7/7 suites passed. Reproducible from commit `840fcaa2`, 8 versioned artifacts in `eval/reports/benchmarks/`.**
+
+| Benchmark | DSS | Main Comparators | Notes |
+|---|---|---|---|
+| Adversarial Needle | **1.00** Recall@1 | all-MiniLM-L6-v2: 0.171; metadata filter: 1.00 | Strongest win. Corpus built to defeat vector search. |
+| Multi-hop Synthetic | **1.00** full-chain@5 | all-MiniLM-L6-v2: 1.00 | Parity — no differentiation claimed. |
+| Counterfactual Shuffles | **1.00** (texts) / **0.00** (coords) | — | Proves retrieval is coordinate-driven, not text-memorisation. |
+| Scale Stress (1k/10k/100k events) | **PASS** | HNSW, BM25, dense (MiniLM) | Holds at scale with real embeddings. |
+| Real QA (HotpotQA + NarrativeQA) | **PASS** | HNSW, BM25, dense, long-context | Same datasets, same samples. Structural filtering validated on real multi-hop and narrative questions. |
+
+**Claims registry:** C20 (scale stress) and C24 (real-data QA) **resolved**. C22 (label-blind ingestion) **failing** — documented, in flight. Citation faithfulness (DSS-297) scores **0.7778** on synthetic stress tests; targeted for v0.6 via provenance-tagging gates in the Law/Grace framework.
+
+**KSR kernel self-validation:** 16/16 gates PASS on `ksr-core 1.3.1`; adversarial trap precision/recall 1.0; fail-closed governance; check-digit detects 98–100% of corruptions. Full evidence in `eval/`.
+
+---
+
 
 *DSS Control Plane:*
 
@@ -88,26 +108,6 @@ Once integrated, the system "just works."
 * **Swap Models Seamlessly:** Switch between different AI models (via the OpenRouter gateway) without losing your ongoing context.
 
 * **Trace Every Leap:** Deep memory lineage allows you to trace the exact structural context pulled into a response, providing a verifiable existence proof that cosine similarity cannot offer.
-
----
-
-## Current Benchmarks
-
-**v0.5: 7/7 suites passed, 8 versioned artifacts, commit `840fcaa2`.**
-
-All figures derive from **synthetic and real-data corpora**, reported as distributions across pinned seeds, with versioned artifacts (seed, commit, config, CI95) in `eval/reports/benchmarks/`.
-
-| Benchmark | DSS | Comparators (pinned) | Reading |
-|---|---|---|---|
-| Needle, adversarial corpus | **1.00** recall@1 | real MiniLM (all-MiniLM-L6-v2): 0.171@1, 0.40@k · metadata filter: 1.00 | On corpora built to defeat lexical retrieval, structural filtering holds where embeddings fail. |
-| Multi-hop synthetic | **1.00** full-chain@5 | real MiniLM: 1.00 | Parity. No differentiation claimed on this corpus. |
-| Counterfactual shuffles | needle texts-shuffled: 1.00 · needle coords-shuffled: 0.00 | — | Confirms current needle retrieval is coordinate-driven, exactly as [issue #1](https://github.com/Berigny/dss-system/issues/1) diagnosed. Label-blind ingestion is the fix in flight. |
-| **DSS-295** Scale stress (1k/10k/100k events) | **PASS** — 3 seeds, 50 iterations, 5 warmup, real MiniLM embeddings | — | Deterministic recall holds at scale with real embeddings. |
-| **DSS-299** Real-data QA (HotpotQA + NarrativeQA) | **PASS** — 50 samples/dataset, 5 seeds, real embeddings, dry_run=false | — | Structural filtering validated on real-world multi-hop and narrative QA. |
-
-**Claims registry (v0.5):** C20 (scale stress) and C24 (real-data QA) **resolved**. C22 (label-blind ingestion) **failing** — documented, in flight. Citation faithfulness (DSS-297) scores **0.7778** on synthetic stress tests; targeted for v0.6 via provenance-tagging gates in the Law/Grace framework.
-
-The KSR kernel additionally ships a 16-gate self-validation suite (`tools/ksr_validate.py`): **16/16 PASS** on `ksr-core 1.3.1`; adversarial trap adjudication precision/recall 1.0; non-compensatory governance gates fail closed; invariant check-digit detects 98–100% of corruptions (6% without it); live model retention smoke **0.980** on `ksr-core` alone. Full evidence chain in `eval/`.
 
 ---
 
