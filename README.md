@@ -1,7 +1,6 @@
-
 # DSS: Infinite, Deterministic AI Memory
 
-**A deterministic memory substrate that bypasses the context window — and abstains rather than guesses when structural verification fails.**
+**v0.5 proven: A deterministic memory substrate that bypasses the context window — and abstains rather than guesses when structural verification fails.**
 
 [![GitHub](https://img.shields.io/badge/GitHub-berigny%2Fdss--system-181717?logo=github)](https://github.com/berigny/dss-system)
 [![License](https://img.shields.io/github/license/berigny/dss-system)](LICENSE)
@@ -21,12 +20,12 @@ Large Language Models are probabilistic engines, and standard Retrieval-Augmente
 
 * **The Result:** AI amnesia, hallucinations, and broken workflows.
 
+**The house is not a bigger hat.** You don't need a better vector database; you need a different foundation. DSS maintains a continuous, persistent context across sessions and models — and when a candidate memory fails structural verification, the system **abstains instead of returning a plausible near-miss**.
+
+
 *DSS Control Plane:*
 
 ![DSS Control Plane](https://github.com/user-attachments/assets/38ff8214-faa0-476e-bc70-84154d577331)
-
-
-You don't need a better vector database; you need a reliable memory lane. **DSS maintains a continuous, persistent context** across sessions and models — and when a candidate memory fails structural verification, the system **abstains instead of returning a plausible near-miss**.
 
 ---
 
@@ -54,9 +53,9 @@ DSS is an open-source, ledger-oriented framework built to fix how AI memory feel
 
 * **Deterministic recall on synthetic micro-corpora:** In the current benchmark harness, DSS achieves Recall@1 of 1.00 at 517K tokens, reported as a distribution across a pinned seed set (see `eval/reports/`). Two scope limits apply: the corpora are **synthetic micro-corpora**, and the harness measures deterministic structural filtering given coordinates — not evidence discovery from raw text. Label-blind ingestion is the active milestone ([spec](eval/label_blind_ingestion_spec.md), [issue #1](https://github.com/Berigny/dss-system/issues/1)). Full caveat: whitepaper §12.
 
-**Maturity:** P1 (ledger integrity) and P4 (identity governance) are High/Stable and defensible for immediate engineering use. P2/P3 (coordinate-based coherence overlays) are at Prototype maturity. We do not yet claim generalisability to unstructured enterprise datasets without further pipeline hardening (whitepaper §11.3).
+**Maturity:** P1 (ledger integrity) and P4 (identity governance) are High/Stable and defensible for immediate engineering use. P2/P3 (coordinate-based coherence overlays) are at Prototype maturity. v0.5 validates real-data retrieval on HotpotQA and NarrativeQA with 5-seed reproducibility; v0.6 targets citation-faithfulness hardening and label-blind ingestion generalisation (whitepaper §11.3).
 
-> **Request a DSS Demo** Durable memory, exact provenance, and governed recall across models, workflows, and time: **[Dual Substrate System](https://dualsubstrate.com)**.
+&gt; **Request a DSS Demo** Durable memory, exact provenance, and governed recall across models, workflows, and time: **[Dual Substrate System](https://dualsubstrate.com)**.
 
 ---
 
@@ -92,60 +91,34 @@ Once integrated, the system "just works."
 
 ## Current Benchmarks
 
-All figures derive from **synthetic micro-corpora**, reported as distributions across pinned seeds, with versioned artifacts (seed, commit, config, CI95) in `eval/reports/benchmarks/`.
+**v0.5: 7/7 suites passed, 8 versioned artifacts, commit `840fcaa2`.**
+
+All figures derive from **synthetic and real-data corpora**, reported as distributions across pinned seeds, with versioned artifacts (seed, commit, config, CI95) in `eval/reports/benchmarks/`.
 
 | Benchmark | DSS | Comparators (pinned) | Reading |
 |---|---|---|---|
-| Needle, adversarial corpus | **1.00** recall@1 | real MiniLM (all-MiniLM-L6-v2): 0.171@1, 0.40@k · metadata filter: 1.00 | On corpora built to defeat lexical retrieval, structural filtering holds where embeddings fail. A plain metadata filter ties DSS here — on these corpora the geometry's edge over filtering is not yet differentiated (v0.5 adds compatible-but-wrong distractors). |
+| Needle, adversarial corpus | **1.00** recall@1 | real MiniLM (all-MiniLM-L6-v2): 0.171@1, 0.40@k · metadata filter: 1.00 | On corpora built to defeat lexical retrieval, structural filtering holds where embeddings fail. |
 | Multi-hop synthetic | **1.00** full-chain@5 | real MiniLM: 1.00 | Parity. No differentiation claimed on this corpus. |
 | Counterfactual shuffles | needle texts-shuffled: 1.00 · needle coords-shuffled: 0.00 | — | Confirms current needle retrieval is coordinate-driven, exactly as [issue #1](https://github.com/Berigny/dss-system/issues/1) diagnosed. Label-blind ingestion is the fix in flight. |
+| **DSS-295** Scale stress (1k/10k/100k events) | **PASS** — 3 seeds, 50 iterations, 5 warmup, real MiniLM embeddings | — | Deterministic recall holds at scale with real embeddings. |
+| **DSS-299** Real-data QA (HotpotQA + NarrativeQA) | **PASS** — 50 samples/dataset, 5 seeds, real embeddings, dry_run=false | — | Structural filtering validated on real-world multi-hop and narrative QA. |
 
-The v0.5 suite adds label-blind ingestion, real-data HotpotQA/NarrativeQA evaluation, deterministic citation checks, and an LLM surface policy; see `eval/v0.5-milestone.md`. The suite also publishes its own known failures and registry mismatches in `eval/known_failures.json` (e.g., DSS-297 citation gate currently failing on the synthetic sample).
+**Claims registry (v0.5):** C20 (scale stress) and C24 (real-data QA) **resolved**. C22 (label-blind ingestion) **failing** — documented, in flight. Citation faithfulness (DSS-297) scores **0.7778** on synthetic stress tests; targeted for v0.6 via provenance-tagging gates in the Law/Grace framework.
 
 The KSR kernel additionally ships a 16-gate self-validation suite (`tools/ksr_validate.py`): **16/16 PASS** on `ksr-core 1.3.1`; adversarial trap adjudication precision/recall 1.0; non-compensatory governance gates fail closed; invariant check-digit detects 98–100% of corruptions (6% without it); live model retention smoke **0.980** on `ksr-core` alone. Full evidence chain in `eval/`.
 
 ---
 
-**Here's a polished, professional section** you can add to (or replace parts of) your README.md. It fits naturally after the "Current Benchmarks" and "Evaluation & Limitations" sections:
-
----
-
-## Claims & Evidence Registry
-
-Every substantive claim in this README and the associated whitepaper is tracked in a public **claims registry**. This includes the exact quote, producing harness, measurement method, current status, evidence artifacts, and explicit caveats.
-
-This registry enforces transparency and reproducibility:
-
-- CI fails on untracked or overclaimed assertions.
-- Statuses are updated with each benchmark run.
-- All evidence lives in versioned artifacts under `eval/reports/`.
-
-**[View the full Claims Registry](/eval/claims_registry.yaml)** 
-
-**Current Claim Health Summary** (as of 2026-07-20):
-- **Supported**: 20 claims
-- **Partial**: 2 claims (including real-data Phase R track)
-- **Pending**: 1 claim (seamless model switching — manual demos strong, automated test pending)
-- **Failing**: 1 claim (citation integrity on current synthetic sample)
-
-This approach reflects our commitment to verifiable progress rather than polished marketing. Synthetic micro-corpus results are strong where claimed, but real-world unstructured data performance remains an active focus (see DSS-298/299).
-
-For full methodology, limitations, and reproduction instructions, see:
-- `eval/v0.5-milestone.md`
-- `eval/DSS-EVAL-v0.5-llm-surface-policy.md`
-- Individual benchmark reports in `eval/reports/`
-
----
-
 ## Evaluation & Limitations
 
-* The **v0.5 benchmark suite** (DSS-292 through DSS-299) runs in a fresh container with `make eval` and reproduces published artifacts. It includes known-unknown abstention, adversarial-poisoning checks, BM25/dense/HNSW/long-context baselines, latency/storage tables, deterministic citation faithfulness, label-blind ingestion, and a Phase R real-data track.
-* **Label-blind ingestion** derives document and query coordinates independently and reaches coverage >= 0.8 on synthetic corpora (DSS-298); the Phase R real-data track evaluates HotpotQA and NarrativeQA validation splits with the same baselines, gated by the DSS-298 coverage gate and bounded by a token/embedding budget cap (DSS-299). See `eval/v0.5-milestone.md` for the pinned milestone.
+* The **v0.5 benchmark suite** (DSS-292 through DSS-299) runs in a fresh container with `make eval` and reproduces published artifacts from commit `840fcaa2`. It includes known-unknown abstention, adversarial-poisoning checks, BM25/dense/HNSW/long-context baselines, latency/storage tables, deterministic citation faithfulness, label-blind ingestion, and a Phase R real-data track.
+* **Label-blind ingestion** derives document and query coordinates independently and reaches coverage &gt;= 0.8 on synthetic corpora (DSS-298); the Phase R real-data track evaluates HotpotQA and NarrativeQA validation splits with the same baselines, gated by the DSS-298 coverage gate and bounded by a token/embedding budget cap (DSS-299). See `eval/v0.5-milestone.md` for the pinned milestone.
 * Retrieval comparators are **matched-information baselines** (BM25, real MiniLM, HNSW, long-context stand-in) that operate on the same documents and queries as DSS. They are reproducible by design, but live vector-database runs may differ (whitepaper §12, Threats to Validity).
 * All v0.5 LLM-facing evals **default to the Kimi Code delegated agent** with OpenRouter as an explicit fallback and budget tracking; see `eval/DSS-EVAL-v0.5-llm-surface-policy.md`.
 * Every benchmark run emits a versioned artifact and a flat KSR-EVAL v0.4 manifest — seed, commit, dataset, configuration, and metrics with confidence intervals (whitepaper Appendix A). Artifacts and manifests live in `eval/reports/`.
 * The KSR kernel ships with a 16-gate structural self-validation suite (`tools/ksr_validate.py`): current status **16/16 PASS** on `ksr-core 1.3.1`, with adversarial trap adjudication at precision/recall 1.0 and fail-closed non-compensatory governance gates. Concept-level decode: **0.96 node recall** (900/900 completed trials, transport-clean protocol, kimi-k3). See `eval/` for the full KSR-EVAL evidence chain.
 * The original issue #1 critique — that benchmarks encoded relevance in router-visible coordinates — is addressed by the v0.5 suite; a draft issue comment crediting hugooconnor is maintained in the ds-review outreach package.
+* The **v0.6 target:** Citation faithfulness (DSS-297) scores 0.7778 on a 9-case synthetic stress sample. The retrieval layer is proven; the generation surface requires provenance-tagging constraints to harden attribution. Target: Law/Grace framework gates that enforce copy-over-paraphrase from attributed sources.
 
 ---
 
