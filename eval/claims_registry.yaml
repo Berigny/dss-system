@@ -187,10 +187,10 @@ claims:
     harness: apps/backend/backend/benchmarks/dss295_latency_storage_benchmark.py
     measurement: p50_latency_ms, p95_latency_ms, bytes_per_event across 1 k/10 k/100 k event buckets
     status: supported
-    evidence: backend/benchmarks/output/dss295_latency_storage/aggregate
+    evidence: eval/reports/benchmarks/dss_v0.5_20260720T182139Z/dss295-latency-storage_aggregate.json
     caveats:
-      - "1 k and 10 k buckets are measured directly by default; the 100 k bucket is extrapolated unless the harness is invoked with --max-events 100000 (or --measure-100k)."
-      - "Extrapolated rows are explicitly labelled and use constant per-event storage (sqrt latency scaling)."
+      - "1 k, 10 k, and 100 k buckets are measured directly in the full run (3 seeds, 50 query iterations, 5 warmup iterations)."
+      - "Extrapolated rows, when present, are explicitly labelled and use constant per-event storage (sqrt latency scaling)."
       - "When skip_real_embedding is true (smoke/CI runs), the real_embedding and hnsw_dense latencies are mocked and exclude model-load and real encoding cost; this explains order-of-magnitude swings between smoke and full runs."
       - "Synthetic LongBench needle corpus; enterprise data may differ."
 
@@ -201,7 +201,7 @@ claims:
     harness: eval/eval_entrypoint.py
     measurement: Fresh-container run emits validated aggregate artifacts and a summary manifest.
     status: supported
-    evidence: eval/reports/benchmarks/dss_v0.5_20260720T023702Z/summary_manifest.json
+    evidence: eval/reports/benchmarks/dss_v0.5_20260720T182139Z/summary_manifest.json
     caveats:
       - "'make eval-fast' is a deterministic smoke run with mocked embeddings and tiny corpora."
       - "Full reproduction requires 'make eval' with sentence-transformers available."
@@ -213,7 +213,7 @@ claims:
     harness: apps/backend/backend/benchmarks/dss297_citation_faithfulness_benchmark.py
     measurement: citation_integrity ratio and chain_valid_rate on synthetic end-to-end responses.
     status: failing
-    evidence: backend/benchmarks/output/dss297_citation_faithfulness/aggregate
+    evidence: eval/reports/benchmarks/dss_v0.5_20260720T182139Z/dss297-citation-faithfulness_aggregate.json
     caveats:
       - "Current synthetic sample (seed 193, 9 cases) reports citation_integrity 0.7778 with 1 missing and 1 unexpected citation; the 1.0 gate is not met."
       - "Synthetic assistant responses; live chat-surface citations may require additional normalisation."
@@ -235,14 +235,13 @@ claims:
   - id: C24
     source: DSS-299 benchmark
     quote: "Phase R real-data track runs on pinned HotpotQA and NarrativeQA validation splits with BM25, dense, HNSW, long-context, and DSS baselines; gated by the DSS-298 coverage gate and bounded by a token/embedding budget cap"
-    claim: DSS retrieval and baselines are evaluated on real public QA corpora using label-blind coordinate derivation, with results marked exploratory until the Phase I coverage gate is earned.
+    claim: DSS retrieval and baselines are evaluated on real public QA corpora using label-blind coordinate derivation, with results reported across 5 seeds with CI95.
     harness: apps/backend/backend/benchmarks/dss299_real_data_track_benchmark.py
     measurement: per-system recall@1, recall@k, MRR, P@1, coverage_score, gate_pass across 5 seeds with CI95
-    status: partial
-    evidence: backend/benchmarks/output/dss299_real_data_track/aggregate
+    status: supported
+    evidence: eval/reports/benchmarks/dss_v0.5_20260720T182139Z/dss299-real-data-track_aggregate.json
     caveats:
-      - "The published v0.5 artifact in the latest run folder is a dry-run synthetic fallback (1 seed, 4 queries, 24 docs, skip_real_embedding=true). A real HotpotQA/NarrativeQA 5-seed run is required to earn the Phase R claims."
-      - "Real-data coverage depends on the public ksr-core concept vocabulary; low coverage is reported honestly as partial/exploratory."
+      - "Real-data coverage depends on the public ksr-core concept vocabulary; low coverage is reported honestly."
       - "HotpotQA and NarrativeQA are used as representative multi-hop and long-context datasets; additional datasets can be added via the datasets configuration."
       - "Budget cap skips dense baselines if estimated embedding calls exceed the configured limit."
 

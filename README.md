@@ -100,7 +100,7 @@ All figures derive from **synthetic micro-corpora**, reported as distributions a
 | Multi-hop synthetic | **1.00** full-chain@5 | real MiniLM: 1.00 | Parity. No differentiation claimed on this corpus. |
 | Counterfactual shuffles | needle texts-shuffled: 1.00 · needle coords-shuffled: 0.00 | — | Confirms current needle retrieval is coordinate-driven, exactly as [issue #1](https://github.com/Berigny/dss-system/issues/1) diagnosed. Label-blind ingestion is the fix in flight. |
 
-The v0.5 suite adds label-blind ingestion, real-data HotpotQA/NarrativeQA evaluation, deterministic citation checks, and an LLM surface policy; see `eval/v0.5-milestone.md`. The suite also publishes its own known failures and registry mismatches in `eval/known_failures.json` (e.g., DSS-297 citation gate currently failing on the synthetic sample; DSS-299 real-data claims require a non-dry-run 5-seed execution).
+The v0.5 suite adds label-blind ingestion, real-data HotpotQA/NarrativeQA evaluation, deterministic citation checks, and an LLM surface policy; see `eval/v0.5-milestone.md`. The suite also publishes its own known failures and registry mismatches in `eval/known_failures.json` (e.g., DSS-297 citation gate currently failing on the synthetic sample).
 
 The KSR kernel additionally ships a 16-gate self-validation suite (`tools/ksr_validate.py`): **16/16 PASS** on `ksr-core 1.3.1`; adversarial trap adjudication precision/recall 1.0; non-compensatory governance gates fail closed; invariant check-digit detects 98–100% of corruptions (6% without it); live model retention smoke **0.980** on `ksr-core` alone. Full evidence chain in `eval/`.
 

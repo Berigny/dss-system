@@ -1,0 +1,253 @@
+{
+  "artefact_schema_version": "1.0.0",
+  "run_id": "dss293-adversarial-poisoning-aggregate-20260720T182224Z",
+  "suite_id": "dss293-adversarial-poisoning",
+  "suite_version": "v1",
+  "executed_at": "2026-07-20T18:22:24.075654Z",
+  "mode": "full_dss",
+  "status": "success",
+  "repos": [
+    {
+      "name": "ds-backend-local",
+      "commit_sha": "840fcaa295f3b55c24c5ece5d4685fbcb24be96c",
+      "role": "canonical_benchmark_engine",
+      "required_for_run": true
+    }
+  ],
+  "datasets": [
+    {
+      "name": "dss293_adversarial_poisoning_synthetic_v1",
+      "version": "v1",
+      "split": "benchmark",
+      "record_count": 108
+    }
+  ],
+  "metrics": {
+    "cost": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "ledger_writes": {
+          "value": 216.0,
+          "unit": "count",
+          "description": "Number of ledger write operations (base + poison).",
+          "statistics": {
+            "mean": 216.0,
+            "standard_deviation": 0.0,
+            "min": 216.0,
+            "max": 216.0,
+            "ci_95_low": 216.0,
+            "ci_95_high": 216.0,
+            "sample_count": 3
+          }
+        }
+      }
+    },
+    "governance": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "compatibility_pass_rate": {
+          "value": 0.6666666666666666,
+          "unit": "ratio",
+          "description": "Fraction of poisoned entries that passed the structural compatibility filter.",
+          "statistics": {
+            "mean": 0.6666666666666666,
+            "standard_deviation": 0.0,
+            "min": 0.6666666666666666,
+            "max": 0.6666666666666666,
+            "ci_95_low": 0.6666666666666666,
+            "ci_95_high": 0.6666666666666666,
+            "sample_count": 3
+          }
+        },
+        "flagged_or_preserved_rate": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Fraction of poisoned entries that were flagged or left the original intact.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 3
+          }
+        },
+        "invariant_flag_rate": {
+          "value": 0.3333333333333333,
+          "unit": "ratio",
+          "description": "Fraction of compatible-coord conflicts flagged by the invariant layer.",
+          "statistics": {
+            "mean": 0.3333333333333333,
+            "standard_deviation": 0.0,
+            "min": 0.3333333333333333,
+            "max": 0.3333333333333333,
+            "ci_95_low": 0.3333333333333333,
+            "ci_95_high": 0.3333333333333333,
+            "sample_count": 3
+          }
+        },
+        "silent_displacement_rate": {
+          "value": 0.0,
+          "unit": "ratio",
+          "description": "Fraction of poisoned entries that silently displaced the original.",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 3
+          }
+        }
+      }
+    },
+    "latency": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "total_runtime_ms": {
+          "value": 152.69196601972604,
+          "unit": "ms",
+          "description": "Total harness runtime.",
+          "statistics": {
+            "mean": 152.69196601972604,
+            "standard_deviation": 4.094034115994968,
+            "min": 148.13569298712537,
+            "max": 156.06161404866725,
+            "ci_95_low": 148.059215419245,
+            "ci_95_high": 157.32471662020708,
+            "sample_count": 3
+          }
+        }
+      }
+    },
+    "retrieval": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "conflict_flagged_rate": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Fraction of cases where the conflict was flagged.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 3
+          }
+        },
+        "original_preserved_rate": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Fraction of cases where the original entry was preserved.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 3
+          }
+        }
+      }
+    },
+    "traceability": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "compatible_coord_conflict_cases": {
+          "value": 36.0,
+          "unit": "count",
+          "description": "Cases with structurally compatible but contradictory coordinates.",
+          "statistics": {
+            "mean": 36.0,
+            "standard_deviation": 0.0,
+            "min": 36.0,
+            "max": 36.0,
+            "ci_95_low": 36.0,
+            "ci_95_high": 36.0,
+            "sample_count": 3
+          }
+        },
+        "incompatible_coord_cases": {
+          "value": 36.0,
+          "unit": "count",
+          "description": "Cases with structurally incompatible poison coordinates.",
+          "statistics": {
+            "mean": 36.0,
+            "standard_deviation": 0.0,
+            "min": 36.0,
+            "max": 36.0,
+            "ci_95_low": 36.0,
+            "ci_95_high": 36.0,
+            "sample_count": 3
+          }
+        },
+        "same_id_overwrite_cases": {
+          "value": 36.0,
+          "unit": "count",
+          "description": "Cases attempting an in-place overwrite.",
+          "statistics": {
+            "mean": 36.0,
+            "standard_deviation": 0.0,
+            "min": 36.0,
+            "max": 36.0,
+            "ci_95_low": 36.0,
+            "ci_95_high": 36.0,
+            "sample_count": 3
+          }
+        },
+        "total_cases": {
+          "value": 108.0,
+          "unit": "count",
+          "description": "Total number of poisoning cases.",
+          "statistics": {
+            "mean": 108.0,
+            "standard_deviation": 0.0,
+            "min": 108.0,
+            "max": 108.0,
+            "ci_95_low": 108.0,
+            "ci_95_high": 108.0,
+            "sample_count": 3
+          }
+        }
+      }
+    }
+  },
+  "freshness": {
+    "status": "fresh",
+    "checked_at": "2026-07-20T18:22:24.075654Z",
+    "max_age_hours": 24,
+    "age_hours": 0.0
+  },
+  "failure_reason": null,
+  "hardware": {
+    "platform": "Darwin-25.5.0-x86_64",
+    "processor": "i386",
+    "cpu_count": 16,
+    "memory_gb": null,
+    "gpu_name": null,
+    "gpu_count": null,
+    "cuda_version": null,
+    "mps_available": true,
+    "backend_accelerator": "mps"
+  },
+  "run_config": {
+    "seed": 193,
+    "gate_passed": true,
+    "gate_target": "flagged_or_preserved_rate == 1.0 and silent_displacement_rate == 0.0",
+    "deterministic_mode": false,
+    "aggregate": true,
+    "seeds": "193,42,7",
+    "seed_count": 3,
+    "seed_run_ids": "dss293-adversarial-poisoning-20260720T182223Z-193,dss293-adversarial-poisoning-20260720T182223Z-42,dss293-adversarial-poisoning-20260720T182224Z-7"
+  }
+}

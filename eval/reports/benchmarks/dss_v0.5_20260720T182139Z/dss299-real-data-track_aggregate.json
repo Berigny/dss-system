@@ -1,0 +1,869 @@
+{
+  "artefact_schema_version": "1.0.0",
+  "run_id": "dss299-real-data-track-aggregate-20260721T111259Z",
+  "suite_id": "dss299-real-data-track",
+  "suite_version": "v1",
+  "executed_at": "2026-07-21T11:12:59.535497Z",
+  "mode": "full_dss",
+  "status": "success",
+  "repos": [
+    {
+      "name": "ds-backend-local",
+      "commit_sha": "840fcaa295f3b55c24c5ece5d4685fbcb24be96c",
+      "role": "canonical_benchmark_engine",
+      "required_for_run": true
+    }
+  ],
+  "datasets": [
+    {
+      "name": "dss299_real_data_track",
+      "version": "v1",
+      "split": "hotpotqa,narrativeqa",
+      "record_count": 84
+    }
+  ],
+  "metrics": {
+    "cost": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "bm25_token_cost": {
+          "value": 1006.0,
+          "unit": "tokens",
+          "description": "bm25 estimated token cost.",
+          "statistics": {
+            "mean": 1006.0,
+            "standard_deviation": 0.0,
+            "min": 1006.0,
+            "max": 1006.0,
+            "ci_95_low": 1006.0,
+            "ci_95_high": 1006.0,
+            "sample_count": 5
+          }
+        },
+        "dss_qp_router_token_cost": {
+          "value": 0.0,
+          "unit": "tokens",
+          "description": "dss_qp_router estimated token cost.",
+          "statistics": {
+            "mean": 0.0,
+            "standard_deviation": 0.0,
+            "min": 0.0,
+            "max": 0.0,
+            "ci_95_low": 0.0,
+            "ci_95_high": 0.0,
+            "sample_count": 5
+          }
+        },
+        "hnsw_dense_token_cost": {
+          "value": 1600.0,
+          "unit": "tokens",
+          "description": "hnsw_dense estimated token cost.",
+          "statistics": {
+            "mean": 1600.0,
+            "standard_deviation": 0.0,
+            "min": 1600.0,
+            "max": 1600.0,
+            "ci_95_low": 1600.0,
+            "ci_95_high": 1600.0,
+            "sample_count": 5
+          }
+        },
+        "long_context_token_cost": {
+          "value": 1607.2,
+          "unit": "tokens",
+          "description": "long_context estimated token cost.",
+          "statistics": {
+            "mean": 1607.2,
+            "standard_deviation": 3.63318042491699,
+            "min": 1602.0,
+            "max": 1612.0,
+            "ci_95_low": 1604.0154354635788,
+            "ci_95_high": 1610.3845645364213,
+            "sample_count": 5
+          }
+        },
+        "real_embedding_token_cost": {
+          "value": 1756.0,
+          "unit": "tokens",
+          "description": "real_embedding estimated token cost.",
+          "statistics": {
+            "mean": 1756.0,
+            "standard_deviation": 0.0,
+            "min": 1756.0,
+            "max": 1756.0,
+            "ci_95_low": 1756.0,
+            "ci_95_high": 1756.0,
+            "sample_count": 5
+          }
+        },
+        "total_documents": {
+          "value": 72.0,
+          "unit": "count",
+          "description": "Total documents indexed across the track.",
+          "statistics": {
+            "mean": 72.0,
+            "standard_deviation": 0.0,
+            "min": 72.0,
+            "max": 72.0,
+            "ci_95_low": 72.0,
+            "ci_95_high": 72.0,
+            "sample_count": 5
+          }
+        },
+        "total_queries": {
+          "value": 12.0,
+          "unit": "count",
+          "description": "Total queries evaluated.",
+          "statistics": {
+            "mean": 12.0,
+            "standard_deviation": 0.0,
+            "min": 12.0,
+            "max": 12.0,
+            "ci_95_low": 12.0,
+            "ci_95_high": 12.0,
+            "sample_count": 5
+          }
+        }
+      }
+    },
+    "governance": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "coverage_gate": {
+          "value": 0.8,
+          "unit": "ratio",
+          "description": "Minimum coverage required to unlock Phase R claims.",
+          "statistics": {
+            "mean": 0.8,
+            "standard_deviation": 0.0,
+            "min": 0.8,
+            "max": 0.8,
+            "ci_95_low": 0.8,
+            "ci_95_high": 0.8,
+            "sample_count": 5
+          }
+        },
+        "coverage_score": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "Fraction of queries with a structurally compatible document coordinate.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "gate_pass": {
+          "value": 1.0,
+          "unit": "boolean",
+          "description": "True if the Phase I coverage gate passes on the real-data corpus.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "phase_r_gated": {
+          "value": 1.0,
+          "unit": "boolean",
+          "description": "Results are explicitly gated behind the DSS-298 label-blind coverage gate.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        }
+      }
+    },
+    "latency": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "bm25_avg_latency_ms": {
+          "value": 3.680203016847372,
+          "unit": "ms",
+          "description": "bm25 average latency per query.",
+          "statistics": {
+            "mean": 3.680203016847372,
+            "standard_deviation": 0.23876326753655583,
+            "min": 3.258876968175173,
+            "max": 3.8390940171666443,
+            "ci_95_low": 3.470921630989864,
+            "ci_95_high": 3.88948440270488,
+            "sample_count": 5
+          }
+        },
+        "dss_qp_router_avg_latency_ms": {
+          "value": 3.062070196028799,
+          "unit": "ms",
+          "description": "dss_qp_router average latency per query.",
+          "statistics": {
+            "mean": 3.062070196028799,
+            "standard_deviation": 0.25993612989918796,
+            "min": 2.7615370345301926,
+            "max": 3.3803479745984077,
+            "ci_95_low": 2.8342303190619185,
+            "ci_95_high": 3.289910072995679,
+            "sample_count": 5
+          }
+        },
+        "hnsw_dense_avg_latency_ms": {
+          "value": 2368.267666408792,
+          "unit": "ms",
+          "description": "hnsw_dense average latency per query.",
+          "statistics": {
+            "mean": 2368.267666408792,
+            "standard_deviation": 1361.6752840833362,
+            "min": 831.3122289837338,
+            "max": 4581.125767028425,
+            "ci_95_low": 1174.728586963728,
+            "ci_95_high": 3561.8067458538562,
+            "sample_count": 5
+          }
+        },
+        "long_context_avg_latency_ms": {
+          "value": 1.3040029909461737,
+          "unit": "ms",
+          "description": "long_context average latency per query.",
+          "statistics": {
+            "mean": 1.3040029909461737,
+            "standard_deviation": 0.05855665383985453,
+            "min": 1.2053220416419208,
+            "max": 1.3608799781650305,
+            "ci_95_low": 1.2526767639548009,
+            "ci_95_high": 1.3553292179375465,
+            "sample_count": 5
+          }
+        },
+        "real_embedding_avg_latency_ms": {
+          "value": 7853.86890640948,
+          "unit": "ms",
+          "description": "real_embedding average latency per query.",
+          "statistics": {
+            "mean": 7853.86890640948,
+            "standard_deviation": 296.86417296826045,
+            "min": 7398.697042022832,
+            "max": 8214.123481011484,
+            "ci_95_low": 7593.660767313174,
+            "ci_95_high": 8114.0770455057855,
+            "sample_count": 5
+          }
+        },
+        "total_runtime_ms": {
+          "value": 16926.10834580846,
+          "unit": "ms",
+          "description": "Total harness runtime.",
+          "statistics": {
+            "mean": 16926.10834580846,
+            "standard_deviation": 2650.8370517597696,
+            "min": 15209.933281003032,
+            "max": 21630.60635799775,
+            "ci_95_low": 14602.589918545453,
+            "ci_95_high": 19249.626773071468,
+            "sample_count": 5
+          }
+        }
+      }
+    },
+    "retrieval": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "bm25_mrr": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bm25 mean reciprocal rank.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "bm25_ndcg_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bm25 NDCG at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "bm25_ndcg_at_2": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bm25 NDCG at rank 2.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "bm25_ndcg_at_3": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bm25 NDCG at rank 3.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "bm25_ndcg_at_4": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bm25 NDCG at rank 4.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "bm25_ndcg_at_5": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bm25 NDCG at rank 5.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "bm25_p_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bm25 precision at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "bm25_p_at_2": {
+          "value": 0.5,
+          "unit": "ratio",
+          "description": "bm25 precision at rank 2.",
+          "statistics": {
+            "mean": 0.5,
+            "standard_deviation": 0.0,
+            "min": 0.5,
+            "max": 0.5,
+            "ci_95_low": 0.5,
+            "ci_95_high": 0.5,
+            "sample_count": 5
+          }
+        },
+        "bm25_p_at_3": {
+          "value": 0.3333333333333333,
+          "unit": "ratio",
+          "description": "bm25 precision at rank 3.",
+          "statistics": {
+            "mean": 0.3333333333333333,
+            "standard_deviation": 0.0,
+            "min": 0.3333333333333333,
+            "max": 0.3333333333333333,
+            "ci_95_low": 0.3333333333333333,
+            "ci_95_high": 0.3333333333333333,
+            "sample_count": 5
+          }
+        },
+        "bm25_p_at_4": {
+          "value": 0.25,
+          "unit": "ratio",
+          "description": "bm25 precision at rank 4.",
+          "statistics": {
+            "mean": 0.25,
+            "standard_deviation": 0.0,
+            "min": 0.25,
+            "max": 0.25,
+            "ci_95_low": 0.25,
+            "ci_95_high": 0.25,
+            "sample_count": 5
+          }
+        },
+        "bm25_p_at_5": {
+          "value": 0.19999999999999998,
+          "unit": "ratio",
+          "description": "bm25 precision at rank 5.",
+          "statistics": {
+            "mean": 0.19999999999999998,
+            "standard_deviation": 0.0,
+            "min": 0.19999999999999998,
+            "max": 0.19999999999999998,
+            "ci_95_low": 0.19999999999999998,
+            "ci_95_high": 0.19999999999999998,
+            "sample_count": 5
+          }
+        },
+        "bm25_recall_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bm25 recall at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "bm25_recall_at_k": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "bm25 recall within top 5.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "dss_qp_router_abstention_rate": {
+          "value": 0.5,
+          "unit": "ratio",
+          "description": "dss_qp_router fraction of queries that abstained.",
+          "statistics": {
+            "mean": 0.5,
+            "standard_deviation": 0.0,
+            "min": 0.5,
+            "max": 0.5,
+            "ci_95_low": 0.5,
+            "ci_95_high": 0.5,
+            "sample_count": 5
+          }
+        },
+        "dss_qp_router_mrr": {
+          "value": 0.4166666666666667,
+          "unit": "ratio",
+          "description": "dss_qp_router mean reciprocal rank.",
+          "statistics": {
+            "mean": 0.4166666666666667,
+            "standard_deviation": 0.0,
+            "min": 0.4166666666666667,
+            "max": 0.4166666666666667,
+            "ci_95_low": 0.4166666666666667,
+            "ci_95_high": 0.4166666666666667,
+            "sample_count": 5
+          }
+        },
+        "dss_qp_router_p_at_1": {
+          "value": 0.3333333333333333,
+          "unit": "ratio",
+          "description": "dss_qp_router precision at rank 1.",
+          "statistics": {
+            "mean": 0.3333333333333333,
+            "standard_deviation": 0.0,
+            "min": 0.3333333333333333,
+            "max": 0.3333333333333333,
+            "ci_95_low": 0.3333333333333333,
+            "ci_95_high": 0.3333333333333333,
+            "sample_count": 5
+          }
+        },
+        "dss_qp_router_recall_at_1": {
+          "value": 0.3333333333333333,
+          "unit": "ratio",
+          "description": "dss_qp_router recall at rank 1.",
+          "statistics": {
+            "mean": 0.3333333333333333,
+            "standard_deviation": 0.0,
+            "min": 0.3333333333333333,
+            "max": 0.3333333333333333,
+            "ci_95_low": 0.3333333333333333,
+            "ci_95_high": 0.3333333333333333,
+            "sample_count": 5
+          }
+        },
+        "dss_qp_router_recall_at_k": {
+          "value": 0.5,
+          "unit": "ratio",
+          "description": "dss_qp_router recall within top 5.",
+          "statistics": {
+            "mean": 0.5,
+            "standard_deviation": 0.0,
+            "min": 0.5,
+            "max": 0.5,
+            "ci_95_low": 0.5,
+            "ci_95_high": 0.5,
+            "sample_count": 5
+          }
+        },
+        "hnsw_dense_mrr": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "hnsw_dense mean reciprocal rank.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "hnsw_dense_ndcg_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "hnsw_dense NDCG at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "hnsw_dense_ndcg_at_2": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "hnsw_dense NDCG at rank 2.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "hnsw_dense_ndcg_at_3": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "hnsw_dense NDCG at rank 3.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "hnsw_dense_ndcg_at_4": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "hnsw_dense NDCG at rank 4.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "hnsw_dense_ndcg_at_5": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "hnsw_dense NDCG at rank 5.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "hnsw_dense_p_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "hnsw_dense precision at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "hnsw_dense_p_at_2": {
+          "value": 0.5,
+          "unit": "ratio",
+          "description": "hnsw_dense precision at rank 2.",
+          "statistics": {
+            "mean": 0.5,
+            "standard_deviation": 0.0,
+            "min": 0.5,
+            "max": 0.5,
+            "ci_95_low": 0.5,
+            "ci_95_high": 0.5,
+            "sample_count": 5
+          }
+        },
+        "hnsw_dense_p_at_3": {
+          "value": 0.3333333333333333,
+          "unit": "ratio",
+          "description": "hnsw_dense precision at rank 3.",
+          "statistics": {
+            "mean": 0.3333333333333333,
+            "standard_deviation": 0.0,
+            "min": 0.3333333333333333,
+            "max": 0.3333333333333333,
+            "ci_95_low": 0.3333333333333333,
+            "ci_95_high": 0.3333333333333333,
+            "sample_count": 5
+          }
+        },
+        "hnsw_dense_p_at_4": {
+          "value": 0.25,
+          "unit": "ratio",
+          "description": "hnsw_dense precision at rank 4.",
+          "statistics": {
+            "mean": 0.25,
+            "standard_deviation": 0.0,
+            "min": 0.25,
+            "max": 0.25,
+            "ci_95_low": 0.25,
+            "ci_95_high": 0.25,
+            "sample_count": 5
+          }
+        },
+        "hnsw_dense_p_at_5": {
+          "value": 0.19999999999999998,
+          "unit": "ratio",
+          "description": "hnsw_dense precision at rank 5.",
+          "statistics": {
+            "mean": 0.19999999999999998,
+            "standard_deviation": 0.0,
+            "min": 0.19999999999999998,
+            "max": 0.19999999999999998,
+            "ci_95_low": 0.19999999999999998,
+            "ci_95_high": 0.19999999999999998,
+            "sample_count": 5
+          }
+        },
+        "hnsw_dense_recall_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "hnsw_dense recall at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "hnsw_dense_recall_at_k": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "hnsw_dense recall within top 5.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "long_context_mrr": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "long_context mean reciprocal rank.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "long_context_recall_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "long_context recall at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "long_context_recall_at_k": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "long_context recall within top 5.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "real_embedding_mrr": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "real_embedding mean reciprocal rank.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "real_embedding_recall_at_1": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "real_embedding recall at rank 1.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        },
+        "real_embedding_recall_at_k": {
+          "value": 1.0,
+          "unit": "ratio",
+          "description": "real_embedding recall within top 5.",
+          "statistics": {
+            "mean": 1.0,
+            "standard_deviation": 0.0,
+            "min": 1.0,
+            "max": 1.0,
+            "ci_95_low": 1.0,
+            "ci_95_high": 1.0,
+            "sample_count": 5
+          }
+        }
+      }
+    },
+    "traceability": {
+      "status": "present",
+      "absence_reason": null,
+      "metrics": {
+        "datasets": {
+          "value": "hotpotqa,narrativeqa",
+          "unit": "string",
+          "description": "Real datasets evaluated in this run.",
+          "statistics": null
+        },
+        "samples_per_dataset": {
+          "value": 50.0,
+          "unit": "count",
+          "description": "Number of examples sampled per dataset per seed.",
+          "statistics": {
+            "mean": 50.0,
+            "standard_deviation": 0.0,
+            "min": 50.0,
+            "max": 50.0,
+            "ci_95_low": 50.0,
+            "ci_95_high": 50.0,
+            "sample_count": 5
+          }
+        }
+      }
+    }
+  },
+  "freshness": {
+    "status": "fresh",
+    "checked_at": "2026-07-21T11:12:59.535497Z",
+    "max_age_hours": 24,
+    "age_hours": 0.0
+  },
+  "failure_reason": null,
+  "hardware": {
+    "platform": "Darwin-25.5.0-x86_64",
+    "processor": "i386",
+    "cpu_count": 16,
+    "memory_gb": null,
+    "gpu_name": null,
+    "gpu_count": null,
+    "cuda_version": null,
+    "mps_available": true,
+    "backend_accelerator": "mps"
+  },
+  "run_config": {
+    "datasets": "hotpotqa,narrativeqa",
+    "samples_per_dataset": 50,
+    "top_k": 5,
+    "seed": 193,
+    "coverage_gate": 0.8,
+    "max_total_documents": 1000,
+    "max_queries": 100,
+    "max_embedding_calls": 2500,
+    "budget_tokens": 500000,
+    "skip_real_embedding": false,
+    "dry_run": false,
+    "deterministic_mode": false,
+    "aggregate": true,
+    "seeds": "193,42,7,13,21",
+    "seed_count": 5,
+    "seed_run_ids": "dss299-real-data-track-20260721T111156Z-193,dss299-real-data-track-20260721T111212Z-42,dss299-real-data-track-20260721T111227Z-7,dss299-real-data-track-20260721T111244Z-13,dss299-real-data-track-20260721T111259Z-21"
+  }
+}
