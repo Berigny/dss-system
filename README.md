@@ -1,6 +1,6 @@
 # DSS: Infinite, Deterministic AI Memory
 
-**v0.5 proven: A deterministic memory substrate that bypasses the context window — and abstains rather than guesses when structural verification fails.**
+**A deterministic memory substrate that bypasses the context window — and abstains rather than guesses when structural verification fails.**
 
 [![GitHub](https://img.shields.io/badge/GitHub-berigny%2Fdss--system-181717?logo=github)](https://github.com/berigny/dss-system)
 [![License](https://img.shields.io/github/license/berigny/dss-system)](LICENSE)
@@ -9,6 +9,8 @@
 [![Fly.io](https://img.shields.io/badge/deployed-Fly.io-7B3FE4?logo=flydotio&logoColor=white)]()
 [![Vercel](https://img.shields.io/badge/deployed-Vercel-000000?logo=vercel&logoColor=white)]()
 [![Whitepaper](https://img.shields.io/badge/Whitepaper-ResearchGate-00CCBB?logo=researchgate&logoColor=white)](https://www.researchgate.net/publication/408995995_Beyond_the_Context_Window_A_Ledger-Oriented_Architecture_for_Provable_AI_Memory_Dual-Substrate_System)
+
+> DSS v0.5: structural filtering beats embeddings 1.00 to 0.17 on adversarial retrieval, validated on HotpotQA and NarrativeQA with 5-seed reproducibility.
 
 ## The Why: The Problem with Probabilistic Memory
 
