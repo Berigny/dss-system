@@ -2334,6 +2334,8 @@ def test_delegated_codex_prompt_path_overrides_principal_for_current_turn_only(m
             "provider": "openai",
             "agent": "mock",
             "enable_ledger": True,
+            "ledger_id": "chat-demo",
+            "entity": "chat-demo",
             "k": 1,
             "delegated_principal": {
                 "principal_did": codex_did,
@@ -2494,6 +2496,8 @@ def test_delegated_principal_on_probation_retrieves_but_does_not_commit(monkeypa
             "provider": "openai",
             "agent": "mock",
             "enable_ledger": True,
+            "ledger_id": "chat-demo",
+            "entity": "chat-demo",
             "k": 1,
             "delegated_principal": {
                 "principal_did": codex_did,
@@ -8613,7 +8617,7 @@ def test_smart_stream_blocks_when_principal_not_connected_to_ledger(monkeypatch)
 
     error_events = [e for e in events if e.get("type") == "error"]
     assert error_events, "Expected an error event when principal is not connected"
-    assert error_events[0].get("error_code") == "principal_not_authorized_for_surface"
+    assert error_events[0].get("error_code") == "principal_not_authorized_for_ledger"
     assert "chat-demo" in error_events[0].get("message", "")
     assert captured["metadata"] is None
 
@@ -8672,3 +8676,116 @@ def test_smart_stream_allows_when_ledger_principals_check_unavailable(monkeypatc
     assert meta_events, "Expected a meta event"
     metadata = captured["metadata"] or {}
     assert metadata.get("answering_principal") == "did:key:z6MkFallback"
+
+
+def test_smart_stream_allows_delegated_principal_by_ledger_scope(monkeypatch):
+    """DSS-286: delegated prompt principals are authorized by ledger_scope."""
+    captured = _patch_for_authority_matrix_test(monkeypatch, principals_for_ledger=[])
+    delegated_did = "did:web:id.dualsubstrate.com:principals:agent:kimi"
+
+    events = _stream_events({
+        "session_id": "authority-delegated-allowed",
+        "message": "hello",
+        "history": [],
+        "provider": "kimi",
+        "agent": "kimi",
+        "enable_ledger": True,
+        "entity": "chat-demo",
+        "principal_did": delegated_did,
+        "principal_key_id": "kimi:agent:kimi-code",
+        "delegated_principal": {
+            "principal_did": delegated_did,
+            "principal_key_id": "kimi:agent:kimi-code",
+            "principal_id": "kimi-code",
+            "principal_type": "agent",
+            "explicit_cli_request": True,
+            "delegation_mode": "delegated_only",
+            "delegated_by_principal_did": "did:key:z6MkOperator",
+            "delegated_by_principal_id": "operator:david",
+            "ledger_scope": ["chat-demo"],
+            "surface_scope": ["surface:chat:primary"],
+            "surface_id": "surface:chat:primary",
+        },
+    })
+
+    error_events = [e for e in events if e.get("type") == "error"]
+    assert not error_events, f"Unexpected error events for delegated principal: {error_events}"
+    meta_events = [e for e in events if e.get("type") == "meta"]
+    assert meta_events, "Expected a meta event"
+    metadata = captured["metadata"] or {}
+    assert metadata.get("answering_principal") == delegated_did
+
+
+def test_smart_stream_blocks_delegated_principal_for_ledger_scope_mismatch(monkeypatch):
+    """DSS-286: delegated prompt principals must include the target ledger in scope."""
+    captured = _patch_for_authority_matrix_test(monkeypatch, principals_for_ledger=[])
+    delegated_did = "did:web:id.dualsubstrate.com:principals:agent:kimi"
+
+    events = _stream_events({
+        "session_id": "authority-delegated-blocked",
+        "message": "hello",
+        "history": [],
+        "provider": "kimi",
+        "agent": "kimi",
+        "enable_ledger": True,
+        "entity": "chat-demo",
+        "principal_did": delegated_did,
+        "principal_key_id": "kimi:agent:kimi-code",
+        "delegated_principal": {
+            "principal_did": delegated_did,
+            "principal_key_id": "kimi:agent:kimi-code",
+            "principal_id": "kimi-code",
+            "principal_type": "agent",
+            "explicit_cli_request": True,
+            "delegation_mode": "delegated_only",
+            "delegated_by_principal_did": "did:key:z6MkOperator",
+            "delegated_by_principal_id": "operator:david",
+            "ledger_scope": ["other-ledger"],
+            "surface_scope": ["surface:chat:primary"],
+            "surface_id": "surface:chat:primary",
+        },
+    })
+
+    error_events = [e for e in events if e.get("type") == "error"]
+    assert error_events, "Expected an error event when delegated ledger scope mismatches"
+    assert error_events[0].get("error_code") == "principal_not_authorized_for_ledger"
+    assert "chat-demo" in error_events[0].get("message", "")
+    assert captured["metadata"] is None
+
+
+@pytest.mark.anyio
+async def test_verify_principal_ledger_connection_delegated_scope_match():
+    class _FakeClient:
+        async def get_ledger_principals(self, ledger_id, *, auth_headers=None):
+            return []
+
+    result, principals = await orchestrator_module._verify_principal_ledger_connection(
+        api_client=_FakeClient(),
+        ledger_id="loam",
+        principal_did="did:web:id.dualsubstrate.com:principals:agent:kimi",
+        auth_headers={
+            "x-delegated-cli-request": "true",
+            "x-delegated-ledger-scope": "loam,clay",
+        },
+    )
+    assert result is True
+    assert principals == []
+
+
+@pytest.mark.anyio
+async def test_verify_principal_ledger_connection_delegated_scope_mismatch():
+    class _FakeClient:
+        async def get_ledger_principals(self, ledger_id, *, auth_headers=None):
+            return [{"principal_did": "did:key:z6MkOther"}]
+
+    result, principals = await orchestrator_module._verify_principal_ledger_connection(
+        api_client=_FakeClient(),
+        ledger_id="loam",
+        principal_did="did:web:id.dualsubstrate.com:principals:agent:kimi",
+        auth_headers={
+            "x-delegated-cli-request": "true",
+            "x-delegated-ledger-scope": "other-ledger",
+        },
+    )
+    assert result is False
+    assert principals == []

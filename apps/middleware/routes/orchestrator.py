@@ -1236,6 +1236,21 @@ def _resolve_runtime_actor(
     return actor_resolution, standing_envelope
 
 
+def _split_delegated_scope(header_value: str | None) -> list[str]:
+    """Parse a comma-separated or JSON list scope header into canonical ids."""
+    raw = str(header_value or "").strip()
+    if not raw:
+        return []
+    if raw.startswith("["):
+        try:
+            parsed = json.loads(raw)
+        except Exception:
+            parsed = None
+        if isinstance(parsed, list):
+            return [str(item).strip() for item in parsed if str(item).strip()]
+    return [canonicalize_ledger_scope(part.strip()) for part in raw.split(",") if part.strip()]
+
+
 async def _verify_principal_ledger_connection(
     *,
     api_client: Any,
@@ -1245,11 +1260,38 @@ async def _verify_principal_ledger_connection(
 ) -> tuple[bool, list[dict[str, Any]]]:
     """Return True if principal_did is actively connected to ledger_id.
 
+    Delegated CLI/agent principals are authorized by their configured
+    ledger_scope rather than a Control Plane ledger-principal relationship,
+    mirroring the backend's delegated principal contract in
+    ``backend/services/authz.py``.
+
     Falls back to allowed when the backend check is unavailable so a
     connection outage does not silently deny all chat answers.
     """
     if not ledger_id or not principal_did:
         return True, []
+    normalized_ledger = canonicalize_ledger_scope(ledger_id)
+    auth_headers = auth_headers if isinstance(auth_headers, dict) else {}
+
+    # DSS-286: delegated prompt principals carry their own ledger scope.
+    delegated_request = str(auth_headers.get("x-delegated-cli-request") or "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+    if delegated_request:
+        delegated_scope = _split_delegated_scope(auth_headers.get("x-delegated-ledger-scope"))
+        is_authorized = normalized_ledger in delegated_scope
+        LOGGER.info(
+            "ledger_auth_delegated: ledger=%s principal=%s delegated_scope=%s authorized=%s",
+            normalized_ledger,
+            principal_did,
+            delegated_scope,
+            is_authorized,
+        )
+        return is_authorized, []
+
     try:
         principals = await api_client.get_ledger_principals(
             ledger_id,
@@ -1264,7 +1306,24 @@ async def _verify_principal_ledger_connection(
         )
         return True, []
     if not isinstance(principals, list):
+        LOGGER.info(
+            "ledger_auth_non_list_response: ledger=%s principal=%s response_type=%s",
+            normalized_ledger,
+            principal_did,
+            type(principals).__name__,
+        )
         return True, []
+    principal_dids = [
+        str(principal.get("principal_did") or "").strip()
+        for principal in principals
+        if isinstance(principal, dict)
+    ]
+    LOGGER.info(
+        "ledger_auth_registry_check: ledger=%s principal=%s connected_principals=%s",
+        normalized_ledger,
+        principal_did,
+        principal_dids,
+    )
     for principal in principals:
         if isinstance(principal, dict) and str(principal.get("principal_did") or "").strip() == principal_did:
             return True, principals
@@ -7692,22 +7751,32 @@ def register_orchestrator_routes(rt):
                 auth_headers=auth_headers if isinstance(auth_headers, dict) else None,
             )
             if not is_connected:
+                delegated_request = str(auth_headers.get("x-delegated-cli-request") or "").strip().lower() in {
+                    "1", "true", "yes", "on",
+                }
                 LOGGER.warning(
-                    "authority_matrix_blocked: ledger=%s principal=%s agent=%s",
+                    "authority_matrix_blocked: ledger=%s principal=%s agent=%s delegated=%s",
                     entity,
                     answering_principal_did,
                     agent,
+                    delegated_request,
                 )
 
                 async def _authority_error_stream():
                     yield _ndjson_event({
                         "type": "error",
-                        "error_code": "principal_not_authorized_for_surface",
+                        "error_code": "principal_not_authorized_for_ledger",
                         "message": (
-                            f"Selected agent is not authorized for ledger '{entity}'. "
-                            "Reconnect the principal in Control Plane and try again."
+                            f"Selected agent is not connected to ledger '{entity}'. "
+                            "Reconnect the principal in Control Plane, or for delegated "
+                            "prompt principals ensure the ledger is included in the delegated "
+                            "ledger scope, and try again."
                         ),
-                        "authority_matrix": {**authority_matrix, "ledger_principals": ledger_principals},
+                        "authority_matrix": {
+                            **authority_matrix,
+                            "ledger_principals": ledger_principals,
+                            "delegated_request": delegated_request,
+                        },
                     })
 
                 return StreamingResponse(
