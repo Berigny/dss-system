@@ -120,7 +120,7 @@ This registry enforces transparency and reproducibility:
 - Statuses are updated with each benchmark run.
 - All evidence lives in versioned artifacts under `eval/reports/`.
 
-**[View the full Claims Registry](claims-registry.yaml)** 
+**[View the full Claims Registry](/eval/claims_registry.yaml)** 
 
 **Current Claim Health Summary** (as of 2026-07-20):
 - **Supported**: 20 claims
