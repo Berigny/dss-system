@@ -106,6 +106,37 @@ The KSR kernel additionally ships a 16-gate self-validation suite (`tools/ksr_va
 
 ---
 
+**Here's a polished, professional section** you can add to (or replace parts of) your README.md. It fits naturally after the "Current Benchmarks" and "Evaluation & Limitations" sections:
+
+---
+
+## Claims & Evidence Registry
+
+Every substantive claim in this README and the associated whitepaper is tracked in a public **claims registry**. This includes the exact quote, producing harness, measurement method, current status, evidence artifacts, and explicit caveats.
+
+This registry enforces transparency and reproducibility:
+
+- CI fails on untracked or overclaimed assertions.
+- Statuses are updated with each benchmark run.
+- All evidence lives in versioned artifacts under `eval/reports/`.
+
+**[View the full Claims Registry](claims-registry.yaml)** 
+
+**Current Claim Health Summary** (as of 2026-07-20):
+- **Supported**: 20 claims
+- **Partial**: 2 claims (including real-data Phase R track)
+- **Pending**: 1 claim (seamless model switching — manual demos strong, automated test pending)
+- **Failing**: 1 claim (citation integrity on current synthetic sample)
+
+This approach reflects our commitment to verifiable progress rather than polished marketing. Synthetic micro-corpus results are strong where claimed, but real-world unstructured data performance remains an active focus (see DSS-298/299).
+
+For full methodology, limitations, and reproduction instructions, see:
+- `eval/v0.5-milestone.md`
+- `eval/DSS-EVAL-v0.5-llm-surface-policy.md`
+- Individual benchmark reports in `eval/reports/`
+
+---
+
 ## Evaluation & Limitations
 
 * The **v0.5 benchmark suite** (DSS-292 through DSS-299) runs in a fresh container with `make eval` and reproduces published artifacts. It includes known-unknown abstention, adversarial-poisoning checks, BM25/dense/HNSW/long-context baselines, latency/storage tables, deterministic citation faithfulness, label-blind ingestion, and a Phase R real-data track.
