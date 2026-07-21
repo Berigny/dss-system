@@ -120,7 +120,7 @@ Once integrated, the system "just works."
 * Every benchmark run emits a versioned artifact and a flat KSR-EVAL v0.4 manifest — seed, commit, dataset, configuration, and metrics with confidence intervals (whitepaper Appendix A). Artifacts and manifests live in `eval/reports/`.
 * The KSR kernel ships with a 16-gate structural self-validation suite (`tools/ksr_validate.py`): current status **16/16 PASS** on `ksr-core 1.3.1`, with adversarial trap adjudication at precision/recall 1.0 and fail-closed non-compensatory governance gates. Concept-level decode: **0.96 node recall** (900/900 completed trials, transport-clean protocol, kimi-k3). See `eval/` for the full KSR-EVAL evidence chain.
 * The original issue #1 critique — that benchmarks encoded relevance in router-visible coordinates — is addressed by the v0.5 suite; a draft issue comment crediting hugooconnor is maintained in the ds-review outreach package.
-* The **v0.6 target:** Citation faithfulness (DSS-297) scores 0.7778 on a 9-case synthetic stress sample. The retrieval layer is proven; the generation surface requires provenance-tagging constraints to harden attribution. Target: Law/Grace framework gates that enforce copy-over-paraphrase from attributed sources.
+* The **v0.6 target:** Citation faithfulness (DSS-297) scores 0.7778 on a 9-case synthetic stress sample. The retrieval layer is proven; the generation surface requires provenance-tagging constraints to harden attribution. Target: Contraint/Adaptability framework gates that enforce copy-over-paraphrase from attributed sources.
 
 ---
 
