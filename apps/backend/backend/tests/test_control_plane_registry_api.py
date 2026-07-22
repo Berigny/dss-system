@@ -1664,3 +1664,82 @@ def test_ledger_principals_returns_active_connections(monkeypatch) -> None:
     principal_dids = {p["principal_did"] for p in body.get("principals", [])}
     assert "did:key:z6MkActiveAgent" in principal_dids
     assert "did:key:z6MkInactiveAgent" not in principal_dids
+
+
+def test_ledger_principals_includes_surface_access_derived_links(monkeypatch):
+    """DSS-286: principals with can_access_surface to a ledger-bound surface are authorized."""
+    monkeypatch.setenv("ADMIN_TOKEN", "test-admin-token")
+    monkeypatch.setenv("LEDGER_AUTHZ_MODE", "registry")
+    monkeypatch.setenv("LEDGER_AUTHZ_UNKNOWN_LEDGER_POLICY", "deny")
+
+    client = _make_client()
+    headers = {
+        "x-principal-id": "ops-admin",
+        "x-principal-type": "admin",
+    }
+
+    resp = client.post(
+        "/api/control-plane/ledgers",
+        json={
+            "ledger_id": "loam",
+            "name": "Loam",
+            "tenant_id": "tenant:demo",
+            "status": "active",
+            "provisioning_source": "control_plane",
+            "idempotency_key": "ledger-loam-surface-derived",
+        },
+        headers=headers,
+    )
+    assert resp.status_code == 200, resp.text
+    resp = client.post(
+        "/api/control-plane/surfaces",
+        json={
+            "surface_id": "surface:chat:primary",
+            "tenant_id": "tenant:demo",
+            "display_name": "Chat Surface",
+            "status": "active",
+            "ledger_id": "loam",
+            "idempotency_key": "surface-chat-primary-surface-derived",
+        },
+        headers=headers,
+    )
+    assert resp.status_code == 200, resp.text
+    resp = client.post(
+        "/api/control-plane/principals",
+        json={
+            "principal_did": "did:key:z6MkSurfaceOperator",
+            "tenant_id": "tenant:demo",
+            "display_name": "Surface Operator",
+            "status": "active",
+            "provisioning_source": "control_plane",
+            "idempotency_key": "principal-surface-operator",
+            "metadata": {"actor_type": "human"},
+        },
+        headers=headers,
+    )
+    assert resp.status_code == 200, resp.text
+    resp = client.post(
+        "/api/control-plane/relationships",
+        json={
+            "subject_entity_type": "principal",
+            "subject_entity_id": "did:key:z6MkSurfaceOperator",
+            "object_entity_type": "surface",
+            "object_entity_id": "surface:chat:primary",
+            "relationship_type": "can_access_surface",
+            "permission_scope": "full",
+            "enabled_state": "enabled",
+            "idempotency_key": "rel-surface-operator-access",
+        },
+        headers=headers,
+    )
+    assert resp.status_code == 200, resp.text
+
+    response = client.get(
+        "/api/control-plane/ledger-principals?ledger_id=loam",
+        headers={**headers, "x-admin-token": "test-admin-token"},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body.get("status") == "ok"
+    principal_dids = {p["principal_did"] for p in body.get("principals", [])}
+    assert "did:key:z6MkSurfaceOperator" in principal_dids

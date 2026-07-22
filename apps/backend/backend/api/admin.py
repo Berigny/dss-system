@@ -2158,7 +2158,14 @@ def _effective_control_plane_relationships(db) -> dict[str, dict[str, Any]]:
 
 
 def _active_principals_for_ledger(db, ledger_id: str) -> list[dict[str, Any]]:
-    """Return principals with an active writes_to_ledger or member_of_ledger link."""
+    """Return principals authorized for the ledger.
+
+    Authorizes principals with a direct ledger link (writes_to_ledger or
+    member_of_ledger) and, as a fallback, principals that can access a surface
+    bound to the ledger. The surface-access fallback aligns the middleware
+    ledger-principal check with the connections shown in Control Plane, where
+    a principal linked to a surface inherits access to that surface's ledger.
+    """
     if not ledger_id:
         return []
     canonical_ledger_id = str(ledger_id or "").strip()
@@ -2167,39 +2174,86 @@ def _active_principals_for_ledger(db, ledger_id: str) -> list[dict[str, Any]]:
     active: list[dict[str, Any]] = []
     seen: set[str] = set()
     today_iso = datetime.now(timezone.utc).date().isoformat()
+
+    # Pre-compute surfaces bound to the target ledger.
+    ledger_surfaces: set[str] = set()
     for record in relationships.values():
         if not isinstance(record, dict):
+            continue
+        if str(record.get("subject_entity_type") or "").strip().lower() != "surface":
             continue
         if str(record.get("object_entity_type") or "").strip().lower() != "ledger":
             continue
         if str(record.get("object_entity_id") or "").strip() != canonical_ledger_id:
             continue
         rel_type = str(record.get("relationship_type") or "").strip().lower()
-        if rel_type not in {"writes_to_ledger", "member_of_ledger"}:
+        if rel_type not in {"surface_bound_to_ledger", "writes_to_ledger", "member_of_ledger"}:
             continue
         if not _relationship_effective_enabled(record, today_iso):
             continue
-        principal_did = str(record.get("subject_entity_id") or "").strip()
-        if not principal_did or principal_did in seen:
+        surface_id = str(record.get("subject_entity_id") or "").strip()
+        if surface_id:
+            ledger_surfaces.add(surface_id)
+
+    direct_matches: list[dict[str, Any]] = []
+    surface_matches: list[dict[str, Any]] = []
+    for record in relationships.values():
+        if not isinstance(record, dict):
             continue
-        if str(record.get("subject_entity_type") or "").strip().lower() != "principal":
+        if not _relationship_effective_enabled(record, today_iso):
             continue
-        principal = principals.get(principal_did) if isinstance(principals, dict) else None
-        if not isinstance(principal, dict):
+        rel_type = str(record.get("relationship_type") or "").strip().lower()
+        subject_type = str(record.get("subject_entity_type") or "").strip().lower()
+        subject_id = str(record.get("subject_entity_id") or "").strip()
+        object_type = str(record.get("object_entity_type") or "").strip().lower()
+        object_id = str(record.get("object_entity_id") or "").strip()
+
+        # Direct ledger link.
+        if object_type == "ledger" and object_id == canonical_ledger_id and rel_type in {"writes_to_ledger", "member_of_ledger"}:
+            if subject_type == "principal" and subject_id and subject_id not in seen:
+                principal = principals.get(subject_id) if isinstance(principals, dict) else None
+                if isinstance(principal, dict):
+                    principal_status = str(principal.get("status") or "").strip().lower() or "active"
+                    if principal_status not in {"disabled", "expired", "retired"}:
+                        seen.add(subject_id)
+                        direct_matches.append({
+                            "principal_did": subject_id,
+                            "principal_type": str(principal.get("principal_type") or principal.get("metadata", {}).get("actor_type") or "").strip() or None,
+                            "display_name": str(principal.get("display_name") or "").strip() or None,
+                            "relationship_type": rel_type,
+                            "relationship_id": str(record.get("relationship_id") or "").strip() or None,
+                            "enabled_state": str(record.get("enabled_state") or "enabled").strip(),
+                            "derived": bool(record.get("metadata", {}).get("derived")),
+                        })
             continue
-        principal_status = str(principal.get("status") or "").strip().lower() or "active"
-        if principal_status in {"disabled", "expired", "retired"}:
-            continue
-        seen.add(principal_did)
-        active.append({
-            "principal_did": principal_did,
-            "principal_type": str(principal.get("principal_type") or principal.get("metadata", {}).get("actor_type") or "").strip() or None,
-            "display_name": str(principal.get("display_name") or "").strip() or None,
-            "relationship_type": rel_type,
-            "relationship_id": str(record.get("relationship_id") or "").strip() or None,
-            "enabled_state": str(record.get("enabled_state") or "enabled").strip(),
-            "derived": bool(record.get("metadata", {}).get("derived")),
-        })
+
+        # Surface-access fallback: principal -> surface -> ledger.
+        if subject_type == "principal" and rel_type == "can_access_surface" and object_type == "surface" and object_id in ledger_surfaces:
+            if subject_id and subject_id not in seen:
+                principal = principals.get(subject_id) if isinstance(principals, dict) else None
+                if isinstance(principal, dict):
+                    principal_status = str(principal.get("status") or "").strip().lower() or "active"
+                    if principal_status not in {"disabled", "expired", "retired"}:
+                        seen.add(subject_id)
+                        surface_matches.append({
+                            "principal_did": subject_id,
+                            "principal_type": str(principal.get("principal_type") or principal.get("metadata", {}).get("actor_type") or "").strip() or None,
+                            "display_name": str(principal.get("display_name") or "").strip() or None,
+                            "relationship_type": "can_access_surface_derived",
+                            "relationship_id": str(record.get("relationship_id") or "").strip() or None,
+                            "enabled_state": str(record.get("enabled_state") or "enabled").strip(),
+                            "derived": True,
+                        })
+
+    active = direct_matches + surface_matches
+    LOGGER.info(
+        "active_principals_for_ledger: ledger=%s direct=%d surface_derived=%d surfaces=%s principal_ids=%s",
+        canonical_ledger_id,
+        len(direct_matches),
+        len(surface_matches),
+        sorted(ledger_surfaces),
+        [p["principal_did"] for p in active],
+    )
     return active
 
 

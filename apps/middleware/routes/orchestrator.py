@@ -1187,6 +1187,14 @@ def _resolve_runtime_actor(
         "resolution_reason": resolution_reason,
     }
 
+    LOGGER.info(
+        "runtime_actor_resolved: actor_did=%s auth_method=%s reason=%s candidates=%s",
+        actor_resolution.get("actor_did"),
+        actor_resolution.get("auth_method"),
+        actor_resolution.get("resolution_reason"),
+        actor_resolution.get("binding_candidates"),
+    )
+
     standing_view = {}
     if principal_record is not None and hasattr(registry, "get_standing_view"):
         try:
