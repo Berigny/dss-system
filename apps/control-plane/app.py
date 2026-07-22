@@ -3603,13 +3603,27 @@ def _relationship_defaults(
         "status": "active",
         "enabled_state": "enabled",
         "permission_scope": "full",
-        "permission_payload": "",
+        "permission_payload": {},
         "start_date": "",
         "end_date": "",
         "notes": "",
         "constraints": "",
-        "metadata": "",
+        "metadata": {},
     }
+
+
+def _coerce_relationship_dict_field(value: Any) -> dict[str, Any]:
+    """Return a dict for relationship fields the backend expects as JSON objects."""
+    if isinstance(value, dict):
+        return value
+    text = str(value or "").strip()
+    if not text:
+        return {}
+    try:
+        parsed = json.loads(text)
+    except Exception:
+        return {}
+    return parsed if isinstance(parsed, dict) else {}
 
 
 def _relationship_record(
@@ -3638,6 +3652,10 @@ def _relationship_record(
     record = _relationship_defaults(subject_type, subject_id, object_type, object_id, relationship_type, label)
     if isinstance(stored, dict):
         record.update(stored)
+    # The backend RelationshipUpsertRequest expects JSON-object fields; legacy
+    # local state may have stored these as empty strings or JSON text.
+    record["permission_payload"] = _coerce_relationship_dict_field(record.get("permission_payload"))
+    record["metadata"] = _coerce_relationship_dict_field(record.get("metadata"))
     if label and not str(record.get("label") or "").strip():
         record["label"] = label
     return record
@@ -8416,7 +8434,7 @@ def _upsert_flow_relationship(
             "enabled_state": _flow_enabled_state(state),
             "permission_scope": _flow_permission_scope(state),
             "updated_at": datetime.now(timezone.utc).isoformat(),
-            "metadata": str(state.get("metadata") or "").strip(),
+            "metadata": _coerce_relationship_dict_field(state.get("metadata")),
             "notes": str(state.get("notes") or "").strip(),
         }
     )
@@ -11267,9 +11285,10 @@ async def _load_connection_lookup_context(
             and str(_as_dict(item.get("metadata")).get("actor_type") or "").strip().lower() == "model"
         ]
         # Rebuild binding_records so derived bindings can reference protected
-        # principals that were restored above.
+        # principals that were restored or injected above. Use the rebuilt
+        # model_principals list so injected catalogue principals are linked.
         binding_records = _merged_control_plane_records(
-            _control_plane_model_binding_records(provider_records, unfiltered_model_principals, llm_provider, llm_model, models_full_data),
+            _control_plane_model_binding_records(provider_records, model_principals, llm_provider, llm_model, models_full_data),
             stored_bindings,
             "binding_id",
         )
@@ -16703,13 +16722,16 @@ def _control_plane_model_binding_records(
             },
         )
 
+    # Telegram template binding is a placeholder for a future surface; its
+    # model_id must not collide with live chat models or it can shadow the
+    # binding matched for real model principals in link-editor / middleware.
     bindings.append(
         {
             "binding_id": "binding:telegram:template",
             "name": "Telegram starter binding",
             "provider_id": provider_lookup.get("openrouter", "provider:openrouter:shared"),
             "provider_type": "OpenRouter",
-            "model_id": llm_model if llm_model and llm_model != "unknown" else "model:pending",
+            "model_id": "binding:telegram:template",
             "linked_model_principal": "",
             "scope": "shared",
             "status": "planned",

@@ -16,12 +16,13 @@ def test_dedupe_models_converts_binding_in_name_field():
     ]
 
 
-def test_dedupe_models_converts_binding_in_id_field():
+def test_dedupe_models_drops_binding_in_id_field():
+    """Binding ids are internal control-plane references, not selectable models."""
     models = [
         {"id": "binding:chat:openai-gpt-5", "name": "binding:chat:openai-gpt-5"},
     ]
     result = app_module._dedupe_models(models)
-    assert result == [{"id": "binding:chat:openai-gpt-5", "name": "Openai: Gpt 5"}]
+    assert result == []
 
 
 def test_dedupe_models_preserves_existing_human_names():

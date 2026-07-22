@@ -323,6 +323,47 @@ def test_models_endpoint_uses_control_plane_chat_bindings(tmp_path: Path, monkey
     ]
 
 
+def test_models_endpoint_excludes_telegram_template_binding(tmp_path: Path, monkeypatch) -> None:
+    client = _client_with_registry(tmp_path)
+    monkeypatch.setenv("OPENROUTER_API_KEY", "test-openrouter-key")
+    monkeypatch.setattr(app_module.settings, "LLM_MODEL", "", raising=False)
+
+    async def fake_fetch_local_models(timeout: float):
+        return []
+
+    monkeypatch.setattr(app_module, "_fetch_local_models", fake_fetch_local_models)
+
+    async def fake_backend_fetch(request, *, method: str, path: str, payload=None):
+        return {
+            "status": "ok",
+            "model_bindings": [
+                {
+                    "binding_id": "binding:chat:default",
+                    "provider_type": "OpenRouter",
+                    "model_id": "openai/gpt-4o",
+                    "name": "OpenAI: GPT-4o",
+                    "status": "active",
+                    "app_surfaces": ["surface:chat:primary"],
+                },
+                {
+                    "binding_id": "binding:telegram:template",
+                    "provider_type": "OpenRouter",
+                    "model_id": "binding:telegram:template",
+                    "name": "Telegram Template",
+                    "status": "active",
+                    "app_surfaces": ["surface:chat:primary"],
+                },
+            ],
+        }
+
+    monkeypatch.setattr(app_module, "_control_plane_backend_fetch", fake_backend_fetch)
+
+    response = client.get("/api/models", headers={"accept": "application/json"})
+    assert response.status_code == 200
+    online_models = response.json().get("online_models")
+    assert [item.get("id") for item in online_models] == ["openai/gpt-4o"]
+
+
 def test_principal_registry_upsert_get_list_disable_enable(tmp_path: Path) -> None:
     client = _client_with_registry(tmp_path)
 

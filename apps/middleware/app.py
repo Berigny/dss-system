@@ -3612,6 +3612,9 @@ def _control_plane_binding_model_rows(payload: dict[str, Any] | None, *, surface
         # Never treat a binding id itself as a selectable model id.
         if model_id.lower().startswith("binding:"):
             continue
+        # Defensive: template bindings are not selectable chat models.
+        if binding_id == "binding:telegram:template":
+            continue
         if provider_type != "openrouter":
             continue
         if status and status not in allowed_statuses:

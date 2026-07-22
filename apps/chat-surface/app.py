@@ -4309,6 +4309,9 @@ def _dedupe_models(models: list[dict[str, str]]) -> list[dict[str, str]]:
         mid = str(item.get("id") or "").strip()
         if not mid or mid in seen:
             continue
+        # Binding ids are internal control-plane references, not selectable models.
+        if mid.lower().startswith("binding:"):
+            continue
         seen.add(mid)
         name = str(item.get("name") or "").strip()
         # The binding id may live in the id field or in the name field.
