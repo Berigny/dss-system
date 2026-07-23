@@ -130,8 +130,12 @@ Auto-generated during DSS-232 pre-migration cleanup.
 | `LLM_MAX_TOKENS` | (required / no default) | backend/api/chat.py |
 | `LLM_MODEL` | (required / no default) | backend/api/chat.py |
 | `LOOP_SENSITIVITY` | "0.6" | backend/api/chat.py |
-| `OPENAI_API_KEY` | (required / no default) | backend/fieldx_kernel/orchestrator.py, backend/main.py, backend/retrieval/fuzzy_retrieve.py |
+| `OPENAI_API_KEY` | (required / no default) | backend/fieldx_kernel/orchestrator.py, backend/main.py, backend/retrieval/fuzzy_retrieve.py, backend/api/voice.py |
 | `OPENROUTER_API_KEY` | (required / no default) | backend/api/billing.py, backend/fieldx_kernel/orchestrator.py, backend/retrieval/fuzzy_retrieve.py, backend/services/model_library.py |
+| `VOICE_CHAT_MODEL` | "gpt-4o-mini" | backend/api/voice.py |
+| `VOICE_MOCK_MODE` | "false" | backend/api/voice.py |
+| `VOICE_SYSTEM_PROMPT` | "You are LOAM..." | backend/api/voice.py |
+| `VOICE_TTS_VOICE` | "alloy" | backend/api/voice.py |
 | `OPENROUTER_MAX_TOKENS` | (required / no default) | backend/api/chat.py |
 | `P_ADIC_DISTANCE_PRIME` | "5" | backend/fieldx_kernel/orchestrator.py, backend/retrieval/fuzzy_retrieve.py |
 | `PADIC_LEDGER_PRECISION` | "4" | backend/fieldx_kernel/substrate/ledger_store_v2.py |
