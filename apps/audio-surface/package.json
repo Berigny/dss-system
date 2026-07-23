@@ -1,0 +1,13 @@
+{
+  "name": "audio-surface",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browser-based Audio Chat surface for LOAM Voice v0.1",
+  "scripts": {
+    "build": "node build.js",
+    "vercel-build": "node build.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

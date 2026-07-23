@@ -28,6 +28,7 @@ from urllib.parse import urljoin
 
 from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
 from openai import OpenAI
+from pydantic import BaseModel
 
 LOGGER = logging.getLogger(__name__)
 
@@ -228,6 +229,30 @@ async def delete_voice_session(session_id: str) -> dict[str, bool]:
         del _sessions[session_id]
         LOGGER.info("Voice session deleted: %s", session_id)
     return {"deleted": True, "session_existed": existed}
+
+
+class _ChatRequest(BaseModel):
+    text: str
+
+
+class _ChatResponse(BaseModel):
+    text: str
+
+
+@router.post("/chat")
+async def voice_chat(req: _ChatRequest) -> _ChatResponse:
+    """Text-only LOAM inference for browser Web Speech API clients."""
+    if VOICE_MOCK_MODE:
+        LOGGER.info("Voice mock mode: returning fixed text response")
+        return _ChatResponse(text="This is a mock response. OpenAI pipeline is disabled.")
+
+    try:
+        reply = await asyncio.get_running_loop().run_in_executor(None, _infer, req.text)
+    except Exception as exc:
+        LOGGER.exception("Voice chat inference failed")
+        return _ChatResponse(text=f"Sorry, I couldn't process that. Error: {exc}")
+
+    return _ChatResponse(text=reply)
 
 
 @router.websocket("/stream/{session_id}")

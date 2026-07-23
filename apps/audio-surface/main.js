@@ -1,16 +1,31 @@
 /**
- * Audio Chat Surface v0.1
+ * Audio Chat Surface v0.2
  * Vanilla JS, no framework.
- * Two-state voice interface to LOAM via WebRTC (Opus).
+ *
+ * Two modes:
+ *   1. WebRTC (default): two-state voice interface via gateway + LOAM backend.
+ *   2. Web Speech (?mode=web-speech): browser handles STT/TTS;
+ *      backend only runs LLM inference via POST /v1/voice/chat.
  */
 
 const CONFIG = {
-  // Gateway base URL. Override with ?gateway=https://...
+  // Gateway base URL. Priority: ?gateway=... > build-time default > empty.
   gatewayUrl: (() => {
     const fromQuery = new URLSearchParams(window.location.search).get('gateway');
     if (fromQuery) return fromQuery.replace(/\/$/, '');
+    const fromBuild = typeof window !== 'undefined' && window.AUDIO_GATEWAY_URL ? window.AUDIO_GATEWAY_URL : '';
+    if (fromBuild) return fromBuild.replace(/\/$/, '');
     return '';
   })(),
+  // Backend chat API base URL. Priority: ?chat=... > build-time default > empty.
+  chatUrl: (() => {
+    const fromQuery = new URLSearchParams(window.location.search).get('chat');
+    if (fromQuery) return fromQuery.replace(/\/$/, '');
+    const fromBuild = typeof window !== 'undefined' && window.AUDIO_CHAT_API_URL ? window.AUDIO_CHAT_API_URL : '';
+    if (fromBuild) return fromBuild.replace(/\/$/, '');
+    return '';
+  })(),
+  mode: new URLSearchParams(window.location.search).get('mode') || 'webrtc',
   iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
   opusMimeType: 'audio/opus',
 };
@@ -30,11 +45,19 @@ const els = {
 
 let audioCtx = null;
 let state = STATES.DISCONNECTED;
+
+// WebRTC mode state
 let pc = null;
 let localStream = null;
 let sessionId = null;
 
-// --- UI state ---------------------------------------------------------------
+// Web Speech mode state
+let speechRecognition = null;
+let isSpeaking = false;
+let restartRecognitionAfterSpeak = false;
+let webSpeechAvailable = false;
+
+// --- UI state -------------------------------------------------------------
 
 function setState(newState) {
   state = newState;
@@ -53,7 +76,7 @@ function setState(newState) {
       break;
     case STATES.CONNECTED:
       els.icon.textContent = '●';
-      els.status.textContent = 'Connected';
+      els.status.textContent = CONFIG.mode === 'web-speech' ? 'Listening...' : 'Connected';
       break;
   }
 }
@@ -99,7 +122,120 @@ function playDisconnectTone() {
   playTone({ freq: 440, duration: 0.15, type: 'sine', peak: 0.08 });
 }
 
-// --- SDP helpers ------------------------------------------------------------
+// --- Web Speech helpers ----------------------------------------------------
+
+function getSpeechRecognition() {
+  return window.SpeechRecognition || window.webkitSpeechRecognition || null;
+}
+
+function speakText(text) {
+  if (!window.speechSynthesis) {
+    console.warn('speechSynthesis not available');
+    return;
+  }
+  isSpeaking = true;
+  stopWebSpeechRecognition();
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 1;
+  utterance.pitch = 1;
+  utterance.onend = () => {
+    isSpeaking = false;
+    if (state === STATES.CONNECTED) {
+      startWebSpeechRecognition();
+    }
+  };
+  utterance.onerror = (err) => {
+    console.warn('speechSynthesis error', err);
+    isSpeaking = false;
+    if (state === STATES.CONNECTED) {
+      startWebSpeechRecognition();
+    }
+  };
+  window.speechSynthesis.speak(utterance);
+}
+
+async function sendChatAndSpeak(text) {
+  if (!CONFIG.chatUrl) {
+    handleError('Chat API URL not configured. Use ?chat=https://...');
+    return;
+  }
+
+  try {
+    const response = await fetch(`${CONFIG.chatUrl}/v1/voice/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+    if (!response.ok) {
+      const body = await response.text();
+      throw new Error(`Chat error ${response.status}: ${body}`);
+    }
+    const data = await response.json();
+    if (data.text) {
+      speakText(data.text);
+    }
+  } catch (err) {
+    console.error('Chat request failed', err);
+    speakText('Sorry, I could not reach LOAM right now.');
+  }
+}
+
+function startWebSpeechRecognition() {
+  if (!speechRecognition || state !== STATES.CONNECTED || isSpeaking) return;
+
+  try {
+    speechRecognition.start();
+  } catch (err) {
+    // start() throws if already started; ignore.
+    if (err.name !== 'InvalidStateError') {
+      console.warn('SpeechRecognition start failed', err);
+    }
+  }
+}
+
+function stopWebSpeechRecognition() {
+  if (!speechRecognition) return;
+  try {
+    speechRecognition.stop();
+  } catch (_) {}
+}
+
+function createSpeechRecognition() {
+  const SR = getSpeechRecognition();
+  if (!SR) return null;
+
+  const recognition = new SR();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = 'en-US';
+
+  recognition.onresult = (event) => {
+    const transcript = event.results[0][0].transcript.trim();
+    if (transcript) {
+      console.log('Heard:', transcript);
+      sendChatAndSpeak(transcript);
+    }
+  };
+
+  recognition.onerror = (event) => {
+    // 'no-speech' and 'aborted' are common and usually benign.
+    if (event.error !== 'no-speech' && event.error !== 'aborted') {
+      console.warn('SpeechRecognition error', event.error);
+    }
+  };
+
+  recognition.onend = () => {
+    // Keep listening while connected and not speaking.
+    if (state === STATES.CONNECTED && !isSpeaking) {
+      startWebSpeechRecognition();
+    }
+  };
+
+  return recognition;
+}
+
+// --- WebRTC helpers --------------------------------------------------------
 
 function preferOpus(sdp) {
   const mLine = /m=audio.*\r\n/.exec(sdp);
@@ -117,8 +253,6 @@ function preferOpus(sdp) {
     return `${prefix} ${opusPayload} ${withoutOpus.join(' ')}`;
   });
 }
-
-// --- WebRTC -----------------------------------------------------------------
 
 function waitForIceGathering(peerConnection) {
   return new Promise((resolve) => {
@@ -145,9 +279,7 @@ function waitForIceGathering(peerConnection) {
   });
 }
 
-async function startConnection() {
-  if (state !== STATES.DISCONNECTED) return;
-
+async function startWebRTCConnection() {
   setState(STATES.CONNECTING);
   els.button.disabled = true;
 
@@ -220,11 +352,11 @@ async function startConnection() {
   }
 }
 
-async function stopConnection() {
+async function stopWebRTCConnection() {
   if (state === STATES.DISCONNECTED) return;
 
   const sid = sessionId;
-  cleanup();
+  cleanupWebRTC();
   setState(STATES.DISCONNECTED);
   playDisconnectTone();
 
@@ -237,7 +369,7 @@ async function stopConnection() {
   }
 }
 
-function cleanup() {
+function cleanupWebRTC() {
   if (pc) {
     try { pc.close(); } catch (_) {}
     pc = null;
@@ -250,6 +382,79 @@ function cleanup() {
   if (els.remoteAudio) {
     els.remoteAudio.srcObject = null;
   }
+}
+
+// --- Web Speech mode lifecycle --------------------------------------------
+
+async function startWebSpeechMode() {
+  if (!webSpeechAvailable) {
+    handleError('Web Speech API not supported in this browser.');
+    return;
+  }
+
+  setState(STATES.CONNECTING);
+  els.button.disabled = true;
+
+  try {
+    ensureAudioContext();
+
+    if (!CONFIG.chatUrl) {
+      throw new Error('Chat API URL not configured. Use ?chat=https://...');
+    }
+
+    // Create a fresh recognition instance (some browsers require this after stop).
+    speechRecognition = createSpeechRecognition();
+
+    setState(STATES.CONNECTED);
+    playConnectTone();
+    startWebSpeechRecognition();
+  } catch (err) {
+    handleError(err.message);
+  }
+}
+
+async function stopWebSpeechMode() {
+  if (state === STATES.DISCONNECTED) return;
+
+  stopWebSpeechRecognition();
+  if (window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+  }
+  isSpeaking = false;
+  speechRecognition = null;
+
+  setState(STATES.DISCONNECTED);
+  playDisconnectTone();
+}
+
+// --- Common lifecycle ------------------------------------------------------
+
+async function startConnection() {
+  if (state !== STATES.DISCONNECTED) return;
+
+  if (CONFIG.mode === 'web-speech') {
+    await startWebSpeechMode();
+  } else {
+    await startWebRTCConnection();
+  }
+}
+
+async function stopConnection() {
+  if (CONFIG.mode === 'web-speech') {
+    await stopWebSpeechMode();
+  } else {
+    await stopWebRTCConnection();
+  }
+}
+
+function cleanup() {
+  cleanupWebRTC();
+  stopWebSpeechRecognition();
+  if (window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+  }
+  isSpeaking = false;
+  speechRecognition = null;
 }
 
 function handleError(message) {
@@ -269,17 +474,32 @@ function handleError(message) {
 
 // --- Input handling ---------------------------------------------------------
 
-els.button.addEventListener('click', () => {
-  if (state === STATES.DISCONNECTED) {
-    startConnection();
-  } else {
-    stopConnection();
+function init() {
+  webSpeechAvailable = !!getSpeechRecognition() && !!window.speechSynthesis;
+
+  if (CONFIG.mode === 'web-speech') {
+    if (!webSpeechAvailable) {
+      els.status.textContent = 'Web Speech not supported';
+      els.button.disabled = true;
+      return;
+    }
+    els.status.textContent = 'Tap to listen';
   }
-});
 
-// Resume AudioContext on first user gesture for autoplay policy compliance.
-els.button.addEventListener('pointerdown', () => {
-  ensureAudioContext();
-});
+  els.button.addEventListener('click', () => {
+    if (state === STATES.DISCONNECTED) {
+      startConnection();
+    } else {
+      stopConnection();
+    }
+  });
 
-setState(STATES.DISCONNECTED);
+  // Resume AudioContext on first user gesture for autoplay policy compliance.
+  els.button.addEventListener('pointerdown', () => {
+    ensureAudioContext();
+  });
+
+  setState(STATES.DISCONNECTED);
+}
+
+init();

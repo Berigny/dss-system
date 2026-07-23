@@ -23,6 +23,7 @@ def test_router_has_voice_routes() -> None:
     assert "/v1/voice/session" in routes
     assert "/v1/voice/session/{session_id}" in routes
     assert "/v1/voice/stream/{session_id}" in routes
+    assert "/v1/voice/chat" in routes
 
 
 def test_session_store_initially_empty() -> None:

@@ -8,6 +8,7 @@ Base path: `/v1/voice`
 POST /v1/voice/session        # create session
 WS   /v1/voice/stream/{id}    # bidirectional opus stream
 DELETE /v1/voice/session/{id} # hard terminate
+POST /v1/voice/chat           # text-only inference (browser Web Speech mode)
 ```
 
 ## Endpoints
@@ -101,6 +102,30 @@ opus frames -> ffmpeg decode -> WAV (16 kHz, mono)
 See `ENV_VARS.md` for `OPENAI_API_KEY`, `VOICE_CHAT_MODEL`, `VOICE_TTS_VOICE`,
 `VOICE_SYSTEM_PROMPT`, and `VOICE_MOCK_MODE`.
 
+### `POST /v1/voice/chat`
+
+Text-only LOAM inference endpoint used by the browser's Web Speech API mode.
+
+**Request:**
+```json
+{
+  "text": "Hello LOAM"
+}
+```
+
+**Response:**
+```json
+{
+  "text": "Hello. How can I help you?"
+}
+```
+
+This endpoint shares the same `VOICE_CHAT_MODEL` and `VOICE_SYSTEM_PROMPT` as
+the full audio pipeline. When `VOICE_MOCK_MODE=true` it returns a fixed mock
+message instead of calling OpenAI.
+
+## Mock mode
+
 When `VOICE_MOCK_MODE=true` (or no OpenAI credit is available and the real
-pipeline fails), the server returns a pre-baked 1 kHz test tone instead of a
-synthesized response.
+pipeline fails), the server returns a pre-baked 1 kHz test tone (audio stream)
+or a fixed mock message (`/chat`) instead of a synthesized response.
