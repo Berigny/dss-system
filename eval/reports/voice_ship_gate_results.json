@@ -1,0 +1,78 @@
+{
+  "backend": "https://dss-system-backend.fly.dev",
+  "ws_base": "wss://dss-system-backend.fly.dev",
+  "warmup_runs": 1,
+  "measured_runs": 5,
+  "mock_mode": true,
+  "target_ms": 800,
+  "acceptable_ms": 1500,
+  "flush_to_first_ms": {
+    "min": 157.95,
+    "max": 170.58,
+    "mean": 163.24,
+    "median": 162.01,
+    "stdev": 5.32
+  },
+  "gate_passed": true,
+  "target_passed": true,
+  "raw_results": [
+    {
+      "session_id": "49f10e2b-06de-4cdc-9161-48b7392840d6",
+      "sent_bytes": 4978,
+      "response_bytes": 4979,
+      "connect_ms": 66.96,
+      "flush_to_first_ms": 157.95,
+      "flush_to_last_ms": 158.64,
+      "success": true
+    },
+    {
+      "session_id": "bd3ebb20-3ba0-4f64-8166-28377b545dcc",
+      "sent_bytes": 4978,
+      "response_bytes": 4979,
+      "connect_ms": 63.25,
+      "flush_to_first_ms": 166.67,
+      "flush_to_last_ms": 168.09,
+      "success": true
+    },
+    {
+      "session_id": "265a2845-88e8-4eea-ab09-3522db8298a8",
+      "sent_bytes": 4978,
+      "response_bytes": 4979,
+      "connect_ms": 156.87,
+      "flush_to_first_ms": 158.98,
+      "flush_to_last_ms": 159.92,
+      "success": true
+    },
+    {
+      "session_id": "bef6148d-94eb-49d0-b868-146bcab62580",
+      "sent_bytes": 4978,
+      "response_bytes": 4979,
+      "connect_ms": 78.77,
+      "flush_to_first_ms": 162.01,
+      "flush_to_last_ms": 163.12,
+      "success": true
+    },
+    {
+      "session_id": "1b0f5275-e22f-4f6f-9555-6d8dea38d110",
+      "sent_bytes": 4978,
+      "response_bytes": 4979,
+      "connect_ms": 64.79,
+      "flush_to_first_ms": 170.58,
+      "flush_to_last_ms": 171.23,
+      "success": true
+    }
+  ],
+  "warm_up_results": [
+    {
+      "session_id": "248fc61b-3600-4757-9329-e9f2e800148b",
+      "sent_bytes": 4978,
+      "response_bytes": 4979,
+      "connect_ms": 89.94,
+      "flush_to_first_ms": 163.56,
+      "flush_to_last_ms": 164.22,
+      "success": true
+    }
+  ],
+  "timestamp": "2026-07-23T06:33:57Z",
+  "note": "Measurements use the mock-tone pipeline (no OpenAI STT/LLM/TTS billing). Live latency will be higher."
+}
