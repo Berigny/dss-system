@@ -1,0 +1,165 @@
+:root {
+  --color-bg: #0b0c0f;
+  --color-text: #e8eaed;
+  --color-muted: #5f6368;
+  --color-neutral: #3c4043;
+  --color-active: #1a73e8;
+  --color-connecting: #f9ab00;
+  --color-error: #ea4335;
+  --button-size: 144px;
+  --wave-height: 24px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.surface {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.audio-button {
+  position: relative;
+  width: var(--button-size);
+  height: var(--button-size);
+  border: none;
+  border-radius: 50%;
+  background: var(--color-neutral);
+  color: var(--color-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.audio-button:active {
+  transform: scale(0.96);
+}
+
+.audio-button:disabled {
+  cursor: wait;
+}
+
+.audio-icon {
+  font-size: 56px;
+  line-height: 1;
+  z-index: 1;
+}
+
+.waveform {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 0;
+}
+
+.waveform span {
+  width: 4px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 2px;
+  animation: wave 1.2s ease-in-out infinite;
+}
+
+.waveform span:nth-child(1) { animation-delay: 0s; }
+.waveform span:nth-child(2) { animation-delay: 0.15s; }
+.waveform span:nth-child(3) { animation-delay: 0.3s; }
+.waveform span:nth-child(4) { animation-delay: 0.45s; }
+.waveform span:nth-child(5) { animation-delay: 0.6s; }
+
+@keyframes wave {
+  0%, 100% { height: 8px; }
+  50% { height: var(--wave-height); }
+}
+
+.status-label {
+  margin: 0;
+  font-size: 16px;
+  color: var(--color-muted);
+  letter-spacing: 0.02em;
+}
+
+/* Connecting state */
+body.connecting .audio-button,
+.audio-button[data-state="connecting"] {
+  background: var(--color-connecting);
+  box-shadow: 0 0 0 0 rgba(249, 171, 0, 0.4);
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(249, 171, 0, 0.4); }
+  70% { box-shadow: 0 0 0 24px rgba(249, 171, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(249, 171, 0, 0); }
+}
+
+body.connecting .audio-icon {
+  opacity: 0;
+}
+
+body.connecting .waveform {
+  opacity: 1;
+}
+
+/* Connected state */
+body.connected .audio-button,
+.audio-button[data-state="connected"] {
+  background: var(--color-active);
+}
+
+body.connected .audio-icon {
+  opacity: 0;
+}
+
+body.connected .waveform {
+  opacity: 1;
+}
+
+body.connected .waveform span {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* Error state */
+.audio-button.error {
+  background: var(--color-error) !important;
+  animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+#remote-audio {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}

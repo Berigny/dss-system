@@ -26,10 +26,11 @@ def test_home_page_renders_chat_and_decode_cards() -> None:
     assert "Open Decode" in html
 
 
-def test_home_page_renders_telegram_coming_soon_when_no_url() -> None:
+def test_home_page_renders_audio_chat_and_telegram_coming_soon_when_no_url() -> None:
     html = dashboard_app.render_home_page({})
-    assert "Telegram" in html
+    assert "Audio Chat" in html
     assert "Coming soon" in html
+    assert "Telegram" in html
 
 
 def test_render_action_cards_supports_telegram_url(monkeypatch) -> None:
@@ -38,10 +39,23 @@ def test_render_action_cards_supports_telegram_url(monkeypatch) -> None:
         chat_url="https://chat.dualsubstrate.com",
         decode_url="https://decode.dualsubstrate.com",
         telegram_url="https://t.me/dssbot",
+        audio_chat_url="https://audio.dualsubstrate.com",
     )
     assert "https://t.me/dssbot" in html
     assert "Open Telegram" in html
-    assert "Coming soon" not in html
+    assert "Open Audio Chat" in html
+
+
+def test_render_action_cards_supports_audio_chat_url() -> None:
+    html = dashboard_app.render_action_cards(
+        chat_url="https://chat.dualsubstrate.com",
+        decode_url="https://decode.dualsubstrate.com",
+        telegram_url=None,
+        audio_chat_url="https://audio.dualsubstrate.com",
+    )
+    assert "https://audio.dualsubstrate.com" in html
+    assert "Open Audio Chat" in html
+    assert "Audio Chat" in html
 
 
 def test_render_action_cards_disabled_when_chat_url_missing() -> None:
@@ -49,6 +63,8 @@ def test_render_action_cards_disabled_when_chat_url_missing() -> None:
         chat_url="",
         decode_url="https://decode.dualsubstrate.com",
         telegram_url=None,
+        audio_chat_url=None,
     )
     assert "Chat not configured" in html
     assert "Open Decode" in html
+    assert "Coming soon" in html

@@ -1,0 +1,19 @@
+{
+  "name": "voice-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Stateless Signal/Media Gateway for LOAM Voice v0.1",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "werift": "^0.22.0",
+    "ws": "^8.18.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

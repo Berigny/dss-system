@@ -178,6 +178,7 @@ def render_action_cards(
     decode_url: str,
     decode_launch_url: str | None = None,
     telegram_url: str | None = None,
+    audio_chat_url: str | None = None,
 ) -> str:
     chat_link = (
         f'<a class="btn primary" href="{html.escape(chat_url)}" target="_blank" rel="noreferrer noopener">Open Chat</a>'
@@ -196,12 +197,23 @@ def render_action_cards(
     else:
         telegram_link = '<button class="btn" disabled>Coming soon</button>'
         telegram_badge = '<span class="badge" style="margin-left:8px;">Coming soon</span>'
+    if audio_chat_url:
+        audio_chat_link = f'<a class="btn primary" href="{html.escape(audio_chat_url)}" target="_blank" rel="noreferrer noopener">Open Audio Chat</a>'
+        audio_chat_badge = ""
+    else:
+        audio_chat_link = '<button class="btn" disabled>Coming soon</button>'
+        audio_chat_badge = '<span class="badge" style="margin-left:8px;">Coming soon</span>'
     return f"""
     <section class="action-card-grid" aria-label="Primary tasks">
       <article class="action-card action-card-primary">
         <h2>Chat</h2>
         <p>Start a governed conversation on the DSS Chat surface.</p>
         {chat_link}
+      </article>
+      <article class="action-card action-card-primary">
+        <h2>Audio Chat{audio_chat_badge}</h2>
+        <p>Single-channel voice interface to LOAM. Tap to connect, speak, and listen.</p>
+        {audio_chat_link}
       </article>
       <article class="action-card action-card-primary">
         <h2>Decode</h2>

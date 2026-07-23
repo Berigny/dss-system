@@ -95,6 +95,7 @@ COORD_DEMO_BASE_URL = (
     os.getenv("COORD_DEMO_BASE_URL") or "https://decode.dualsubstrate.com"
 ).rstrip("/")
 TELEGRAM_BASE_URL = (os.getenv("TELEGRAM_BASE_URL") or "").rstrip("/")
+AUDIO_CHAT_BASE_URL = (os.getenv("AUDIO_CHAT_BASE_URL") or "").rstrip("/")
 BENCHMARK_DECODER_BASE_URL = (os.getenv("BENCHMARK_DECODER_BASE_URL") or "").rstrip("/")
 LOCAL_CHAT_BASE_URL = (os.getenv("LOCAL_CHAT_BASE_URL") or "").rstrip("/")
 LOCAL_CHAT_LABEL = str(os.getenv("LOCAL_CHAT_LABEL") or "Local Offline Chat").strip()
@@ -3134,6 +3135,7 @@ def _render_settings_trust_details_content(
                 <p><strong>Auth base URL:</strong> {html.escape(AUTH_BASE_URL)}</p>
                 <p><strong>Backend admin base URL:</strong> {html.escape(BACKEND_ADMIN_BASE_URL)}</p>
                 <p><strong>Chat base URL:</strong> {html.escape(CHAT_BASE_URL)}</p>
+                <p><strong>Audio chat base URL:</strong> {html.escape(AUDIO_CHAT_BASE_URL or 'not configured')}</p>
                 <p><strong>Local chat base URL:</strong> {html.escape(LOCAL_CHAT_BASE_URL or 'not configured')}</p>
                 <p><strong>Local sync mode:</strong> {html.escape(LOCAL_CHAT_SYNC_MODE or 'unknown')}</p>
               </div>
@@ -4295,6 +4297,8 @@ def _safe_next_path(value: str) -> str:
             allowed_hosts.add(str(urlparse(LOCAL_CHAT_BASE_URL).hostname or "").strip().lower())
         if COORD_DEMO_BASE_URL:
             allowed_hosts.add(str(urlparse(COORD_DEMO_BASE_URL).hostname or "").strip().lower())
+        if AUDIO_CHAT_BASE_URL:
+            allowed_hosts.add(str(urlparse(AUDIO_CHAT_BASE_URL).hostname or "").strip().lower())
         host = str(parsed.hostname or "").strip().lower()
         if host and host in {candidate for candidate in allowed_hosts if candidate}:
             return next_path
@@ -14141,6 +14145,7 @@ def render_home_page(snapshot: dict[str, Any]) -> str:
             decode_url=COORD_DEMO_BASE_URL,
             decode_launch_url="/go/decode",
             telegram_url=TELEGRAM_BASE_URL or None,
+            audio_chat_url=AUDIO_CHAT_BASE_URL or None,
         ),
         support_html="",
     )

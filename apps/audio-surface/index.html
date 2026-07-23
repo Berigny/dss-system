@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Audio Chat</title>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body class="disconnected">
+  <main class="surface">
+    <button
+      id="audio-button"
+      class="audio-button"
+      data-state="disconnected"
+      aria-label="Connect to Audio Chat"
+    >
+      <span id="audio-icon" class="audio-icon" aria-hidden="true">🎤</span>
+      <span class="waveform" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+      </span>
+    </button>
+    <p id="status-label" class="status-label">Tap to connect</p>
+  </main>
+
+  <!-- Remote audio output from LOAM -->
+  <audio id="remote-audio" autoplay></audio>
+
+  <script src="./main.js"></script>
+</body>
+</html>
