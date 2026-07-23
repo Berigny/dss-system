@@ -62,6 +62,6 @@ node build.js
 
 ## Notes
 
-- Part of the `dss-system` monorepo.
+- Part of the `dss-system` monorepo (root directory `apps/audio-surface`).
 - Deployed as a static app (Vercel or equivalent).
 - `config.js` is generated at build time and is gitignored.
