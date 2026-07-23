@@ -24,8 +24,9 @@ import json
 import uuid
 from io import BytesIO
 from typing import Any
+from urllib.parse import urljoin
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, Request, WebSocket, WebSocketDisconnect
 from openai import OpenAI
 
 LOGGER = logging.getLogger(__name__)
@@ -34,6 +35,9 @@ router = APIRouter(prefix="/v1/voice", tags=["voice"])
 
 # In-memory session state. No persistence.
 _sessions: dict[str, dict[str, Any]] = {}
+
+# Active WebSocket connections by session id, used for hard-termination.
+_active_websockets: dict[str, WebSocket] = {}
 
 VOICE_MODEL = os.getenv("VOICE_CHAT_MODEL", "gpt-4o-mini")
 VOICE_SYSTEM_PROMPT = os.getenv(
@@ -191,23 +195,39 @@ def _mp3_to_opus(mp3_bytes: bytes) -> bytes:
 
 
 @router.post("/session")
-async def create_voice_session() -> dict[str, str]:
+async def create_voice_session(request: Request) -> dict[str, str]:
     session_id = str(uuid.uuid4())
     _sessions[session_id] = {
         "created_at": time.time(),
         "chunks": [],
         "lock": asyncio.Lock(),
     }
+
+    # Build the WebSocket stream URL hint for the gateway.
+    scheme = "wss" if request.url.scheme == "https" else "ws"
+    host = request.headers.get("host") or request.url.hostname or "localhost"
+    base_url = f"{scheme}://{host}"
+    stream_url = urljoin(base_url, f"/v1/voice/stream/{session_id}")
+
     LOGGER.info("Voice session created: %s", session_id)
-    return {"session_id": session_id}
+    return {"session_id": session_id, "stream_url": stream_url}
 
 
 @router.delete("/session/{session_id}")
 async def delete_voice_session(session_id: str) -> dict[str, bool]:
-    if session_id in _sessions:
+    # Hard-terminate any active WebSocket for this session first.
+    ws = _active_websockets.pop(session_id, None)
+    if ws is not None:
+        try:
+            await ws.close(code=4000, reason="Session deleted")
+        except Exception:
+            LOGGER.exception("Failed to close websocket for session %s", session_id)
+
+    existed = session_id in _sessions
+    if existed:
         del _sessions[session_id]
         LOGGER.info("Voice session deleted: %s", session_id)
-    return {"deleted": True}
+    return {"deleted": True, "session_existed": existed}
 
 
 @router.websocket("/stream/{session_id}")
@@ -218,6 +238,7 @@ async def voice_stream(websocket: WebSocket, session_id: str) -> None:
 
     await websocket.accept()
     session = _sessions[session_id]
+    _active_websockets[session_id] = websocket
     LOGGER.info("Voice stream connected: %s", session_id)
 
     try:
@@ -241,6 +262,8 @@ async def voice_stream(websocket: WebSocket, session_id: str) -> None:
                 text = message["text"]
                 if text == "ping":
                     await websocket.send_text("pong")
+                elif text == "heartbeat":
+                    await websocket.send_text("heartbeat")
                 elif text == "flush":
                     async with session["lock"]:
                         await _process_utterance(websocket, session)
@@ -248,6 +271,7 @@ async def voice_stream(websocket: WebSocket, session_id: str) -> None:
     except WebSocketDisconnect:
         pass
     finally:
+        _active_websockets.pop(session_id, None)
         LOGGER.info("Voice stream disconnected: %s", session_id)
 
 
