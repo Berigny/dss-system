@@ -1,0 +1,6 @@
+fastapi>=0.110.0
+python-fasthtml==0.12.42
+httpx>=0.25.0
+python-dotenv>=1.0.0
+uvicorn[standard]>=0.24.0
+fastcore==1.12.14

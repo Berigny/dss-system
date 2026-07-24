@@ -13,14 +13,15 @@ Stateless Signal/Media Gateway for LOAM Voice.
 
 - `POST {gatewayUrl}/session` with JSON body `{ offer: <SDP> }`
   - Returns `{ session_id: string, answer: <SDP> }`
-- WebSocket control channel: `{gatewayUrl}/control/{session_id}` (optional)
 - `DELETE {gatewayUrl}/session/{session_id}`
 
 ## LOAM core contract
 
-- `POST {LOAM_VOICE_API}/v1/voice/session` with `{ offer: <SDP> }`
-  - Returns `{ session_id: string, answer: <SDP> }`
-- `WS {LOAM_VOICE_API}/v1/voice/stream/{session_id}` bidirectional opus frames
+- `POST {LOAM_VOICE_API}/v1/voice/session` — allocate a voice session
+  - Returns `{ session_id: string }`
+- `WS {LOAM_VOICE_API}/v1/voice/stream/{session_id}` — bidirectional opus frames
+  - Gateway -> core: opus payloads extracted from browser RTP
+  - Core -> gateway: opus payloads to wrap into RTP for the browser
 - `DELETE {LOAM_VOICE_API}/v1/voice/session/{session_id}`
 
 ## Install

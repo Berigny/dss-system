@@ -43,6 +43,7 @@ from backend.api.wallet import router as wallet_router
 from backend.api.wizard import router as wizard_router
 from backend.api.voice import router as voice_router
 from backend.api.telegram import router as telegram_router
+from backend.api.document import router as document_router
 from backend.services.session_tokens import apply_session_token_claims_or_raise
 from backend.api.http import (
     router as ledger_router,
@@ -260,6 +261,7 @@ app.include_router(ui_api.router)
 app.include_router(ledger_api.router, prefix="/ledger", tags=["ledger"])
 app.include_router(voice_router)
 app.include_router(telegram_router)
+app.include_router(document_router)
 
 
 @app.get("/health", include_in_schema=False)

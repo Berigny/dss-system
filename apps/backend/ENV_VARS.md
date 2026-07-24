@@ -143,6 +143,9 @@ Auto-generated during DSS-232 pre-migration cleanup.
 | `TELEGRAM_LEDGER_ID` | "pilot" | backend/api/telegram.py |
 | `TELEGRAM_CHAT_MODEL` | "gpt-4o-mini" | backend/api/telegram.py |
 | `TELEGRAM_PAIRING_CODE_TTL_SECONDS` | "600" | backend/api/telegram.py |
+| `DOCUMENT_SURFACE_ID` | "surface:document:primary" | backend/api/document.py |
+| `DOCUMENT_LEDGER_ID` | "pilot" | backend/api/document.py |
+| `DOCUMENT_CHAT_MODEL` | "gpt-4o-mini" | backend/api/document.py |
 | `OPENROUTER_MAX_TOKENS` | (required / no default) | backend/api/chat.py |
 | `P_ADIC_DISTANCE_PRIME` | "5" | backend/fieldx_kernel/orchestrator.py, backend/retrieval/fuzzy_retrieve.py |
 | `PADIC_LEDGER_PRECISION` | "4" | backend/fieldx_kernel/substrate/ledger_store_v2.py |

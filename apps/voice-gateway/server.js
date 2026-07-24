@@ -182,14 +182,35 @@ app.post('/session', async (req, res) => {
       return res.status(400).json({ error: 'Missing offer SDP' });
     }
 
-    const sessionId = generateSessionId();
+    // Create the WebRTC peer connection locally; the gateway is the browser's peer.
     const pc = createPeerConnection();
-
     const outgoingTrack = new MediaStreamTrack({ kind: 'audio' });
     const transceiver = pc.addTransceiver(outgoingTrack, { direction: 'sendrecv' });
 
+    await pc.setRemoteDescription(offer);
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+
+    // Allocate a session with LOAM core. The core only needs a session id;
+    // all SDP state stays in the gateway.
+    let coreSessionId;
+    if (MOCK_CORE) {
+      coreSessionId = generateSessionId();
+    } else {
+      const coreResponse = await fetch(`${LOAM_VOICE_API}/v1/voice/session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!coreResponse.ok) {
+        const text = await coreResponse.text();
+        throw new Error(`LOAM core session error ${coreResponse.status}: ${text}`);
+      }
+      const coreData = await coreResponse.json();
+      coreSessionId = coreData.session_id;
+    }
+
     const session = {
-      id: sessionId,
+      id: coreSessionId,
       pc,
       outgoingTrack,
       transceiver,
@@ -203,14 +224,14 @@ app.post('/session', async (req, res) => {
     };
 
     pc.onconnectionstatechange = () => {
-      console.log(`Session ${sessionId} connection state: ${pc.connectionState}`);
+      console.log(`Session ${coreSessionId} connection state: ${pc.connectionState}`);
       if (['failed', 'disconnected', 'closed'].includes(pc.connectionState)) {
-        cleanupSession(sessionId);
+        cleanupSession(coreSessionId);
       }
     };
 
     transceiver.onTrack.subscribe((track) => {
-      console.log(`Session ${sessionId} received audio track`);
+      console.log(`Session ${coreSessionId} received audio track`);
       session.inSsrc = track.ssrc;
 
       track.onReceiveRtp.subscribe((rtpPacket) => {
@@ -219,16 +240,12 @@ app.post('/session', async (req, res) => {
       });
     });
 
-    await pc.setRemoteDescription(offer);
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-
-    sessions.set(sessionId, session);
+    sessions.set(coreSessionId, session);
 
     // Connect to LOAM core now so the return path is ready.
     connectLoamCore(session);
 
-    res.json({ session_id: sessionId, answer: pc.localDescription });
+    res.json({ session_id: coreSessionId, answer: pc.localDescription });
   } catch (err) {
     console.error('Session creation failed:', err);
     res.status(500).json({ error: err.message });

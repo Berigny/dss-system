@@ -81,6 +81,10 @@ def normalise_coord(coord: str) -> dict[str, Any]:
             kind = "meta"
         elif bare.startswith("MD-Reset-"):
             kind = "meta"
+        elif bare.startswith("MD-DocState-"):
+            kind = "meta"
+        elif bare.startswith("DOC-"):
+            kind = "document"
 
     canonical = canonical_bare
     if namespace:
