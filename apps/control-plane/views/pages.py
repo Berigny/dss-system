@@ -179,6 +179,8 @@ def render_action_cards(
     decode_launch_url: str | None = None,
     telegram_url: str | None = None,
     audio_chat_url: str | None = None,
+    document_url: str | None = None,
+    document_enabled: bool = False,
 ) -> str:
     chat_link = (
         f'<a class="btn primary" href="{html.escape(chat_url)}" target="_blank" rel="noreferrer noopener">Open Chat</a>'
@@ -191,18 +193,28 @@ def render_action_cards(
         if effective_decode_url
         else '<button class="btn primary" disabled>Decode not configured</button>'
     )
-    if telegram_url:
-        telegram_link = f'<a class="btn" href="{html.escape(telegram_url)}" target="_blank" rel="noreferrer noopener">Open Telegram</a>'
+    telegram_configured = bool(telegram_url)
+    telegram_actions = []
+    if telegram_configured:
+        telegram_actions.append(f'<a class="btn" href="{html.escape(telegram_url)}" target="_blank" rel="noreferrer noopener">Open Telegram</a>')
+        telegram_actions.append('<a class="btn primary" href="/surfaces/telegram/connect">Connect Telegram</a>')
         telegram_badge = ""
     else:
-        telegram_link = '<button class="btn" disabled>Coming soon</button>'
+        telegram_actions.append('<button class="btn" disabled>Coming soon</button>')
         telegram_badge = '<span class="badge" style="margin-left:8px;">Coming soon</span>'
+    telegram_link = " ".join(telegram_actions)
     if audio_chat_url:
         audio_chat_link = f'<a class="btn primary" href="{html.escape(audio_chat_url)}" target="_blank" rel="noreferrer noopener">Open Audio Chat</a>'
         audio_chat_badge = ""
     else:
-        audio_chat_link = '<button class="btn" disabled>Coming soon</button>'
+        audio_chat_link = '<button class="btn primary" disabled>Coming soon</button>'
         audio_chat_badge = '<span class="badge" style="margin-left:8px;">Coming soon</span>'
+    if document_enabled and document_url:
+        document_link = f'<a class="btn primary" href="{html.escape(document_url)}" target="_blank" rel="noreferrer noopener">Open Documents</a>'
+        document_badge = ""
+    else:
+        document_link = '<button class="btn" disabled>Coming soon</button>'
+        document_badge = '<span class="badge" style="margin-left:8px;">Coming soon</span>'
     return f"""
     <section class="action-card-grid" aria-label="Primary tasks">
       <article class="action-card action-card-primary">
@@ -220,9 +232,14 @@ def render_action_cards(
         <p>Explore coordinates, decodings, and benchmark results.</p>
         {decode_link}
       </article>
-      <article class="action-card action-card-secondary{'' if telegram_url else ' action-card-disabled'}">
+      <article class="action-card action-card-secondary{'' if document_enabled else ' action-card-disabled'}">
+        <h2>Documents{document_badge}</h2>
+        <p>Compose governed documents with append-only chunk versioning and deterministic export.</p>
+        {document_link}
+      </article>
+      <article class="action-card action-card-secondary{'' if telegram_configured else ' action-card-disabled'}">
         <h2>Telegram{telegram_badge}</h2>
-        <p>Connect the planned Telegram surface for notifications and quick interactions.</p>
+        <p>Connect the Telegram surface for notifications and quick interactions.</p>
         {telegram_link}
       </article>
       <article class="action-card action-card-secondary">
@@ -245,6 +262,7 @@ def render_action_cards(
       </article>
     </section>
     """
+
 
 
 def render_home_page_content(*, header_html: str, actions_html: str, support_html: str = "") -> str:

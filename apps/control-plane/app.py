@@ -95,6 +95,10 @@ COORD_DEMO_BASE_URL = (
     os.getenv("COORD_DEMO_BASE_URL") or "https://decode.dualsubstrate.com"
 ).rstrip("/")
 TELEGRAM_BASE_URL = (os.getenv("TELEGRAM_BASE_URL") or "").rstrip("/")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_ADMIN_SECRET = os.getenv("TELEGRAM_ADMIN_SECRET", "")
+DOCUMENT_BASE_URL = (os.getenv("DOCUMENT_BASE_URL") or "").rstrip("/")
+DOCUMENT_SURFACE_ENABLEMENT = (os.getenv("DOCUMENT_SURFACE_ENABLEMENT") or "disabled").strip().lower()
 AUDIO_CHAT_BASE_URL = (os.getenv("AUDIO_CHAT_BASE_URL") or "").rstrip("/")
 BENCHMARK_DECODER_BASE_URL = (os.getenv("BENCHMARK_DECODER_BASE_URL") or "").rstrip("/")
 LOCAL_CHAT_BASE_URL = (os.getenv("LOCAL_CHAT_BASE_URL") or "").rstrip("/")
@@ -14135,6 +14139,7 @@ def _wallet_status_copy(status: str) -> str:
 
 
 def render_home_page(snapshot: dict[str, Any]) -> str:
+    document_enabled = DOCUMENT_SURFACE_ENABLEMENT == "enabled"
     return render_home_page_content(
         header_html=render_page_header(
             title="Home",
@@ -14146,6 +14151,8 @@ def render_home_page(snapshot: dict[str, Any]) -> str:
             decode_launch_url="/go/decode",
             telegram_url=TELEGRAM_BASE_URL or None,
             audio_chat_url=AUDIO_CHAT_BASE_URL or None,
+            document_url=DOCUMENT_BASE_URL or None,
+            document_enabled=document_enabled,
         ),
         support_html="",
     )
@@ -14154,6 +14161,56 @@ def render_home_page(snapshot: dict[str, Any]) -> str:
 def render_home(snapshot: dict[str, Any], request: Request) -> str:
     profile_name = _profile_name_from_identity_card(_as_dict(snapshot.get("identity_card")))
     return _layout_with_nav(f"Home | {APP_TITLE}", render_home_page(snapshot), "/", profile_name=profile_name)
+
+
+async def telegram_connect_page(request: Request) -> Response:
+    """Mint a Telegram pairing code for the current principal."""
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_ADMIN_SECRET:
+        body_html = render_page_header(
+            title="Telegram not configured",
+            description="TELEGRAM_BOT_TOKEN and TELEGRAM_ADMIN_SECRET must be set before pairing a chat.",
+        ) + '<p><a class="btn" href="/">Back home</a></p>'
+        return HTMLResponse(_layout_with_nav("Telegram | " + APP_TITLE, body_html, "/"), status_code=503)
+
+    principal_did = str(request.cookies.get(PRINCIPAL_DID_COOKIE) or "").strip()
+    if not principal_did:
+        body_html = render_page_header(
+            title="Authentication required",
+            description="Sign in to the Control Plane before connecting Telegram.",
+        ) + '<p><a class="btn" href="/">Back home</a></p>'
+        return HTMLResponse(_layout_with_nav("Telegram | " + APP_TITLE, body_html, "/"), status_code=401)
+
+    status_code, body = await _backend_admin_post(
+        "/v1/telegram/pairing-code",
+        {"principal_did": principal_did},
+        extra_headers={"x-telegram-admin-secret": TELEGRAM_ADMIN_SECRET},
+    )
+    if status_code >= 400:
+        error = html.escape(str(body.get("detail") or body.get("error") or "Failed to mint pairing code"))
+        body_html = render_page_header(title="Telegram pairing failed", description=error) + '<p><a class="btn" href="/">Back home</a></p>'
+        return HTMLResponse(_layout_with_nav("Telegram | " + APP_TITLE, body_html, "/"), status_code=status_code)
+
+    code = html.escape(str(body.get("code") or ""))
+    expires_at = int(body.get("expires_at") or 0)
+    body_html = (
+        render_page_header(
+            title="Connect Telegram",
+            description="Send the message below to your Telegram bot to pair this account.",
+        )
+        + f"""
+        <section class="action-card-grid">
+          <article class="action-card action-card-primary">
+            <h2>Pairing code</h2>
+            <p class="monospace" style="font-size:1.5rem; letter-spacing:0.05em;">{code}</p>
+            <p>Copy and send this exact message to your bot:</p>
+            <pre><code>/start {code}</code></pre>
+            <p>Expires at {expires_at} (Unix timestamp).</p>
+            <p><a class="btn" href="/">Back home</a></p>
+          </article>
+        </section>
+        """
+    )
+    return HTMLResponse(_layout_with_nav("Telegram | " + APP_TITLE, body_html, "/"))
 
 
 def render_trust_page(snapshot: dict[str, Any], request: Request) -> str:
@@ -16747,6 +16804,47 @@ def _control_plane_model_binding_records(
             "canonical_subject_source": "did:web:binding",
         }
     )
+
+    # Active Telegram surface binding scoped to the primary Telegram surface.
+    # The model_id is a non-chat binding id so middleware never offers it as a
+    # selectable chat model, while the binding row still routes Telegram scoped
+    # requests correctly.
+    bindings.append(
+        {
+            "binding_id": "binding:telegram:primary",
+            "name": "Telegram primary binding",
+            "provider_id": provider_lookup.get("openrouter", "provider:openrouter:shared"),
+            "provider_type": "OpenRouter",
+            "model_id": "binding:telegram:primary",
+            "linked_model_principal": "",
+            "scope": "surface",
+            "status": "active",
+            "app_surfaces": ["surface:telegram:primary"],
+            "policy_profile": "default",
+            "source": "surface-binding",
+            "canonical_subject": _canonical_entity_subject("binding", "binding:telegram:primary"),
+            "canonical_subject_source": "did:web:binding",
+        }
+    )
+
+    # Document surface binding scoped to the primary Document surface.
+    bindings.append(
+        {
+            "binding_id": "binding:document:primary",
+            "name": "Document primary binding",
+            "provider_id": provider_lookup.get("openrouter", "provider:openrouter:shared"),
+            "provider_type": "OpenRouter",
+            "model_id": "binding:document:primary",
+            "linked_model_principal": "",
+            "scope": "surface",
+            "status": "active",
+            "app_surfaces": ["surface:document:primary"],
+            "policy_profile": "default",
+            "source": "surface-binding",
+            "canonical_subject": _canonical_entity_subject("binding", "binding:document:primary"),
+            "canonical_subject_source": "did:web:binding",
+        }
+    )
     return bindings
 
 
@@ -17224,6 +17322,54 @@ def _control_plane_app_surface_records(
             "next_action": "Create the app-surface record, connector identity, webhook, and ledger before launch.",
             "notes": "Telegram should be onboarded through a governed app-surface record rather than raw deployment notes.",
             "canonical_subject": _canonical_entity_subject("surface", "surface:telegram:template"),
+            "canonical_subject_source": "did:web:surface",
+        },
+        {
+            "surface_id": "surface:telegram:primary",
+            "name": "Telegram",
+            "surface_type": "Telegram",
+            "status": "active" if TELEGRAM_BASE_URL else "planned",
+            "environment": "production" if TELEGRAM_BASE_URL else "planned",
+            "deployment_owner": "Vercel / Fly connector",
+            "endpoint": TELEGRAM_BASE_URL or "webhook:pending",
+            "dss_api_base": MIDDLEWARE_BASE_URL,
+            "dss_auth_mode": "bot-webhook+token",
+            "mcp_detail": "Telegram Bot API webhook surface",
+            "default_binding_id": "binding:telegram:primary",
+            "provider_type": "OpenRouter",
+            "model_id": str(binding_lookup.get("binding:telegram:primary", {}).get("model_id") or "model:pending"),
+            "principal_did": principal_did,
+            "tenant_id": tenant_id,
+            "ledger_id": ledger_id or "ledger:pending",
+            "ledger_state": "shared" if ledger_id else "planned",
+            "onboarding_state": activation_state if TELEGRAM_BASE_URL else "pending_tenant_config",
+            "next_action": "Open Telegram connection" if TELEGRAM_BASE_URL else "Set TELEGRAM_BASE_URL and TELEGRAM_BOT_TOKEN to enable the Telegram surface.",
+            "notes": "Governed Telegram surface for notifications and quick interactions. Pairing codes are minted from the Control Plane.",
+            "canonical_subject": _canonical_entity_subject("surface", "surface:telegram:primary"),
+            "canonical_subject_source": "did:web:surface",
+        },
+        {
+            "surface_id": "surface:document:primary",
+            "name": "Documents",
+            "surface_type": "Document",
+            "status": "active" if DOCUMENT_SURFACE_ENABLEMENT == "enabled" else DOCUMENT_SURFACE_ENABLEMENT,
+            "environment": "production" if DOCUMENT_BASE_URL else "planned",
+            "deployment_owner": "Vercel",
+            "endpoint": DOCUMENT_BASE_URL or "https://docs.dualsubstrate.com",
+            "dss_api_base": MIDDLEWARE_BASE_URL,
+            "dss_auth_mode": "session+principal",
+            "mcp_detail": "not required",
+            "default_binding_id": "binding:document:primary",
+            "provider_type": "OpenRouter",
+            "model_id": str(binding_lookup.get("binding:document:primary", {}).get("model_id") or "model:pending"),
+            "principal_did": principal_did,
+            "tenant_id": tenant_id,
+            "ledger_id": ledger_id or "ledger:pending",
+            "ledger_state": "shared" if ledger_id else "planned",
+            "onboarding_state": activation_state if DOCUMENT_SURFACE_ENABLEMENT == "enabled" else DOCUMENT_SURFACE_ENABLEMENT,
+            "next_action": "Open Documents" if DOCUMENT_BASE_URL and DOCUMENT_SURFACE_ENABLEMENT == "enabled" else "Enable document surface in provisioning before launch.",
+            "notes": "Governed document composer surface with append-only chunk versioning and deterministic export.",
+            "canonical_subject": _canonical_entity_subject("surface", "surface:document:primary"),
             "canonical_subject_source": "did:web:surface",
         },
         {
@@ -24003,6 +24149,7 @@ app = Starlette(
         Route("/principals/codex/provision", codex_principal_provision_submit, methods=["POST"]),
         Route("/principals/kimi/provision", kimi_principal_provision_submit, methods=["POST"]),
         Route("/principals/{principal_id}/delegated-access", principal_delegated_access_update, methods=["POST"]),
+        Route("/surfaces/telegram/connect", telegram_connect_page, methods=["GET", "HEAD"]),
         Route("/surfaces/{surface_id}", surface_detail_page, methods=["GET", "HEAD"]),
         Route("/sources/{source_id}", source_detail_page, methods=["GET", "HEAD"]),
         Route("/trust-panel/{entity_type}/{entity_id:path}", entity_trust_panel_page, methods=["GET", "HEAD"]),

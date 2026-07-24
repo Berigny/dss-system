@@ -52,6 +52,11 @@ FREE_TRIAL_ENTITLEMENTS = PilotPlanEntitlements(
         authorised_rep_slots=1,
     ),
     manual_only=(
+        # v0.1 is manual-first: document surface and Telegram setup require an
+        # admin action (provisioning enablement or Control Plane pairing code
+        # minting) even though the backend/UI plumbing is in place. They move to
+        # fully self-serve capability_states once the onboarding flow can issue
+        # pairing codes and enable the surface without admin intervention.
         "document_surface",
         "telegram_setup",
         "advanced_agent_setups",
