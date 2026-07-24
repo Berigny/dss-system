@@ -263,13 +263,23 @@ def _chunk_card(chunk: dict[str, Any], versions: list[str]) -> Div:
     )
 
 
-def _chunks_partial(doc: dict[str, Any]) -> Div:
+async def _chunk_versions(request: Request, chunk_coord: str) -> list[str]:
+    try:
+        payload = await _backend_request(request, "GET", f"/v1/documents/chunks/{chunk_coord}/versions")
+        return payload.get("versions", [])
+    except Exception:
+        return []
+
+
+async def _chunks_partial(request: Request, doc: dict[str, Any]) -> Div:
     chunks = doc.get("chunks", [])
     if not chunks:
         return Div(P("No chunks yet."), id="chunks")
     cards = []
     for chunk in chunks:
-        versions = [chunk.get("active_version", "")]
+        versions = await _chunk_versions(request, chunk["chunk_coord"])
+        if not versions:
+            versions = [chunk.get("active_version", "")]
         cards.append(_chunk_card(chunk, versions))
     return Div(*cards, id="chunks")
 
@@ -384,7 +394,7 @@ async def doc_editor(request: Request, doc_id: str):
             ),
             cls="composer",
         ),
-        _chunks_partial(doc),
+        await _chunks_partial(request, doc),
         _error_div(error) if error else "",
         Div(
             H3("Export"),
@@ -421,7 +431,7 @@ async def api_create_chunk(request: Request, doc_id: str):
         doc = await _backend_request(request, "GET", f"/v1/documents/{doc_id}")
     except Exception as exc:
         return _error_div(f"Chunk failed: {exc}")
-    return _chunks_partial(doc)
+    return await _chunks_partial(request, doc)
 
 
 @rt("/api/chunks/{chunk_coord}/reprompt-form", methods=["GET"])
@@ -448,7 +458,7 @@ async def api_reprompt(request: Request, chunk_coord: str):
         doc = await _backend_request(request, "GET", f"/v1/documents/{doc_id}")
     except Exception as exc:
         return _error_div(f"Reprompt failed: {exc}")
-    return _chunks_partial(doc)
+    return await _chunks_partial(request, doc)
 
 
 @rt("/api/chunks/{chunk_coord}/version", methods=["POST"])
@@ -461,7 +471,7 @@ async def api_set_version(request: Request, chunk_coord: str):
         doc = await _backend_request(request, "GET", f"/v1/documents/{doc_id}")
     except Exception as exc:
         return _error_div(f"Version change failed: {exc}")
-    return _chunks_partial(doc)
+    return await _chunks_partial(request, doc)
 
 
 @rt("/api/chunks/{chunk_coord}/selection", methods=["POST"])
@@ -478,7 +488,7 @@ async def api_set_selection(request: Request, chunk_coord: str):
         doc = await _backend_request(request, "GET", f"/v1/documents/{doc_id}")
     except Exception as exc:
         return _error_div(f"Selection update failed: {exc}")
-    return _chunks_partial(doc)
+    return await _chunks_partial(request, doc)
 
 
 @rt("/api/chunks/{chunk_coord}/toggle", methods=["POST"])
@@ -492,7 +502,7 @@ async def api_toggle_visible(request: Request, chunk_coord: str):
         doc = await _backend_request(request, "GET", f"/v1/documents/{doc_id}")
     except Exception as exc:
         return _error_div(f"Toggle failed: {exc}")
-    return _chunks_partial(doc)
+    return await _chunks_partial(request, doc)
 
 
 @rt("/api/chunks/{chunk_coord}/move", methods=["POST"])
@@ -518,7 +528,7 @@ async def api_move_chunk(request: Request, chunk_coord: str):
         doc = await _backend_request(request, "GET", f"/v1/documents/{doc_id}")
     except Exception as exc:
         return _error_div(f"Move failed: {exc}")
-    return _chunks_partial(doc)
+    return await _chunks_partial(request, doc)
 
 
 @rt("/api/documents/{doc_id}/export", methods=["GET"])
