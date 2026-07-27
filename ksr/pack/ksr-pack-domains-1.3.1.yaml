@@ -1,5 +1,0 @@
-ksr_artifact: ksr-pack-domains
-source_registry_sha256: 00d63d0bba51387527c467761beadc52719b2d71e6ea8b84ddceda1b541be1a1
-artifact:
-  ksr_pack: domains
-  cross_domain_registry: {}
