@@ -1,0 +1,269 @@
+{
+  "claims_binding": {
+    "bound": {
+      "abstention.absent_queries": {
+        "description": "Total number of absent queries executed.",
+        "metric": "absent_queries",
+        "operator": ">=",
+        "status": "recorded",
+        "suite": "abstention",
+        "threshold": null,
+        "value": 9
+      },
+      "abstention.borderline_abstention_rate": {
+        "description": "Share of borderline queries on which the system abstained.",
+        "metric": "borderline_abstention_rate",
+        "operator": ">=",
+        "status": "recorded",
+        "suite": "abstention",
+        "threshold": null,
+        "value": 0.0
+      },
+      "abstention.borderline_queries": {
+        "description": "Total number of borderline queries executed.",
+        "metric": "borderline_queries",
+        "operator": ">=",
+        "status": "recorded",
+        "suite": "abstention",
+        "threshold": null,
+        "value": 6
+      },
+      "abstention.false_abstention_rate": {
+        "description": "Present queries must not be incorrectly declined.",
+        "metric": "false_abstention_rate",
+        "operator": "<=",
+        "status": "passed",
+        "suite": "abstention",
+        "threshold": 0.1,
+        "value": 0.0
+      },
+      "abstention.pass": {
+        "description": "Suite-level pass/fail indicator.",
+        "metric": "pass",
+        "operator": ">=",
+        "status": "recorded",
+        "suite": "abstention",
+        "threshold": null,
+        "value": true
+      },
+      "abstention.precision": {
+        "description": "Absent queries must be correctly declined.",
+        "metric": "precision",
+        "operator": ">=",
+        "status": "passed",
+        "suite": "abstention",
+        "threshold": 0.98,
+        "value": 1.0
+      },
+      "abstention.present_queries": {
+        "description": "Total number of present queries executed.",
+        "metric": "present_queries",
+        "operator": ">=",
+        "status": "recorded",
+        "suite": "abstention",
+        "threshold": null,
+        "value": 9
+      },
+      "abstention.recall": {
+        "description": "Present queries must be correctly answered.",
+        "metric": "recall",
+        "operator": ">=",
+        "status": "passed",
+        "suite": "abstention",
+        "threshold": 0.95,
+        "value": 1.0
+      },
+      "integrity.incoherent_retrieval_rate": {
+        "description": "Retrieval should return structurally valid records.",
+        "metric": "incoherent_retrieval_rate",
+        "operator": "<=",
+        "status": "passed",
+        "suite": "integrity",
+        "threshold": 0.05,
+        "value": 0.0
+      },
+      "integrity.pass": {
+        "description": "Suite-level pass/fail indicator.",
+        "metric": "pass",
+        "operator": ">=",
+        "status": "recorded",
+        "suite": "integrity",
+        "threshold": null,
+        "value": true
+      },
+      "integrity.total_queries": {
+        "description": "Total number of integrity queries executed.",
+        "metric": "total_queries",
+        "operator": ">=",
+        "status": "recorded",
+        "suite": "integrity",
+        "threshold": null,
+        "value": 45
+      },
+      "integrity.transparency_rate": {
+        "description": "Retrievals should carry verifiable provenance metadata.",
+        "metric": "transparency_rate",
+        "operator": ">=",
+        "status": "passed",
+        "suite": "integrity",
+        "threshold": 0.95,
+        "value": 1.0
+      },
+      "poisoning.avg_conflict_detection_latency_s": {
+        "description": "Conflict detection latency is recorded but not threshold-gated.",
+        "metric": "avg_conflict_detection_latency_s",
+        "operator": "<=",
+        "status": "recorded",
+        "suite": "poisoning",
+        "threshold": null,
+        "value": 9.6e-05
+      },
+      "poisoning.flagged_or_preserved_rate": {
+        "description": "Conflicts must be flagged or original facts preserved.",
+        "metric": "flagged_or_preserved_rate",
+        "operator": ">=",
+        "status": "passed",
+        "suite": "poisoning",
+        "threshold": 1.0,
+        "value": 1.0
+      },
+      "poisoning.pass": {
+        "description": "Suite-level pass/fail indicator.",
+        "metric": "pass",
+        "operator": ">=",
+        "status": "recorded",
+        "suite": "poisoning",
+        "threshold": null,
+        "value": true
+      },
+      "poisoning.silent_displacement_rate": {
+        "description": "Adversarial entries must never silently displace committed facts.",
+        "metric": "silent_displacement_rate",
+        "operator": "==",
+        "status": "passed",
+        "suite": "poisoning",
+        "threshold": 0.0,
+        "value": 0.0
+      },
+      "poisoning.total_conflicts": {
+        "description": "Total number of injected conflicts exercised.",
+        "metric": "total_conflicts",
+        "operator": ">=",
+        "status": "recorded",
+        "suite": "poisoning",
+        "threshold": null,
+        "value": 9
+      }
+    },
+    "fail_ci": [],
+    "missing_claims": [],
+    "overall": true,
+    "unknown_claims": [],
+    "unknown_claims_policy": "fail_ci"
+  },
+  "overall_pass": true,
+  "suites": [
+    {
+      "avg_conflict_detection_latency_s": 9.6e-05,
+      "flagged_or_preserved_rate": 1.0,
+      "pass": true,
+      "per_seed": [
+        {
+          "conflicts": 3,
+          "flagged_or_preserved": 3,
+          "seed": 42,
+          "silent_displacements": 0
+        },
+        {
+          "conflicts": 3,
+          "flagged_or_preserved": 3,
+          "seed": 43,
+          "silent_displacements": 0
+        },
+        {
+          "conflicts": 3,
+          "flagged_or_preserved": 3,
+          "seed": 44,
+          "silent_displacements": 0
+        }
+      ],
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "silent_displacement_rate": 0.0,
+      "suite": "poisoning",
+      "total_conflicts": 9
+    },
+    {
+      "incoherent_retrieval_rate": 0.0,
+      "pass": true,
+      "per_seed": [
+        {
+          "incoherent_retrievals": 0,
+          "queries": 15,
+          "seed": 42,
+          "transparent_retrievals": 15
+        },
+        {
+          "incoherent_retrievals": 0,
+          "queries": 15,
+          "seed": 43,
+          "transparent_retrievals": 15
+        },
+        {
+          "incoherent_retrievals": 0,
+          "queries": 15,
+          "seed": 44,
+          "transparent_retrievals": 15
+        }
+      ],
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "suite": "integrity",
+      "total_queries": 45,
+      "transparency_rate": 1.0
+    },
+    {
+      "absent_queries": 9,
+      "borderline_abstention_rate": 0.0,
+      "borderline_queries": 6,
+      "false_abstention_rate": 0.0,
+      "pass": true,
+      "per_seed": [
+        {
+          "absent_correct": 3,
+          "borderline_abstained": 0,
+          "present_correct": 3,
+          "seed": 42
+        },
+        {
+          "absent_correct": 3,
+          "borderline_abstained": 0,
+          "present_correct": 3,
+          "seed": 43
+        },
+        {
+          "absent_correct": 3,
+          "borderline_abstained": 0,
+          "present_correct": 3,
+          "seed": 44
+        }
+      ],
+      "precision": 1.0,
+      "present_queries": 9,
+      "recall": 1.0,
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "suite": "abstention"
+    }
+  ],
+  "timestamp": "2026-07-27T00:35:29.275543+00:00"
+}

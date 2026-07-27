@@ -1,0 +1,8 @@
+# Core dependencies (always required)
+pyyaml>=6.0
+
+# Optional adapters — install only the backend you intend to benchmark.
+# faiss-cpu>=1.7.4   # optional, fallback to brute-force cosine if absent
+# langchain>=0.1.0   # optional, stubbed if absent
+# llama-index>=0.10.0 # optional, stubbed if absent
+# pymilvus>=2.3.0    # optional, stubbed if absent
