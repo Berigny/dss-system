@@ -9,10 +9,13 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from adapters.base import RetrievalAdapter
+from adapters.chroma_adapter import ChromaAdapter
 from adapters.faiss_adapter import FaissAdapter
 from adapters.langchain_adapter import LangChainAdapter
 from adapters.llama_index_adapter import LlamaIndexAdapter
 from adapters.milvus_adapter import MilvusAdapter
+from adapters.qdrant_adapter import QdrantAdapter
+from adapters.sentence_transformers_adapter import SentenceTransformersAdapter
 from harness.claims_registry import check_registry, load_registry
 from harness.reporter import generate_report, write_json_report, write_markdown_summary
 from suites.abstention import AbstentionSuite
@@ -29,6 +32,9 @@ SUITE_MAP = {
 
 ADAPTER_MAP = {
     "faiss": FaissAdapter,
+    "chroma": ChromaAdapter,
+    "qdrant": QdrantAdapter,
+    "sentence_transformers": SentenceTransformersAdapter,
     "langchain": LangChainAdapter,
     "llama_index": LlamaIndexAdapter,
     "milvus": MilvusAdapter,

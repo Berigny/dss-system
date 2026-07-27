@@ -1,8 +1,16 @@
 # Core dependencies (always required)
 pyyaml>=6.0
 
-# Optional adapters — install only the backend you intend to benchmark.
-# faiss-cpu>=1.7.4   # optional, fallback to brute-force cosine if absent
-# langchain>=0.1.0   # optional, stubbed if absent
-# llama-index>=0.10.0 # optional, stubbed if absent
-# pymilvus>=2.3.0    # optional, stubbed if absent
+# Optional adapters — install only the backends you intend to benchmark.
+# faiss-cpu>=1.7.4           # optional, fallback to brute-force cosine if absent
+# chromadb>=0.5.0            # local vector DB adapter
+# qdrant-client>=1.9.0       # local or remote Qdrant adapter
+# sentence-transformers>=3.0 # neural embedding baseline
+# langchain>=0.1.0           # framework adapter (stubbed if absent)
+# langchain-community>=0.0.20 # self-indexing LangChain adapter
+# llama-index>=0.10.0        # framework adapter (stubbed if absent)
+# pymilvus>=2.3.0            # optional, stubbed if absent
+# pinecone-client>=4.0.0     # hosted vector DB (requires API key)
+# openai>=1.0.0              # embedding API adapter (requires API key)
+# weaviate-client>=4.0.0     # Weaviate adapter (local Docker or cloud)
+# haystack-ai>=2.0.0         # Haystack pipeline adapter

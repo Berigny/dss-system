@@ -1,0 +1,49 @@
+adapters:
+  faiss:
+    threshold: 0.25
+    mock_embeddings: false
+
+  chroma:
+    threshold: 0.25
+    persist_dir: ./.chroma_cache
+    embedding_model: all-MiniLM-L6-v2
+
+  qdrant:
+    threshold: 0.25
+    location: ":memory:"
+    collection_name: dss_eval
+    vector_size: 384
+    embedding_model: all-MiniLM-L6-v2
+
+  sentence_transformers:
+    threshold: 0.25
+    model_name: all-MiniLM-L6-v2
+
+  pinecone:
+    threshold: 0.25
+    index_name: dss-eval
+    dimension: 384
+    metric: cosine
+    # API key from env: PINECONE_API_KEY
+
+  openai:
+    threshold: 0.25
+    model: text-embedding-3-small
+    # API key from env: OPENAI_API_KEY
+
+  weaviate:
+    threshold: 0.25
+    url: "${WEAVIATE_URL:-http://localhost:8080}"
+    class_name: DssEvalDoc
+
+  langchain:
+    threshold: 0.25
+    embedding_model: all-MiniLM-L6-v2
+
+  llama_index:
+    threshold: 0.25
+    embedding_model: all-MiniLM-L6-v2
+
+  milvus:
+    threshold: 0.25
+    collection_name: dss_eval
