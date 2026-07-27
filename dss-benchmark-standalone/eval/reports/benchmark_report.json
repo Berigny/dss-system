@@ -8,7 +8,7 @@
         "status": "recorded",
         "suite": "abstention",
         "threshold": null,
-        "value": 9
+        "value": 3
       },
       "abstention.borderline_abstention_rate": {
         "description": "Share of borderline queries on which the system abstained.",
@@ -26,7 +26,7 @@
         "status": "recorded",
         "suite": "abstention",
         "threshold": null,
-        "value": 6
+        "value": 2
       },
       "abstention.false_abstention_rate": {
         "description": "Present queries must not be incorrectly declined.",
@@ -62,7 +62,7 @@
         "status": "recorded",
         "suite": "abstention",
         "threshold": null,
-        "value": 9
+        "value": 3
       },
       "abstention.recall": {
         "description": "Present queries must be correctly answered.",
@@ -98,7 +98,7 @@
         "status": "recorded",
         "suite": "integrity",
         "threshold": null,
-        "value": 45
+        "value": 15
       },
       "integrity.transparency_rate": {
         "description": "Retrievals should carry verifiable provenance metadata.",
@@ -116,7 +116,7 @@
         "status": "recorded",
         "suite": "poisoning",
         "threshold": null,
-        "value": 9.6e-05
+        "value": 0.000121
       },
       "poisoning.flagged_or_preserved_rate": {
         "description": "Conflicts must be flagged or original facts preserved.",
@@ -152,7 +152,7 @@
         "status": "recorded",
         "suite": "poisoning",
         "threshold": null,
-        "value": 9
+        "value": 3
       }
     },
     "fail_ci": [],
@@ -164,7 +164,7 @@
   "overall_pass": true,
   "suites": [
     {
-      "avg_conflict_detection_latency_s": 9.6e-05,
+      "avg_conflict_detection_latency_s": 0.000121,
       "flagged_or_preserved_rate": 1.0,
       "pass": true,
       "per_seed": [
@@ -173,28 +173,14 @@
           "flagged_or_preserved": 3,
           "seed": 42,
           "silent_displacements": 0
-        },
-        {
-          "conflicts": 3,
-          "flagged_or_preserved": 3,
-          "seed": 43,
-          "silent_displacements": 0
-        },
-        {
-          "conflicts": 3,
-          "flagged_or_preserved": 3,
-          "seed": 44,
-          "silent_displacements": 0
         }
       ],
       "seeds": [
-        42,
-        43,
-        44
+        42
       ],
       "silent_displacement_rate": 0.0,
       "suite": "poisoning",
-      "total_conflicts": 9
+      "total_conflicts": 3
     },
     {
       "incoherent_retrieval_rate": 0.0,
@@ -205,33 +191,19 @@
           "queries": 15,
           "seed": 42,
           "transparent_retrievals": 15
-        },
-        {
-          "incoherent_retrievals": 0,
-          "queries": 15,
-          "seed": 43,
-          "transparent_retrievals": 15
-        },
-        {
-          "incoherent_retrievals": 0,
-          "queries": 15,
-          "seed": 44,
-          "transparent_retrievals": 15
         }
       ],
       "seeds": [
-        42,
-        43,
-        44
+        42
       ],
       "suite": "integrity",
-      "total_queries": 45,
+      "total_queries": 15,
       "transparency_rate": 1.0
     },
     {
-      "absent_queries": 9,
+      "absent_queries": 3,
       "borderline_abstention_rate": 0.0,
-      "borderline_queries": 6,
+      "borderline_queries": 2,
       "false_abstention_rate": 0.0,
       "pass": true,
       "per_seed": [
@@ -240,30 +212,16 @@
           "borderline_abstained": 0,
           "present_correct": 3,
           "seed": 42
-        },
-        {
-          "absent_correct": 3,
-          "borderline_abstained": 0,
-          "present_correct": 3,
-          "seed": 43
-        },
-        {
-          "absent_correct": 3,
-          "borderline_abstained": 0,
-          "present_correct": 3,
-          "seed": 44
         }
       ],
       "precision": 1.0,
-      "present_queries": 9,
+      "present_queries": 3,
       "recall": 1.0,
       "seeds": [
-        42,
-        43,
-        44
+        42
       ],
       "suite": "abstention"
     }
   ],
-  "timestamp": "2026-07-27T00:35:29.275543+00:00"
+  "timestamp": "2026-07-27T03:16:49.260241+00:00"
 }

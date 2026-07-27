@@ -1,0 +1,60 @@
+name: DSS-EVAL Benchmark
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  eval-fast:
+    name: Fast smoke benchmark
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install benchmark dependencies
+        run: make install
+
+      - name: Run fast deterministic benchmark
+        run: make eval-fast
+
+      - name: Upload benchmark artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-report-fast
+          path: |
+            dss-benchmark-standalone/eval/reports/benchmark_report.json
+            dss-benchmark-standalone/eval/reports/benchmark_summary.md
+
+  eval-full:
+    name: Full benchmark
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install benchmark dependencies
+        run: make install
+
+      - name: Run full deterministic benchmark
+        run: make eval
+
+      - name: Upload benchmark artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-report-full
+          path: |
+            dss-benchmark-standalone/eval/reports/benchmark_report.json
+            dss-benchmark-standalone/eval/reports/benchmark_summary.md

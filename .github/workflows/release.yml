@@ -1,0 +1,42 @@
+name: Publish benchmark release artifacts
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and attach benchmark artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install benchmark dependencies
+        run: make install
+
+      - name: Run deterministic benchmark
+        run: make eval
+
+      - name: Copy artifacts for release
+        run: |
+          mkdir -p release-artifacts
+          cp dss-benchmark-standalone/eval/reports/benchmark_report.json release-artifacts/
+          cp dss-benchmark-standalone/eval/reports/benchmark_summary.md release-artifacts/
+          cp dss-benchmark-standalone/eval/claims_registry.yaml release-artifacts/
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: release-artifacts/*
+          fail_on_unmatched_files: true

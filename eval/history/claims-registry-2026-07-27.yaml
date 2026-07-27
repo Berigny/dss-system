@@ -1,0 +1,121 @@
+unknown_claims_policy: fail_ci
+
+claims:
+  - id: poisoning.silent_displacement_rate
+    suite: poisoning
+    metric: silent_displacement_rate
+    description: "Adversarial entries must never silently displace committed facts."
+    threshold: 0.0
+    operator: "=="
+
+  - id: poisoning.flagged_or_preserved_rate
+    suite: poisoning
+    metric: flagged_or_preserved_rate
+    description: "Conflicts must be flagged or original facts preserved."
+    threshold: 1.0
+    operator: ">="
+
+  - id: poisoning.avg_conflict_detection_latency_s
+    suite: poisoning
+    metric: avg_conflict_detection_latency_s
+    description: "Conflict detection latency is recorded but not threshold-gated."
+    threshold: null
+    operator: "<="
+
+  - id: poisoning.total_conflicts
+    suite: poisoning
+    metric: total_conflicts
+    description: "Total number of injected conflicts exercised."
+    threshold: null
+    operator: ">="
+
+  - id: poisoning.pass
+    suite: poisoning
+    metric: pass
+    description: "Suite-level pass/fail indicator."
+    threshold: null
+    operator: ">="
+
+  - id: integrity.incoherent_retrieval_rate
+    suite: integrity
+    metric: incoherent_retrieval_rate
+    description: "Retrieval should return structurally valid records."
+    threshold: 0.05
+    operator: "<="
+
+  - id: integrity.transparency_rate
+    suite: integrity
+    metric: transparency_rate
+    description: "Retrievals should carry verifiable provenance metadata."
+    threshold: 0.95
+    operator: ">="
+
+  - id: integrity.total_queries
+    suite: integrity
+    metric: total_queries
+    description: "Total number of integrity queries executed."
+    threshold: null
+    operator: ">="
+
+  - id: integrity.pass
+    suite: integrity
+    metric: pass
+    description: "Suite-level pass/fail indicator."
+    threshold: null
+    operator: ">="
+
+  - id: abstention.precision
+    suite: abstention
+    metric: precision
+    description: "Absent queries must be correctly declined."
+    threshold: 0.98
+    operator: ">="
+
+  - id: abstention.recall
+    suite: abstention
+    metric: recall
+    description: "Present queries must be correctly answered."
+    threshold: 0.95
+    operator: ">="
+
+  - id: abstention.false_abstention_rate
+    suite: abstention
+    metric: false_abstention_rate
+    description: "Present queries must not be incorrectly declined."
+    threshold: 0.10
+    operator: "<="
+
+  - id: abstention.absent_queries
+    suite: abstention
+    metric: absent_queries
+    description: "Total number of absent queries executed."
+    threshold: null
+    operator: ">="
+
+  - id: abstention.present_queries
+    suite: abstention
+    metric: present_queries
+    description: "Total number of present queries executed."
+    threshold: null
+    operator: ">="
+
+  - id: abstention.borderline_queries
+    suite: abstention
+    metric: borderline_queries
+    description: "Total number of borderline queries executed."
+    threshold: null
+    operator: ">="
+
+  - id: abstention.borderline_abstention_rate
+    suite: abstention
+    metric: borderline_abstention_rate
+    description: "Share of borderline queries on which the system abstained."
+    threshold: null
+    operator: ">="
+
+  - id: abstention.pass
+    suite: abstention
+    metric: pass
+    description: "Suite-level pass/fail indicator."
+    threshold: null
+    operator: ">="
