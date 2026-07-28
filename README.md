@@ -7,7 +7,7 @@
 <h1 align="center">DSS-EVAL</h1>
 
 <p align="center">
-  <strong>Adversarial benchmarks for memory-augmented LLMs — RAG poisoning resistance, retrieval integrity, and abstention capacity. Deterministic, CI-gated, vendor-agnostic.</strong>
+  <strong>Adversarial benchmarks for memory-augmented LLMs; RAG poisoning resistance, retrieval integrity, and abstention capacity. Deterministic, CI-gated, vendor-agnostic.</strong>
 </p>
 
 <p align="center">
@@ -26,19 +26,19 @@ Memory-augmented language models fail in ways standard retrieval benchmarks don'
 
 ## Highlights
 
-- **RAG Poisoning Resistance** — Adversarial entries injected against committed facts. The gate is absolute: **silent displacement rate must equal 0.0** — every conflict must be flagged or the original fact preserved. No tolerance band.
-- **Retrieval Integrity** — Synthetic distractors engineered for semantic similarity but structural invalidity. Incoherent retrieval must stay **≤ 5%**; **≥ 95%** of retrievals must carry verifiable provenance metadata.
-- **Abstention Capacity** — Absent, borderline, and present queries test whether a system knows when *not* to answer: **precision ≥ 0.98** on absent queries, **recall ≥ 0.95** on present queries, false abstention **≤ 10%**.
+- **RAG Poisoning Resistance**; Adversarial entries injected against committed facts. The gate is absolute: **silent displacement rate must equal 0.0**; every conflict must be flagged or the original fact preserved. No tolerance band.
+- **Retrieval Integrity**; Synthetic distractors engineered for semantic similarity but structural invalidity. Incoherent retrieval must stay **≤ 5%**; **≥ 95%** of retrievals must carry verifiable provenance metadata.
+- **Abstention Capacity**; Absent, borderline, and present queries test whether a system knows when *not* to answer: **precision ≥ 0.98** on absent queries, **recall ≥ 0.95** on present queries, false abstention **≤ 10%**.
 
-Every threshold above is machine-enforced. Claims live in `dss-benchmark-standalone/eval/claims_registry.yaml`, and CI runs with `unknown_claims_policy: fail_ci` — **a claim that isn't registered fails the build**. Self-reported numbers can't drift from measured reality.
+Every threshold above is machine-enforced. Claims live in `dss-benchmark-standalone/eval/claims_registry.yaml`, and CI runs with `unknown_claims_policy: fail_ci`; **a claim that isn't registered fails the build**. Self-reported numbers can't drift from measured reality.
 
 ## Paper
 
-The benchmark design, baseline results, and claims-registry status are described in the companion paper: *DSS-EVAL: A Reproducible Benchmark Suite for RAG Poisoning, Retrieval Integrity, and Abstention Capacity* (Berigny, July 2026). The paper reports baseline measurements from the DSS ledger-oriented memory system; this repository contains the harness, corpora, and claims registry needed to reproduce every table.
+The benchmark design, baseline results, and claims-registry status are described in the companion paper: *[DSS-EVAL: A Reproducible Benchmark Suite for RAG Poisoning, Retrieval Integrity, and Abstention Capacity](https://www.researchgate.net/publication/410844170_DSS-EVAL_RAG_Poisoning_Retrieval_Integrity_and_Abstention_Capacity)* (Berigny, July 2026). The paper reports baseline measurements from the DSS ledger-oriented memory system; this repository contains the harness, corpora, and claims registry needed to reproduce every table. 
 
 ## Results
 
-<!-- FAISS-adapter values from dss-benchmark-standalone/eval/reports/benchmark_report.json (smoke run 2026-07-27, seed 42, mocked embeddings) — verified reproducible via `python harness/runner.py --adapter faiss --seeds 42 --mock-embeddings`. Structured (DSS) adapter column is N/A until the DSS adapter run is published (that adapter lives in the private dss-codebase repo). Auto-generate this table from benchmark_report.json in CI so it cannot drift from measured results. -->
+<!-- FAISS-adapter values from dss-benchmark-standalone/eval/reports/benchmark_report.json (smoke run 2026-07-27, seed 42, mocked embeddings); verified reproducible via `python harness/runner.py --adapter faiss --seeds 42 --mock-embeddings`. Structured (DSS) adapter column is N/A until the DSS adapter run is published (that adapter lives in the private dss-codebase repo). Auto-generate this table from benchmark_report.json in CI so it cannot drift from measured results. -->
 
 | Suite | Metric | Gate | DSS QP | FAISS Ref | Chroma Lex | Qdrant Lex | ST Lex | Langchain Stub | Llama Index Stub |
 |---|---|---|---|---|---|---|---|---|---|
@@ -54,9 +54,9 @@ The benchmark design, baseline results, and claims-registry status are described
 
 ---
 
-Row scope: poisoning metrics over 3 conflict cases; integrity metrics over 15 queries; abstention metrics over 3 absent, 2 borderline, and 3 present queries. Single-seed smoke run — treat as a reproducibility check, not a cross-system league table. At smoke scale the FAISS reference adapter passes all gates; the differentiating full-scale results (108 poisoning cases, 300 abstention queries, real QA splits) are reported in the companion paper.
+Row scope: poisoning metrics over 3 conflict cases; integrity metrics over 15 queries; abstention metrics over 3 absent, 2 borderline, and 3 present queries. Single-seed smoke run; treat as a reproducibility check, not a cross-system league table. At smoke scale the FAISS reference adapter passes all gates; the differentiating full-scale results (108 poisoning cases, 300 abstention queries, real QA splits) are reported in the companion paper.
 
-<!-- RESULTS CHART: assets/results-chart.png — generated from benchmark_report.json values (smoke run); regenerate on each CI run -->
+<!-- RESULTS CHART: assets/results-chart.png; generated from benchmark_report.json values (smoke run); regenerate on each CI run -->
 <p align="center">
   <img src="assets/results-chart.png" alt="Measured values vs registered gates, FAISS reference adapter" width="800">
 </p>
@@ -90,14 +90,14 @@ make install
 # Full deterministic benchmark run (mocked small embeddings, CPU-friendly)
 make eval
 
-# Smoke pass — completes in < 60 seconds
+# Smoke pass; completes in < 60 seconds
 make eval-fast
 
 ```
 
 ## Plug In Your Own Retriever
 
-The harness is vendor-agnostic. Implement the thin `RetrievalAdapter` interface — any retrieval system can be evaluated in ~10 lines:
+The harness is vendor-agnostic. Implement the thin `RetrievalAdapter` interface; any retrieval system can be evaluated in ~10 lines:
 
 ```python
 from adapters.base import RetrievalAdapter, RetrievalResult
@@ -120,30 +120,30 @@ python harness/runner.py --suites poisoning abstention   # subset runs
 
 ## Methodology
 
-* **Determinism** — Fixed seeds and mocked small embeddings for CPU-friendly reproducibility; identical runs produce identical reports.
-* **Claims registry** — Every public claim is bound to a metric, threshold, and comparison operator in `dss-benchmark-standalone/eval/claims_registry.yaml` (17 registered claims). CI enforces `unknown_claims_policy: fail_ci`: any claim added to documentation without a registered metric fails the build. The legacy 26-claim registry from the v0.5 DSS evaluation is retained at `eval/legacy_v05_claims.yaml` (23 supported, 1 pending, 1 failing, 1 re-framed) — deprecated name, do not register new claims there; see the DSS-EVAL paper for the full registry status.
-* **Poisoning suite** (`suites/poisoning.py`) — Compatible/incompatible coordinate conflicts and same-identifier overwrites; measures silent displacement and flagged-or-preserved rates, plus conflict-detection latency (recorded, not gated).
-* **Integrity suite** (`suites/integrity.py`) — Structural vs. semantic coherence on synthetic distractors and optional real QA splits; measures incoherent retrieval and provenance transparency.
-* **Abstention suite** (`suites/abstention.py`) — Absent, borderline, and present queries; measures precision, recall, false abstention rate, and borderline abstention behaviour (recorded, not gated).
+* **Determinism**; Fixed seeds and mocked small embeddings for CPU-friendly reproducibility; identical runs produce identical reports.
+* **Claims registry**; Every public claim is bound to a metric, threshold, and comparison operator in `dss-benchmark-standalone/eval/claims_registry.yaml` (17 registered claims). CI enforces `unknown_claims_policy: fail_ci`: any claim added to documentation without a registered metric fails the build. The legacy 26-claim registry from the v0.5 DSS evaluation is retained at `eval/legacy_v05_claims.yaml` (23 supported, 1 pending, 1 failing, 1 re-framed); deprecated name, do not register new claims there; see the DSS-EVAL paper for the full registry status.
+* **Poisoning suite** (`suites/poisoning.py`); Compatible/incompatible coordinate conflicts and same-identifier overwrites; measures silent displacement and flagged-or-preserved rates, plus conflict-detection latency (recorded, not gated).
+* **Integrity suite** (`suites/integrity.py`); Structural vs. semantic coherence on synthetic distractors and optional real QA splits; measures incoherent retrieval and provenance transparency.
+* **Abstention suite** (`suites/abstention.py`); Absent, borderline, and present queries; measures precision, recall, false abstention rate, and borderline abstention behaviour (recorded, not gated).
 
 ## Limitations
 
-These benchmarks test structural integrity and abstention behaviour — **not** general retrieval quality on unstructured corpora. A passing score means a system resists the three failure modes above; it says nothing about topical relevance or recall on open-domain search. See `dss-benchmark-standalone/README.md` for the full disclosure.
+These benchmarks test structural integrity and abstention behaviour; **not** general retrieval quality on unstructured corpora. A passing score means a system resists the three failure modes above; it says nothing about topical relevance or recall on open-domain search. See `dss-benchmark-standalone/README.md` for the full disclosure.
 
 ## Repository Layout
 
-* `dss-benchmark-standalone/` — the standalone benchmark package (this is the product)
-* `adapters/` — vendor-agnostic adapter interface and reference implementations
-* `suites/` — poisoning, integrity, and abstention suites
-* `corpora/` — synthetic adversarial distractors and real QA splits
-* `harness/` — deterministic runner, claims registry loader, and reporter
-* `eval/claims_registry.yaml` — machine-readable claim registry
-* `eval/reports/` — run artifacts (JSON + Markdown)
+* `dss-benchmark-standalone/`; the standalone benchmark package (this is the product)
+* `adapters/`; vendor-agnostic adapter interface and reference implementations
+* `suites/`; poisoning, integrity, and abstention suites
+* `corpora/`; synthetic adversarial distractors and real QA splits
+* `harness/`; deterministic runner, claims registry loader, and reporter
+* `eval/claims_registry.yaml`; machine-readable claim registry
+* `eval/reports/`; run artifacts (JSON + Markdown)
 
 
-* `eval/` — legacy DSS-EVAL reports and milestone documents (retained for history)
+* `eval/`; legacy DSS-EVAL reports and milestone documents (retained for history)
 
-> This repository contains only the benchmark harness, evaluation corpora, claims registry, and reproducibility artifacts — no application runtime code. The private application (runtime, surfaces, control plane, middleware) lives in `dss-codebase`.
+> This repository contains only the benchmark harness, evaluation corpora, claims registry, and reproducibility artifacts; no application runtime code. The private application (runtime, surfaces, control plane, middleware) lives in `dss-codebase`.
 
 ## Citation
 
@@ -151,4 +151,4 @@ If you use DSS-EVAL in research or evaluation work, please cite this repository 
 
 ## License
 
-DSS-EVAL is available under a custom non-commercial license — see [LICENSE](https://www.google.com/search?q=LICENSE). Free for research and non-commercial use.
+DSS-EVAL is available under a custom non-commercial license; see [LICENSE](https://www.google.com/search?q=LICENSE). Free for research and non-commercial use.
