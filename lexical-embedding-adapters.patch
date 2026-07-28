@@ -1,0 +1,487 @@
+diff --git a/dss-benchmark-standalone/adapters/chroma_adapter.py b/dss-benchmark-standalone/adapters/chroma_adapter.py
+index bc0da55..a56137c 100644
+--- a/dss-benchmark-standalone/adapters/chroma_adapter.py
++++ b/dss-benchmark-standalone/adapters/chroma_adapter.py
+@@ -4,6 +4,7 @@ from __future__ import annotations
+ from typing import Any, List
+ 
+ from adapters.base import RetrievalAdapter, RetrievalResult
++from adapters.lexical_embedding import LexicalEmbeddingFunction
+ from config.loader import get_adapter_config
+ 
+ try:
+@@ -28,6 +29,7 @@ class ChromaAdapter(RetrievalAdapter):
+         persist_dir: str | None = None,
+         threshold: float | None = None,
+         embedding_model: str | None = None,
++        embedding: str = "neural",
+         config: dict[str, Any] | None = None,
+     ):
+         cfg = config or get_adapter_config("chroma")
+@@ -36,6 +38,10 @@ class ChromaAdapter(RetrievalAdapter):
+         self.embedding_model = embedding_model or cfg.get(
+             "embedding_model", "all-MiniLM-L6-v2"
+         )
++        # Opt-in deterministic offline embedding ("lexical"); default "neural"
++        # keeps the historical sentence-transformers behavior unchanged.
++        self.embedding = embedding
++        self._lexical_ef = LexicalEmbeddingFunction() if embedding == "lexical" else None
+         self._client: Any = None
+         self._collection: Any = None
+ 
+@@ -50,17 +56,39 @@ class ChromaAdapter(RetrievalAdapter):
+             return
+ 
+         self._client = chromadb.PersistentClient(path=self.persist_dir)
+-        ef = SentenceTransformerEmbeddingFunction(model_name=self.embedding_model)
+-        self._collection = self._client.get_or_create_collection(
+-            name="dss_eval", embedding_function=ef
+-        )
++        if self._lexical_ef is not None:
++            ef: Any = self._lexical_ef
++            # Deterministic re-indexing: drop any persisted collection so
++            # repeated runs/seeds never collide on duplicate ids.
++            try:
++                self._client.delete_collection(name="dss_eval")
++            except Exception:
++                pass
++            self._collection = self._client.create_collection(
++                name="dss_eval", embedding_function=ef
++            )
++        else:
++            ef = SentenceTransformerEmbeddingFunction(model_name=self.embedding_model)
++            self._collection = self._client.get_or_create_collection(
++                name="dss_eval", embedding_function=ef
++            )
+ 
+         documents = corpus.get("documents", []) if isinstance(corpus, dict) else []
+         if not documents:
+             return
+ 
++        ids = [doc.get("id", str(i)) for i, doc in enumerate(documents)]
++        if self._lexical_ef is not None and len(set(ids)) != len(ids):
++            # Corpora may contain deliberate duplicate identifiers (poisoning
++            # suite).  Chroma enforces unique ids, so keep the LAST occurrence
++            # per id (upsert semantics); the suite measures the resulting
++            # displacement behavior of the store.
++            latest = {doc.get("id", str(i)): doc for i, doc in enumerate(documents)}
++            documents = list(latest.values())
++            ids = [doc.get("id", str(i)) for i, doc in enumerate(documents)]
++
+         self._collection.add(
+-            ids=[doc.get("id", str(i)) for i, doc in enumerate(documents)],
++            ids=ids,
+             documents=[doc["text"] for doc in documents],
+             metadatas=[doc.get("metadata", {}) for doc in documents],
+         )
+diff --git a/dss-benchmark-standalone/adapters/faiss_adapter.py b/dss-benchmark-standalone/adapters/faiss_adapter.py
+index f21d475..cd259dc 100644
+--- a/dss-benchmark-standalone/adapters/faiss_adapter.py
++++ b/dss-benchmark-standalone/adapters/faiss_adapter.py
+@@ -1,9 +1,13 @@
+ """Minimal dense-retrieval adapter backed by FAISS or a CPU fallback."""
+-import math
+-import re
+ from typing import Any, Dict, List, Tuple
+ 
+ from adapters.base import RetrievalAdapter, RetrievalResult
++from adapters.lexical_embedding import (
++    _build_vocab,
++    _cosine,
++    _normalize,
++    _vectorize,
++)
+ 
+ 
+ def _has_faiss() -> bool:
+@@ -14,55 +18,6 @@ def _has_faiss() -> bool:
+         return False
+ 
+ 
+-_STOPWORDS = frozenset({
+-    "the", "a", "an", "is", "are", "was", "were", "be", "been", "being",
+-    "have", "has", "had", "do", "does", "did", "will", "would", "could",
+-    "should", "may", "might", "must", "shall", "can", "need", "dare",
+-    "ought", "used", "to", "of", "in", "for", "on", "with", "at", "by",
+-    "from", "as", "into", "through", "during", "before", "after", "above",
+-    "below", "between", "under", "again", "further", "then", "once", "here",
+-    "there", "when", "where", "why", "how", "all", "each", "few", "more",
+-    "most", "other", "some", "such", "no", "nor", "not", "only", "own",
+-    "same", "so", "than", "too", "very", "just", "and", "but", "if", "or",
+-    "because", "until", "while", "what", "which", "who", "whom", "this",
+-    "that", "these", "those", "am", "it", "its", "their", "them", "they",
+-    "we", "you", "he", "she", "his", "her", "our", "us", "me", "my",
+-})
+-
+-
+-def _tokenize(text: str) -> List[str]:
+-    tokens = re.findall(r"[a-zA-Z0-9]+", text.lower())
+-    return [t for t in tokens if t not in _STOPWORDS]
+-
+-
+-def _build_vocab(texts: List[str]) -> Dict[str, int]:
+-    vocab: Dict[str, int] = {}
+-    for text in texts:
+-        for token in _tokenize(text):
+-            if token not in vocab:
+-                vocab[token] = len(vocab)
+-    return vocab
+-
+-
+-def _vectorize(text: str, vocab: Dict[str, int], dim: int) -> List[float]:
+-    vec = [0.0] * dim
+-    for token in _tokenize(text):
+-        idx = vocab.get(token)
+-        if idx is not None:
+-            vec[idx] += 1.0
+-    norm = math.sqrt(sum(v * v for v in vec)) or 1.0
+-    return [v / norm for v in vec]
+-
+-
+-def _normalize(vec: List[float]) -> List[float]:
+-    norm = math.sqrt(sum(v * v for v in vec)) or 1.0
+-    return [v / norm for v in vec]
+-
+-
+-def _cosine(a: List[float], b: List[float]) -> float:
+-    return sum(x * y for x, y in zip(a, b))
+-
+-
+ class FaissAdapter(RetrievalAdapter):
+     """Dense-retrieval adapter using FAISS when available, else brute force.
+ 
+diff --git a/dss-benchmark-standalone/adapters/lexical_embedding.py b/dss-benchmark-standalone/adapters/lexical_embedding.py
+new file mode 100644
+index 0000000..4f9665a
+--- /dev/null
++++ b/dss-benchmark-standalone/adapters/lexical_embedding.py
+@@ -0,0 +1,107 @@
++"""Deterministic offline lexical embeddings shared by all adapters.
++
++This module extracts the exact bag-of-words embedding approach used by
++``FaissAdapter`` (tokenize, build a corpus vocabulary, L2-normalized term
++frequency vectors) so that every adapter can run with the SAME deterministic
++embedding when the opt-in lexical mode is selected (``--embedding lexical``
++on ``harness/runner.py``).  It requires no network access and no third-party
++dependencies.
++
++The lexical mode measures structural / retrieval-integrity behavior of each
++vector store; it is NOT a measure of neural embedding quality.
++"""
++import math
++import re
++from typing import Any, Dict, List
++
++
++_STOPWORDS = frozenset({
++    "the", "a", "an", "is", "are", "was", "were", "be", "been", "being",
++    "have", "has", "had", "do", "does", "did", "will", "would", "could",
++    "should", "may", "might", "must", "shall", "can", "need", "dare",
++    "ought", "used", "to", "of", "in", "for", "on", "with", "at", "by",
++    "from", "as", "into", "through", "during", "before", "after", "above",
++    "below", "between", "under", "again", "further", "then", "once", "here",
++    "there", "when", "where", "why", "how", "all", "each", "few", "more",
++    "most", "other", "some", "such", "no", "nor", "not", "only", "own",
++    "same", "so", "than", "too", "very", "just", "and", "but", "if", "or",
++    "because", "until", "while", "what", "which", "who", "whom", "this",
++    "that", "these", "those", "am", "it", "its", "their", "them", "they",
++    "we", "you", "he", "she", "his", "her", "our", "us", "me", "my",
++})
++
++
++def _tokenize(text: str) -> List[str]:
++    tokens = re.findall(r"[a-zA-Z0-9]+", text.lower())
++    return [t for t in tokens if t not in _STOPWORDS]
++
++
++def _build_vocab(texts: List[str]) -> Dict[str, int]:
++    vocab: Dict[str, int] = {}
++    for text in texts:
++        for token in _tokenize(text):
++            if token not in vocab:
++                vocab[token] = len(vocab)
++    return vocab
++
++
++def _vectorize(text: str, vocab: Dict[str, int], dim: int) -> List[float]:
++    vec = [0.0] * dim
++    for token in _tokenize(text):
++        idx = vocab.get(token)
++        if idx is not None:
++            vec[idx] += 1.0
++    norm = math.sqrt(sum(v * v for v in vec)) or 1.0
++    return [v / norm for v in vec]
++
++
++def _normalize(vec: List[float]) -> List[float]:
++    norm = math.sqrt(sum(v * v for v in vec)) or 1.0
++    return [v / norm for v in vec]
++
++
++def _cosine(a: List[float], b: List[float]) -> float:
++    return sum(x * y for x, y in zip(a, b))
++
++
++class LexicalEmbeddingFunction:
++    """Callable embedding function backed by the shared lexical vectors.
++
++    The vocabulary is built deterministically from the FIRST batch of texts
++    encoded (the corpus documents) and frozen thereafter, so queries are
++    embedded in the same space — mirroring how ``FaissAdapter`` builds its
++    vocabulary from the corpus before embedding the query.
++    """
++
++    def __init__(self) -> None:
++        self._vocab: Dict[str, int] | None = None
++
++    @property
++    def dim(self) -> int | None:
++        return None if self._vocab is None else max(len(self._vocab), 1)
++
++    def encode(self, texts: List[str]) -> List[List[float]]:
++        if self._vocab is None:
++            self._vocab = _build_vocab(texts)
++        dim = max(len(self._vocab), 1)
++        return [_vectorize(text, self._vocab, dim) for text in texts]
++
++    # Chroma embedding-function protocol.
++    def __call__(self, input: List[str]) -> List[List[float]]:  # noqa: A002
++        return self.encode(list(input))
++
++    def embed_documents(self, input: List[str]) -> List[List[float]]:  # noqa: A002
++        return self.encode(list(input))
++
++    def embed_query(self, input: List[str]) -> List[List[float]]:  # noqa: A002
++        return self.encode(list(input))
++
++    def name(self) -> str:
++        return "dss-lexical"
++
++    def get_config(self) -> Dict[str, Any]:
++        return {}
++
++    @staticmethod
++    def build_from_config(config: Dict[str, Any]) -> "LexicalEmbeddingFunction":
++        return LexicalEmbeddingFunction()
+diff --git a/dss-benchmark-standalone/adapters/qdrant_adapter.py b/dss-benchmark-standalone/adapters/qdrant_adapter.py
+index 1ea4854..ccbc058 100644
+--- a/dss-benchmark-standalone/adapters/qdrant_adapter.py
++++ b/dss-benchmark-standalone/adapters/qdrant_adapter.py
+@@ -4,6 +4,7 @@ from __future__ import annotations
+ from typing import Any, List
+ 
+ from adapters.base import RetrievalAdapter, RetrievalResult
++from adapters.lexical_embedding import LexicalEmbeddingFunction
+ from config.loader import get_adapter_config
+ 
+ try:
+@@ -37,6 +38,7 @@ class QdrantAdapter(RetrievalAdapter):
+         vector_size: int | None = None,
+         threshold: float | None = None,
+         embedding_model: str | None = None,
++        embedding: str = "neural",
+         config: dict[str, Any] | None = None,
+     ):
+         cfg = config or get_adapter_config("qdrant")
+@@ -47,6 +49,10 @@ class QdrantAdapter(RetrievalAdapter):
+         self.embedding_model = embedding_model or cfg.get(
+             "embedding_model", "all-MiniLM-L6-v2"
+         )
++        # Opt-in deterministic offline embedding ("lexical"); default "neural"
++        # keeps the historical sentence-transformers behavior unchanged.
++        self.embedding = embedding
++        self._lexical_ef = LexicalEmbeddingFunction() if embedding == "lexical" else None
+         self._client: Any = None
+         self._docs: List[dict] = []
+ 
+@@ -55,35 +61,47 @@ class QdrantAdapter(RetrievalAdapter):
+                 "QdrantAdapter requires 'qdrant-client'. "
+                 "Install with: pip install qdrant-client sentence-transformers"
+             )
+-        if not ST_AVAILABLE:
++        if self._lexical_ef is None and not ST_AVAILABLE:
+             raise RuntimeError(
+                 "QdrantAdapter requires 'sentence-transformers'. "
+                 "Install with: pip install sentence-transformers"
+             )
+ 
+-    def _encoder(self) -> Any:
+-        return SentenceTransformer(self.embedding_model)
++    def _encode(self, texts: List[str]) -> List[List[float]]:
++        if self._lexical_ef is not None:
++            return self._lexical_ef.encode(texts)
++        model = SentenceTransformer(self.embedding_model)
++        return model.encode(texts, show_progress_bar=False).tolist()
+ 
+     def _ensure_indexed(self, corpus: Any) -> None:
+         if self._client is not None:
+             return
+ 
++        documents = corpus.get("documents", []) if isinstance(corpus, dict) else []
++
++        if self._lexical_ef is not None:
++            # Encode first so the lexical vocabulary determines the vector size.
++            embeddings = self._encode([d["text"] for d in documents]) if documents else []
++            vector_size = self._lexical_ef.dim or self.vector_size
++        else:
++            embeddings = []
++            vector_size = self.vector_size
++
+         self._client = QdrantClient(self.location)
+         self._client.recreate_collection(
+             collection_name=self.collection_name,
+-            vectors_config=VectorParams(size=self.vector_size, distance=Distance.COSINE),
++            vectors_config=VectorParams(size=vector_size, distance=Distance.COSINE),
+         )
+ 
+-        documents = corpus.get("documents", []) if isinstance(corpus, dict) else []
+         if not documents:
+             return
+ 
+-        model = self._encoder()
+-        embeddings = model.encode([d["text"] for d in documents], show_progress_bar=False)
++        if self._lexical_ef is None:
++            embeddings = self._encode([d["text"] for d in documents])
+         points = [
+             PointStruct(
+                 id=i,
+-                vector=embeddings[i].tolist(),
++                vector=list(embeddings[i]),
+                 payload={"text": doc["text"], **doc.get("metadata", {})},
+             )
+             for i, doc in enumerate(documents)
+@@ -96,13 +114,20 @@ class QdrantAdapter(RetrievalAdapter):
+         if self._client is None:
+             return []
+ 
+-        model = self._encoder()
+-        vector = model.encode([query_text], show_progress_bar=False)[0].tolist()
+-        result = self._client.search(
+-            collection_name=self.collection_name,
+-            query_vector=vector,
+-            limit=1,
+-        )
++        vector = self._encode([query_text])[0]
++        if hasattr(self._client, "search"):
++            result = self._client.search(
++                collection_name=self.collection_name,
++                query_vector=vector,
++                limit=1,
++            )
++        else:
++            # qdrant-client >= 1.10 removed Client.search in favour of query_points.
++            result = self._client.query_points(
++                collection_name=self.collection_name,
++                query=vector,
++                limit=1,
++            ).points
+         if not result:
+             return []
+ 
+diff --git a/dss-benchmark-standalone/adapters/sentence_transformers_adapter.py b/dss-benchmark-standalone/adapters/sentence_transformers_adapter.py
+index 97b9940..0508636 100644
+--- a/dss-benchmark-standalone/adapters/sentence_transformers_adapter.py
++++ b/dss-benchmark-standalone/adapters/sentence_transformers_adapter.py
+@@ -9,6 +9,7 @@ from __future__ import annotations
+ from typing import Any, List
+ 
+ from adapters.base import RetrievalAdapter, RetrievalResult
++from adapters.lexical_embedding import LexicalEmbeddingFunction
+ from config.loader import get_adapter_config
+ 
+ try:
+@@ -33,6 +34,17 @@ except Exception:
+     NUMPY_AVAILABLE = False
+ 
+ 
++class _LexicalEncoder:
++    """NumPy-returning wrapper so the lexical embedding matches the
++    ``SentenceTransformer.encode`` API used by this adapter."""
++
++    def __init__(self, ef: LexicalEmbeddingFunction):
++        self._ef = ef
++
++    def encode(self, texts, show_progress_bar: bool = False):
++        return np.array(self._ef.encode(list(texts)), dtype="float32")
++
++
+ class SentenceTransformersAdapter(RetrievalAdapter):
+     """Self-indexing adapter powered by sentence-transformers embeddings."""
+ 
+@@ -40,17 +52,22 @@ class SentenceTransformersAdapter(RetrievalAdapter):
+         self,
+         model_name: str | None = None,
+         threshold: float | None = None,
++        embedding: str = "neural",
+         config: dict[str, Any] | None = None,
+     ):
+         cfg = config or get_adapter_config("sentence_transformers")
+         self.model_name = model_name or cfg.get("model_name", "all-MiniLM-L6-v2")
+         self.threshold = threshold if threshold is not None else cfg.get("threshold", 0.25)
++        # Opt-in deterministic offline embedding ("lexical"); default "neural"
++        # keeps the historical sentence-transformers behavior unchanged.
++        self.embedding = embedding
++        self._lexical_ef = LexicalEmbeddingFunction() if embedding == "lexical" else None
+         self._model: Any = None
+         self._faiss_index: Any = None
+         self._doc_embeddings: Any = None
+         self._docs: List[dict] = []
+ 
+-        if not ST_AVAILABLE:
++        if self._lexical_ef is None and not ST_AVAILABLE:
+             raise RuntimeError(
+                 "SentenceTransformersAdapter requires 'sentence-transformers'. "
+                 "Install with: pip install sentence-transformers"
+@@ -62,6 +79,8 @@ class SentenceTransformersAdapter(RetrievalAdapter):
+             )
+ 
+     def _encoder(self) -> Any:
++        if self._lexical_ef is not None:
++            return _LexicalEncoder(self._lexical_ef)
+         if self._model is None:
+             self._model = SentenceTransformer(self.model_name)
+         return self._model
+diff --git a/dss-benchmark-standalone/harness/runner.py b/dss-benchmark-standalone/harness/runner.py
+index 169a82f..afad94b 100644
+--- a/dss-benchmark-standalone/harness/runner.py
++++ b/dss-benchmark-standalone/harness/runner.py
+@@ -74,6 +74,7 @@ def run_benchmarks(
+     seeds: List[int] = None,
+     suites: List[str] = None,
+     mock_embeddings: bool = False,
++    embedding: str = "neural",
+ ) -> Dict[str, Any]:
+     """Run selected suites and return the assembled report."""
+     adapter_cls = ADAPTER_MAP.get(adapter_name)
+@@ -82,6 +83,8 @@ def run_benchmarks(
+ 
+     if adapter_name == "faiss":
+         adapter: RetrievalAdapter = adapter_cls(mock_embeddings=mock_embeddings)
++    elif adapter_name in ("chroma", "qdrant", "sentence_transformers"):
++        adapter: RetrievalAdapter = adapter_cls(embedding=embedding)
+     else:
+         adapter: RetrievalAdapter = adapter_cls()
+ 
+@@ -110,6 +113,14 @@ def main(argv: List[str] = None) -> int:
+     parser.add_argument("--suites", nargs="+", choices=list(SUITE_MAP.keys()),
+                         default=list(SUITE_MAP.keys()))
+     parser.add_argument("--mock-embeddings", action="store_true")
++    parser.add_argument(
++        "--embedding",
++        choices=["neural", "lexical"],
++        default="neural",
++        help="Embedding backend for chroma/qdrant/sentence_transformers adapters. "
++        "'neural' (default) uses the configured sentence-transformers model; "
++        "'lexical' opts into the shared deterministic offline lexical embedding.",
++    )
+     parser.add_argument("--report-dir", type=Path, default=None)
+     args = parser.parse_args(argv)
+ 
+@@ -118,6 +129,7 @@ def main(argv: List[str] = None) -> int:
+         seeds=args.seeds,
+         suites=args.suites,
+         mock_embeddings=args.mock_embeddings,
++        embedding=args.embedding,
+     )
+ 
+     report_dir = args.report_dir or (ROOT / "eval" / "reports")
