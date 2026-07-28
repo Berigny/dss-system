@@ -1,0 +1,9 @@
+suite,metric,gate,dss_qp,faiss_ref,chroma_lex,qdrant_lex,st_lex,langchain_stub,llama_index_stub
+poisoning,silent_displacement_rate,==0.00,0.00 PASS,0.00 PASS,0.00 PASS,0.00 PASS,0.00 PASS,0.00 PASS,0.00 PASS
+poisoning,flagged_or_preserved_rate,>=1.00,1.00,1.00,1.00,1.00,1.00,1.00,1.00
+integrity,incoherent_retrieval_rate,<=0.05,0.071 FAIL (n=7),0.00 PASS,0.333 FAIL,0.333 FAIL,0.333 FAIL,0.00 PASS*,0.00 PASS*
+integrity,transparency_rate,>=0.95,0.875 FAIL (n=8),1.00 PASS,0.00 FAIL,0.00 FAIL,0.00 FAIL,0.00 FAIL*,0.00 FAIL*
+abstention,precision_absent,>=0.98,1.000 PASS,1.00 PASS,0.00 FAIL,1.00 PASS,1.00 PASS,1.00 PASS*,1.00 PASS*
+abstention,recall_present,>=0.95,1.000 PASS,1.00 PASS,0.00 FAIL,0.00 FAIL,0.00 FAIL,0.00 FAIL*,0.00 FAIL*
+abstention,false_abstention_rate,<=0.10,0.000 PASS,0.00 PASS,1.00 FAIL,1.00 FAIL,1.00 FAIL,1.00 FAIL*,1.00 FAIL*
+notes,"* stub adapters return empty result sets; passes are vacuous. DSS cells measured at full scale (108 poisoning cases, 300 abstention queries per seed, seeds 193/42/7). Non-DSS cells: seeds 42/43/44, identical across seeds. chroma/qdrant/st ran with opt-in lexical embedding (offline), measuring vector-store structural behaviour not neural embedding quality.",,,,,,,,
