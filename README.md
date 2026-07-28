@@ -1,3 +1,4 @@
+
 <!-- HERO BANNER: assets/banner.png (1280×640, doubles as GitHub social preview) -->
 <p align="center">
   <img src="assets/banner.png" alt="DSS-EVAL" width="800">
@@ -39,9 +40,8 @@ The benchmark design, baseline results, and claims-registry status are described
 
 <!-- FAISS-adapter values from dss-benchmark-standalone/eval/reports/benchmark_report.json (smoke run 2026-07-27, seed 42, mocked embeddings) — verified reproducible via `python harness/runner.py --adapter faiss --seeds 42 --mock-embeddings`. Structured (DSS) adapter column is N/A until the DSS adapter run is published (that adapter lives in the private dss-codebase repo). Auto-generate this table from benchmark_report.json in CI so it cannot drift from measured results. -->
 
-
 | Suite | Metric | Gate | DSS QP | FAISS Ref | Chroma Lex | Qdrant Lex | ST Lex | Langchain Stub | Llama Index Stub |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|---|---|---|---|---|---|---|---|---|---|
 | poisoning | silent_displacement_rate | ==0.00 | 0.00 PASS | 0.00 PASS | 0.00 PASS | 0.00 PASS | 0.00 PASS | 0.00 PASS | 0.00 PASS |
 | poisoning | flagged_or_preserved_rate | >=1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
 | integrity | incoherent_retrieval_rate | <=0.05 | 0.071 FAIL (n=7) | 0.00 PASS | 0.333 FAIL | 0.333 FAIL | 0.333 FAIL | 0.00 PASS* | 0.00 PASS* |
@@ -50,7 +50,7 @@ The benchmark design, baseline results, and claims-registry status are described
 | abstention | recall_present | >=0.95 | 1.000 PASS | 1.00 PASS | 0.00 FAIL | 0.00 FAIL | 0.00 FAIL | 0.00 FAIL* | 0.00 FAIL* |
 | abstention | false_abstention_rate | <=0.10 | 0.000 PASS | 0.00 PASS | 1.00 FAIL | 1.00 FAIL | 1.00 FAIL | 1.00 FAIL* | 1.00 FAIL* |
 
- <sub>* stub adapters return empty result sets; passes are vacuous. DSS cells measured at full scale (108 poisoning cases, 300 abstention queries per seed, seeds 193/42/7). Non-DSS cells: seeds 42/43/44, identical across seeds. chroma/qdrant/st ran with opt-in lexical embedding (offline), measuring vector-store structural behaviour not neural embedding quality.</sub>.
+ <sub>* stub adapters return empty result sets; passes are vacuous. DSS cells measured at full scale (108 poisoning cases, 300 abstention queries per seed, seeds 193/42/7). Non-DSS cells: seeds 42/43/44, identical across seeds. chroma/qdrant/st ran with opt-in lexical embedding (offline), measuring vector-store structural behaviour not neural embedding quality.</sub>
 
 ---
 
@@ -70,11 +70,15 @@ Full artifacts: `dss-benchmark-standalone/eval/reports/`
   <img src="assets/pipeline.png" alt="Corpora → Suites → Adapter → Claims Registry → CI gate → Reports" width="800">
 </p>
 
+
 ```
+
 corpora/  →  suites/   →  RetrievalAdapter  →  claims_registry.yaml  →  CI gate  →  reports/
 (adversarial  (poisoning,   (your retrieval     (metric + threshold      (fail_ci    (JSON +
- distractors   integrity,    system, ~10         per public claim)       policy)      Markdown)
- + real QA)    abstention)   lines to plug in)
+distractors   integrity,    system, ~10         per public claim)       policy)      Markdown)
+
+* real QA)    abstention)   lines to plug in)
+
 ```
 
 ## Quick Start
@@ -88,6 +92,7 @@ make eval
 
 # Smoke pass — completes in < 60 seconds
 make eval-fast
+
 ```
 
 ## Plug In Your Own Retriever
@@ -102,6 +107,7 @@ class MyAdapter(RetrievalAdapter):
     def query(self, corpus: Any, query_text: str) -> List[RetrievalResult]:
         ...
         return [RetrievalResult(text=..., score=..., identifier=..., metadata={...})]
+
 ```
 
 Register it in `harness/runner.py` under `ADAPTER_MAP`, then:
@@ -109,15 +115,16 @@ Register it in `harness/runner.py` under `ADAPTER_MAP`, then:
 ```bash
 python harness/runner.py --adapter my_adapter
 python harness/runner.py --suites poisoning abstention   # subset runs
+
 ```
 
 ## Methodology
 
-- **Determinism** — Fixed seeds and mocked small embeddings for CPU-friendly reproducibility; identical runs produce identical reports.
-- **Claims registry** — Every public claim is bound to a metric, threshold, and comparison operator in `dss-benchmark-standalone/eval/claims_registry.yaml` (17 registered claims). CI enforces `unknown_claims_policy: fail_ci`: any claim added to documentation without a registered metric fails the build. The legacy 26-claim registry from the v0.5 DSS evaluation is retained at `eval/legacy_v05_claims.yaml` (23 supported, 1 pending, 1 failing, 1 re-framed) — deprecated name, do not register new claims there; see the DSS-EVAL paper for the full registry status.
-- **Poisoning suite** (`suites/poisoning.py`) — Compatible/incompatible coordinate conflicts and same-identifier overwrites; measures silent displacement and flagged-or-preserved rates, plus conflict-detection latency (recorded, not gated).
-- **Integrity suite** (`suites/integrity.py`) — Structural vs. semantic coherence on synthetic distractors and optional real QA splits; measures incoherent retrieval and provenance transparency.
-- **Abstention suite** (`suites/abstention.py`) — Absent, borderline, and present queries; measures precision, recall, false abstention rate, and borderline abstention behaviour (recorded, not gated).
+* **Determinism** — Fixed seeds and mocked small embeddings for CPU-friendly reproducibility; identical runs produce identical reports.
+* **Claims registry** — Every public claim is bound to a metric, threshold, and comparison operator in `dss-benchmark-standalone/eval/claims_registry.yaml` (17 registered claims). CI enforces `unknown_claims_policy: fail_ci`: any claim added to documentation without a registered metric fails the build. The legacy 26-claim registry from the v0.5 DSS evaluation is retained at `eval/legacy_v05_claims.yaml` (23 supported, 1 pending, 1 failing, 1 re-framed) — deprecated name, do not register new claims there; see the DSS-EVAL paper for the full registry status.
+* **Poisoning suite** (`suites/poisoning.py`) — Compatible/incompatible coordinate conflicts and same-identifier overwrites; measures silent displacement and flagged-or-preserved rates, plus conflict-detection latency (recorded, not gated).
+* **Integrity suite** (`suites/integrity.py`) — Structural vs. semantic coherence on synthetic distractors and optional real QA splits; measures incoherent retrieval and provenance transparency.
+* **Abstention suite** (`suites/abstention.py`) — Absent, borderline, and present queries; measures precision, recall, false abstention rate, and borderline abstention behaviour (recorded, not gated).
 
 ## Limitations
 
@@ -125,23 +132,23 @@ These benchmarks test structural integrity and abstention behaviour — **not** 
 
 ## Repository Layout
 
-- `dss-benchmark-standalone/` — the standalone benchmark package (this is the product)
-  - `adapters/` — vendor-agnostic adapter interface and reference implementations
-  - `suites/` — poisoning, integrity, and abstention suites
-  - `corpora/` — synthetic adversarial distractors and real QA splits
-  - `harness/` — deterministic runner, claims registry loader, and reporter
-  - `eval/claims_registry.yaml` — machine-readable claim registry
-  - `eval/reports/` — run artifacts (JSON + Markdown)
-- `eval/` — legacy DSS-EVAL reports and milestone documents (retained for history)
+* `dss-benchmark-standalone/` — the standalone benchmark package (this is the product)
+* `adapters/` — vendor-agnostic adapter interface and reference implementations
+* `suites/` — poisoning, integrity, and abstention suites
+* `corpora/` — synthetic adversarial distractors and real QA splits
+* `harness/` — deterministic runner, claims registry loader, and reporter
+* `eval/claims_registry.yaml` — machine-readable claim registry
+* `eval/reports/` — run artifacts (JSON + Markdown)
+
+
+* `eval/` — legacy DSS-EVAL reports and milestone documents (retained for history)
 
 > This repository contains only the benchmark harness, evaluation corpora, claims registry, and reproducibility artifacts — no application runtime code. The private application (runtime, surfaces, control plane, middleware) lives in `dss-codebase`.
 
 ## Citation
 
-<!-- Add once a DOI or report landing page exists -->
-
 If you use DSS-EVAL in research or evaluation work, please cite this repository and link the claims registry version you ran against.
 
 ## License
 
-DSS-EVAL is available under a custom non-commercial license — see [LICENSE](LICENSE). Free for research and non-commercial use.
+DSS-EVAL is available under a custom non-commercial license — see [LICENSE](https://www.google.com/search?q=LICENSE). Free for research and non-commercial use.
