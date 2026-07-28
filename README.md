@@ -39,15 +39,20 @@ The benchmark design, baseline results, and claims-registry status are described
 
 <!-- FAISS-adapter values from dss-benchmark-standalone/eval/reports/benchmark_report.json (smoke run 2026-07-27, seed 42, mocked embeddings) — verified reproducible via `python harness/runner.py --adapter faiss --seeds 42 --mock-embeddings`. Structured (DSS) adapter column is N/A until the DSS adapter run is published (that adapter lives in the private dss-codebase repo). Auto-generate this table from benchmark_report.json in CI so it cannot drift from measured results. -->
 
-| Suite | Metric | Gate | Naive vector RAG (FAISS ref adapter) | Structured adapter (DSS) |
-|---|---|---|---|---|
-| Poisoning | Silent displacement rate | == 0.00 | 0.00 ✅ | N/A |
-| Poisoning | Flagged-or-preserved rate | ≥ 1.00 | 1.00 ✅ | N/A |
-| Integrity | Incoherent retrieval rate | ≤ 0.05 | 0.00 ✅ | N/A |
-| Integrity | Transparency rate | ≥ 0.95 | 1.00 ✅ | N/A |
-| Abstention | Precision (absent queries) | ≥ 0.98 | 1.00 ✅ | N/A |
-| Abstention | Recall (present queries) | ≥ 0.95 | 1.00 ✅ | N/A |
-| Abstention | False abstention rate | ≤ 0.10 | 0.00 ✅ | N/A |
+
+| Suite | Metric | Gate | DSS QP | FAISS Ref | Chroma Lex | Qdrant Lex | ST Lex | Langchain Stub | Llama Index Stub |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| poisoning | silent_displacement_rate | ==0.00 | 0.00 PASS | 0.00 PASS | 0.00 PASS | 0.00 PASS | 0.00 PASS | 0.00 PASS | 0.00 PASS |
+| poisoning | flagged_or_preserved_rate | >=1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 | 1.00 |
+| integrity | incoherent_retrieval_rate | <=0.05 | 0.071 FAIL (n=7) | 0.00 PASS | 0.333 FAIL | 0.333 FAIL | 0.333 FAIL | 0.00 PASS* | 0.00 PASS* |
+| integrity | transparency_rate | >=0.95 | 0.875 FAIL (n=8) | 1.00 PASS | 0.00 FAIL | 0.00 FAIL | 0.00 FAIL | 0.00 FAIL* | 0.00 FAIL* |
+| abstention | precision_absent | >=0.98 | 1.000 PASS | 1.00 PASS | 0.00 FAIL | 1.00 PASS | 1.00 PASS | 1.00 PASS* | 1.00 PASS* |
+| abstention | recall_present | >=0.95 | 1.000 PASS | 1.00 PASS | 0.00 FAIL | 0.00 FAIL | 0.00 FAIL | 0.00 FAIL* | 0.00 FAIL* |
+| abstention | false_abstention_rate | <=0.10 | 0.000 PASS | 0.00 PASS | 1.00 FAIL | 1.00 FAIL | 1.00 FAIL | 1.00 FAIL* | 1.00 FAIL* |
+
+ <sub>* stub adapters return empty result sets; passes are vacuous. DSS cells measured at full scale (108 poisoning cases, 300 abstention queries per seed, seeds 193/42/7). Non-DSS cells: seeds 42/43/44, identical across seeds. chroma/qdrant/st ran with opt-in lexical embedding (offline), measuring vector-store structural behaviour not neural embedding quality.</sub>.
+
+---
 
 Row scope: poisoning metrics over 3 conflict cases; integrity metrics over 15 queries; abstention metrics over 3 absent, 2 borderline, and 3 present queries. Single-seed smoke run — treat as a reproducibility check, not a cross-system league table. At smoke scale the FAISS reference adapter passes all gates; the differentiating full-scale results (108 poisoning cases, 300 abstention queries, real QA splits) are reported in the companion paper.
 
@@ -56,7 +61,7 @@ Row scope: poisoning metrics over 3 conflict cases; integrity metrics over 15 qu
   <img src="assets/results-chart.png" alt="Measured values vs registered gates, FAISS reference adapter" width="800">
 </p>
 
-Full artifacts: `dss-benchmark-standalone/eval/reports/` (`benchmark_report.json`, `benchmark_summary.md`).
+Full artifacts: `dss-benchmark-standalone/eval/reports/` 
 
 ## How It Works
 
