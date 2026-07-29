@@ -125,6 +125,7 @@ python harness/runner.py --suites poisoning abstention   # subset runs
 * **Poisoning suite** (`suites/poisoning.py`); Compatible/incompatible coordinate conflicts and same-identifier overwrites; measures silent displacement and flagged-or-preserved rates, plus conflict-detection latency (recorded, not gated).
 * **Integrity suite** (`suites/integrity.py`); Structural vs. semantic coherence on synthetic distractors and optional real QA splits; measures incoherent retrieval and provenance transparency.
 * **Abstention suite** (`suites/abstention.py`); Absent, borderline, and present queries; measures precision, recall, false abstention rate, and borderline abstention behaviour (recorded, not gated).
+* **336 efficiency-floor ablation** (`dss-benchmark-standalone/tests/test_h3_ablation.py`); Synthetic telemetry samples with sub-threshold and supra-threshold `A_corr` are evaluated through the DSS 336 Lawfulness Gateway in enabled and disabled modes. The claim metric is `rejection_rate_on - rejection_rate_off`; a positive causal delta proves the gate causes sub-θ_A (0.20) rejections. Every issued Closure Fingerprint must carry `efficiency_eta`.
 
 ## Limitations
 

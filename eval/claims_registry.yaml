@@ -3,7 +3,7 @@
 # and evidence link. CI fails if a README claim lacks a registry entry.
 
 schema_version: "1.0"
-last_reviewed: "2026-07-20"
+last_reviewed: "2026-07-28"
 
 claims:
   - id: C01
@@ -268,5 +268,32 @@ claims:
     caveats:
       - "The actual GitHub issue comment is a draft saved in ds-review; it has not been posted without explicit approval."
       - "GitHub milestone pinning is documented locally; repository settings changes require maintainer action."
+
+  - id: C27
+    source: DSS-2.0-master-plan.md §3.3 H3
+    quote: "gateway rejects A_corr < 0.20 commits; ablation on/off proves causation"
+    claim: The 336 gateway rejects appends with efficiency improvement A_corr < 0.20, and an ablation test proves the gate causes the rejection.
+    harness: dss-system/dss-benchmark-standalone/tests/test_h3_ablation.py
+    measurement: rejection_rate_on - rejection_rate_off
+    status: supported
+    evidence:
+      - dss-system/dss-benchmark-standalone/tests/test_h3_ablation.py
+      - dss-system/dss-benchmark-standalone/dss_benchmark_standalone/harness/h3_ablation.py
+      - dss-codebase/packages/gate/tests/test_gateway.py
+      - dss-codebase/packages/flow/tests/test_replay.py
+
+  - id: C28
+    source: DSS-2.0-master-plan.md §3.3 H2
+    quote: "Fingerprint schema v1 includes efficiency_eta; golden-vector tests updated"
+    claim: Closure Fingerprint schema v1 includes efficiency_eta and produces deterministic SHA-256 golden vectors for identical inputs.
+    harness: dss-codebase packages/gate/tests/test_fingerprint_golden.py
+    measurement: Same payload → same fingerprint_hash across two independent replays
+    status: supported
+    evidence:
+      - dss-codebase/packages/gate/tests/fixtures/fingerprint_vectors.json
+      - dss-codebase/packages/gate/tests/test_fingerprint_golden.py
+      - dss-codebase/packages/gate/tests/test_schema_conformance.py
+      - dss-codebase/packages/gate/fingerprint_schema_v1.json
+      - dss-codebase/apps/backend/backend/tests/test_fingerprint_api.py
 
 unknown_claims_policy: fail_ci

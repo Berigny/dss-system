@@ -1,0 +1,23 @@
+{
+  "timestamp": "2026-07-27T00:00:00",
+  "overall_pass": true,
+  "suites": [
+    {
+      "suite": "poisoning",
+      "silent_displacement_rate": 0.0,
+      "flagged_or_preserved_rate": 1.0
+    },
+    {
+      "suite": "integrity",
+      "incoherent_retrieval_rate": 0.0,
+      "transparency_rate": 1.0
+    },
+    {
+      "suite": "abstention",
+      "precision": 1.0,
+      "recall": 1.0,
+      "false_abstention_rate": 0.0
+    }
+  ],
+  "claims_binding": {}
+}

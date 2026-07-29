@@ -52,6 +52,9 @@ the adapter.
   transparency rates.
 - `suites/abstention.py` — absent, borderline, and present queries; measures
   precision, recall, and false abstention rate.
+- `tests/test_h3_ablation.py` — 336 efficiency-floor ablation using synthetic
+  telemetry. Proves the gateway rejects sub-θ_A (`A_corr < 0.20`) commits when
+  enabled and that rejection rate materially drops when disabled.
 
 ## Claims registry
 
