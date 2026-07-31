@@ -1,0 +1,5 @@
+{
+  "peo_ref": "did:web:api.dualsubstrate.com:ledgers:chat-demo#chat-demo:GV-EXPORT-001",
+  "export_signature": "hmac-sha256:38c97617a1c5e1b865ea03c40148ddd157ff515420795e73d3e37178243185de",
+  "exported_at": "2026-07-31T03:14:28.291489+00:00"
+}

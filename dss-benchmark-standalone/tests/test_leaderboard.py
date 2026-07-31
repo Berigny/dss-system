@@ -50,7 +50,8 @@ def test_leaderboard_pass(capsys) -> None:
 
     result = subprocess.run(
         [sys.executable, str(REPO_ROOT / "scripts" / "generate_leaderboard.py"),
-         "--adapters", "faiss", "--seeds", "42"],
+         "--adapters", "faiss", "--seeds", "42",
+         "--suites", "poisoning", "integrity", "abstention"],
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,

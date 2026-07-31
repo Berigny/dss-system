@@ -79,6 +79,12 @@ def main(argv: list[str] | None = None) -> int:
         default=[42, 43, 44],
         help="Seeds to average over",
     )
+    parser.add_argument(
+        "--suites",
+        nargs="+",
+        default=None,
+        help="Only evaluate claims from these suites (default: all gated claims)",
+    )
     args = parser.parse_args(argv)
 
     registry = load_registry()
@@ -87,6 +93,8 @@ def main(argv: list[str] | None = None) -> int:
         for c in registry.get("claims", [])
         if c.get("threshold") is not None
     ]
+    if args.suites:
+        gated_claims = [c for c in gated_claims if c["suite"] in set(args.suites)]
 
     headers = ["Adapter"] + [f"{c['suite']}.{c['metric']}" for c in gated_claims] + ["Overall"]
     rows: list[list[str]] = []

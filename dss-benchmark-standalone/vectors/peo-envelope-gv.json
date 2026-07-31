@@ -1,0 +1,99 @@
+{
+  "peo_class": "E",
+  "Z0": {
+    "peo_schema_version": "2.0",
+    "peo_class": "E",
+    "glossary_version": "1.0",
+    "elephant_closure_alg": "elephant.closure.v1"
+  },
+  "Z1": {
+    "coord": "chat-demo:GV-001",
+    "evidence_cid": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "peo_ref": "did:web:api.dualsubstrate.com:ledgers:chat-demo#chat-demo:GV-001",
+    "runtime_identity": {
+      "principal_did": "did:key:z6Mkgolden"
+    }
+  },
+  "Z2": {
+    "content_cids": {
+      "user_message": "sha256:uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu",
+      "assistant_reply": "sha256:rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr"
+    }
+  },
+  "Z3": {
+    "provenance": {
+      "ledger_id": "chat-demo",
+      "principal_did": "did:key:z6Mkgolden",
+      "parent_hash": "sha256:pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+      "epoch": 42
+    }
+  },
+  "Z4": {
+    "governance": {
+      "checksum_336_pass": true,
+      "A": 0.8,
+      "U": 0.7,
+      "E": 0.9,
+      "V": 0.6,
+      "epoch": 42,
+      "gate_surface": "chat",
+      "patch_statuses": {
+        "eq6": true,
+        "eq7": true,
+        "eq8": true
+      },
+      "impact_hash": "sha256:iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
+      "proof_tag": "+D",
+      "closure_fingerprint": "sha256:419a07c9b9a42628fd4dfc9fc4a6ecd3b5820bcb55d3475cf14d7989130c1095"
+    }
+  },
+  "Z5": {
+    "e6_header": {
+      "mode": 3,
+      "route": 3
+    }
+  },
+  "Z6": {
+    "prime_coordinate": {
+      "body_prime": "17",
+      "token_prime_product": "12345678901234567890"
+    }
+  },
+  "Z7": {
+    "defeasible_fragment": {
+      "closure_alg": "elephant.closure.v1",
+      "strict_rules": [
+        {
+          "id": "r-336",
+          "body": [
+            "and",
+            "eq6-awared",
+            "eq7-united",
+            "eq8-admissible"
+          ],
+          "head": "structurally-valid"
+        }
+      ],
+      "proof_status": "+d",
+      "linter_warnings": []
+    }
+  },
+  "Z8": {
+    "value_lineage": {
+      "construction_value": 1.0
+    }
+  },
+  "Z9": {
+    "efficiency": {
+      "gen_output_tokens": 100,
+      "max_tokens": 200,
+      "latency_ms": 500.0,
+      "cost_usd": 0.01,
+      "eta_version": "v1.0.0",
+      "tokens_in": 50,
+      "tokens_out": 100,
+      "finish_reason": "stop",
+      "efficiency_eta": 0.9900990099009901
+    }
+  }
+}

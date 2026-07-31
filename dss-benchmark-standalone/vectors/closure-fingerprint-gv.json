@@ -1,0 +1,24 @@
+{
+  "peo_ref": "did:web:api.dualsubstrate.com:ledgers:chat-demo#chat-demo:GV-001",
+  "closure_fingerprint": "sha256:419a07c9b9a42628fd4dfc9fc4a6ecd3b5820bcb55d3475cf14d7989130c1095",
+  "tag_set": {
+    "gate_surface": "chat",
+    "patch_statuses": {
+      "eq6": true,
+      "eq7": true,
+      "eq8": true
+    },
+    "A": 0.8,
+    "U": 0.7,
+    "E": 0.9,
+    "V": 0.6,
+    "lawfulness_level": 0,
+    "evidence_cid": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "parent_hash": "sha256:pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+    "epoch": 42,
+    "glossary_version": "1.0",
+    "efficiency_eta": 0.9900990099009901,
+    "impact_hash": "sha256:iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",
+    "proof_tag": "+D"
+  }
+}
