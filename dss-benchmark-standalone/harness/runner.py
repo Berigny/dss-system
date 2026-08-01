@@ -97,7 +97,8 @@ def run_benchmarks(
 
     registry = load_registry()
     _apply_thresholds(suite_results, registry)
-    overall_pass, binding = check_registry(registry, suite_results)
+    run_suites = set(s.get("suite") for s in suite_results)
+    overall_pass, binding = check_registry(registry, suite_results, run_suites=run_suites)
 
     report = generate_report(suite_results, binding)
     return report

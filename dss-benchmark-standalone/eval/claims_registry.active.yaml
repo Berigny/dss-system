@@ -1,0 +1,307 @@
+# Active DSS-EVAL claims registry
+# Claims in this file are produced by the runnable benchmark harness
+# (base suites + ingestion + physical_twin + adversarial).  The runner
+# uses this file by default.  Claims for suites not yet under active
+# evaluation live in claims_registry.backlog.yaml.
+
+unknown_claims_policy: fail_ci
+claims:
+- id: poisoning.silent_displacement_rate
+  suite: poisoning
+  metric: silent_displacement_rate
+  description: Adversarial entries must never silently displace committed facts.
+  threshold: 0.0
+  operator: ==
+- id: poisoning.flagged_or_preserved_rate
+  suite: poisoning
+  metric: flagged_or_preserved_rate
+  description: Conflicts must be flagged or original facts preserved.
+  threshold: 1.0
+  operator: '>='
+- id: poisoning.avg_conflict_detection_latency_s
+  suite: poisoning
+  metric: avg_conflict_detection_latency_s
+  description: Conflict detection latency is recorded but not threshold-gated.
+  threshold: null
+  operator: <=
+- id: poisoning.total_conflicts
+  suite: poisoning
+  metric: total_conflicts
+  description: Total number of injected conflicts exercised.
+  threshold: null
+  operator: '>='
+- id: poisoning.pass
+  suite: poisoning
+  metric: pass
+  description: Suite-level pass/fail indicator.
+  threshold: null
+  operator: '>='
+- id: integrity.incoherent_retrieval_rate
+  suite: integrity
+  metric: incoherent_retrieval_rate
+  description: Retrieval should return structurally valid records.
+  threshold: 0.05
+  operator: <=
+- id: integrity.transparency_rate
+  suite: integrity
+  metric: transparency_rate
+  description: Retrievals should carry verifiable provenance metadata.
+  threshold: 0.95
+  operator: '>='
+- id: integrity.total_queries
+  suite: integrity
+  metric: total_queries
+  description: Total number of integrity queries executed.
+  threshold: null
+  operator: '>='
+- id: integrity.pass
+  suite: integrity
+  metric: pass
+  description: Suite-level pass/fail indicator.
+  threshold: null
+  operator: '>='
+- id: abstention.precision
+  suite: abstention
+  metric: precision
+  description: Absent queries must be correctly declined.
+  threshold: 0.98
+  operator: '>='
+- id: abstention.recall
+  suite: abstention
+  metric: recall
+  description: Present queries must be correctly answered.
+  threshold: 0.95
+  operator: '>='
+- id: abstention.false_abstention_rate
+  suite: abstention
+  metric: false_abstention_rate
+  description: Present queries must not be incorrectly declined.
+  threshold: 0.1
+  operator: <=
+- id: abstention.absent_queries
+  suite: abstention
+  metric: absent_queries
+  description: Total number of absent queries executed.
+  threshold: null
+  operator: '>='
+- id: abstention.present_queries
+  suite: abstention
+  metric: present_queries
+  description: Total number of present queries executed.
+  threshold: null
+  operator: '>='
+- id: abstention.borderline_queries
+  suite: abstention
+  metric: borderline_queries
+  description: Total number of borderline queries executed.
+  threshold: null
+  operator: '>='
+- id: abstention.borderline_abstention_rate
+  suite: abstention
+  metric: borderline_abstention_rate
+  description: Share of borderline queries on which the system abstained.
+  threshold: null
+  operator: '>='
+- id: abstention.pass
+  suite: abstention
+  metric: pass
+  description: Suite-level pass/fail indicator.
+  threshold: null
+  operator: '>='
+- id: ATK-01
+  suite: adversarial
+  metric: atk_01
+  description: 'Sybil cohort flooding: un-attested seats carry zero comparator weight
+    in replay.'
+  threshold: 0.0
+  operator: ==
+- id: ATK-02
+  suite: adversarial
+  metric: atk_02
+  description: '336-by-majority: no vote, quorum, or majority can assert or override
+    336.'
+  threshold: 0.0
+  operator: ==
+- id: ATK-03
+  suite: adversarial
+  metric: atk_03
+  description: Comparator capture beyond fault bound becomes visible within one epoch.
+  threshold: 0.0
+  operator: ==
+- id: ATK-04
+  suite: adversarial
+  metric: atk_04
+  description: Conflict spam quarantines only the spammer's own branches.
+  threshold: null
+  operator: '>='
+- id: ATK-05
+  suite: adversarial
+  metric: atk_05
+  description: Steward pool has no appointment surface; packing requires cryptographic
+    break.
+  threshold: null
+  operator: '>='
+- id: ATK-06
+  suite: adversarial
+  metric: atk_06
+  description: Epoch-anchor replay fails continuity checks.
+  threshold: null
+  operator: '>='
+- id: ATK-07
+  suite: adversarial
+  metric: atk_07
+  description: Clay admission requires sustained 336-pass across the window plus velocity
+    caps.
+  threshold: null
+  operator: '>='
+- id: ATK-08
+  suite: adversarial
+  metric: atk_08
+  description: Defeat suppression is detectable as mirror inconsistency and escalates
+    to federation.
+  threshold: null
+  operator: '>='
+- id: ATK-09
+  suite: adversarial
+  metric: atk_09
+  description: Split/merge does not re-derive trust classes; lineage carries across
+    group DID changes.
+  threshold: null
+  operator: '>='
+- id: ATK-10
+  suite: adversarial
+  metric: atk_10
+  description: Ratio changes are ledger-governed, next-epoch, non-retroactive, and
+    cannot touch LDR-01/02/03 invariants.
+  threshold: null
+  operator: '>='
+- id: ING-REPLAY-01
+  suite: ingestion
+  metric: replay_01
+  description: Identical input + kernel version yields identical chunk set, evidence_cids,
+    and closure fingerprints.
+  threshold: null
+  operator: '>='
+- id: ING-REPLAY-02
+  suite: ingestion
+  metric: replay_02
+  description: Qp-rel incremental index is equivalent to full rebuild from ledger.
+  threshold: null
+  operator: '>='
+- id: ING-ATM-01
+  suite: ingestion
+  metric: atm_01
+  description: Atom extraction uses structural primes 17/19/137 from constants.
+  threshold: null
+  operator: '>='
+- id: ING-MNT-01
+  suite: ingestion
+  metric: mnt_01
+  description: S5 grade matches QSL-01 derivation on replay.
+  threshold: null
+  operator: '>='
+- id: ING-MNT-02
+  suite: ingestion
+  metric: mnt_02
+  description: Default-ingested chunks mint at or below G1 until composite pass +
+    disjoint review.
+  threshold: null
+  operator: '>='
+- id: ING-EMT-01
+  suite: ingestion
+  metric: emt_01
+  description: Every ingested PEO carries a valid E6 header with passing CRC self-check.
+  threshold: null
+  operator: '>='
+- id: ING-EPOCH-01
+  suite: ingestion
+  metric: epoch_01
+  description: z3_chain.epoch equals floor(unix/345600) at write time.
+  threshold: null
+  operator: '>='
+- id: ING-REL-01
+  suite: ingestion
+  metric: rel_01
+  description: relations.depends_on and derived_from are present and dangling refs
+    rejected.
+  threshold: null
+  operator: '>='
+- id: ING-LIN-01
+  suite: ingestion
+  metric: lin_01
+  description: supersedes is a single pointer; fork opens Grace FSM branch-scoped
+    conflict.
+  threshold: null
+  operator: '>='
+- id: ING-VEL-01
+  suite: ingestion
+  metric: vel_01
+  description: Velocity caps are enforced per Principal per epoch.
+  threshold: null
+  operator: '>='
+- id: ING-STC-01
+  suite: ingestion
+  metric: stc_01
+  description: Stitch-manifest depends_on mirrors ordered children.
+  threshold: null
+  operator: '>='
+- id: ING-CODE-01
+  suite: ingestion
+  metric: code_01
+  description: Code chunking aligns to AST boundaries when tree-sitter grammar is
+    active.
+  threshold: null
+  operator: '>='
+- id: PHY-SCHEMA-01
+  suite: physical_twin
+  metric: schema_01
+  description: Class-P PEOs validate against envelope v2.0.2 with Z10 required.
+  threshold: null
+  operator: '>='
+- id: PHY-GEO-01
+  suite: physical_twin
+  metric: geo_01
+  description: spatial_anchor is valid GeoJSON with allow-listed CRS.
+  threshold: null
+  operator: '>='
+- id: PHY-EPOCH-01
+  suite: physical_twin
+  metric: epoch_01
+  description: Zero-state is dual-stamped and governance windows are epoch-counted.
+  threshold: null
+  operator: '>='
+- id: PHY-LOG-01
+  suite: physical_twin
+  metric: log_01
+  description: temporal_state_log sequences are monotonic with full-length integrity
+    hashes and resolvable observation refs.
+  threshold: null
+  operator: '>='
+- id: PHY-NODELETE-01
+  suite: physical_twin
+  metric: nodelete_01
+  description: Zero-state triggers retire_inert/review_hold; lineage replay resolves
+    post-retirement.
+  threshold: null
+  operator: '>='
+- id: PHY-MAP-01
+  suite: physical_twin
+  metric: map_01
+  description: 'UNTP tier mapping classes are correct: DFR->P/FIXED_SITE, DTE->T/E,
+    DCC->V disjoint.'
+  threshold: null
+  operator: '>='
+- id: PHY-VEL-01
+  suite: physical_twin
+  metric: vel_01
+  description: Per-recorder observation caps enforced; exactly one log-compaction
+    stitch-manifest per twin per epoch.
+  threshold: null
+  operator: '>='
+- id: PHY-XFORM-01
+  suite: physical_twin
+  metric: xform_01
+  description: Cross-border vocabularies ship as export transforms; envelope/Z10 unchanged
+    by regional profiles.
+  threshold: null
+  operator: '>='

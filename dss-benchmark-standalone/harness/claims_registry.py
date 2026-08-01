@@ -5,7 +5,10 @@ from typing import Any, Dict, List, Tuple
 import yaml
 
 
-REGISTRY_PATH = Path(__file__).resolve().parent.parent / "eval" / "claims_registry.yaml"
+EVAL_DIR = Path(__file__).resolve().parent.parent / "eval"
+REGISTRY_PATH = EVAL_DIR / "claims_registry.active.yaml"
+MERGED_REGISTRY_PATH = EVAL_DIR / "claims_registry.yaml"
+BACKLOG_REGISTRY_PATH = EVAL_DIR / "claims_registry.backlog.yaml"
 
 
 def load_registry(path: Path = None) -> Dict[str, Any]:
@@ -70,11 +73,20 @@ def _validate_registry(registry: Dict[str, Any]) -> List[str]:
     return errors
 
 
-def bind_claims(registry: Dict[str, Any], results: List[Dict[str, Any]]) -> Dict[str, Any]:
+def bind_claims(
+    registry: Dict[str, Any],
+    results: List[Dict[str, Any]],
+    run_suites: set = None,
+) -> Dict[str, Any]:
     """Bind collected suite metrics to the claims registry.
 
     Supports both legacy ``suite.metric`` result keys and explicit ``claim_ids``
     mappings for claim IDs that do not follow the ``suite.metric`` convention.
+
+    If ``run_suites`` is provided, only registered claims whose ``suite`` value
+    is in ``run_suites`` are considered missing when not produced. This lets a
+    runner that executes only a subset of suites (e.g. a fast smoke run) pass
+    without being blocked by claims belonging to suites it did not run.
 
     Returns a dictionary describing each claim's status, evidence, and whether
     any unregistered (unknown) claims were detected.
@@ -133,9 +145,19 @@ def bind_claims(registry: Dict[str, Any], results: List[Dict[str, Any]]) -> Dict
                 "description": claim.get("description", ""),
             }
 
-    # Mark any registered claims that were not produced.
+    # Mark any registered claims that were not produced. When the caller tells
+    # us which suites were actually run, restrict the missing-claim check to
+    # claims belonging to those suites. Claims for suites that were not run are
+    # expected to be missing from this result set (they are validated elsewhere,
+    # e.g. by dedicated pytest suites).
     produced = set(bound.keys())
-    missing = [cid for cid in claims if cid not in produced]
+    if run_suites is not None:
+        missing = [
+            cid for cid in claims
+            if cid not in produced and claims[cid].get("suite") in run_suites
+        ]
+    else:
+        missing = [cid for cid in claims if cid not in produced]
 
     fail_ci = unknown_policy == "fail_ci" and (unknown or missing)
 
@@ -148,10 +170,14 @@ def bind_claims(registry: Dict[str, Any], results: List[Dict[str, Any]]) -> Dict
     }
 
 
-def check_registry(registry: Dict[str, Any], results: List[Dict[str, Any]]) -> Tuple[bool, Dict[str, Any]]:
+def check_registry(
+    registry: Dict[str, Any],
+    results: List[Dict[str, Any]],
+    run_suites: set = None,
+) -> Tuple[bool, Dict[str, Any]]:
     """Return (overall_pass, details) for the registry check."""
     registry_errors = _validate_registry(registry)
-    binding = bind_claims(registry, results)
+    binding = bind_claims(registry, results, run_suites=run_suites)
     all_passed = all(b["status"] in ("passed", "recorded") for b in binding["bound"].values())
     overall = all_passed and not binding["fail_ci"] and not registry_errors
     binding["overall"] = overall

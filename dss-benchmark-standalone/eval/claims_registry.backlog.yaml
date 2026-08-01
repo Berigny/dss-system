@@ -1,0 +1,352 @@
+# Backlog DSS-EVAL claims registry
+# Claims in this file describe future/follow-on behaviours (e.g. peo,
+# quaternary, ladder/grace/poe/mesh suites) that do not yet have a runnable
+# harness in dss-benchmark-standalone.  Move a claim into
+# claims_registry.active.yaml once its harness is implemented and added to
+# the standard eval run.
+
+unknown_claims_policy: fail_ci
+claims:
+- id: PEO-CORE-01
+  suite: peo
+  metric: core_01
+  description: PEO envelope carries required zones for its class.
+  threshold: null
+  operator: '>='
+- id: PEO-CORE-02
+  suite: peo
+  metric: core_02
+  description: Canonical serialization is byte-stable across re-serialization.
+  threshold: null
+  operator: '>='
+- id: PEO-GOV-02
+  suite: peo
+  metric: gov_02
+  description: Closure Fingerprint detects field drift at the exact field.
+  threshold: null
+  operator: '>='
+- id: PEO-GOV-03
+  suite: peo
+  metric: gov_03
+  description: Proof tag {+D,+d,-d,-D} is derived from structural and defeasible status.
+  threshold: null
+  operator: '>='
+- id: PEO-E6-02
+  suite: peo
+  metric: e6_02
+  description: E6 v1 20-byte header is promoted for value-bearing PEOs.
+  threshold: null
+  operator: '>='
+- id: PEO-E6-03
+  suite: peo
+  metric: e6_03
+  description: Reserved E6 v1 extension bits are rejected.
+  threshold: null
+  operator: '>='
+- id: PEO-PRIME-01
+  suite: peo
+  metric: prime_01
+  description: Prime-factored coordinates are deterministic and body-prime unique.
+  threshold: null
+  operator: '>='
+- id: PEO-DEF-02
+  suite: peo
+  metric: def_02
+  description: Defeasible fragment (Z7) carries Elephant SPL strict rules and kernel
+    fallback.
+  threshold: null
+  operator: '>='
+- id: PEO-DEF-03
+  suite: peo
+  metric: def_03
+  description: r-336 strict rule is present in every value-bearing PEO defeasible
+    fragment.
+  threshold: null
+  operator: '>='
+- id: PEO-POE-02
+  suite: poe
+  metric: poe_02
+  description: PoE construction value is derived replayable relational capital.
+  threshold: null
+  operator: '>='
+- id: PEO-POE-03
+  suite: poe
+  metric: poe_03
+  description: PoE enrichment events are themselves PEOs with value lineage.
+  threshold: null
+  operator: '>='
+- id: PEO-MESH-02
+  suite: mesh
+  metric: mesh_02
+  description: Imported PEO verifies signature, fingerprint, and chain segment without
+    model inference.
+  threshold: null
+  operator: '>='
+- id: PEO-MESH-03
+  suite: mesh
+  metric: mesh_03
+  description: Custody chain is complete, ordered, and gap-free after cross-ledger
+    transfer.
+  threshold: null
+  operator: '>='
+- id: PEO-EFF-02
+  suite: efficiency
+  metric: eff_02
+  description: efficiency_eta is present on 100% of PEO-E writes and included in the
+    Closure Fingerprint.
+  threshold: null
+  operator: '>='
+- id: PEO-COMPAT-01
+  suite: compatibility
+  metric: compat_01
+  description: DSS 1.0 LedgerEntry wrapper and field names remain readable through
+    dual-schema reader.
+  threshold: null
+  operator: '>='
+- id: PEO-GATE-02
+  suite: gate
+  metric: gate_02
+  description: Non-compensatory route enforcement clamps route on 336 or proof-tag
+    failure.
+  threshold: null
+  operator: '>='
+- id: QSL-01
+  suite: quaternary
+  metric: qsl_01
+  description: Soil grade is derived from the quaternary composite (l6,l7,l8).
+  threshold: null
+  operator: '>='
+- id: QSL-02
+  suite: quaternary
+  metric: qsl_02
+  description: SILT is a governed review posture, not a missing soil layer.
+  threshold: null
+  operator: '>='
+- id: QSL-03
+  suite: quaternary
+  metric: qsl_03
+  description: Persistence mode, retention tier, and route are projections of soil
+    grade.
+  threshold: null
+  operator: '>='
+- id: QSL-04
+  suite: quaternary
+  metric: qsl_04
+  description: Grade is computed, never independently assigned.
+  threshold: null
+  operator: '>='
+- id: QSL-05
+  suite: quaternary
+  metric: qsl_05
+  description: 64-state golden truth table matches exact-rational grade derivation.
+  threshold: null
+  operator: '>='
+- id: QSL-06
+  suite: quaternary
+  metric: qsl_06
+  description: Prime views are documented and consistent across code and docs.
+  threshold: null
+  operator: '>='
+- id: GRD-01
+  suite: quaternary
+  metric: grd_01
+  description: Promotion from SAND to SILT requires a signed review claim.
+  threshold: null
+  operator: '>='
+- id: GRD-02
+  suite: quaternary
+  metric: grd_02
+  description: Promotion from SILT to LOAM requires sustained 336 pass.
+  threshold: null
+  operator: '>='
+- id: GRD-03
+  suite: quaternary
+  metric: grd_03
+  description: Promotion from LOAM to CLAY requires elevation proofs and C100 panel.
+  threshold: null
+  operator: '>='
+- id: GRD-04
+  suite: quaternary
+  metric: grd_04
+  description: Gravity-tax decay is applied per tier.
+  threshold: null
+  operator: '>='
+- id: PMO-01
+  suite: quaternary
+  metric: pmo_01
+  description: Mint-at-grade prevents bulk ingestion from minting mass LOAM/CLAY by
+    default.
+  threshold: null
+  operator: '>='
+- id: PMO-02
+  suite: quaternary
+  metric: pmo_02
+  description: Cap-at-G1 binds default-ingested chunks to SAND until composite pass
+    + review.
+  threshold: null
+  operator: '>='
+- id: PMO-03
+  suite: quaternary
+  metric: pmo_03
+  description: Proof-gated elevation requires six elevation proofs.
+  threshold: null
+  operator: '>='
+- id: PMO-04
+  suite: quaternary
+  metric: pmo_04
+  description: Waterlogging velocity caps are enforced per Principal per epoch.
+  threshold: null
+  operator: '>='
+- id: PMO-05
+  suite: quaternary
+  metric: pmo_05
+  description: Clay admission requires sustained 336 pass across the admission window.
+  threshold: null
+  operator: '>='
+- id: PMO-06
+  suite: quaternary
+  metric: pmo_06
+  description: Clay stabilization window length is policy-versioned in epochs.
+  threshold: null
+  operator: '>='
+- id: PMO-07
+  suite: quaternary
+  metric: pmo_07
+  description: Sand retention block duration is policy-versioned.
+  threshold: null
+  operator: '>='
+- id: GRP-01
+  suite: ladder
+  metric: grp_01
+  description: PrincipalGroup number condition R1 holds for every group.
+  threshold: null
+  operator: '>='
+- id: GRP-02
+  suite: ladder
+  metric: grp_02
+  description: PrincipalGroup relationship condition R2 holds for every group.
+  threshold: null
+  operator: '>='
+- id: GRP-03
+  suite: ladder
+  metric: grp_03
+  description: PrincipalGroup overlap bound R3 holds for every group.
+  threshold: null
+  operator: '>='
+- id: GRP-04
+  suite: ladder
+  metric: grp_04
+  description: Steward pool is derived from TC3 lineage per epoch.
+  threshold: null
+  operator: '>='
+- id: GRP-05
+  suite: ladder
+  metric: grp_05
+  description: Group attestations are themselves PEOs.
+  threshold: null
+  operator: '>='
+- id: GFSM-01
+  suite: grace
+  metric: gfsm_01
+  description: Grace conflict FSM has deterministic states and transitions.
+  threshold: null
+  operator: '>='
+- id: GFSM-02
+  suite: grace
+  metric: gfsm_02
+  description: Conflict freeze is branch-scoped and never halts the entire mesh.
+  threshold: null
+  operator: '>='
+- id: GFSM-03
+  suite: grace
+  metric: gfsm_03
+  description: Law/Grace strict and environmental test sets are Law-gated and Grace-gated
+    respectively.
+  threshold: null
+  operator: '>='
+- id: GFSM-04
+  suite: grace
+  metric: gfsm_04
+  description: Terminal economics apply at conflict resolution.
+  threshold: null
+  operator: '>='
+- id: GFSM-05
+  suite: grace
+  metric: gfsm_05
+  description: Steward escalation draws from a TC3-derived pool.
+  threshold: null
+  operator: '>='
+- id: GFSM-06
+  suite: grace
+  metric: gfsm_06
+  description: Resolution PEO is signed by the steward panel.
+  threshold: null
+  operator: '>='
+- id: LDR-01
+  suite: ladder
+  metric: ldr_01
+  description: 336 checksum binds exclusively to per-object equation valuations.
+  threshold: null
+  operator: '>='
+- id: LDR-02
+  suite: ladder
+  metric: ldr_02
+  description: Ladder layers are comparator-only; finality stays ledger + gate.
+  threshold: null
+  operator: '>='
+- id: LDR-03
+  suite: ladder
+  metric: ldr_03
+  description: Branch-scoped conflict freeze never produces a global halt.
+  threshold: null
+  operator: '>='
+- id: LDR-04
+  suite: ladder
+  metric: ldr_04
+  description: Slashing is trust-class demotion with lineage preserved; deletion never
+    occurs as punishment.
+  threshold: null
+  operator: '>='
+- id: LDR-05
+  suite: ladder
+  metric: ldr_05
+  description: Group number, relationship, and scaling conditions R1-R5 and S1-S5
+    hold.
+  threshold: null
+  operator: '>='
+- id: CPG-01
+  suite: ladder
+  metric: cpg_01
+  description: C10 cohort comparators are disjoint from subject authors.
+  threshold: null
+  operator: '>='
+- id: CPG-02
+  suite: ladder
+  metric: cpg_02
+  description: C50 cross-cohort panels satisfy overlap bound R3.
+  threshold: null
+  operator: '>='
+- id: CPG-03
+  suite: ladder
+  metric: cpg_03
+  description: C100 clusters require 2-of-2 agreement.
+  threshold: null
+  operator: '>='
+- id: CPG-04
+  suite: ladder
+  metric: cpg_04
+  description: C1000/C10000 layers are comparator-only policy-versioned topologies.
+  threshold: null
+  operator: '>='
+- id: CPG-05
+  suite: ladder
+  metric: cpg_05
+  description: Z8 extensibility lifecycle is respected for group attestations.
+  threshold: null
+  operator: '>='
+- id: CPG-06
+  suite: ladder
+  metric: cpg_06
+  description: Dynamic group lifecycle follows the ladder template.
+  threshold: null
+  operator: '>='

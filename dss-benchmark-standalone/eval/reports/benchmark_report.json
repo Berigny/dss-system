@@ -158,6 +158,7 @@
     "fail_ci": [],
     "missing_claims": [],
     "overall": true,
+    "registry_errors": [],
     "unknown_claims": [],
     "unknown_claims_policy": "fail_ci"
   },
@@ -223,5 +224,5 @@
       "suite": "abstention"
     }
   ],
-  "timestamp": "2026-07-27T03:16:49.260241+00:00"
+  "timestamp": "2026-08-01T01:52:37.104895+00:00"
 }
