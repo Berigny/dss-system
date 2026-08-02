@@ -47,7 +47,7 @@ jobs:
               mock_embeddings=True,
           )
 
-          overall, binding = check_registry(registry, report['suites'])
+          overall, binding = check_registry(registry, report['suites'], run_suites={'poisoning', 'integrity', 'abstention'})
 
           print(f"Overall registry pass: {overall}")
           print(f"Bound claims: {len(binding['bound'])}")

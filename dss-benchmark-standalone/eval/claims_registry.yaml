@@ -719,3 +719,451 @@ claims:
     description: "Cross-border vocabularies ship as export transforms; envelope/Z10 unchanged by regional profiles."
     threshold: null
     operator: ">="
+
+  - id: epic-55-claim-001
+    suite: epic55
+    metric: claim_001
+    description: "The Elephant glossary v1 is the single source of truth for public↔internal term mapping."
+    threshold: null
+    operator: '>='
+
+  - id: epic-55-claim-002
+    suite: epic55
+    metric: claim_002
+    description: "The H1 telemetry contract makes E_pred/E_baseline deterministic and replayable."
+    threshold: null
+    operator: '>='
+
+  - id: epic-55-claim-003
+    suite: epic55
+    metric: claim_003
+    description: "Closure Fingerprint schema v1 is frozen and decodable against glossary_version."
+    threshold: null
+    operator: '>='
+
+  - id: epic-55-claim-004
+    suite: epic55
+    metric: claim_004
+    description: "The A_corr ≥ 0.20 efficiency floor is already enforced by the Awareness factor in governance_engine.py."
+    threshold: null
+    operator: '>='
+
+  - id: epic-55-claim-005
+    suite: epic55
+    metric: claim_005
+    description: "DSS 2.0 public language is a naming program, not a retrofit, because the mapped semantics already exist in code."
+    threshold: null
+    operator: '>='
+
+  - id: epic-55-claim-006
+    suite: epic55
+    metric: claim_006
+    description: "Efficiency is a property of Awareness, not a fourth factor, so V = A×U×E remains intact."
+    threshold: null
+    operator: '>='
+
+  - id: epic-56-claim-001
+    suite: epic56
+    metric: claim_001
+    description: "Canonical evidence CIDs use sha256:<hex> to preserve chain continuity."
+    threshold: null
+    operator: '>='
+
+  - id: epic-56-claim-002
+    suite: epic56
+    metric: claim_002
+    description: "The evidence substrate is a facade over the existing write-once body layer, not a new store."
+    threshold: null
+    operator: '>='
+
+  - id: epic-56-claim-003
+    suite: epic56
+    metric: claim_003
+    description: "Ingestion stores content CID only; raw_text leaves the index path."
+    threshold: null
+    operator: '>='
+
+  - id: epic-56-claim-004
+    suite: epic56
+    metric: claim_004
+    description: "Vector store is a derived, rebuildable cache keyed by content_hash."
+    threshold: null
+    operator: '>='
+
+  - id: epic-56-claim-005
+    suite: epic56
+    metric: claim_005
+    description: "Evidence substrate realises the paper construct 'Evidence Fabric' for custody."
+    threshold: null
+    operator: '>='
+
+  - id: epic-56-claim-006
+    suite: epic56
+    metric: claim_006
+    description: "GET /evidence/verify recomputes the hash of the resolved body and confirms resolution."
+    threshold: null
+    operator: '>='
+
+  - id: epic-57-claim-001
+    suite: epic57
+    metric: claim_001
+    description: "The symbolic ledger implements a SHA-256 chain over ledger entries."
+    threshold: null
+    operator: '>='
+
+  - id: epic-57-claim-002
+    suite: epic57
+    metric: claim_002
+    description: "Each epoch is sealed by a deterministic Merkle root."
+    threshold: null
+    operator: '>='
+
+  - id: epic-57-claim-003
+    suite: epic57
+    metric: claim_003
+    description: "The hasher interface makes PQC migration a configuration change."
+    threshold: null
+    operator: '>='
+
+  - id: epic-57-claim-004
+    suite: epic57
+    metric: claim_004
+    description: "Single-writer CAS prevents chain forks per tenant."
+    threshold: null
+    operator: '>='
+
+  - id: epic-57-claim-005
+    suite: epic57
+    metric: claim_005
+    description: "The ledger is the Elephant Corpus: an append-only sealed entry store."
+    threshold: null
+    operator: '>='
+
+  - id: epic-57-claim-006
+    suite: epic57
+    metric: claim_006
+    description: "Append-only updates are modelled as new superseded entries, not in-place edits."
+    threshold: null
+    operator: '>='
+
+  - id: epic-58-claim-001
+    suite: epic58
+    metric: claim_001
+    description: "Canonical addressing uses tenant.cell.namespace.entity over KSR content."
+    threshold: null
+    operator: '>='
+
+  - id: epic-58-claim-002
+    suite: epic58
+    metric: claim_002
+    description: "The Theory sidecar exposes typed nodes and edges over the existing causal graph."
+    threshold: null
+    operator: '>='
+
+  - id: epic-58-claim-003
+    suite: epic58
+    metric: claim_003
+    description: "COORD_CREATE is a Speech Act whose ledger evidence binds the graph delta."
+    threshold: null
+    operator: '>='
+
+  - id: epic-58-claim-004
+    suite: epic58
+    metric: claim_004
+    description: "Vector retrieval verifies every hit against the ledger before recall."
+    threshold: null
+    operator: '>='
+
+  - id: epic-58-claim-005
+    suite: epic58
+    metric: claim_005
+    description: "The COORD graph is the Elephant Theory namespace."
+    threshold: null
+    operator: '>='
+
+  - id: epic-58-claim-006
+    suite: epic58
+    metric: claim_006
+    description: "The Elephant sidecar provides a public-dialect façade without renaming load-bearing kernel symbols."
+    threshold: null
+    operator: '>='
+
+  - id: epic-58-claim-007
+    suite: epic58
+    metric: claim_007
+    description: "Vector retrieval verifies every hit's evidence CID before recall and drops unverified hits before prompt assembly."
+    threshold: null
+    operator: '>='
+
+  - id: epic-58-claim-008
+    suite: epic58
+    metric: claim_008
+    description: "The seven public Speech Act event types round-trip through the ledger."
+    threshold: null
+    operator: '>='
+
+  - id: epic-59-claim-001
+    suite: epic59
+    metric: claim_001
+    description: "The gateway façade unifies the three existing 336 gate surfaces."
+    threshold: null
+    operator: '>='
+
+  - id: epic-59-claim-002
+    suite: epic59
+    metric: claim_002
+    description: "Every append path is gated by the 336 Lawfulness Gateway."
+    threshold: null
+    operator: '>='
+
+  - id: epic-59-claim-003
+    suite: epic59
+    metric: claim_003
+    description: "Closure Fingerprint API returns a deterministic schema-v1 attestation per ledger sequence."
+    threshold: null
+    operator: '>='
+
+  - id: epic-59-claim-004
+    suite: epic59
+    metric: claim_004
+    description: "The gateway rejects appends with efficiency improvement A_corr below 0.20."
+    threshold: null
+    operator: '>='
+
+  - id: epic-59-claim-005
+    suite: epic59
+    metric: claim_005
+    description: "The 336 gateway is the AI-Trust-OPs Credibility Gate."
+    threshold: null
+    operator: '>='
+
+  - id: epic-59-claim-006
+    suite: epic59
+    metric: claim_006
+    description: "Fail responses include the patch's public Predicate name and hard_gate string."
+    threshold: null
+    operator: '>='
+
+  - id: epic-60-claim-001
+    suite: epic60
+    metric: claim_001
+    description: "Flow metrics are deterministic and replayable per epoch."
+    threshold: null
+    operator: '>='
+
+  - id: epic-60-claim-002
+    suite: epic60
+    metric: claim_002
+    description: "dE is computed from real compute telemetry per the H1 contract."
+    threshold: null
+    operator: '>='
+
+  - id: epic-60-claim-003
+    suite: epic60
+    metric: claim_003
+    description: "K triggers abstention when below threshold or lawfulness is insufficient."
+    threshold: null
+    operator: '>='
+
+  - id: epic-60-claim-004
+    suite: epic60
+    metric: claim_004
+    description: "The system abstains instead of hallucinating when health is degraded."
+    threshold: null
+    operator: '>='
+
+  - id: epic-60-claim-005
+    suite: epic60
+    metric: claim_005
+    description: "Flow metrics make DSS 2.0 cognizant of its own operational health."
+    threshold: null
+    operator: '>='
+
+  - id: epic-61-claim-001
+    suite: epic61
+    metric: claim_001
+    description: "Evidence Object schema v1 binds content CID with source metadata, operational context, policy binding, and review history."
+    threshold: null
+    operator: '>='
+
+  - id: epic-61-claim-002
+    suite: epic61
+    metric: claim_002
+    description: "The NHI registry persists the paper tuple A = ⟨id, sponsor, auth, cred, tools, mem, pol, log, state⟩."
+    threshold: null
+    operator: '>='
+
+  - id: epic-61-claim-003
+    suite: epic61
+    metric: claim_003
+    description: "Permit(A,t,x) is conjunctive and mapped to existing mechanisms."
+    threshold: null
+    operator: '>='
+
+  - id: epic-61-claim-004
+    suite: epic61
+    metric: claim_004
+    description: "NHI lifecycle events are verifiable on the chain from P2."
+    threshold: null
+    operator: '>='
+
+  - id: epic-61-claim-005
+    suite: epic61
+    metric: claim_005
+    description: "Forced amnesia on retirement deletes bounded memory keys."
+    threshold: null
+    operator: '>='
+
+  - id: epic-61-claim-006
+    suite: epic61
+    metric: claim_006
+    description: "Evidence Objects realise the paper's Evidence Fabric construct."
+    threshold: null
+    operator: '>='
+
+  - id: epic-62-claim-001
+    suite: epic62
+    metric: claim_001
+    description: "Trust Diagnostic classifications are derived from gate telemetry and linked to a Closure Fingerprint."
+    threshold: null
+    operator: '>='
+
+  - id: epic-62-claim-002
+    suite: epic62
+    metric: claim_002
+    description: "apps/did-issuer issues W3C VCs for Evidence Objects and epoch roots."
+    threshold: null
+    operator: '>='
+
+  - id: epic-62-claim-003
+    suite: epic62
+    metric: claim_003
+    description: "External verification validates a VC without internal ledger access."
+    threshold: null
+    operator: '>='
+
+  - id: epic-62-claim-004
+    suite: epic62
+    metric: claim_004
+    description: "Credibility outer product blocks cross-tenant handoff on any zero factor."
+    threshold: null
+    operator: '>='
+
+  - id: epic-62-claim-005
+    suite: epic62
+    metric: claim_005
+    description: "The Trust Diagnostic decides whether a signal is safe to use."
+    threshold: null
+    operator: '>='
+
+  - id: epic-62-claim-006
+    suite: epic62
+    metric: claim_006
+    description: "VCs are attestations of chain state, not proofs of trustworthiness."
+    threshold: null
+    operator: '>='
+
+  - id: epic-63-claim-001
+    suite: epic63
+    metric: claim_001
+    description: "The current production DSS backend stores ledger state in RocksDB on a Cloud Storage FUSE volume, which is a stopgap and not the target architecture."
+    threshold: null
+    operator: '>='
+
+  - id: epic-63-claim-002
+    suite: epic63
+    metric: claim_002
+    description: "The backend has no storage interface abstraction; LedgerStoreV2 is directly coupled to RocksDB."
+    threshold: null
+    operator: '>='
+
+  - id: epic-63-claim-003
+    suite: epic63
+    metric: claim_003
+    description: "The coordinator Postgres instance is provisioned but unused for tenant registry, epoch roots, or constitution/exodus entries."
+    threshold: null
+    operator: '>='
+
+  - id: epic-63-claim-004
+    suite: epic63
+    metric: claim_004
+    description: "A per-tenant SQLite file store in object storage is the intended ledger substrate, but it is not yet implemented."
+    threshold: null
+    operator: '>='
+
+  - id: epic-63-claim-005
+    suite: epic63
+    metric: claim_005
+    description: "Once the target architecture is implemented and verified on production, epics 55+ can make operationally true claims about ledger immutability, durability, and tenant isolation."
+    threshold: null
+    operator: '>='
+
+  - id: epic-63-claim-006
+    suite: epic63
+    metric: claim_006
+    description: "The Cloud Storage FUSE volume can be removed once the backend uses GCS client libraries and Postgres for durable state."
+    threshold: null
+    operator: '>='
+
+  - id: epic-63-claim-007
+    suite: epic63
+    metric: claim_007
+    description: "Existing RocksDB tenant data can be exported to the per-tenant SQLite format without data loss."
+    threshold: null
+    operator: '>='
+
+  - id: epic-63-claim-008
+    suite: epic63
+    metric: claim_008
+    description: "Production smoke tests can verify ledger durability across container restarts and tenant isolation."
+    threshold: null
+    operator: '>='
+
+  - id: epic-64-claim-001
+    suite: epic64
+    metric: claim_001
+    description: "The Control Plane has no deterministic impact calculator for connection removals or permission changes."
+    threshold: null
+    operator: '>='
+
+  - id: epic-64-claim-002
+    suite: epic64
+    metric: claim_002
+    description: "Removal rules for principals, ledgers, surfaces, and the orphan guard are not implemented as atomic ledger-backed operations."
+    threshold: null
+    operator: '>='
+
+  - id: epic-64-claim-003
+    suite: epic64
+    metric: claim_003
+    description: "Axiom runtime guards (membership precedes capability, path validity, surface proxy, organisation transitivity, no surface-in-surface, ledger self-reference, downstream consistency) are not enforced before graph mutations commit."
+    threshold: null
+    operator: '>='
+
+  - id: epic-64-claim-004
+    suite: epic64
+    metric: claim_004
+    description: "There is no dry-run impact-analysis API or confirmation-token flow for connection mutations."
+    threshold: null
+    operator: '>='
+
+  - id: epic-64-claim-005
+    suite: epic64
+    metric: claim_005
+    description: "Surfaces such as chat and decode do not yet consume the effective permission graph from the ledger at runtime, so Control Plane grants do not govern surface actions."
+    threshold: null
+    operator: '>='
+
+  - id: epic-64-claim-006
+    suite: epic64
+    metric: claim_006
+    description: "The Permission Editor is not preset-first and does not validate that a permission payload stays within the invariant bounds of its selected preset."
+    threshold: null
+    operator: '>='
+
+  - id: epic-64-claim-007
+    suite: epic64
+    metric: claim_007
+    description: "Once Epic 64 is implemented and verified on production, Control Plane connection mutations will be lawful, deterministic, and enforced on downstream surfaces."
+    threshold: null
+    operator: '>='
