@@ -1,0 +1,361 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dualsubstrate.com/schemas/peo-envelope-v2.0.schema.json",
+  "title": "PEO Envelope v2.0 — Portable Evidence-Object",
+  "description": "DSS 2.0 portable evidence-object envelope. Logical zone model (Z0-Z9) per DSS-2.0-PEO-payload-requirements.md §4. The LedgerEntry wrapper (key/state/created_at/notes/pinned) is retained for 1.0 compatibility (PEO-CORE-08); the constructor flattens zones to 1.0 field names on write (H4). Canonical serialization: sorted keys, stable arrays, decimal-string big-integers, UTF-8 (PEO-CORE-04). v2.0.1 amendment (2026-07-31, DSS_Ingestion_Requirements_v0.2.1 §7.1): +z2_content.bodies[].span (optional), +z3_chain.relations{depends_on, derived_from} (required, empty-valid). v2.0.2 amendment (2026-07-31, DSS-2.0-physical-twin-class-addendum): +peo_class P (physical/digital-twin object passport), +z10_physical zone.",
+  "type": "object",
+  "required": ["key", "state", "created_at"],
+  "properties": {
+    "key": {"type": "string", "pattern": "^[^:]+:.+$", "description": "{namespace}:{identifier} (PEO-ADDR-03)"},
+    "state": {
+      "type": "object",
+      "required": ["metadata"],
+      "properties": {
+        "coordinates": {"type": "object"},
+        "phase": {"type": "string"},
+        "metadata": {"$ref": "#/$defs/peo_metadata"}
+      }
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "notes": {"type": ["string", "null"]},
+    "pinned": {"type": "boolean"}
+  },
+  "$defs": {
+    "peo_metadata": {
+      "type": "object",
+      "required": ["z0_envelope", "z1_identity", "z3_chain", "z4_verdict"],
+      "properties": {
+        "z0_envelope": {"$ref": "#/$defs/z0"},
+        "z1_identity": {"$ref": "#/$defs/z1"},
+        "z2_content": {"$ref": "#/$defs/z2"},
+        "z3_chain": {"$ref": "#/$defs/z3"},
+        "z4_verdict": {"$ref": "#/$defs/z4"},
+        "z5_e6": {"$ref": "#/$defs/z5"},
+        "z6_prime": {"$ref": "#/$defs/z6"},
+        "z7_defeasible": {"$ref": "./defeasible-fragment-v1.schema.json"},
+        "z8_value": {"$ref": "./poe-value-events-v1.schema.json#/$defs/z8_value_lineage"},
+        "z9_efficiency": {"$ref": "#/$defs/z9"},
+        "z10_physical": {"$ref": "#/$defs/z10"}
+      },
+      "allOf": [
+        {"if": {"properties": {"z0_envelope": {"properties": {"peo_class": {"const": "E"}}}}},
+         "then": {"required": ["z0_envelope","z1_identity","z2_content","z3_chain","z4_verdict","z5_e6","z6_prime","z9_efficiency"],
+                  "description": "PEO-E (Evidence): Z0-Z6, Z9 required; Z7 SHOULD; Z8 SHALL for value-bearing"}},
+        {"if": {"properties": {"z0_envelope": {"properties": {"peo_class": {"const": "A"}}}}},
+         "then": {"required": ["z0_envelope","z1_identity","z3_chain","z4_verdict","z5_e6","z8_value"],
+                  "description": "PEO-A (Act/Speech Act)"}},
+        {"if": {"properties": {"z0_envelope": {"properties": {"peo_class": {"const": "V"}}}}},
+         "then": {"required": ["z0_envelope","z1_identity","z3_chain","z4_verdict","z7_defeasible","z8_value"],
+                  "description": "PEO-V (Verdict/re-evaluation)"}},
+        {"if": {"properties": {"z0_envelope": {"properties": {"peo_class": {"const": "T"}}}}},
+         "then": {"required": ["z0_envelope","z1_identity","z3_chain","z4_verdict","z8_value"],
+                  "description": "PEO-T (Transfer/Attestation)"}},
+        {"if": {"properties": {"z0_envelope": {"properties": {"peo_class": {"const": "P"}}}}},
+         "then": {"required": ["z0_envelope","z1_identity","z3_chain","z4_verdict","z10_physical"],
+                  "description": "PEO-P (Physical/digital-twin object passport): Z0,Z1,Z3,Z4,Z10 required; Z2 SHOULD hold observation bodies by ref; Z8 SHALL for value-bearing twins"}}
+      ]
+    },
+    "z0": {
+      "type": "object",
+      "required": ["peo_schema_version", "peo_class", "glossary_version", "elephant_closure_alg"],
+      "properties": {
+        "peo_schema_version": {"const": "2.0"},
+        "peo_class": {"enum": ["E", "A", "V", "T", "P"], "description": "E=Evidence, A=Act, V=Verdict, T=Transfer, P=Physical/digital-twin object passport (v2.0.2)"},
+        "glossary_version": {"type": "string", "description": "docs/glossary/elephant-dss.yaml version (PEO-CORE-03)"},
+        "elephant_closure_alg": {"type": "string", "description": "e.g. elephant.closure.v1 or kernel-fallback id"},
+        "supersedes": {"type": ["string", "null"], "description": "peo_ref of superseded PEO (PEO-GOV-06)"}
+      },
+      "additionalProperties": false
+    },
+    "z1": {
+      "type": "object",
+      "required": ["coord", "evidence_cid", "canonical_subject", "peo_ref"],
+      "properties": {
+        "coord": {"type": "string", "description": "Namespace address (kernel symbol, unchanged)"},
+        "evidence_cid": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "canonical_subject": {"type": "string", "pattern": "^did:(web|key|crdt):.+$"},
+        "peo_ref": {"type": "string", "description": "{ledger_canonical_subject}#{coord} (PEO-ADDR-02)"},
+        "session_id": {"type": ["string", "null"]},
+        "turn_id": {"type": ["string", "null"]},
+        "context_id": {"type": ["string", "null"]},
+        "taxonomy_provenance": {"type": ["object", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "z2": {
+      "type": "object",
+      "required": ["bodies"],
+      "properties": {
+        "bodies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["role", "cid"],
+            "properties": {
+              "role": {"type": "string", "description": "e.g. user_message, assistant_reply, attachment"},
+              "cid": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+              "redacted": {"type": "boolean", "default": false},
+              "redaction_marker_cid": {"type": ["string", "null"], "description": "Required when redacted=true (H9)"},
+              "span": {
+                "type": ["object", "null"],
+                "properties": {
+                  "start": {"type": ["integer", "null"], "minimum": 0},
+                  "end": {"type": ["integer", "null"], "minimum": 0},
+                  "unit_type": {"type": ["string", "null"], "description": "sentence|clause|paragraph|section|ast_node|time_range"},
+                  "start_ms": {"type": ["integer", "null"], "minimum": 0},
+                  "end_ms": {"type": ["integer", "null"], "minimum": 0}
+                },
+                "additionalProperties": false,
+                "description": "CHK-04 structural range (v2.0.1 amendment): token/byte range, or temporal range for transcript/MM content"
+              }
+            },
+            "if": {"properties": {"redacted": {"const": true}}},
+            "then": {"required": ["redaction_marker_cid"]}
+          },
+          "description": "Content by reference only (§4.2 invariant 3; TKT-005)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "z3": {
+      "type": "object",
+      "required": ["entry_hash", "parent_hash", "epoch", "provenance_commit", "relations"],
+      "properties": {
+        "entry_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "parent_hash": {"type": "string", "description": "sha256:... or 'genesis'"},
+        "epoch": {"type": "integer", "minimum": 0, "description": "floor(unix/345600), 4-day cycle"},
+        "epoch_root_ref": {"type": ["string", "null"]},
+        "provenance_commit": {"type": "string"},
+        "relations": {
+          "type": "object",
+          "required": ["depends_on", "derived_from"],
+          "properties": {
+            "depends_on": {"type": "array", "items": {"type": "string"}, "description": "peo_ref list (PEO-ADDR-02 format)"},
+            "derived_from": {"type": "array", "items": {"type": "string"}, "description": "peo_ref list of contributing workspace PEOs"}
+          },
+          "additionalProperties": false,
+          "description": "REL-02/04 (v2.0.1 amendment): empty array valid, omission invalid"
+        },
+        "export_block": {
+          "type": ["object", "null"],
+          "required": ["origin_ledger_did", "export_signature", "exported_at", "exporter_principal"],
+          "properties": {
+            "origin_ledger_did": {"type": "string"},
+            "chain_segment": {"type": ["object", "null"]},
+            "export_signature": {"type": "string", "description": "Principal DID signature or assurance-HMAC ref (PEO-MESH-02)"},
+            "exported_at": {"type": "string", "format": "date-time"},
+            "exporter_principal": {"type": "string"}
+          },
+          "description": "Present only on exported PEOs (PEO-MESH-01)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "z4": {
+      "type": "object",
+      "required": ["hard_gates", "patch_statuses", "checksum_336_pass", "lawfulness_level", "A", "U", "E", "V", "closure_fingerprint", "proof_tag", "efficiency_eta", "soil_grade"],
+      "properties": {
+        "hard_gates": {
+          "type": "object",
+          "required": ["L_top", "K_t", "P_t", "E_t"],
+          "properties": {"L_top": {"type": "integer"}, "K_t": {"type": "integer"}, "P_t": {"type": "integer"}, "E_t": {"type": "integer"}}
+        },
+        "patch_statuses": {
+          "type": "object",
+          "required": ["patch_001","patch_002","patch_003","patch_004","patch_005","patch_006","patch_007","patch_008","patch_009","patch_010"],
+          "patternProperties": {"^patch_0(0[1-9]|10)$": {"type": "boolean"}},
+          "additionalProperties": false,
+          "description": "Canonical order = PATCH_REGISTRY.e6_bit_index (PEO-E6-02)"
+        },
+        "checksum_336_pass": {"type": "boolean", "description": "= all(patch_statuses) (governance_engine.py:451)"},
+        "lawfulness_level": {"type": "integer", "minimum": 0, "maximum": 3},
+        "A": {"type": "number", "minimum": 0, "maximum": 1},
+        "U": {"type": "number", "minimum": 0, "maximum": 1},
+        "E": {"type": "number", "minimum": 0, "maximum": 1},
+        "V": {"type": "number", "minimum": 0, "maximum": 1, "description": "V = A*U*E, multiplicative, non-compensatory (PEO-GOV-04)"},
+        "closure_fingerprint": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "proof_tag": {"enum": ["+D", "+d", "-d", "-D"], "description": "§8.5 derivation table (PEO-GOV-03)"},
+        "efficiency_eta": {"type": "number", "minimum": 0, "maximum": 1, "description": "H2: fingerprint-visible efficiency"},
+        "soil_grade": {"enum": ["G0", "G1", "G2", "G3", "G4"], "description": "Cached projection only; authoritative value derived per QSL-01"},
+        "governance_detail": {"type": ["object", "null"], "description": "Full governance.{eq6,L,H,P,E,U,V} detail (carried from 1.0)"}
+      },
+      "additionalProperties": false
+    },
+    "z5": {
+      "type": "object",
+      "required": ["e6_header_v0_hex", "e6_header_v0_fields"],
+      "properties": {
+        "e6_header_v0_hex": {"type": "string", "pattern": "^[0-9A-Fa-f]{32}$", "description": "16 bytes, frozen v0 format (PEO-E6-01)"},
+        "e6_header_v0_fields": {"type": "object"},
+        "e6_header_v1_ext_hex": {"type": ["string", "null"], "pattern": "^[0-9A-Fa-f]{8}$", "description": "4-byte v1 extension (PEO-E6-02/03); see e6-header-v1.layout.json"},
+        "e6_seq": {"type": ["integer", "null"]},
+        "e6_policy_mode": {"type": ["integer", "null"]},
+        "e6_rollout_flags": {"type": ["object", "null"], "description": "E6_SCORING_STRICT etc. (PEO-E6-07)"}
+      },
+      "additionalProperties": false
+    },
+    "z6": {
+      "type": "object",
+      "required": ["body_prime", "token_prime_product", "prime_lattice_exponents"],
+      "properties": {
+        "body_prime": {"type": "string", "description": "Decimal string (big-int safety, §4.2)"},
+        "token_primes": {"type": ["array", "null"], "items": {"type": "string"}},
+        "token_prime_product": {"type": "string", "description": "Decimal string; = prod(token_primes) (PEO-PRIME-01)"},
+        "prime_multiplicative_value": {"type": ["string", "null"]},
+        "prime_lattice_exponents": {"type": "object"},
+        "p_adic_write_cost": {"type": ["number", "null"]},
+        "ciu": {"type": ["object", "null"], "description": "CIU_FACTORS/KERNEL_EXPONENTS/MMF_PROJECTIONS/ENTRY_CLASS/FLOW_RULE_TAGS/RELATIONSHIP_LINKS (PEO-PRIME-05)"}
+      },
+      "additionalProperties": false
+    },
+    "z9": {
+      "type": "object",
+      "required": ["telemetry", "coherence_tax", "gravity_penalty"],
+      "properties": {
+        "telemetry": {
+          "type": "object",
+          "required": ["tokens_in", "tokens_out", "wall_ms"],
+          "properties": {
+            "tokens_in": {"type": "integer", "minimum": 0},
+            "tokens_out": {"type": "integer", "minimum": 0},
+            "wall_ms": {"type": "number", "minimum": 0},
+            "cpu_s": {"type": ["number", "null"]},
+            "gpu_s": {"type": ["number", "null"]},
+            "cost_usd": {"type": ["number", "null"]},
+            "joules": {"type": ["number", "null"]}
+          },
+          "description": "H1 telemetry contract — sufficient to recompute A_corr/efficiency_eta (PEO-EFF-01)"
+        },
+        "coherence_tax": {"type": "object", "description": "patch_006 coherence-tax block (PEO-EFF-03)"},
+        "gravity_penalty": {"type": "number"},
+        "p_adic_write_cost": {"type": ["number", "null"]},
+        "quality_tier": {"enum": ["express", "stabilise", "probe", "halt"]},
+        "persistence_mode": {"enum": ["tower", "standard", "ephemeral"], "description": "Projection of soil_grade (QSL-03), never independently assigned"}
+      },
+      "additionalProperties": false
+    },
+    "z10": {
+      "type": "object",
+      "required": ["mobility_classification", "spatial_anchor", "entropy_profile", "decay_binding", "temporal_state_log"],
+      "properties": {
+        "mobility_classification": {
+          "type": "object",
+          "required": ["mobility_type", "is_movable"],
+          "properties": {
+            "mobility_type": {"enum": ["MOVABLE_ITEM", "FIXED_POLYGON", "FIXED_SITE", "TEMPORARY_ITEM", "EPHEMERAL_PHENOMENON"]},
+            "is_movable": {"type": "boolean"},
+            "ephemeral_classification": {"enum": ["STABLE", "SEASONAL", "EPHEMERAL", "HIGHLY_EPHEMERAL", null]},
+            "estimated_lifespan_seconds": {"type": ["integer", "null"], "minimum": 0}
+          },
+          "additionalProperties": false,
+          "description": "PHY-04; FIXED_* types must have is_movable=false"
+        },
+        "spatial_anchor": {
+          "type": "object",
+          "required": ["type", "coordinates", "crs"],
+          "properties": {
+            "type": {"enum": ["Point", "LineString", "Polygon", "MultiPolygon"]},
+            "coordinates": {"type": "array", "description": "GeoJSON positions; [lon, lat] or [lon, lat, alt_m]"},
+            "crs": {"type": "string", "description": "default EPSG:4326-WGS84"},
+            "altitude_m": {"type": ["number", "null"]},
+            "perimeter_error_m": {"type": ["number", "null"], "minimum": 0},
+            "spatial_justification": {"type": ["string", "null"]}
+          },
+          "additionalProperties": false,
+          "description": "PHY-03: GeoJSON geometry + CRS; physical anchor, distinct from abstract state.coordinates"
+        },
+        "entropy_profile": {
+          "type": "object",
+          "required": ["degradation_vector", "current_state"],
+          "properties": {
+            "degradation_vector": {"enum": ["DEGENERATIVE", "REGENERATIVE", "STATIC", "DYNAMIC"]},
+            "primary_driver": {"type": ["string", "null"]},
+            "half_life_minutes": {"type": ["number", "null"], "exclusiveMinimum": 0},
+            "current_state": {
+              "type": "object",
+              "required": ["confidence_score", "last_measured_state"],
+              "properties": {
+                "confidence_score": {"type": "number", "minimum": 0, "maximum": 1},
+                "last_measured_state": {"type": "string"},
+                "projected_zero_state_timestamp": {"type": ["string", "null"], "format": "date-time", "description": "measured/forecast data (wall-clock allowed as DATA)"},
+                "projected_zero_state_epoch": {"type": ["integer", "null"], "minimum": 0, "description": "PHY-05: dual-stamp; governance windows use epochs (C4)"}
+              },
+              "additionalProperties": false
+            },
+            "regenerative": {
+              "type": ["object", "null"],
+              "properties": {
+                "is_self_healed": {"type": "boolean"},
+                "regrowth_triggers": {"type": "array", "items": {"type": "string"}}
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "decay_binding": {
+          "type": "object",
+          "required": ["entropy_driven_decay", "retention_tier_derived"],
+          "properties": {
+            "entropy_driven_decay": {"type": "boolean", "description": "PHY-07: half-life parameterises retention decay schedule"},
+            "decay_function": {"type": ["string", "null"], "description": "e.g. logarithmic_v_decay (constants.py:225 LOAM topology)"},
+            "retention_tier_derived": {"enum": ["Sand", "Silt", "Loam", "Clay"], "description": "DERIVED projection, never assigned (QSL-03)"},
+            "zero_state_action": {"enum": ["retire_inert", "review_hold"], "description": "PHY-07: zero-state => retirement/inertness, NEVER deletion (C5/LDR-04)"}
+          },
+          "additionalProperties": false
+        },
+        "temporal_state_log": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["state_sequence", "recorded_at", "observed_data", "recorder_did"],
+            "properties": {
+              "state_sequence": {"type": "integer", "minimum": 1, "description": "strictly increasing (PHY-06)"},
+              "recorded_at": {"type": "string", "format": "date-time"},
+              "epoch": {"type": ["integer", "null"], "minimum": 0},
+              "observed_data": {
+                "type": "object",
+                "required": ["integrity_hash"],
+                "properties": {"integrity_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}},
+                "additionalProperties": true,
+                "description": "arbitrary measurement map + full integrity hash (N-C5 correction)"
+              },
+              "recorder_did": {"type": "string", "description": "sensor/IoT/observer DID"},
+              "observation_peo_ref": {"type": ["string", "null"], "description": "PHY-06: each log entry SHOULD be minted as its own class-E observation PEO"}
+            },
+            "additionalProperties": false
+          },
+          "description": "UNTP DTE-equivalent: timestamped physical-state transitions"
+        },
+        "physical_carrier": {
+          "type": ["object", "null"],
+          "properties": {
+            "carrier_types": {"type": "array", "items": {"enum": ["DATAMATRIX_2D", "QR", "RFID", "TAMPER_SEAL", "NONE"]}},
+            "carrier_ids": {"type": "array", "items": {"type": "string"}}
+          },
+          "description": "link to physical data carriers (UNTP DPP carrier rule)"
+        },
+        "facility_ref": {"type": ["string", "null"], "description": "DFR link: peo_ref of class-P FIXED_SITE twin (PHY-08)"},
+        "conformity_refs": {"type": "array", "items": {"type": "string"}, "description": "DCC links: class-V verdict peo_refs by R2-disjoint issuers (PHY-08)"},
+        "origin": {
+          "type": ["object", "null"],
+          "properties": {
+            "jurisdiction": {"type": ["string", "null"]},
+            "geolocation": {"type": ["string", "null"]},
+            "environmental_zone": {"type": ["string", "null"]}
+          },
+          "description": "UNTP provenance rules"
+        },
+        "selective_disclosure": {
+          "type": ["object", "null"],
+          "properties": {
+            "zk_proof_refs": {"type": "array", "items": {"type": "string"}, "description": "consistency_zk proofs (constants.py:232)"},
+            "redacted_fields": {"type": "array", "items": {"type": "string"}, "description": "H9/RDX redaction markers"}
+          },
+          "description": "PHY-09: prove integrity/half-life without leaking private fields"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Physical/digital-twin object passport (v2.0.2, class P). Incorporates Evidence-Object-Passport + UNTP four-tier notes as corrected (N-C1..C5): no new DID method (peo_ref is identity), zero-state dual-stamped with epoch governance (C4), mesh resolution not central register, zero-state => retire never delete (C5)."
+    }
+  }
+}

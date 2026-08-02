@@ -1,0 +1,52 @@
+# packages/poe/weights-v1.yaml — PoE value weights (seed policy)
+# Per DSS-2.0-PEO-payload-requirements.md §6.2 (PEO-POE-01/02) and H8:
+# weights live in versioned policy, are ledger-governed, and changes are
+# non-retroactive (enrichment events carry the weights_version they were
+# computed under; re-derivation replays with historical weights).
+# Seed posture: conservative-uniform — no component privileged until
+# production telemetry justifies differentiation via governance proposal.
+weights_version: "poe-weights/v1.0.0"
+status: seed
+governance:
+  change_control: ledger_governed_proposal
+  retroactivity: none            # new weights apply to new events only
+  requires_claims:               # dss-system claims guarding changes
+    - PEO-POE-01
+    - PEO-POE-02
+components:
+  # c_i in V_construct = 336_pass * sum(w_i * c_i); all c_i in [0,1]
+  # except antecedent_depth (count, normalized by depth_norm).
+  gate_quality:
+    weight: 0.20
+    source_fields: [z4_verdict.V, z4_verdict.lawfulness_level, z4_verdict.patch_statuses]
+    note: "336 structural quality; already zero-knobbed — weight kept modest to avoid double-counting"
+  efficiency_eta:
+    weight: 0.15
+    source_fields: [z4_verdict.efficiency_eta, z9_telemetry]
+    note: "Gravity Tax pressure: efficient construction worth more"
+  provenance_completeness:
+    weight: 0.20
+    source_fields: [z3_chain, z2_bodies.redaction_markers]
+    note: "full body/parent/redaction-marker coverage"
+  defeasible_completeness:
+    weight: 0.15
+    source_fields: [z7_defeasible]
+    note: "named defeaters + superiority + MECE posture present and linter-clean"
+  antecedent_depth:
+    weight: 0.20
+    source_fields: [z3_chain.parent_hash, z8_value.consolidation_lineage]
+    depth_norm: 10               # c = min(depth, depth_norm)/depth_norm
+    cross_ledger_multiplier: 1.5 # verified antecedents on other ledgers weighted higher
+    note: "work-to-rights: depth earns standing, never transferable (PEO-POE-09)"
+  mece_posture:
+    weight: 0.10
+    source_fields: [z7_defeasible.mece.score]
+    note: "MECE linter score on the defeasible fragment"
+normalization:
+  sum_weights: 1.00
+  zero_knob: "336_pass == false => V_construct = 0.0 exactly"
+invariants:
+  - "V_construct is DERIVED (replay of lineage); never stored as mutable counter (PEO-POE-02)"
+  - "value vests mesh-portable only at soil_grade G4 CLAY (PMO-06)"
+  - "self-dealing excluded: REUSE events with issuer == author are void (§6.6)"
+  - "velocity caps apply per epoch per principal (§6.6)"

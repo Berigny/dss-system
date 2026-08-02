@@ -1,0 +1,47 @@
+# ladder-template-v1.yaml — C-series ladder topology template (policy, NOT invariant)
+# Per C7: ratios are policy-versioned and tunable by ledger governance.
+# Per GRP-03: every layer below is a COMPARATOR layer — provenance amplifier,
+# not consensus participant. Finality = ledger + 336 gate, unchanged at any scale.
+ladder_template_version: "ladder-template/v1.0.0"
+binding_corrections: [C1, C3, C5, C6, C7]   # see quaternary-minting doc §3.2
+layers:
+  - name: C10
+    role: "cohort — origin review cell"
+    composition: "10 Principals (1 cohort)"
+    default_ratio: 10
+    duties: ["origin attestation", "first-pass comparator review", "SAND/SILT grade review claims"]
+    bft_note: "tolerates 3 Byzantine members for comparator purposes (3f+1=10, f=3); comparator disagreement never blocks finality"
+  - name: C50
+    role: "cluster — cross-cohort comparator"
+    composition: "5 cohorts (50 Principals)"
+    default_ratio: 5
+    duties: ["cross-cohort consistency (consistency_zk spot checks)", "SILT review posture arbitration", "LOAM promotion witnesses"]
+    bft_note: "comparator quorum 34/50 (2f+1, f=16); disagreement escalates to Grace FSM, never halts"
+  - name: C100
+    role: "domain — policy cell"
+    composition: "2 clusters (100 Principals)"
+    default_ratio: 2
+    duties: ["glossary/weights policy proposals", "CLAY admission review panel", "defeat propagation routing (hierarchical, PEO-MESH-07)"]
+    bft_note: "2-of-2 cluster agreement for policy proposals; disagreement keeps prior policy version (fail-closed to status quo)"
+  - name: C1000
+    role: "region — stewardship pool"
+    composition: "10 domains (1000 Principals)"
+    default_ratio: 10
+    duties: ["TC3-derived steward pool (C6)", "waterlogging guard reviews (Clay velocity caps)", "epoch anchor co-signing"]
+    bft_note: "steward pool derived per epoch; pool size is OUTPUT of derivation, never a membership quota (C6)"
+  - name: C10000
+    role: "federation — inter-region mirror mesh"
+    composition: "10 regions (10000 Principals)"
+    default_ratio: 10
+    duties: ["cross-ledger mirror verification", "epoch anchor federation", "CUSTODY_TRANSFER final witnesses"]
+    bft_note: "federation of C1000s, NOT a deeper tree (group-ontology S3); inter-region agreement is mirror-consistency, not consensus"
+scaling_laws:
+  L1: "every 10x adds exactly ONE comparator layer; consensus depth is always 1 (the ledger)"
+  L2: "comparator latency budget stays p95 <= 50ms per layer (PEO-MESH-05); breaching budget triggers split (S1)"
+  L3: "336 binds to per-PEO equation valuations at EVERY layer — never to member counts (C1)"
+  L4: "branch-scoped freeze only; no ladder layer can halt the mesh (C3, GFSM-02)"
+  L5: "slashing = trust-class demotion with full lineage preserved; deletion is never a ladder action (C5)"
+attack_resistance_ref: "DSS-2.0-ladder-bft-foundations.md §6 (ATK-01..ATK-07)"
+governance:
+  ratio_change: "ledger proposal; applies from next epoch; non-retroactive"
+  requires_claims: [LDR-01, LDR-02, LDR-03, LDR-04, LDR-05]

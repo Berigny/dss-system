@@ -1,0 +1,160 @@
+{
+  "artifact": "e6-header-v1-layout",
+  "version": "v1",
+  "date": "2026-07-30",
+  "basis": {
+    "dss-codebase": "ce7a27b8",
+    "v0": "fieldx_kernel/e6_packet.py (MAGIC 0x4347, ver=1, fmt=0, big-endian MSB-first)",
+    "v1_ext": "apps/middleware/utils/e6_packet.py (20-byte: v0 prefix + 4-byte ext, ext bits LSB-numbered)",
+    "reserved_allocation": "PEO-E6-03: ext bits 26..27 proof_tag (00=+D,01=+d,10=-d,11=-D), 28 enrichment, 29 custody, 30..31 reserved=0"
+  },
+  "crc": {
+    "algorithm": "CRC-16/CCITT-FALSE",
+    "poly": "0x1021",
+    "init": "0xFFFF",
+    "scope": "bytes 0..13 (v0 prefix only \u2014 frozen); extension integrity carried by envelope signature (PEO-E6-06)"
+  },
+  "ext_encoding": "ext_u32 = patch_status | (checksum336<<10) | (proof_tag<<26) | (enrichment<<28) | (custody<<29); big-endian bytes",
+  "vectors": [
+    {
+      "name": "clay-mint-express-wu",
+      "desc": "G4 CLAY mint: full 336, EXPRESS, LEDGER_COMMIT, enrichment event present",
+      "v0_fields": {
+        "mode": 3,
+        "ptype": 0,
+        "law": 3,
+        "route": 3,
+        "node": 1,
+        "flags": 15,
+        "dW": 0,
+        "seq": 5,
+        "t_ms": 500,
+        "V_q": 61026
+      },
+      "ext_fields": {
+        "patch_status": 1023,
+        "checksum336": 336,
+        "proof_tag": 1,
+        "enrichment": 1,
+        "custody": 0
+      },
+      "v0_hex": "434710CF1F000000050001F4EE6259EB",
+      "ext_hex": "140543FF",
+      "full_20byte_hex": "434710CF1F000000050001F4EE6259EB140543FF",
+      "crc16": "0x59EB",
+      "crc_ok": true
+    },
+    {
+      "name": "loam-stabilise-local",
+      "desc": "G3 LOAM: partial composite, STABILISE, LOCAL_COMMIT, patches 001..009 pass, patch_010 pending",
+      "v0_fields": {
+        "mode": 2,
+        "ptype": 0,
+        "law": 2,
+        "route": 2,
+        "node": 3,
+        "flags": 15,
+        "dW": 0,
+        "seq": 12,
+        "t_ms": 2048,
+        "V_q": 38000
+      },
+      "ext_fields": {
+        "patch_status": 511,
+        "checksum336": 0,
+        "proof_tag": 1,
+        "enrichment": 0,
+        "custody": 0
+      },
+      "v0_hex": "4347108A3F0000000C0008009470FCDB",
+      "ext_hex": "040001FF",
+      "full_20byte_hex": "4347108A3F0000000C0008009470FCDB040001FF",
+      "crc16": "0xFCDB",
+      "crc_ok": true
+    },
+    {
+      "name": "sand-probe-hr",
+      "desc": "G1 SAND: volatile ingress, PROBE, LOCAL_COMMIT volatile, low V",
+      "v0_fields": {
+        "mode": 1,
+        "ptype": 1,
+        "law": 1,
+        "route": 2,
+        "node": 5,
+        "flags": 7,
+        "dW": 0,
+        "seq": 1,
+        "t_ms": 100,
+        "V_q": 12000
+      },
+      "ext_fields": {
+        "patch_status": 51,
+        "checksum336": 0,
+        "proof_tag": 2,
+        "enrichment": 0,
+        "custody": 0
+      },
+      "v0_hex": "4347105657000000010000642EE06858",
+      "ext_hex": "08000033",
+      "full_20byte_hex": "4347105657000000010000642EE0685808000033",
+      "crc16": "0x6858",
+      "crc_ok": true
+    },
+    {
+      "name": "collapse-halt-block",
+      "desc": "G0 GATE_COLLAPSE: HALT, BLOCK, no checksum, -D",
+      "v0_fields": {
+        "mode": 0,
+        "ptype": 1,
+        "law": 0,
+        "route": 0,
+        "node": 7,
+        "flags": 0,
+        "dW": 2,
+        "seq": 33,
+        "t_ms": 999,
+        "V_q": 0
+      },
+      "ext_fields": {
+        "patch_status": 0,
+        "checksum336": 0,
+        "proof_tag": 3,
+        "enrichment": 0,
+        "custody": 0
+      },
+      "v0_hex": "4347101070020000210003E700002AF0",
+      "ext_hex": "0C000000",
+      "full_20byte_hex": "4347101070020000210003E700002AF00C000000",
+      "crc16": "0x2AF0",
+      "crc_ok": true
+    },
+    {
+      "name": "clay-custody-transfer",
+      "desc": "G4 CLAY custody transfer: +D, enrichment+custody set, CA packet",
+      "v0_fields": {
+        "mode": 3,
+        "ptype": 3,
+        "law": 3,
+        "route": 3,
+        "node": 2,
+        "flags": 15,
+        "dW": 0,
+        "seq": 77,
+        "t_ms": 4000,
+        "V_q": 62000
+      },
+      "ext_fields": {
+        "patch_status": 1023,
+        "checksum336": 336,
+        "proof_tag": 0,
+        "enrichment": 1,
+        "custody": 1
+      },
+      "v0_hex": "434710FF2F0000004D000FA0F2307098",
+      "ext_hex": "300543FF",
+      "full_20byte_hex": "434710FF2F0000004D000FA0F2307098300543FF",
+      "crc16": "0x7098",
+      "crc_ok": true
+    }
+  ]
+}

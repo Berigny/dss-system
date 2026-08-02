@@ -1,0 +1,87 @@
+# ingestion-policy-v1.yaml — ingestion policy constants (ledger-governed, next-epoch, non-retroactive)
+# Shipped with DSS_Ingestion_Requirements_v0.2.1 (all ODs resolved 2026-07-31).
+ingestion_policy_version: "ingestion-policy/v1.0.0"
+status: seed
+governance:
+  change_control: ledger_governed_proposal
+  retroactivity: none
+  applies_from: next_epoch
+
+atoms:
+  # ATM-03 (OD-confirmed): named policy constant replacing the magic literal at
+  # atom_extractor.py:64 ("Default fertile-pending exponent; keeps individual
+  # chunks in LOAM unless reinforced").
+  ATOM_DEFAULT_V: 3
+  primes_source: "constants.QUATERNARY_GATE_TO_PRIME (structural primes 17/19/137) — ATM-02"
+
+minting:
+  # MNT-02 (OD-1): chunk ROUTING follows the verified pipeline (LOAM default via v=3),
+  # but minted grade is capped until composite pass + disjoint review.
+  chunk_mint_cap: G1
+  cap_lift_conditions:
+    - composite_checksum_336_pass_on_stitch_manifest   # ATM-05
+    - disjoint_comparator_review_claim                 # R2, class-V PEO
+  # MNT-05 (OD-3): velocity caps per Principal per epoch
+  velocity_caps:
+    chunk_peos_per_epoch: 500
+    manifest_acceptances_per_epoch: 50
+  # MNT-06: CLAY admission
+  clay_admission:
+    sustained_336_window_epochs: 1
+    panel: "C100 domain panel (ladder-template-v1.yaml)"
+
+witness_bands:     # STC-07 (OD-6): stitch-manifest acceptance witnesses
+  - band: lt_100
+    max_chunks: 99
+    witnesses: 3
+    scope: cohort_C10
+  - band: 100_to_999
+    max_chunks: 999
+    witnesses: 5
+    scope: cohort_C10
+  - band: gte_1000
+    max_chunks: null
+    witnesses: 5
+    scope: cross_cohort_C50
+
+genesis:
+  # GEN-02: epoch-counted cooling (C4), TC3-derived panel (C6)
+  override_panel_size: 5
+  override_quorum: 4
+  cooling_epochs: 2            # ~= 8 days at 4-day epochs
+
+chunk_grammars:    # CHK-07 registry, version-locked per content type
+  document: "clause-chunker/1.0 (backend/ingestion/chunker.py @ ce7a27b8)"
+  code: "document-fallback (pending tree-sitter, OD-4, ticket HENGE-130)"
+  transcript: "transcript-chunker/0.1 (planned, OD-7, ticket HENGE-141): document clause core + time_range spans"
+  multimodal_av: "HORIZON"
+
+mm_activation:     # OD-7
+  first_modality: transcript
+  anchor_rule: "audio/video source PEOs anchor to transcript chunks via relations.depends_on (MM-05)"
+  span_fields: [start_ms, end_ms]   # MM-03/MM-08; unit_type: time_range
+
+qp_rel:            # OD-5
+  storage_mode: incremental_at_S8
+  conformance_oracle: full_rebuild_from_ledger
+  claim: ING-REPLAY-02           # incremental == rebuild
+
+invariants:
+  - "policy is versioned and ledger-governed; changes apply next epoch, non-retroactive (C7 pattern)"
+  - "chunking tunables remain exactly one: KERNEL_CHUNK_MAX_TOKENS (CHK-06); this file holds governance values, not chunking thresholds"
+  - "336 binds per-object; nothing in this file redefines the gate (C1)"
+
+class_p:              # physical/digital-twin twins (envelope v2.0.2; addendum v1.0.1 — ODs resolved 2026-07-31)
+  mobility_enum: frozen_minor_version_only   # OD-P1: extend only via schema minor version
+  observation_caps:                          # OD-P2: per-recorder, NOT per-twin
+    observation_peos_per_recorder_per_epoch: 2000   # ~3-min sweep cadence across a 4-day epoch; telemetry-tunable
+  log_compaction:                            # OD-P2
+    cadence: per_epoch
+    artifact: "stitch-manifest (class E) referencing that epoch's observation PEOs"
+    exactly_one_per_twin_per_epoch: true
+    depends_on_mirrors_children: true        # STC-08 applies (claim ING-STC-01)
+  cross_border:                              # OD-P3
+    mechanism: export_transforms             # at mesh export (PEO-MESH-01)
+    envelope_stability: "no regional fields in schema; transforms carry regional vocabularies"
+    known_profiles: [eu_dpp, cen_cenelec]
+    first_profile: eu_dpp

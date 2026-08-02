@@ -296,4 +296,69 @@ claims:
       - dss-codebase/packages/gate/fingerprint_schema_v1.json
       - dss-codebase/apps/backend/backend/tests/test_fingerprint_api.py
 
+  # --- STC-inspired verification layer (DSS-2.0-STC-verification-layer.md §5) ---
+  - id: VFY-GATE-01
+    source: DSS-2.0-STC-verification-layer.md §4
+    quote: "four-check attestation gate (type->path->confluence->cocycle, in order) runs on every ledger-accept; failure quarantines branch-scoped (GFSM-02)"
+    claim: The four-check attestation gate runs in order on every PEO ledger-accept and branch-scoped quarantine is applied on failure.
+    harness: dss-codebase/packages/ledger/dss_symbolic_ledger/verification/gate.py
+    measurement: Gate runs on 5 shipped examples; forced-failure vectors are quarantined.
+    status: pending
+    evidence:
+      - dss-system/fixtures/dss-2.0/examples
+      - backlog_reqs/epic_reviews/epic-66-dss-2-0-stc-verification-layer/tickets/DSS-6602-build.md
+
+  - id: VFY-PATH-01
+    source: DSS-2.0-STC-verification-layer.md §4
+    quote: "illegal jumps rejected: NLC draft->accepted direct; soil grade G1->G4 direct (PMO-02); mint cap violation (MNT-02)"
+    claim: Illegal path jumps are rejected by the attestation gate.
+    harness: dss-codebase/packages/ledger/dss_symbolic_ledger/verification/gate.py
+    measurement: Illegal-jump vector suite rejected.
+    status: pending
+    evidence:
+      - dss-system/fixtures/dss-2.0/ingestion-policy-v1.yaml
+      - backlog_reqs/epic_reviews/epic-66-dss-2-0-stc-verification-layer/tickets/DSS-6602-build.md
+
+  - id: VFY-CONFLUENCE-01
+    source: DSS-2.0-STC-verification-layer.md §4
+    quote: "double-mint rejected: duplicate closure fingerprint with distinct identity; REUSE self-dealing rejected; broken custody signature links rejected"
+    claim: Confluence check rejects double-mint, REUSE self-dealing, and broken custody chains.
+    harness: dss-codebase/packages/ledger/dss_symbolic_ledger/verification/gate.py
+    measurement: Double-mint + self-dealing simulation rejected.
+    status: pending
+    evidence:
+      - dss-system/fixtures/dss-2.0/closure-fingerprint-v1.schema.json
+      - backlog_reqs/epic_reviews/epic-66-dss-2-0-stc-verification-layer/tickets/DSS-6602-build.md
+
+  - id: VFY-COCYCLE-01
+    source: DSS-2.0-STC-verification-layer.md §4
+    quote: "operation-history DAG (supersedes + enrichment events + consolidation_lineage + temporal_state_log) is acyclic and deterministically orderable on replay"
+    claim: Operation-history DAG is acyclic and deterministically orderable on replay.
+    harness: dss-codebase/packages/ledger/dss_symbolic_ledger/verification/op_dag.py
+    measurement: Cycle-injection simulation rejected; deterministic topo-order replay passes.
+    status: pending
+    evidence:
+      - dss-system/fixtures/dss-2.0/peo-envelope-v2.0.schema.json
+      - backlog_reqs/epic_reviews/epic-66-dss-2-0-stc-verification-layer/tickets/DSS-6604-build.md
+
+  - id: VFY-PERF-01
+    source: DSS-2.0-STC-verification-layer.md §4
+    quote: "gate p95 <= 50ms per PEO on reference hardware (PEO-MESH-03 bound)"
+    claim: Attestation gate p95 latency is ≤ 50 ms per PEO on reference hardware.
+    harness: dss-codebase/packages/ledger/dss_symbolic_ledger/verification/gate.py
+    measurement: Benchmark harness p95 ≤ 50 ms.
+    status: pending
+    evidence:
+      - backlog_reqs/epic_reviews/epic-66-dss-2-0-stc-verification-layer/tickets/DSS-6602-build.md
+
+  - id: VFY-NODELETE-01
+    source: DSS-2.0-STC-verification-layer.md §4
+    quote: "operation set is exactly {mint, combine, evolve, transfer, retire}; no delete operation exists (C5/LDR-04)"
+    claim: The verification-layer operation set contains exactly five operations and no delete primitive.
+    harness: dss-codebase/packages/ledger/dss_symbolic_ledger/verification/operations.py
+    measurement: Static audit of operations.py shows no delete primitive.
+    status: pending
+    evidence:
+      - backlog_reqs/epic_reviews/epic-66-dss-2-0-stc-verification-layer/tickets/DSS-6603-build.md
+
 unknown_claims_policy: fail_ci

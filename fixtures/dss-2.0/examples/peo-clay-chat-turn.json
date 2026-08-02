@@ -1,0 +1,130 @@
+{
+  "key": "chat:2026-07-30T12:00:05Z:node-01:seq-5",
+  "state": {
+    "coordinates": {"x": 0.93, "y": 0.88, "z": 0.91},
+    "phase": "stabilise",
+    "metadata": {
+      "z0_envelope": {
+        "peo_schema_version": "2.0",
+        "peo_class": "E",
+        "glossary_version": "elephant-dss/v2.0.0",
+        "elephant_closure_alg": "elephant.closure.v1",
+        "supersedes": null
+      },
+      "z1_identity": {
+        "coord": "cg://node-01/chat/2026-07-30/seq-5",
+        "evidence_cid": "sha256:2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae",
+        "canonical_subject": "did:crdt:principal-david-berigny",
+        "peo_ref": "did:crdt:principal-david-berigny#cg://node-01/chat/2026-07-30/seq-5",
+        "session_id": "sess-2026-07-30-001", "turn_id": "turn-0005", "context_id": "ctx-dss-2-0", "taxonomy_provenance": null
+      },
+      "z2_content": {
+        "bodies": [
+          {"role": "user_message", "cid": "sha256:3a6eb0790f39ac87c94f3856b2dd2c5d110e6811602261a9a923d3bb23adc8b7", "redacted": false,
+           "span": {"start": 0, "end": 412, "unit_type": "paragraph", "start_ms": null, "end_ms": null}},
+          {"role": "assistant_reply", "cid": "sha256:2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae", "redacted": false,
+           "span": {"start": 0, "end": 268, "unit_type": "paragraph", "start_ms": null, "end_ms": null}}
+        ]
+      },
+      "z3_chain": {
+        "entry_hash": "sha256:9b74c9897bac770ffc029102a200c5de0c2b3f1b2e9e0a1c4d5e6f708192a3b4",
+        "parent_hash": "sha256:1b4f0e9851971998e732078544c96b36c3d01cedf7caa332359d6f1d83567014",
+        "epoch": 5166,
+        "epoch_root_ref": null,
+        "provenance_commit": "sha256:88d4266fd4e6338d13b845fcf289579d209c897823b9217da3e161936f031589",
+        "relations": {"depends_on": [], "derived_from": []},
+        "export_block": null
+      },
+      "z4_verdict": {
+        "hard_gates": {"L_top": 1, "K_t": 1, "P_t": 1, "E_t": 1},
+        "patch_statuses": {
+          "patch_001": true, "patch_002": true, "patch_003": true, "patch_004": true, "patch_005": true,
+          "patch_006": true, "patch_007": true, "patch_008": true, "patch_009": true, "patch_010": true
+        },
+        "checksum_336_pass": true,
+        "lawfulness_level": 3,
+        "A": 0.93, "U": 0.88, "E": 0.91, "V": 0.7444,
+        "closure_fingerprint": "sha256:4f8b8f0a1c2d3e4f5061728394a5b6c7d8e9f0a1b2c3d4e5f60718293a4b5c6d",
+        "proof_tag": "+d",
+        "efficiency_eta": 0.87,
+        "soil_grade": "G4",
+        "governance_detail": null
+      },
+      "z5_e6": {
+        "e6_header_v0_hex": "434710CF1F000000050001F4EE6259EB",
+        "e6_header_v0_fields": {"magic": "0x4347", "ver": 1, "fmt": 0, "mode": 3, "ptype": 0, "law": 3, "route": 3, "node": 1, "flags": 15, "dW": 0, "seq": 5, "t_ms": 500, "V_q": 61026, "crc16": "0x59EB"},
+        "e6_header_v1_ext_hex": "140543FF",
+        "e6_seq": 5, "e6_policy_mode": 3,
+        "e6_rollout_flags": {"E6_SCORING_STRICT": true}
+      },
+      "z6_prime": {
+        "body_prime": "104729",
+        "token_primes": ["17", "19", "137"],
+        "token_prime_product": "44251",
+        "prime_multiplicative_value": null,
+        "prime_lattice_exponents": {"5": 6, "7": 7, "11": 8},
+        "p_adic_write_cost": null,
+        "ciu": null
+      },
+      "z7_defeasible": {
+        "closure_alg": "elephant.closure.v1",
+        "facts": [
+          {"predicate": "(gate-verdict v_q 0.7444)", "source": "z4_verdict.V"},
+          {"predicate": "(lawfulness-level 3)", "source": "z4_verdict.lawfulness_level"},
+          {"predicate": "(checksum-336 pass)", "source": "z4_verdict.checksum_336_pass"}
+        ],
+        "strict_rules": [
+          {"rule_id": "r-336", "form": "always",
+           "antecedents": ["(checksum-336 pass)", "(all-patches pass)"],
+           "head": "(admissible strict)", "context": null}
+        ],
+        "defeasible_rules": [
+          {"rule_id": "r-useful-chat", "form": "normally",
+           "antecedents": ["(gate-verdict v_q 0.7444)"],
+           "head": "(useful response)", "context": "chat-turn"}
+        ],
+        "defeaters": [
+          {"defeater_id": "d-stale-context", "targets": ["r-useful-chat"],
+           "condition": "(superseded-by-newer-briefing)", "scope": "local"}
+        ],
+        "superiority": [{"over": "r-336", "under": "r-useful-chat"}],
+        "proof_status": {
+          "tag": "+d", "computed_by": "kernel-fallback",
+          "computed_at": "2026-07-30T12:00:05Z", "node_scope": null
+        },
+        "explainer_refs": ["why-not:admissible", "require:checksum-336"],
+        "mece": {
+          "exhaustive_over": ["patch_statuses", "quaternary_levels", "V_thresholds"],
+          "mutually_exclusive": true, "score": 0.95, "linter_version": "mece-lint/v0.3"
+        }
+      },
+      "z8_value": {
+        "value_construction": {
+          "gate_quality": 0.95, "efficiency_eta": 0.87, "provenance_completeness": 1.0,
+          "defeasible_completeness": 0.95, "antecedent_depth": 0.6, "mece_posture": 0.95,
+          "weights_version": "poe-weights/v1.0.0",
+          "zero_knob_pass": true, "v_construct": 0.892
+        },
+        "soil_grade": "G4",
+        "extensibility": {"referenceable": true, "composable": true, "transferable": false, "frozen": false},
+        "enrichment_events": [],
+        "consolidation_lineage": [],
+        "review_posture": null
+      },
+      "z9_efficiency": {
+        "telemetry": {
+          "tokens_in": 412, "tokens_out": 268, "wall_ms": 500,
+          "cpu_s": 0.31, "gpu_s": 0.18, "cost_usd": 0.0011, "joules": 2.4
+        },
+        "coherence_tax": {"applied": true, "rate": 0.03, "basis": "patch_006"},
+        "gravity_penalty": 0.0,
+        "p_adic_write_cost": null,
+        "quality_tier": "stabilise",
+        "persistence_mode": "standard"
+      }
+    }
+  },
+  "created_at": "2026-07-30T12:00:05Z",
+  "notes": "G4 CLAY chat turn; matches golden vector clay-mint-express-wu (e6-header-v1.layout.json)",
+  "pinned": false
+}

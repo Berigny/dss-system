@@ -1,0 +1,66 @@
+# group-ontology-v1.yaml — Control Plane group-of-Principals conditions
+# Fills the gap the user named: "we already have in the ontology the idea of
+# group of Principals but no conditions on number, relationships and scaling
+# principles."
+# Corrections C1/C3/C5/C6/C7 (DSS-2.0-quaternary-minting-foundations.md §3.2)
+# are BINDING here: 336 never counts members; freeze is branch-scoped;
+# slashing is trust-class demotion; steward pool is TC3-derived; ratios are
+# policy-versioned, not invariant.
+group_ontology_version: "cp-group-ontology/v1.0.0"
+entity:
+  type: PrincipalGroup
+  description: >
+    A dynamic coalition of Principals acting under one Control Plane scope.
+    Groups are comparator/topology constructs (GRP-03): they amplify
+    provenance and distribute review work; they NEVER participate in
+    consensus. Finality stays with the ledger + 336 gate, always.
+  identity:
+    group_did: "did:crdt:<group-id> (CRDT-native, mergeable across epochs)"
+    parent_group_did: "nullable; groups form a tree via split/merge"
+    epoch_created: integer
+    epoch_retired: "nullable integer; retired groups remain readable forever"
+membership_conditions:
+  number:
+    min_members: 2            # a group of one is a Principal, not a group
+    max_members: 50           # C50 ceiling; larger scopes split (see scaling)
+    soft_target: 10           # C10 baseline cohort
+  eligibility:
+    trust_class_floor: TC1    # TC0 (unresolved Law defeat) cannot join
+    attestation_precedes_membership: true   # relationship condition R1
+    sponsor_required: true    # joining requires one existing member sponsor
+  relationships:
+    R1_attestation_order:
+      rule: "attestation edge exists BEFORE membership edge"
+      rationale: "membership without prior attestation is an unverifiable coalition"
+    R2_comparator_disjointness:
+      rule: "a Principal may not simultaneously serve as comparator and as origin/custodian for the same PEO scope"
+      rationale: "comparator layers review; they must not grade their own work (GRP-03)"
+    R3_principal_overlap:
+      rule: "cross-group overlap allowed but bounded: a Principal may hold seats in at most 3 groups per epoch"
+      rationale: "Grace FSM PrincipalOverlap check (strict Law gate)"
+    R4_steward_eligibility:
+      rule: "steward seats drawn from TC3-derived pool only; derivation replayed per epoch (C6)"
+      rationale: "stewardship is earned standing, never appointed count"
+    R5_ledger_path_validity:
+      rule: "every member's ledger path (did:crdt chain) must resolve to the group's shared epoch anchor"
+      rationale: "prevents phantom members from forked branches"
+scaling_principles:
+  S1_split:
+    trigger: "members > max_members OR comparator latency p95 > 50ms bound (PEO-MESH-05)"
+    action: "deterministic split by closure-fingerprint locality; child groups inherit parent epoch anchor"
+    invariant: "split NEVER re-derives member trust classes; lineage carries (C6)"
+  S2_merge:
+    trigger: "two sibling groups each < min_members for 3 consecutive epochs"
+    action: "merge into parent scope; retire child group_dids (readable forever)"
+  S3_depth_limit:
+    rule: "group tree depth <= 4 (C10 -> C50 -> C100 -> C1000 scopes; C10000 is a federation of C1000s, not a deeper tree)"
+    rationale: "depth beyond 4 makes PrincipalOverlap verification unbounded"
+  S4_epoch_lifecycle:
+    rule: "group composition re-anchored every epoch (floor(unix/345600)); membership edges expire unless re-attested"
+    rationale: "dynamic coalitions, not static committees"
+  S5_ratio_policy:
+    rule: "layer ratios (default 10:5:2:10:10) are policy-versioned in ladder-template-v1.yaml; NEVER invariant (C7)"
+ladder_binding:
+  topology_template: "ladder-template-v1.yaml"
+  attack_resistance_claims: [ATK-01, ATK-02, ATK-03, ATK-04, ATK-05, ATK-06, ATK-07]
+  requirements: [CPG-01, CPG-02, CPG-03, CPG-04, CPG-05, CPG-06]

@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dualsubstrate.com/schemas/stitch-manifest-v1.profile.json",
+  "title": "Stitch-Manifest Profile v1",
+  "description": "Profile over peo-envelope-v2.0.schema.json (v2.0.1) per DSS_Ingestion_Requirements_v0.2.1 §6.3. A stitch-manifest is a class-E PEO that references child PEOs (chunks or nested stitch-manifests) in a defined order, carries a structural checksum, and never embeds child content (STC-01..08). Distinct from evidence-manifests (services/evidence_manifests.py) — never bare 'manifest' in code (STC-06).",
+  "allOf": [
+    {"$ref": "./peo-envelope-v2.0.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "state": {
+          "type": "object",
+          "properties": {
+            "metadata": {
+              "type": "object",
+              "required": ["z4_verdict"],
+              "properties": {
+                "z0_envelope": {
+                  "type": "object",
+                  "required": ["peo_class"],
+                  "properties": {"peo_class": {"const": "E", "description": "STC-01: stitch-manifests are class E (evidence of structure)"}}
+                },
+                "z3_chain": {
+                  "type": "object",
+                  "required": ["relations"],
+                  "properties": {
+                    "relations": {
+                      "type": "object",
+                      "properties": {
+                        "depends_on": {"minItems": 1, "description": "STC-08: mirrors manifest.children (claim ING-STC-01 enforces order-equality at conformance time)"}
+                      }
+                    }
+                  }
+                },
+                "z4_verdict": {
+                  "type": "object",
+                  "required": ["governance_detail"],
+                  "properties": {
+                    "governance_detail": {
+                      "type": "object",
+                      "required": ["manifest"],
+                      "properties": {"manifest": {"$ref": "#/$defs/manifest_block"}},
+                      "additionalProperties": true
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "manifest_block": {
+      "type": "object",
+      "required": ["children", "manifest_checksum", "child_count", "composite_checksum_336"],
+      "properties": {
+        "children": {
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "description": "ordered child peo_refs ({canonical_subject}#{coord})"},
+          "description": "STC-02: ordered references; STC-03: never embedded content; STC-04: may reference other stitch-manifests"
+        },
+        "manifest_checksum": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "description": "sha256 over concatenated ordered child evidence_cids (hex, no separators)"
+        },
+        "child_count": {"type": "integer", "minimum": 1},
+        "composite_checksum_336": {"type": "boolean", "description": "ATM-05: composite gate evaluation over summed chunk exponents"},
+        "composite_exponents": {
+          "type": ["object", "null"],
+          "properties": {"17": {"type": "integer"}, "19": {"type": "integer"}, "137": {"type": "integer"}},
+          "description": "structural primes 17/19/137 (ATM-02); summed per prime across chunks"
+        },
+        "content_type": {"type": ["string", "null"], "description": "document|code|transcript|multimodal"},
+        "chunk_grammar": {"type": ["string", "null"], "description": "grammar id + version per ingestion-policy-v1.yaml registry (CHK-07)"},
+        "heading_hierarchy": {
+          "type": ["array", "null"],
+          "items": {"type": "object", "required": ["level", "text", "child_index"], "properties": {
+            "level": {"type": "integer", "minimum": 1},
+            "text": {"type": "string"},
+            "child_index": {"type": "integer", "minimum": 0}
+          }},
+          "description": "DOC-02: explicit heading structure, not inferred"
+        },
+        "acceptance": {
+          "type": ["object", "null"],
+          "required": ["band", "witnesses"],
+          "properties": {
+            "band": {"enum": ["lt_100", "100_to_999", "gte_1000"], "description": "OD-6 size band"},
+            "witnesses": {
+              "type": "array",
+              "items": {"type": "object", "required": ["principal_did", "attestation_peo_ref", "disjoint_confirmed"], "properties": {
+                "principal_did": {"type": "string"},
+                "attestation_peo_ref": {"type": "string", "description": "class-T attestation PEO"},
+                "disjoint_confirmed": {"type": "boolean", "description": "R2 comparator disjointness checked"}
+              }}
+            }
+          },
+          "description": "STC-07: size-banded witness set (3-of-cohort / 5-of-cohort / 5 cross-cohort C50)"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

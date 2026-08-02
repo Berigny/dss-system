@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dualsubstrate.com/schemas/defeasible-fragment-v1.schema.json",
+  "title": "Z7 Defeasible Fragment v1",
+  "description": "Embedded Elephant SPL theory per DSS-2.0-PEO-payload-requirements.md §8. Surface forms verified against codeberg.org/anuna/elephant: given / always / normally / except / prefer; proof tags +D/+d/-D/-d; closure algorithm id (elephant.closure.v1 or kernel-fallback).",
+  "type": "object",
+  "required": ["closure_alg", "facts", "strict_rules", "defeasible_rules", "defeaters", "superiority", "proof_status"],
+  "properties": {
+    "closure_alg": {"type": "string", "examples": ["elephant.closure.v1", "kernel-fallback.v1"]},
+    "facts": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/statement"},
+      "description": "given — embedded verdicts, telemetry, policy refs"
+    },
+    "strict_rules": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/rule"},
+      "contains": {"required": ["rule_id"], "properties": {"rule_id": {"const": "r-336"}}, "required": ["rule_id"]},
+      "description": "always — MUST contain canonical r-336 (PEO-DEF-03)"
+    },
+    "defeasible_rules": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/rule"},
+      "description": "normally — usefulness claims with named context (PEO-DEF-04)"
+    },
+    "defeaters": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/defeater"},
+      "description": "except — named disproof conditions (PEO-DEF-05)"
+    },
+    "superiority": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["over", "under"],
+        "properties": {"over": {"type": "string"}, "under": {"type": "string"}},
+        "additionalProperties": false
+      },
+      "description": "prefer — must include Law over Grace (r-336 over usefulness rules)"
+    },
+    "proof_status": {"$ref": "#/$defs/proof"},
+    "explainer_refs": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "why-not / require explanation bindings (PEO-DEF-08)"
+    },
+    "mece": {
+      "type": ["object", "null"],
+      "required": ["exhaustive_over", "mutually_exclusive", "score"],
+      "properties": {
+        "exhaustive_over": {"type": "array", "items": {"type": "string"}, "description": "gate surfaces covered (patches, quaternary, V thresholds)"},
+        "mutually_exclusive": {"type": "boolean"},
+        "score": {"type": "number", "minimum": 0, "maximum": 1},
+        "linter_version": {"type": ["string", "null"]}
+      },
+      "description": "§8.4 MECE posture — linter output"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "statement": {
+      "type": "object",
+      "required": ["predicate"],
+      "properties": {
+        "predicate": {"type": "string", "description": "SPL predicate, e.g. (gate-verdict v_q 0.93)"},
+        "source": {"type": ["string", "null"], "description": "zone/field the fact is drawn from"}
+      },
+      "additionalProperties": false
+    },
+    "rule": {
+      "type": "object",
+      "required": ["rule_id", "form", "head"],
+      "properties": {
+        "rule_id": {"type": "string", "pattern": "^r-[a-z0-9-]+$"},
+        "form": {"enum": ["always", "normally"]},
+        "antecedents": {"type": "array", "items": {"type": "string"}},
+        "head": {"type": "string"},
+        "context": {"type": ["string", "null"], "description": "named context — required for usefulness claims (PEO-DEF-04)"}
+      },
+      "additionalProperties": false,
+      "if": {"properties": {"form": {"const": "normally"}}},
+      "then": {"required": ["context"]}
+    },
+    "defeater": {
+      "type": "object",
+      "required": ["defeater_id", "targets", "condition"],
+      "properties": {
+        "defeater_id": {"type": "string"},
+        "targets": {"type": "array", "items": {"type": "string"}, "minItems": 1, "description": "rule_id(s) this defeater blocks"},
+        "condition": {"type": "string", "description": "SPL condition, e.g. (superseded-by-newer-briefing)"},
+        "scope": {"enum": ["local", "propagated"], "default": "local", "description": "Grace-layer defeats stay local; Law-layer propagate (PEO-MESH-07)"}
+      },
+      "additionalProperties": false
+    },
+    "proof": {
+      "type": "object",
+      "required": ["tag", "computed_by", "computed_at"],
+      "properties": {
+        "tag": {"enum": ["+D", "+d", "-d", "-D"]},
+        "computed_by": {"type": "string", "description": "closure engine id: elephant-sidecar or kernel-fallback (PEO-DEF-06)"},
+        "computed_at": {"type": "string", "format": "date-time"},
+        "node_scope": {"type": ["string", "null"], "description": "set when tag is a node-local re-closure (PEO-DEF-07)"}
+      },
+      "additionalProperties": false
+    }
+  }
+}

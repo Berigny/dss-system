@@ -1,0 +1,125 @@
+# glossary-additions.yaml — rows to merge into elephant-dss.yaml
+# Public (Elephant) register <-> kernel register; non-destructive to kernel
+# symbols (PEO doc §3.2, 5 non-destructive rules).
+glossary_patch: "elephant-dss/v2.0-additions"
+rows:
+  # --- PEO register ---
+  - public_term: portable evidence-object (PEO)
+    kernel_symbol: LedgerEntry
+    register: transport
+    note: "canonical label; coord=address, payload=transport form, evidence-object=paper term"
+  - public_term: coord
+    kernel_symbol: state.coordinates
+    register: identity
+  - public_term: evidence_cid
+    kernel_symbol: "<content-hash>"
+    register: identity
+  # --- soil register ---
+  - public_term: soil grade
+    kernel_symbol: "<derived: min(l6,l7,l8)>"
+    register: derivation
+    note: "G0 collapse / G1 SAND / G2 SILT (review posture) / G3 LOAM / G4 CLAY (QSL-01)"
+  - public_term: Sand under management
+    kernel_symbol: "<review_posture on G1>"
+    register: posture
+    note: "SILT restored as signed review posture, not a level (H13/QSL-02)"
+  - public_term: waterlogging guard
+    kernel_symbol: "<clay admission + velocity caps>"
+    register: guard
+    note: "5-point guard: sustained-gate admission, velocity caps, durable-cost visibility, dead-branch inertness, decay-on-review-fail (PMO-04)"
+  - public_term: irrigation schedule
+    kernel_symbol: "<PoE value model>"
+    register: metaphor-binding
+    note: "the value model waters; the soil grade drains (PMO-01)"
+  # --- ladder register ---
+  - public_term: ladder layer
+    kernel_symbol: "<comparator scope: C10/C50/C100/C1000/C10000>"
+    register: topology
+    note: "comparator/provenance amplifier, NEVER consensus participant (GRP-03)"
+  - public_term: cohort
+    kernel_symbol: "<C10 layer>"
+    register: topology
+  - public_term: cluster
+    kernel_symbol: "<C50 layer>"
+    register: topology
+  - public_term: domain
+    kernel_symbol: "<C100 layer>"
+    register: topology
+  - public_term: region
+    kernel_symbol: "<C1000 layer>"
+    register: topology
+  - public_term: federation
+    kernel_symbol: "<C10000 layer>"
+    register: topology
+  - public_term: steward pool
+    kernel_symbol: "<TC3-derived set, per epoch>"
+    register: derivation
+    note: "derived standing, never appointed quota (C6)"
+  # --- grace register ---
+  - public_term: grace status
+    kernel_symbol: "<conflict-open posture>"
+    register: conflict
+    note: "branch-scoped freeze; extensibility.frozen=true while open (GFSM-02)"
+  - public_term: branch quarantine
+    kernel_symbol: "<branch-scoped freeze>"
+    register: conflict
+    note: "never a global halt (C3)"
+  # --- PoE register ---
+  - public_term: value lineage
+    kernel_symbol: "<replay of enrichment_events>"
+    register: derivation
+    note: "V_construct derived, never mutable counter (PEO-POE-02)"
+  - public_term: trust class
+    kernel_symbol: "<TC0..TC3 derived>"
+    register: derivation
+    note: "derived with hard floors; never assigned (PEO-POE-06)"
+  # --- physical/digital-twin register (class P, envelope v2.0.2) ---
+  - public_term: digital twin
+    kernel_symbol: "<PEO class P + z10_physical>"
+    register: identity
+    note: "physical object inventory master record; id = peo_ref (no new DID method, N-C1)"
+  - public_term: evidence-object passport
+    kernel_symbol: "<class-P envelope>"
+    register: transport
+    note: "UNTP DPP-equivalent; portable across mesh via peo_ref + mirrors (N-C3)"
+  - public_term: mobility class
+    kernel_symbol: "z10_physical.mobility_classification.mobility_type"
+    register: derivation-input
+    note: "MOVABLE_ITEM / FIXED_POLYGON / FIXED_SITE / TEMPORARY_ITEM / EPHEMERAL_PHENOMENON (PHY-04)"
+  - public_term: entropy profile
+    kernel_symbol: "z10_physical.entropy_profile"
+    register: derivation-input
+    note: "degradation vector + half-life; parameterises retention decay when entropy_driven_decay=true (PHY-07)"
+  - public_term: spatial anchor
+    kernel_symbol: "z10_physical.spatial_anchor"
+    register: identity
+    note: "GeoJSON + CRS physical anchor; distinct from abstract state.coordinates"
+  - public_term: facility record
+    kernel_symbol: "<class-P twin, mobility_type FIXED_SITE>"
+    register: identity
+    note: "UNTP DFR-equivalent; children link via facility_ref (PHY-08)"
+  - public_term: conformity credential
+    kernel_symbol: "<class-V verdict by R2-disjoint issuer>"
+    register: verdict
+    note: "UNTP DCC-equivalent; linked via conformity_refs (PHY-08)"
+  - public_term: temporal state log
+    kernel_symbol: "z10_physical.temporal_state_log + child class-E observation PEOs"
+    register: lineage
+    note: "UNTP DTE-equivalent; entries mint as their own PEOs (PHY-06)"
+  # --- STC-inspired verification register (DSS-2.0-STC-verification-layer.md) ---
+  - public_term: attestation gate
+    kernel_symbol: "<verification/gate.py four-check composer>"
+    register: verification
+    note: "type -> path -> confluence -> cocycle, in order, before ledger-accept (VFY-01). Four-check structure inspired by QNFO's Syntactic Token Calculus (DOI 10.5281/zenodo.20287742); independently implemented — concepts, not code (QNFO license: non-commercial)"
+  - public_term: confluence check
+    kernel_symbol: "<closure-fingerprint dedup + REUSE/custody guards>"
+    register: verification
+    note: "double-mint and double-spend rejection (VFY-04); confluence = standard term-rewriting vocabulary"
+  - public_term: cocycle check
+    kernel_symbol: "<operation-history DAG acyclicity/determinism verifier>"
+    register: verification
+    note: "provenance as verifiable structure, not log (VFY-05); cocycle = standard homological-algebra vocabulary"
+  - public_term: operation set
+    kernel_symbol: "{mint, combine, evolve, transfer, retire}"
+    register: lifecycle
+    note: "exactly five precondition-gated operations (VFY-06); retire never deletes (C5)"

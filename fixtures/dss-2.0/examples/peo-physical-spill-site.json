@@ -1,0 +1,152 @@
+{
+  "key": "dss-field:2026-07-31T10:30:00Z:node-04:twin-xyz889",
+  "state": {
+    "coordinates": {"x": 0.30, "y": 0.35, "z": 0.33},
+    "phase": "probe",
+    "metadata": {
+      "z0_envelope": {
+        "peo_schema_version": "2.0",
+        "peo_class": "P",
+        "glossary_version": "elephant-dss/v2.0.1",
+        "elephant_closure_alg": "elephant.closure.v1",
+        "supersedes": null
+      },
+      "z1_identity": {
+        "coord": "cg://node-04/field/spatial-environmental-2026-xyz889",
+        "evidence_cid": "sha256:2ab0c4f2c8b3e5a7d91f0e2c4a6b8d0f1e3a5c7b9d1f3a5c7b9d1f3a5c7b9d1f",
+        "canonical_subject": "did:web:forensics.example:spatial-unit",
+        "peo_ref": "did:web:forensics.example:spatial-unit#cg://node-04/field/spatial-environmental-2026-xyz889",
+        "session_id": null, "turn_id": null, "context_id": "ctx-field-survey", "taxonomy_provenance": null
+      },
+      "z3_chain": {
+        "entry_hash": "sha256:5c1e9a3b7d2f4a6c8e0b1d3f5a7c9e1b2d4f6a8c0e2b4d6f8a0c1e3b5d7f9a1c",
+        "parent_hash": "genesis",
+        "epoch": 5166,
+        "epoch_root_ref": null,
+        "provenance_commit": "sha256:7f3a1c5e9b2d4f6a8c0e1b3d5f7a9c1e2b4d6f8a0c2e4b6d8f0a1c3e5b7d9f2a",
+        "relations": {
+          "depends_on": [
+            "did:web:forensics.example:sensor:iot-0992#cg://node-04/obs/2026-07-31/state-001",
+            "did:web:forensics.example:sensor:iot-0992#cg://node-04/obs/2026-07-31/state-002"
+          ],
+          "derived_from": []
+        },
+        "export_block": null
+      },
+      "z4_verdict": {
+        "hard_gates": {"L_top": 1, "K_t": 1, "P_t": 1, "E_t": 0},
+        "patch_statuses": {
+          "patch_001": true, "patch_002": true, "patch_003": true, "patch_004": true, "patch_005": true,
+          "patch_006": true, "patch_007": true, "patch_008": true, "patch_009": false, "patch_010": true
+        },
+        "checksum_336_pass": false,
+        "lawfulness_level": 1,
+        "A": 0.55, "U": 0.60, "E": 0.48, "V": 0.1584,
+        "closure_fingerprint": "sha256:8e4b2d6f0a1c3e5b7d9f1a3c5e7b9d1f3a5c7e9b1d3f5a7c9e1b3d5f7a9c1e2b",
+        "proof_tag": "-d",
+        "efficiency_eta": 0.71,
+        "soil_grade": "G1",
+        "governance_detail": null
+      },
+      "z10_physical": {
+        "mobility_classification": {
+          "mobility_type": "FIXED_POLYGON",
+          "is_movable": false,
+          "ephemeral_classification": "HIGHLY_EPHEMERAL",
+          "estimated_lifespan_seconds": 86400
+        },
+        "spatial_anchor": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [-118.2437, 34.0522, 85.0],
+              [-118.2435, 34.0525, 85.0],
+              [-118.2439, 34.0528, 86.2],
+              [-118.2441, 34.0524, 85.8],
+              [-118.2437, 34.0522, 85.0]
+            ]
+          ],
+          "crs": "EPSG:4326-WGS84",
+          "altitude_m": 85.0,
+          "perimeter_error_m": 0.5,
+          "spatial_justification": "Primary soil-contamination footprint and chemical spill boundary"
+        },
+        "entropy_profile": {
+          "degradation_vector": "DEGENERATIVE",
+          "primary_driver": "ENVIRONMENTAL_EVAPORATION",
+          "half_life_minutes": 180.0,
+          "current_state": {
+            "confidence_score": 0.94,
+            "last_measured_state": "VOLATILE_LIQUID_SATURATION",
+            "projected_zero_state_timestamp": "2026-08-01T04:30:00Z",
+            "projected_zero_state_epoch": 5166
+          },
+          "regenerative": {"is_self_healed": false, "regrowth_triggers": []}
+        },
+        "decay_binding": {
+          "entropy_driven_decay": true,
+          "decay_function": "logarithmic_v_decay",
+          "retention_tier_derived": "Sand",
+          "zero_state_action": "retire_inert"
+        },
+        "temporal_state_log": [
+          {
+            "state_sequence": 1,
+            "recorded_at": "2026-07-31T08:00:00Z",
+            "epoch": 5166,
+            "observed_data": {
+              "chemicalConcentrationPPM": 450.2,
+              "surfaceTemperatureCelsius": 22.4,
+              "integrity_hash": "sha256:a1b2c3d4e5f60718293a4b5c6d7e8f9012345678abcdef0123456789abcdef01"
+            },
+            "recorder_did": "did:web:forensics.example:sensor:iot-0992",
+            "observation_peo_ref": "did:web:forensics.example:sensor:iot-0992#cg://node-04/obs/2026-07-31/state-001"
+          },
+          {
+            "state_sequence": 2,
+            "recorded_at": "2026-07-31T10:00:00Z",
+            "epoch": 5166,
+            "observed_data": {
+              "chemicalConcentrationPPM": 225.1,
+              "surfaceTemperatureCelsius": 26.8,
+              "integrity_hash": "sha256:b2c3d4e5f60718293a4b5c6d7e8f9012345678abcdef0123456789abcdef0123"
+            },
+            "recorder_did": "did:web:forensics.example:sensor:iot-0992",
+            "observation_peo_ref": "did:web:forensics.example:sensor:iot-0992#cg://node-04/obs/2026-07-31/state-002"
+          }
+        ],
+        "physical_carrier": {
+          "carrier_types": ["DATAMATRIX_2D", "TAMPER_SEAL"],
+          "carrier_ids": ["seal-2026-xyz889-a"]
+        },
+        "facility_ref": "did:web:forensics.example:spatial-unit#cg://node-04/facility/field-plot-114",
+        "conformity_refs": [
+          "did:web:lab-assays.example:lab-7#cg://node-05/verdict/2026-07-31/assay-441"
+        ],
+        "origin": {
+          "jurisdiction": "example-county-environmental",
+          "geolocation": "34.0522,-118.2437",
+          "environmental_zone": "industrial-brownfield"
+        },
+        "selective_disclosure": {
+          "zk_proof_refs": ["zk:consistency:9f8e7d6c5b4a3928"],
+          "redacted_fields": ["origin.investigating_officer"]
+        }
+      },
+      "z9_efficiency": {
+        "telemetry": {
+          "tokens_in": 0, "tokens_out": 0, "wall_ms": 40,
+          "cpu_s": 0.02, "gpu_s": null, "cost_usd": 0.0, "joules": null
+        },
+        "coherence_tax": {"applied": false, "rate": 0.0, "basis": "patch_006"},
+        "gravity_penalty": 0.0,
+        "p_adic_write_cost": null,
+        "quality_tier": "probe",
+        "persistence_mode": "ephemeral"
+      }
+    }
+  },
+  "created_at": "2026-07-31T10:30:00Z",
+  "notes": "Class-P digital twin of an evaporating chemical-spill polygon (incorporates uploaded notes, corrections N-C1..C5 applied). Object degenerates (Sand, entropy-driven decay); the case record may vitrify to Clay independently. Zero-state => retire_inert, never delete.",
+  "pinned": true
+}

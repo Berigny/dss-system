@@ -1,0 +1,116 @@
+{
+  "key": "dss-docs:2026-07-31T10:00:00Z:node-02:manifest-001",
+  "state": {
+    "coordinates": {"x": 0.55, "y": 0.50, "z": 0.52},
+    "phase": "review",
+    "metadata": {
+      "z0_envelope": {
+        "peo_schema_version": "2.0",
+        "peo_class": "E",
+        "glossary_version": "elephant-dss/v2.0.0",
+        "elephant_closure_alg": "elephant.closure.v1",
+        "supersedes": null
+      },
+      "z1_identity": {
+        "coord": "cg://node-02/dss-docs/design-note/manifest",
+        "evidence_cid": "sha256:8141cb74a61e5cb28db6b30f73779cc799f43d893986da94786af84266d76fa3",
+        "canonical_subject": "did:crdt:principal-ana-torres",
+        "peo_ref": "did:crdt:principal-ana-torres#cg://node-02/dss-docs/design-note/manifest",
+        "session_id": "sess-2026-07-31-010", "turn_id": null, "context_id": "ctx-ingestion", "taxonomy_provenance": null
+      },
+      "z2_content": {
+        "bodies": [
+          {"role": "manifest_metadata", "cid": "sha256:8141cb74a61e5cb28db6b30f73779cc799f43d893986da94786af84266d76fa3", "redacted": false, "span": null}
+        ]
+      },
+      "z3_chain": {
+        "entry_hash": "sha256:1e2f3a4b5c6d7e8f9012345678abcdef0123456789abcdef0123456789abcde0",
+        "parent_hash": "sha256:6dcd4ce23d88e2ee9568ba546c007c63d9131c3b73af9093d0b6b49f3c3b0a1e",
+        "epoch": 5166,
+        "epoch_root_ref": null,
+        "provenance_commit": "sha256:2f3e4d5c6b7a8998a7b6c5d4e3f201234567890abcdef1234567890abcdef123",
+        "relations": {
+          "depends_on": [
+            "did:crdt:principal-ana-torres#cg://node-02/dss-docs/design-note/chunk-000",
+            "did:crdt:principal-ana-torres#cg://node-02/dss-docs/design-note/chunk-001",
+            "did:crdt:principal-ana-torres#cg://node-02/dss-docs/design-note/chunk-002"
+          ],
+          "derived_from": []
+        },
+        "export_block": null
+      },
+      "z4_verdict": {
+        "hard_gates": {"L_top": 1, "K_t": 1, "P_t": 1, "E_t": 1},
+        "patch_statuses": {
+          "patch_001": true, "patch_002": true, "patch_003": true, "patch_004": true, "patch_005": true,
+          "patch_006": true, "patch_007": true, "patch_008": true, "patch_009": true, "patch_010": true
+        },
+        "checksum_336_pass": true,
+        "lawfulness_level": 2,
+        "A": 0.71, "U": 0.68, "E": 0.74, "V": 0.3572,
+        "closure_fingerprint": "sha256:3a4b5c6d7e8f9012345678901abcdef234567890abcdef34567890abcdef4567",
+        "proof_tag": "+d",
+        "efficiency_eta": 0.79,
+        "soil_grade": "G3",
+        "governance_detail": {
+          "manifest": {
+            "children": [
+              "did:crdt:principal-ana-torres#cg://node-02/dss-docs/design-note/chunk-000",
+              "did:crdt:principal-ana-torres#cg://node-02/dss-docs/design-note/chunk-001",
+              "did:crdt:principal-ana-torres#cg://node-02/dss-docs/design-note/chunk-002"
+            ],
+            "manifest_checksum": "sha256:4b5c6d7e8f901234567890123456abcdef34567890abcdef45678901abcdef56",
+            "child_count": 3,
+            "composite_checksum_336": true,
+            "composite_exponents": {"17": 6, "19": 7, "137": 8},
+            "content_type": "document",
+            "chunk_grammar": "clause-chunker/1.0",
+            "heading_hierarchy": [
+              {"level": 1, "text": "Design Note: Ingestion 2.0", "child_index": 0},
+              {"level": 2, "text": "Stage Model", "child_index": 1},
+              {"level": 2, "text": "Mint Caps", "child_index": 2}
+            ],
+            "acceptance": {
+              "band": "lt_100",
+              "witnesses": [
+                {"principal_did": "did:crdt:principal-reviewer-sam", "attestation_peo_ref": "did:crdt:principal-reviewer-sam#cg://node-01/attest/2026-07-31/seq-88", "disjoint_confirmed": true},
+                {"principal_did": "did:crdt:principal-reviewer-kim", "attestation_peo_ref": "did:crdt:principal-reviewer-kim#cg://node-03/attest/2026-07-31/seq-12", "disjoint_confirmed": true},
+                {"principal_did": "did:crdt:principal-reviewer-joe", "attestation_peo_ref": "did:crdt:principal-reviewer-joe#cg://node-01/attest/2026-07-31/seq-90", "disjoint_confirmed": true}
+              ]
+            }
+          }
+        }
+      },
+      "z5_e6": {
+        "e6_header_v0_hex": "4347108A3F0000000C0008009470FCDB",
+        "e6_header_v0_fields": {"magic": "0x4347", "ver": 1, "fmt": 0, "mode": 2, "ptype": 0, "law": 2, "route": 2, "node": 3, "flags": 15, "dW": 0, "seq": 12, "t_ms": 800, "V_q": 38000, "crc16": "0xFCDB"},
+        "e6_header_v1_ext_hex": "040001FF",
+        "e6_seq": 12, "e6_policy_mode": 2,
+        "e6_rollout_flags": {"E6_SCORING_STRICT": false, "kernel_version": "clause-chunker/1.0"}
+      },
+      "z6_prime": {
+        "body_prime": "97",
+        "token_primes": ["17", "19"],
+        "token_prime_product": "323",
+        "prime_multiplicative_value": null,
+        "prime_lattice_exponents": {"17": 6, "19": 7, "137": 8},
+        "p_adic_write_cost": null,
+        "ciu": null
+      },
+      "z9_efficiency": {
+        "telemetry": {
+          "tokens_in": 1820, "tokens_out": 0, "wall_ms": 800,
+          "cpu_s": 0.42, "gpu_s": null, "cost_usd": 0.0, "joules": null
+        },
+        "coherence_tax": {"applied": true, "rate": 0.01, "basis": "patch_006"},
+        "gravity_penalty": 0.0,
+        "p_adic_write_cost": null,
+        "quality_tier": "stabilise",
+        "persistence_mode": "standard"
+      }
+    }
+  },
+  "created_at": "2026-07-31T10:00:00Z",
+  "notes": "Stitch-manifest over 3 document chunks; lt_100 band, 3-of-cohort witnesses, composite 336 pass -> G3 LOAM (cap lifted per MNT-02).",
+  "pinned": false
+}

@@ -1,0 +1,107 @@
+{
+  "key": "verdict:2026-07-30T15:42:10Z:node-01:seq-77",
+  "state": {
+    "coordinates": {"x": 0.12, "y": 0.09, "z": 0.15},
+    "phase": "halt",
+    "metadata": {
+      "z0_envelope": {
+        "peo_schema_version": "2.0",
+        "peo_class": "V",
+        "glossary_version": "elephant-dss/v2.0.0",
+        "elephant_closure_alg": "elephant.closure.v1",
+        "supersedes": null
+      },
+      "z1_identity": {
+        "coord": "cg://node-01/verdict/2026-07-30/seq-77",
+        "evidence_cid": "sha256:b5d4045c3f466fa91fe2cc6abe79232a1a57cdf104f7a26e716e0a1e2789df78",
+        "canonical_subject": "did:crdt:principal-reviewer-sam",
+        "peo_ref": "did:crdt:principal-reviewer-sam#cg://node-01/verdict/2026-07-30/seq-77",
+        "session_id": "sess-2026-07-30-003", "turn_id": "turn-0077", "context_id": "ctx-review", "taxonomy_provenance": null
+      },
+      "z3_chain": {
+        "entry_hash": "sha256:2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3",
+        "parent_hash": "sha256:4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
+        "epoch": 5166,
+        "epoch_root_ref": null,
+        "provenance_commit": "sha256:6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918",
+        "relations": {
+          "depends_on": ["did:crdt:principal-ana-torres#cg://node-02/note/2026-07-30/seq-12"],
+          "derived_from": ["did:crdt:principal-reviewer-sam#cg://node-01/review/2026-07-30/seq-71"]
+        },
+        "export_block": null
+      },
+      "z4_verdict": {
+        "hard_gates": {"L_top": 1, "K_t": 1, "P_t": 1, "E_t": 1},
+        "patch_statuses": {
+          "patch_001": true, "patch_002": true, "patch_003": true, "patch_004": true, "patch_005": true,
+          "patch_006": true, "patch_007": true, "patch_008": true, "patch_009": true, "patch_010": true
+        },
+        "checksum_336_pass": true,
+        "lawfulness_level": 3,
+        "A": 0.97, "U": 0.96, "E": 0.98, "V": 0.9125,
+        "closure_fingerprint": "sha256:8f14e45fceea167a5a36dedd4bea2543c9a4b3e6a1f2d3c4b5a6978877665544",
+        "proof_tag": "+D",
+        "efficiency_eta": 0.91,
+        "soil_grade": "G4",
+        "governance_detail": null
+      },
+      "z7_defeasible": {
+        "closure_alg": "elephant.closure.v1",
+        "facts": [
+          {"predicate": "(target-peo did:crdt:principal-ana-torres#cg://node-02/note/2026-07-30/seq-12)", "source": "review_target"},
+          {"predicate": "(law-defeat-observed contradicted-attestation)", "source": "review_finding"}
+        ],
+        "strict_rules": [
+          {"rule_id": "r-336", "form": "always",
+           "antecedents": ["(checksum-336 pass)", "(all-patches pass)"],
+           "head": "(admissible strict)", "context": null}
+        ],
+        "defeasible_rules": [],
+        "defeaters": [
+          {"defeater_id": "d-contradicted-attestation", "targets": ["r-useful-note"],
+           "condition": "(attestation-contradicted-by-verified-evidence)", "scope": "propagated"}
+        ],
+        "superiority": [{"over": "r-336", "under": "r-useful-note"}],
+        "proof_status": {
+          "tag": "+D", "computed_by": "elephant-sidecar",
+          "computed_at": "2026-07-30T15:42:10Z", "node_scope": null
+        },
+        "explainer_refs": ["why-not:useful", "require:law-defeat-propagation"],
+        "mece": {
+          "exhaustive_over": ["target_lineage"],
+          "mutually_exclusive": true, "score": 1.0, "linter_version": "mece-lint/v0.3"
+        }
+      },
+      "z8_value": {
+        "value_construction": {
+          "gate_quality": 0.99, "efficiency_eta": 0.91, "provenance_completeness": 1.0,
+          "defeasible_completeness": 1.0, "antecedent_depth": 0.3, "mece_posture": 1.0,
+          "weights_version": "poe-weights/v1.0.0",
+          "zero_knob_pass": true, "v_construct": 0.954
+        },
+        "soil_grade": "G4",
+        "extensibility": {"referenceable": true, "composable": true, "transferable": false, "frozen": false},
+        "enrichment_events": [
+          {
+            "event_type": "DEFEAT",
+            "event_peo_ref": "did:crdt:principal-reviewer-sam#cg://node-01/verdict/2026-07-30/seq-77",
+            "issuer_principal_did": "did:crdt:principal-reviewer-sam",
+            "epoch": 5166,
+            "signature": "sig:ed25519:9f8e7d6c5b4a39281706f5e4d3c2b1a0987654321fedcba0987654321fedcba09",
+            "details": {
+              "defeater": "d-contradicted-attestation",
+              "scope": "propagated",
+              "target_peo_ref": "did:crdt:principal-ana-torres#cg://node-02/note/2026-07-30/seq-12",
+              "effect": "target trust-class floor TC1 until resolved; defeat propagates hierarchically (PEO-MESH-07)"
+            }
+          }
+        ],
+        "consolidation_lineage": [],
+        "review_posture": null
+      }
+    }
+  },
+  "created_at": "2026-07-30T15:42:10Z",
+  "notes": "Class-V verdict PEO carrying a propagated Law-scope DEFEAT enrichment event against the SILT example's author lineage.",
+  "pinned": true
+}

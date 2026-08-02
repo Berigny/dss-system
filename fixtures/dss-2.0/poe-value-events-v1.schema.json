@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dualsubstrate.com/schemas/poe-value-events-v1.schema.json",
+  "title": "Z8 Value & Custody Lineage v1 — PoE",
+  "description": "PoE value model artifacts per DSS-2.0-PEO-payload-requirements.md §6 and DSS-2.0-quaternary-minting-foundations.md §5-§6. Value is derived state (replay of lineage), never a mutable counter (PEO-POE-02). Non-transferable (PEO-POE-09).",
+  "$defs": {
+    "z8_value_lineage": {
+      "type": "object",
+      "required": ["value_construction", "soil_grade", "extensibility", "enrichment_events"],
+      "properties": {
+        "value_construction": {"$ref": "#/$defs/value_construction"},
+        "soil_grade": {"enum": ["G0", "G1", "G2", "G3", "G4"], "description": "Cached projection per QSL-01; derivation authoritative"},
+        "extensibility": {"$ref": "#/$defs/extensibility"},
+        "enrichment_events": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/enrichment_event"},
+          "description": "References to enrichment event PEOs (class V/T/A) forming this PEO's value lineage"
+        },
+        "consolidation_lineage": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Promotion/demotion event peo_refs (PMO-02/07)"
+        },
+        "review_posture": {
+          "type": ["object", "null"],
+          "required": ["claim_ref", "claimed_by", "window_expires_epoch"],
+          "properties": {
+            "claim_ref": {"type": "string"},
+            "claimed_by": {"type": "string"},
+            "window_expires_epoch": {"type": "integer"}
+          },
+          "description": "SILT review claim (QSL-02); null when not under review"
+        }
+      },
+      "additionalProperties": false
+    },
+    "value_construction": {
+      "type": "object",
+      "required": ["gate_quality", "efficiency_eta", "provenance_completeness", "defeasible_completeness", "antecedent_depth", "mece_posture", "weights_version", "zero_knob_pass"],
+      "properties": {
+        "gate_quality": {"type": "number", "minimum": 0, "maximum": 1, "description": "from V_q, lawfulness, patch statuses"},
+        "efficiency_eta": {"type": "number", "minimum": 0, "maximum": 1},
+        "provenance_completeness": {"type": "number", "minimum": 0, "maximum": 1},
+        "defeasible_completeness": {"type": "number", "minimum": 0, "maximum": 1},
+        "antecedent_depth": {"type": "number", "minimum": 0, "description": "count of verified resolved antecedents; cross-ledger weighted higher"},
+        "mece_posture": {"type": "number", "minimum": 0, "maximum": 1},
+        "weights_version": {"type": "string", "description": "packages/poe/weights.yaml version (H8 governed)"},
+        "zero_knob_pass": {"type": "boolean", "description": "336_pass; false => V_construct = 0 exactly (PEO-POE-01)"},
+        "v_construct": {"type": "number", "minimum": 0, "description": "= zero_knob_pass * sum(w_i * c_i); recomputed must match"}
+      },
+      "additionalProperties": false
+    },
+    "extensibility": {
+      "type": "object",
+      "required": ["referenceable", "composable", "transferable"],
+      "properties": {
+        "referenceable": {"type": "boolean"},
+        "composable": {"type": "boolean"},
+        "transferable": {"const": false, "description": "Always false (PEO-POE-09)"},
+        "frozen": {"type": "boolean", "default": false, "description": "true while in grace status (conflict open)"}
+      },
+      "additionalProperties": false
+    },
+    "enrichment_event": {
+      "type": "object",
+      "required": ["event_type", "event_peo_ref", "issuer_principal_did", "epoch", "signature"],
+      "properties": {
+        "event_type": {"enum": ["RE_EVALUATION", "REUSE", "CUSTODY_TRANSFER", "DEFEASIBILITY_IMPROVEMENT", "DEFEAT", "RETIREMENT"]},
+        "event_peo_ref": {"type": "string", "description": "peo_ref of the event PEO itself"},
+        "issuer_principal_did": {"type": "string", "pattern": "^did:.+$"},
+        "epoch": {"type": "integer", "minimum": 0},
+        "signature": {"type": "string"},
+        "details": {
+          "type": ["object", "null"],
+          "description": "Per-type payload: REUSE requires reusing_principal_did + context_of_use; CUSTODY_TRANSFER requires two signatures + custody chain; DEFEASIBILITY_IMPROVEMENT requires before/after fragment refs + measured delta; DEFEAT requires named defeater + scope"
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {"if": {"properties": {"event_type": {"const": "REUSE"}}},
+         "then": {"properties": {"details": {"required": ["reusing_principal_did", "context_of_use"]}},
+                  "description": "PEO-POE-04; reusing DID must differ from author (anti self-dealing, §6.6)"}},
+        {"if": {"properties": {"event_type": {"const": "CUSTODY_TRANSFER"}}},
+         "then": {"properties": {"details": {"required": ["from_steward", "to_steward", "signatures", "custody_chain"]}}}},
+        {"if": {"properties": {"event_type": {"const": "DEFEASIBILITY_IMPROVEMENT"}}},
+         "then": {"properties": {"details": {"required": ["before_fragment_ref", "after_fragment_ref", "measured_delta"]}}}},
+        {"if": {"properties": {"event_type": {"const": "DEFEAT"}}},
+         "then": {"properties": {"details": {"required": ["defeater", "scope"]}}}}
+      ]
+    },
+    "trust_class_record": {
+      "type": "object",
+      "required": ["principal_did", "trust_class", "derived_from_lineage", "floors_applied"],
+      "properties": {
+        "principal_did": {"type": "string"},
+        "trust_class": {"enum": ["TC0", "TC1", "TC2", "TC3"], "description": "Derived, never assigned (PEO-POE-06)"},
+        "derived_from_lineage": {"type": "array", "items": {"type": "string"}},
+        "floors_applied": {
+          "type": "array",
+          "items": {"enum": ["unresolved_law_defeat_caps_TC1", "contradiction_caps_bar_TC3"]},
+          "description": "Hard floors (PEO-POE-06)"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

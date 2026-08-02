@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dualsubstrate.com/schemas/closure-fingerprint-v1.schema.json",
+  "title": "Closure Fingerprint v1",
+  "description": "Canonical identity-excluding closure fingerprint per DSS-2.0-PEO-payload-requirements.md §3.2 and PEO-GOV-02. Mirrors Elephant's elephant.closure.v1 design: fingerprint covers the gate surface only — identity, custody, and enrichment lineage are excluded so that portability does not alter identity. Two PEOs with identical gate surfaces share a fingerprint; this is the dedup / replay-equivalence anchor.",
+  "type": "object",
+  "required": ["alg", "canonical_form", "fields", "digest"],
+  "properties": {
+    "alg": {"const": "elephant.closure.v1"},
+    "canonical_form": {
+      "const": "JCS-RFC8785(UTF-8(sorted tag set)) -> SHA-256 -> 'sha256:<hex>'",
+      "description": "JSON Canonicalization Scheme over the sorted field set; separator-stable"
+    },
+    "fields": {
+      "type": "object",
+      "required": ["gate_surface", "patch_statuses", "A", "U", "E", "V", "lawfulness_level", "evidence_cid", "parent_hash", "epoch", "glossary_version", "efficiency_eta"],
+      "properties": {
+        "gate_surface": {"type": "string", "description": "Canonical string of the 10 patch outcomes + quaternary levels, e.g. 'p001:pass|p002:pass|...|eq6:level_3|eq7:level_3|eq8:level_3'"},
+        "patch_statuses": {
+          "type": "object",
+          "patternProperties": {"^patch_0(0[1-9]|10)$": {"enum": ["pass", "fail", "warn", "skip"]}},
+          "minProperties": 10,
+          "maxProperties": 10
+        },
+        "A": {"type": "number", "minimum": 0, "maximum": 1},
+        "U": {"type": "number", "minimum": 0, "maximum": 1},
+        "E": {"type": "number", "minimum": 0, "maximum": 1},
+        "V": {"type": "number", "minimum": 0, "maximum": 1},
+        "lawfulness_level": {"type": "integer", "minimum": 0, "maximum": 3},
+        "evidence_cid": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "parent_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "epoch": {"type": "integer", "minimum": 0},
+        "glossary_version": {"type": "string"},
+        "efficiency_eta": {"type": "number", "minimum": 0, "maximum": 1},
+        "impact_hash": {"type": ["string", "null"], "pattern": "^sha256:[0-9a-f]{64}$", "description": "Optional: hash of the action-impact surface for class-A PEOs"}
+      },
+      "additionalProperties": false
+    },
+    "excluded_fields": {
+      "type": "array",
+      "items": {"type": "string"},
+      "default": ["coord", "canonical_subject", "peo_ref", "entry_hash", "export_block", "enrichment_events", "consolidation_lineage", "e6_header_v0_hex", "telemetry", "proof_status.node_scope"],
+      "description": "Identity/custody/enrichment excluded so portability preserves identity (PEO-GOV-02, PEO-MESH-04)"
+    },
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  },
+  "additionalProperties": false
+}

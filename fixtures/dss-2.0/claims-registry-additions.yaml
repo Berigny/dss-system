@@ -1,0 +1,189 @@
+# claims-registry-additions.yaml — new fail_ci claims for dss-system
+# Merge into claims_registry.yaml. unknown_claims_policy: fail_ci already
+# enforced repo-side; these entries extend coverage to DSS 2.0 artifacts.
+claims_patch: "dss-eval/v2.0-additions"
+unknown_claims_policy: fail_ci   # re-asserted; do not weaken
+claims:
+  # --- soil / grade derivation ---
+  - id: QSL-01
+    statement: "soil grade = f(min(l6,l7,l8)): 0->G0, 1->G1, 2->G3, 3->G4; G2 only via signed review posture"
+    oracle: soil-grade-truth-table-v1.json        # 64-state conformance table
+    test: "replay all 64 (l6,l7,l8) triples; grade + checksum_336 must match table exactly"
+    severity: fail_ci
+  - id: QSL-02
+    statement: "SILT is a review posture over G1 objects; gate-level maps never assign SILT"
+    oracle: "kernel/constants.py:222-225 (SILT in LAYER_ORDER/TOPOLOGY, absent from level maps)"
+    severity: fail_ci
+  # --- 336 binding ---
+  - id: LDR-01
+    statement: "336 binds to per-PEO equation valuations (6/7/8 over 5/7/11), never to group member counts"
+    oracle: "checksum_336 true only for (3,3,3) in truth table"
+    severity: fail_ci
+  # --- ladder topology ---
+  - id: LDR-02
+    statement: "ladder layers are comparator-only; consensus depth is 1 (the ledger) at every scale C10..C10000"
+    oracle: ladder-template-v1.yaml scaling_laws.L1
+    severity: fail_ci
+  - id: LDR-03
+    statement: "freeze is branch-scoped; no ladder layer can halt the mesh"
+    oracle: "Grace FSM GFSM-02"
+    severity: fail_ci
+  - id: LDR-04
+    statement: "slashing = trust-class demotion with lineage preserved; deletion never occurs"
+    oracle: ladder-template-v1.yaml scaling_laws.L5
+    severity: fail_ci
+  - id: LDR-05
+    statement: "steward pool = TC3-derived per epoch; pool size is derivation output, not quota"
+    oracle: group-ontology-v1.yaml R4
+    severity: fail_ci
+  # --- group ontology ---
+  - id: CPG-01
+    statement: "group membership requires prior attestation edge (R1)"
+    oracle: group-ontology-v1.yaml
+    severity: fail_ci
+  - id: CPG-02
+    statement: "comparator disjointness: no Principal grades own work (R2)"
+    oracle: group-ontology-v1.yaml
+    severity: fail_ci
+  - id: CPG-03
+    statement: "cross-group overlap <= 3 seats per Principal per epoch (R3 / PrincipalOverlap)"
+    oracle: group-ontology-v1.yaml
+    severity: fail_ci
+  - id: CPG-04
+    statement: "group tree depth <= 4; C10000 is federation of C1000s, not deeper tree (S3)"
+    oracle: group-ontology-v1.yaml
+    severity: fail_ci
+  # --- PoE ---
+  - id: PEO-POE-01
+    statement: "V_construct = 336_pass * sum(w_i c_i); 336_pass=false => V=0 exactly"
+    oracle: weights-v1.yaml normalization.zero_knob
+    severity: fail_ci
+  - id: PEO-POE-02
+    statement: "value is derived (replay of lineage), never stored as mutable counter"
+    oracle: poe-value-events-v1.schema.json
+    severity: fail_ci
+  - id: PEO-POE-09
+    statement: "extensibility.transferable is const false"
+    oracle: "poe-value-events-v1.schema.json #/$defs/extensibility"
+    severity: fail_ci
+  # --- envelope ---
+  - id: PEO-CORE-01
+    statement: "PEO envelope validates against peo-envelope-v2.0.schema.json with class-aware zone requirements"
+    oracle: peo-envelope-v2.0.schema.json + examples/
+    severity: fail_ci
+  - id: PEO-GOV-02
+    statement: "closure fingerprint excludes identity/custody/enrichment fields; identical gate surfaces share digest"
+    oracle: closure-fingerprint-v1.schema.json excluded_fields
+    severity: fail_ci
+  # --- E6 ---
+  - id: PEO-E6-01
+    statement: "E6 v1 = 16-byte v0 prefix + 4-byte ext; CRC-16 covers v0 prefix only; golden vectors match"
+    oracle: e6-header-v1.layout.json vectors
+    severity: fail_ci
+  # --- ingestion pipeline (DSS_Ingestion_Requirements_v0.2.1 §7.3) ---
+  - id: ING-REPLAY-01
+    statement: "identical input + kernel version => identical chunk set, evidence_cids, closure fingerprints"
+    oracle: "ingestion replay harness vs closure-fingerprint-v1.schema.json"
+    severity: fail_ci
+  - id: ING-REPLAY-02
+    statement: "Qp-rel incremental index == full rebuild from ledger (OD-5)"
+    oracle: "rebuild-equivalence test over golden corpus"
+    severity: fail_ci
+  - id: ING-ATM-01
+    statement: "atom extraction uses structural primes (17/19/137) from constants; no semantic-prime path in code"
+    oracle: "static check + atom_extractor golden vectors"
+    severity: fail_ci
+  - id: ING-MNT-01
+    statement: "S5 grade = QSL-01 derivation; cached soil_grade matches derivation on replay"
+    oracle: soil-grade-truth-table-v1.json
+    severity: fail_ci
+  - id: ING-MNT-02
+    statement: "default-ingested chunks mint <= G1 until composite pass + disjoint review claim (OD-1)"
+    oracle: "ingestion-policy-v1.yaml minting.chunk_mint_cap"
+    severity: fail_ci
+  - id: ING-EMT-01
+    statement: "every ingested PEO carries valid z5_e6 v0 (+v1 ext post-rollout); CRC self-check passes"
+    oracle: e6-header-v1.layout.json
+    severity: fail_ci
+  - id: ING-EPOCH-01
+    statement: "z3_chain.epoch = floor(unix/345600) at write time"
+    oracle: "write-path unit test with frozen clock"
+    severity: fail_ci
+  - id: ING-REL-01
+    statement: "relations.depends_on/derived_from present (empty valid); dangling refs rejected"
+    oracle: "peo-envelope-v2.0.schema.json v2.0.1 (required relations)"
+    severity: fail_ci
+  - id: ING-LIN-01
+    statement: "supersedes single-pointer; fork opens Grace FSM branch-scoped conflict (C3)"
+    oracle: "fork-injection simulation"
+    severity: fail_ci
+  - id: ING-VEL-01
+    statement: "velocity caps enforced per Principal per epoch (500 chunks / 50 manifest acceptances, OD-3)"
+    oracle: ingestion-policy-v1.yaml
+    severity: fail_ci
+  - id: ING-STC-01
+    statement: "stitch-manifest relations.depends_on mirrors ordered manifest.children (STC-08)"
+    oracle: "stitch-manifest-v1.profile.json + order-equality conformance test"
+    severity: fail_ci
+  - id: ING-CODE-01
+    statement: "code chunking aligns to AST boundaries via tree-sitter vendored in backend/ingestion (OD-4)"
+    oracle: "AST boundary conformance suite (activates when grammar ships)"
+    severity: future
+  # --- physical/digital-twin class P (DSS-2.0-physical-twin-class-addendum §5) ---
+  - id: PHY-SCHEMA-01
+    statement: "class-P PEOs validate against envelope v2.0.2 with z10_physical required"
+    oracle: "peo-envelope-v2.0.schema.json (v2.0.2) + examples/peo-physical-spill-site.json"
+    severity: fail_ci
+  - id: PHY-GEO-01
+    statement: "spatial_anchor is valid GeoJSON geometry with allow-listed CRS (default EPSG:4326-WGS84)"
+    oracle: "GeoJSON lint + CRS allow-list conformance test"
+    severity: fail_ci
+  - id: PHY-EPOCH-01
+    statement: "entropy zero-state dual-stamped (timestamp + epoch); governance windows epoch-counted (C4)"
+    oracle: "write-path test with frozen clock"
+    severity: fail_ci
+  - id: PHY-LOG-01
+    statement: "temporal_state_log state_sequence strictly increasing; integrity_hash full sha256:64hex; observation_peo_refs resolve"
+    oracle: "log-lint + Qp-rel reference resolution"
+    severity: fail_ci
+  - id: PHY-NODELETE-01
+    statement: "zero-state => retire_inert or review_hold, never deletion; lineage replay resolves post-retirement (C5/LDR-04)"
+    oracle: "retirement simulation + lineage replay"
+    severity: fail_ci
+  - id: PHY-MAP-01
+    statement: "UNTP tier mapping holds: DFR=class-P FIXED_SITE, DTE=class-T (+child class-E), DCC=class-V by R2-disjoint issuer"
+    oracle: "cross-class reference resolution + disjointness check"
+    severity: fail_ci
+  - id: PHY-VEL-01
+    statement: "per-recorder observation velocity caps enforced (2000/epoch initial); exactly one log-compaction stitch-manifest per twin per epoch (OD-P2)"
+    oracle: ingestion-policy-v1.yaml class_p
+    severity: fail_ci
+  - id: PHY-XFORM-01
+    statement: "cross-border vocabularies ship as export transforms at mesh export; envelope/z10 carry no regional fields (OD-P3)"
+    oracle: "static schema field check + transform round-trip vs eu_dpp profile"
+    severity: fail_ci
+  # --- STC-inspired verification layer (DSS-2.0-STC-verification-layer.md §5) ---
+  - id: VFY-GATE-01
+    statement: "four-check attestation gate (type->path->confluence->cocycle, in order) runs on every ledger-accept; failure quarantines branch-scoped (GFSM-02)"
+    oracle: "gate harness over 5 shipped examples + forced-failure vectors"
+    severity: fail_ci
+  - id: VFY-PATH-01
+    statement: "illegal jumps rejected: NLC draft->accepted direct; soil grade G1->G4 direct (PMO-02); mint cap violation (MNT-02)"
+    oracle: "illegal-jump vector suite"
+    severity: fail_ci
+  - id: VFY-CONFLUENCE-01
+    statement: "double-mint rejected: duplicate closure fingerprint with distinct identity; REUSE self-dealing rejected; broken custody signature links rejected"
+    oracle: "double-mint + self-dealing simulation"
+    severity: fail_ci
+  - id: VFY-COCYCLE-01
+    statement: "operation-history DAG (supersedes + enrichment events + consolidation_lineage + temporal_state_log) is acyclic and deterministically orderable on replay"
+    oracle: "cycle-injection simulation + deterministic topo-order replay"
+    severity: fail_ci
+  - id: VFY-PERF-01
+    statement: "gate p95 <= 50ms per PEO on reference hardware (PEO-MESH-03 bound)"
+    oracle: "benchmark harness"
+    severity: fail_ci
+  - id: VFY-NODELETE-01
+    statement: "operation set is exactly {mint, combine, evolve, transfer, retire}; no delete operation exists (C5/LDR-04)"
+    oracle: "static audit of verification/operations.py"
+    severity: fail_ci
