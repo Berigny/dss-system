@@ -85,7 +85,15 @@ def test_active_registry_excludes_backlog_suites() -> None:
     """The default active registry contains only suites with runnable harnesses."""
     registry = load_registry(REGISTRY_PATH)
     suites = {c["suite"] for c in registry.get("claims", [])}
-    active_suites = {"poisoning", "integrity", "abstention", "ingestion", "physical_twin", "adversarial"}
+    active_suites = {
+        "poisoning",
+        "integrity",
+        "abstention",
+        "ingestion",
+        "physical_twin",
+        "adversarial",
+        "epic69_storage",
+    }
     assert suites == active_suites, f"Unexpected suites in active registry: {suites - active_suites}"
 
 
@@ -93,7 +101,27 @@ def test_backlog_registry_contains_future_suite_claims() -> None:
     """Backlog claims for suites without runnable harnesses are kept separate."""
     registry = load_registry(BACKLOG_REGISTRY_PATH)
     suites = {c["suite"] for c in registry.get("claims", [])}
-    backlog_suites = {"peo", "quaternary", "ladder", "grace", "poe", "mesh", "efficiency", "gate", "compatibility"}
+    backlog_suites = {
+        "peo",
+        "quaternary",
+        "ladder",
+        "grace",
+        "poe",
+        "mesh",
+        "efficiency",
+        "gate",
+        "compatibility",
+        "epic55",
+        "epic56",
+        "epic57",
+        "epic58",
+        "epic59",
+        "epic60",
+        "epic61",
+        "epic62",
+        "epic63",
+        "epic64",
+    }
     assert suites == backlog_suites, f"Unexpected suites in backlog registry: {suites - backlog_suites}"
 
 

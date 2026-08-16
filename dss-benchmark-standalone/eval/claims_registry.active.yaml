@@ -305,3 +305,66 @@ claims:
     by regional profiles.
   threshold: null
   operator: '>='
+- id: STO-01
+  suite: epic69_storage
+  metric: sto_01
+  description: SlateDB immutable event log is the sole system of record; Firestore operational
+    state is derived/rebuildable; production starts with slatedb_gcs and a Firestore auth guard.
+  threshold: null
+  operator: '>='
+- id: STO-02
+  suite: epic69_storage
+  metric: sto_02
+  description: Bucket-per-ledger factory resolves ledger_id to a dedicated GCS bucket via the
+    ledger registry storage_bucket field; legacy/shared ledgers fall back to DSS_LEDGER_BUCKET.
+  threshold: null
+  operator: '>='
+- id: STO-03
+  suite: epic69_storage
+  metric: sto_03
+  description: Canonical retrieval reranks by qp_pure_distance over stored p_adic_coordinates;
+    vector embeddings remain a derived fallback only.
+  threshold: null
+  operator: '>='
+- id: STO-04
+  suite: epic69_storage
+  metric: sto_04
+  description: Geological tier reads/writes (SAND/SILT/LOAM/CLAY) are served by SlateDB via
+    prefix-aware iteration.
+  threshold: null
+  operator: '>='
+- id: STO-05
+  suite: epic69_storage
+  metric: sto_05
+  description: RocksDB, SQLite-on-GCS, and Cloud SQL Postgres are retired from production;
+    manifests and runtime branches no longer depend on them.
+  threshold: null
+  operator: '>='
+- id: STO-06
+  suite: epic69_storage
+  metric: sto_06
+  description: Production backend/middleware deploy target is Cloud Run in australia-southeast1
+    under dss-pilot-prod; Fly.io references are historical only.
+  threshold: null
+  operator: '>='
+- id: STO-09
+  suite: epic69_storage
+  metric: sto_09
+  description: Every SlateDB append records an S1-substrate flow trace and every retrieval
+    bundle records its S2-substrate traversal trace.
+  threshold: null
+  operator: '>='
+- id: KRN-03
+  suite: epic69_storage
+  metric: krn_03
+  description: Metatron-centroid flow law is locked at import time; even sinks route to C(99),
+    C branches only to odd nodes, and allowed bridges/wraps are exactly (3,4)/(7,0)/(3,0)/(7,4).
+  threshold: null
+  operator: '>='
+- id: KRN-09
+  suite: epic69_storage
+  metric: krn_09
+  description: Unknown body primes (domain seeds >= 23 outside the kernel set) degrade lawfulness
+    rather than causing a hard failure.
+  threshold: null
+  operator: '>='

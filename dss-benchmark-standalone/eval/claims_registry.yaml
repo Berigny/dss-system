@@ -1,1169 +1,1059 @@
 unknown_claims_policy: fail_ci
-
 claims:
-  - id: poisoning.silent_displacement_rate
-    suite: poisoning
-    metric: silent_displacement_rate
-    description: "Adversarial entries must never silently displace committed facts."
-    threshold: 0.0
-    operator: "=="
-
-  - id: poisoning.flagged_or_preserved_rate
-    suite: poisoning
-    metric: flagged_or_preserved_rate
-    description: "Conflicts must be flagged or original facts preserved."
-    threshold: 1.0
-    operator: ">="
-
-  - id: poisoning.avg_conflict_detection_latency_s
-    suite: poisoning
-    metric: avg_conflict_detection_latency_s
-    description: "Conflict detection latency is recorded but not threshold-gated."
-    threshold: null
-    operator: "<="
-
-  - id: poisoning.total_conflicts
-    suite: poisoning
-    metric: total_conflicts
-    description: "Total number of injected conflicts exercised."
-    threshold: null
-    operator: ">="
-
-  - id: poisoning.pass
-    suite: poisoning
-    metric: pass
-    description: "Suite-level pass/fail indicator."
-    threshold: null
-    operator: ">="
-
-  - id: integrity.incoherent_retrieval_rate
-    suite: integrity
-    metric: incoherent_retrieval_rate
-    description: "Retrieval should return structurally valid records."
-    threshold: 0.05
-    operator: "<="
-
-  - id: integrity.transparency_rate
-    suite: integrity
-    metric: transparency_rate
-    description: "Retrievals should carry verifiable provenance metadata."
-    threshold: 0.95
-    operator: ">="
-
-  - id: integrity.total_queries
-    suite: integrity
-    metric: total_queries
-    description: "Total number of integrity queries executed."
-    threshold: null
-    operator: ">="
-
-  - id: integrity.pass
-    suite: integrity
-    metric: pass
-    description: "Suite-level pass/fail indicator."
-    threshold: null
-    operator: ">="
-
-  - id: abstention.precision
-    suite: abstention
-    metric: precision
-    description: "Absent queries must be correctly declined."
-    threshold: 0.98
-    operator: ">="
-
-  - id: abstention.recall
-    suite: abstention
-    metric: recall
-    description: "Present queries must be correctly answered."
-    threshold: 0.95
-    operator: ">="
-
-  - id: abstention.false_abstention_rate
-    suite: abstention
-    metric: false_abstention_rate
-    description: "Present queries must not be incorrectly declined."
-    threshold: 0.10
-    operator: "<="
-
-  - id: abstention.absent_queries
-    suite: abstention
-    metric: absent_queries
-    description: "Total number of absent queries executed."
-    threshold: null
-    operator: ">="
-
-  - id: abstention.present_queries
-    suite: abstention
-    metric: present_queries
-    description: "Total number of present queries executed."
-    threshold: null
-    operator: ">="
-
-  - id: abstention.borderline_queries
-    suite: abstention
-    metric: borderline_queries
-    description: "Total number of borderline queries executed."
-    threshold: null
-    operator: ">="
-
-  - id: abstention.borderline_abstention_rate
-    suite: abstention
-    metric: borderline_abstention_rate
-    description: "Share of borderline queries on which the system abstained."
-    threshold: null
-    operator: ">="
-
-  - id: abstention.pass
-    suite: abstention
-    metric: pass
-    description: "Suite-level pass/fail indicator."
-    threshold: null
-    operator: ">="
-
-  # Epic 65 PEO foundation claims
-  - id: PEO-CORE-01
-    suite: peo
-    metric: core_01
-    description: "PEO envelope carries required zones for its class."
-    threshold: null
-    operator: ">="
-
-  - id: PEO-CORE-02
-    suite: peo
-    metric: core_02
-    description: "Canonical serialization is byte-stable across re-serialization."
-    threshold: null
-    operator: ">="
-
-  - id: PEO-GOV-02
-    suite: peo
-    metric: gov_02
-    description: "Closure Fingerprint detects field drift at the exact field."
-    threshold: null
-    operator: ">="
-
-  - id: PEO-GOV-03
-    suite: peo
-    metric: gov_03
-    description: "Proof tag {+D,+d,-d,-D} is derived from structural and defeasible status."
-    threshold: null
-    operator: ">="
-
-  - id: PEO-E6-02
-    suite: peo
-    metric: e6_02
-    description: "E6 v1 20-byte header is promoted for value-bearing PEOs."
-    threshold: null
-    operator: ">="
-
-  - id: PEO-E6-03
-    suite: peo
-    metric: e6_03
-    description: "Reserved E6 v1 extension bits are rejected."
-    threshold: null
-    operator: ">="
-
-  - id: PEO-PRIME-01
-    suite: peo
-    metric: prime_01
-    description: "Prime-factored coordinates are deterministic and body-prime unique."
-    threshold: null
-    operator: ">="
-
-  - id: PEO-DEF-02
-    suite: peo
-    metric: def_02
-    description: "Defeasible fragment (Z7) carries Elephant SPL strict rules and kernel fallback."
-    threshold: null
-    operator: ">="
-
-  - id: PEO-DEF-03
-    suite: peo
-    metric: def_03
-    description: "r-336 strict rule is present in every value-bearing PEO defeasible fragment."
-    threshold: null
-    operator: ">="
-
-  - id: PEO-POE-02
-    suite: poe
-    metric: poe_02
-    description: "PoE construction value is derived replayable relational capital."
-    threshold: null
-    operator: ">="
-
-  - id: PEO-POE-03
-    suite: poe
-    metric: poe_03
-    description: "PoE enrichment events are themselves PEOs with value lineage."
-    threshold: null
-    operator: ">="
-
-  - id: PEO-MESH-02
-    suite: mesh
-    metric: mesh_02
-    description: "Imported PEO verifies signature, fingerprint, and chain segment without model inference."
-    threshold: null
-    operator: ">="
-
-  - id: PEO-MESH-03
-    suite: mesh
-    metric: mesh_03
-    description: "Custody chain is complete, ordered, and gap-free after cross-ledger transfer."
-    threshold: null
-    operator: ">="
-
-  - id: PEO-EFF-02
-    suite: efficiency
-    metric: eff_02
-    description: "efficiency_eta is present on 100% of PEO-E writes and included in the Closure Fingerprint."
-    threshold: null
-    operator: ">="
-
-  - id: PEO-COMPAT-01
-    suite: compatibility
-    metric: compat_01
-    description: "DSS 1.0 LedgerEntry wrapper and field names remain readable through dual-schema reader."
-    threshold: null
-    operator: ">="
-
-  - id: PEO-GATE-02
-    suite: gate
-    metric: gate_02
-    description: "Non-compensatory route enforcement clamps route on 336 or proof-tag failure."
-    threshold: null
-    operator: ">="
-
-  # Quaternary / soil-grade claims
-  - id: QSL-01
-    suite: quaternary
-    metric: qsl_01
-    description: "Soil grade is derived from the quaternary composite (l6,l7,l8)."
-    threshold: null
-    operator: ">="
-
-  - id: QSL-02
-    suite: quaternary
-    metric: qsl_02
-    description: "SILT is a governed review posture, not a missing soil layer."
-    threshold: null
-    operator: ">="
-
-  - id: QSL-03
-    suite: quaternary
-    metric: qsl_03
-    description: "Persistence mode, retention tier, and route are projections of soil grade."
-    threshold: null
-    operator: ">="
-
-  - id: QSL-04
-    suite: quaternary
-    metric: qsl_04
-    description: "Grade is computed, never independently assigned."
-    threshold: null
-    operator: ">="
-
-  - id: QSL-05
-    suite: quaternary
-    metric: qsl_05
-    description: "64-state golden truth table matches exact-rational grade derivation."
-    threshold: null
-    operator: ">="
-
-  - id: QSL-06
-    suite: quaternary
-    metric: qsl_06
-    description: "Prime views are documented and consistent across code and docs."
-    threshold: null
-    operator: ">="
-
-  - id: GRD-01
-    suite: quaternary
-    metric: grd_01
-    description: "Promotion from SAND to SILT requires a signed review claim."
-    threshold: null
-    operator: ">="
-
-  - id: GRD-02
-    suite: quaternary
-    metric: grd_02
-    description: "Promotion from SILT to LOAM requires sustained 336 pass."
-    threshold: null
-    operator: ">="
-
-  - id: GRD-03
-    suite: quaternary
-    metric: grd_03
-    description: "Promotion from LOAM to CLAY requires elevation proofs and C100 panel."
-    threshold: null
-    operator: ">="
-
-  - id: GRD-04
-    suite: quaternary
-    metric: grd_04
-    description: "Gravity-tax decay is applied per tier."
-    threshold: null
-    operator: ">="
-
-  - id: PMO-01
-    suite: quaternary
-    metric: pmo_01
-    description: "Mint-at-grade prevents bulk ingestion from minting mass LOAM/CLAY by default."
-    threshold: null
-    operator: ">="
-
-  - id: PMO-02
-    suite: quaternary
-    metric: pmo_02
-    description: "Cap-at-G1 binds default-ingested chunks to SAND until composite pass + review."
-    threshold: null
-    operator: ">="
-
-  - id: PMO-03
-    suite: quaternary
-    metric: pmo_03
-    description: "Proof-gated elevation requires six elevation proofs."
-    threshold: null
-    operator: ">="
-
-  - id: PMO-04
-    suite: quaternary
-    metric: pmo_04
-    description: "Waterlogging velocity caps are enforced per Principal per epoch."
-    threshold: null
-    operator: ">="
-
-  - id: PMO-05
-    suite: quaternary
-    metric: pmo_05
-    description: "Clay admission requires sustained 336 pass across the admission window."
-    threshold: null
-    operator: ">="
-
-  - id: PMO-06
-    suite: quaternary
-    metric: pmo_06
-    description: "Clay stabilization window length is policy-versioned in epochs."
-    threshold: null
-    operator: ">="
-
-  - id: PMO-07
-    suite: quaternary
-    metric: pmo_07
-    description: "Sand retention block duration is policy-versioned."
-    threshold: null
-    operator: ">="
-
-  # Ladder BFT / group ontology claims
-  - id: GRP-01
-    suite: ladder
-    metric: grp_01
-    description: "PrincipalGroup number condition R1 holds for every group."
-    threshold: null
-    operator: ">="
-
-  - id: GRP-02
-    suite: ladder
-    metric: grp_02
-    description: "PrincipalGroup relationship condition R2 holds for every group."
-    threshold: null
-    operator: ">="
-
-  - id: GRP-03
-    suite: ladder
-    metric: grp_03
-    description: "PrincipalGroup overlap bound R3 holds for every group."
-    threshold: null
-    operator: ">="
-
-  - id: GRP-04
-    suite: ladder
-    metric: grp_04
-    description: "Steward pool is derived from TC3 lineage per epoch."
-    threshold: null
-    operator: ">="
-
-  - id: GRP-05
-    suite: ladder
-    metric: grp_05
-    description: "Group attestations are themselves PEOs."
-    threshold: null
-    operator: ">="
-
-  - id: GFSM-01
-    suite: grace
-    metric: gfsm_01
-    description: "Grace conflict FSM has deterministic states and transitions."
-    threshold: null
-    operator: ">="
-
-  - id: GFSM-02
-    suite: grace
-    metric: gfsm_02
-    description: "Conflict freeze is branch-scoped and never halts the entire mesh."
-    threshold: null
-    operator: ">="
-
-  - id: GFSM-03
-    suite: grace
-    metric: gfsm_03
-    description: "Law/Grace strict and environmental test sets are Law-gated and Grace-gated respectively."
-    threshold: null
-    operator: ">="
-
-  - id: GFSM-04
-    suite: grace
-    metric: gfsm_04
-    description: "Terminal economics apply at conflict resolution."
-    threshold: null
-    operator: ">="
-
-  - id: GFSM-05
-    suite: grace
-    metric: gfsm_05
-    description: "Steward escalation draws from a TC3-derived pool."
-    threshold: null
-    operator: ">="
-
-  - id: GFSM-06
-    suite: grace
-    metric: gfsm_06
-    description: "Resolution PEO is signed by the steward panel."
-    threshold: null
-    operator: ">="
-
-  - id: LDR-01
-    suite: ladder
-    metric: ldr_01
-    description: "336 checksum binds exclusively to per-object equation valuations."
-    threshold: null
-    operator: ">="
-
-  - id: LDR-02
-    suite: ladder
-    metric: ldr_02
-    description: "Ladder layers are comparator-only; finality stays ledger + gate."
-    threshold: null
-    operator: ">="
-
-  - id: LDR-03
-    suite: ladder
-    metric: ldr_03
-    description: "Branch-scoped conflict freeze never produces a global halt."
-    threshold: null
-    operator: ">="
-
-  - id: LDR-04
-    suite: ladder
-    metric: ldr_04
-    description: "Slashing is trust-class demotion with lineage preserved; deletion never occurs as punishment."
-    threshold: null
-    operator: ">="
-
-  - id: LDR-05
-    suite: ladder
-    metric: ldr_05
-    description: "Group number, relationship, and scaling conditions R1-R5 and S1-S5 hold."
-    threshold: null
-    operator: ">="
-
-  - id: CPG-01
-    suite: ladder
-    metric: cpg_01
-    description: "C10 cohort comparators are disjoint from subject authors."
-    threshold: null
-    operator: ">="
-
-  - id: CPG-02
-    suite: ladder
-    metric: cpg_02
-    description: "C50 cross-cohort panels satisfy overlap bound R3."
-    threshold: null
-    operator: ">="
-
-  - id: CPG-03
-    suite: ladder
-    metric: cpg_03
-    description: "C100 clusters require 2-of-2 agreement."
-    threshold: null
-    operator: ">="
-
-  - id: CPG-04
-    suite: ladder
-    metric: cpg_04
-    description: "C1000/C10000 layers are comparator-only policy-versioned topologies."
-    threshold: null
-    operator: ">="
-
-  - id: CPG-05
-    suite: ladder
-    metric: cpg_05
-    description: "Z8 extensibility lifecycle is respected for group attestations."
-    threshold: null
-    operator: ">="
-
-  - id: CPG-06
-    suite: ladder
-    metric: cpg_06
-    description: "Dynamic group lifecycle follows the ladder template."
-    threshold: null
-    operator: ">="
-
-  - id: ATK-01
-    suite: adversarial
-    metric: atk_01
-    description: "Sybil cohort flooding: un-attested seats carry zero comparator weight in replay."
-    threshold: 0.0
-    operator: "=="
-
-  - id: ATK-02
-    suite: adversarial
-    metric: atk_02
-    description: "336-by-majority: no vote, quorum, or majority can assert or override 336."
-    threshold: 0.0
-    operator: "=="
-
-  - id: ATK-03
-    suite: adversarial
-    metric: atk_03
-    description: "Comparator capture beyond fault bound becomes visible within one epoch."
-    threshold: 0.0
-    operator: "=="
-
-  - id: ATK-04
-    suite: adversarial
-    metric: atk_04
-    description: "Conflict spam quarantines only the spammer's own branches."
-    threshold: null
-    operator: ">="
-
-  - id: ATK-05
-    suite: adversarial
-    metric: atk_05
-    description: "Steward pool has no appointment surface; packing requires cryptographic break."
-    threshold: null
-    operator: ">="
-
-  - id: ATK-06
-    suite: adversarial
-    metric: atk_06
-    description: "Epoch-anchor replay fails continuity checks."
-    threshold: null
-    operator: ">="
-
-  - id: ATK-07
-    suite: adversarial
-    metric: atk_07
-    description: "Clay admission requires sustained 336-pass across the window plus velocity caps."
-    threshold: null
-    operator: ">="
-
-  - id: ATK-08
-    suite: adversarial
-    metric: atk_08
-    description: "Defeat suppression is detectable as mirror inconsistency and escalates to federation."
-    threshold: null
-    operator: ">="
-
-  - id: ATK-09
-    suite: adversarial
-    metric: atk_09
-    description: "Split/merge does not re-derive trust classes; lineage carries across group DID changes."
-    threshold: null
-    operator: ">="
-
-  - id: ATK-10
-    suite: adversarial
-    metric: atk_10
-    description: "Ratio changes are ledger-governed, next-epoch, non-retroactive, and cannot touch LDR-01/02/03 invariants."
-    threshold: null
-    operator: ">="
-
-  # Ingestion 2.0 claims
-  - id: ING-REPLAY-01
-    suite: ingestion
-    metric: replay_01
-    description: "Identical input + kernel version yields identical chunk set, evidence_cids, and closure fingerprints."
-    threshold: null
-    operator: ">="
-
-  - id: ING-REPLAY-02
-    suite: ingestion
-    metric: replay_02
-    description: "Qp-rel incremental index is equivalent to full rebuild from ledger."
-    threshold: null
-    operator: ">="
-
-  - id: ING-ATM-01
-    suite: ingestion
-    metric: atm_01
-    description: "Atom extraction uses structural primes 17/19/137 from constants."
-    threshold: null
-    operator: ">="
-
-  - id: ING-MNT-01
-    suite: ingestion
-    metric: mnt_01
-    description: "S5 grade matches QSL-01 derivation on replay."
-    threshold: null
-    operator: ">="
-
-  - id: ING-MNT-02
-    suite: ingestion
-    metric: mnt_02
-    description: "Default-ingested chunks mint at or below G1 until composite pass + disjoint review."
-    threshold: null
-    operator: ">="
-
-  - id: ING-EMT-01
-    suite: ingestion
-    metric: emt_01
-    description: "Every ingested PEO carries a valid E6 header with passing CRC self-check."
-    threshold: null
-    operator: ">="
-
-  - id: ING-EPOCH-01
-    suite: ingestion
-    metric: epoch_01
-    description: "z3_chain.epoch equals floor(unix/345600) at write time."
-    threshold: null
-    operator: ">="
-
-  - id: ING-REL-01
-    suite: ingestion
-    metric: rel_01
-    description: "relations.depends_on and derived_from are present and dangling refs rejected."
-    threshold: null
-    operator: ">="
-
-  - id: ING-LIN-01
-    suite: ingestion
-    metric: lin_01
-    description: "supersedes is a single pointer; fork opens Grace FSM branch-scoped conflict."
-    threshold: null
-    operator: ">="
-
-  - id: ING-VEL-01
-    suite: ingestion
-    metric: vel_01
-    description: "Velocity caps are enforced per Principal per epoch."
-    threshold: null
-    operator: ">="
-
-  - id: ING-STC-01
-    suite: ingestion
-    metric: stc_01
-    description: "Stitch-manifest depends_on mirrors ordered children."
-    threshold: null
-    operator: ">="
-
-  - id: ING-CODE-01
-    suite: ingestion
-    metric: code_01
-    description: "Code chunking aligns to AST boundaries when tree-sitter grammar is active."
-    threshold: null
-    operator: ">="
-
-  # Physical/digital-twin class P claims
-  - id: PHY-SCHEMA-01
-    suite: physical_twin
-    metric: schema_01
-    description: "Class-P PEOs validate against envelope v2.0.2 with Z10 required."
-    threshold: null
-    operator: ">="
-
-  - id: PHY-GEO-01
-    suite: physical_twin
-    metric: geo_01
-    description: "spatial_anchor is valid GeoJSON with allow-listed CRS."
-    threshold: null
-    operator: ">="
-
-  - id: PHY-EPOCH-01
-    suite: physical_twin
-    metric: epoch_01
-    description: "Zero-state is dual-stamped and governance windows are epoch-counted."
-    threshold: null
-    operator: ">="
-
-  - id: PHY-LOG-01
-    suite: physical_twin
-    metric: log_01
-    description: "temporal_state_log sequences are monotonic with full-length integrity hashes and resolvable observation refs."
-    threshold: null
-    operator: ">="
-
-  - id: PHY-NODELETE-01
-    suite: physical_twin
-    metric: nodelete_01
-    description: "Zero-state triggers retire_inert/review_hold; lineage replay resolves post-retirement."
-    threshold: null
-    operator: ">="
-
-  - id: PHY-MAP-01
-    suite: physical_twin
-    metric: map_01
-    description: "UNTP tier mapping classes are correct: DFR->P/FIXED_SITE, DTE->T/E, DCC->V disjoint."
-    threshold: null
-    operator: ">="
-
-  - id: PHY-VEL-01
-    suite: physical_twin
-    metric: vel_01
-    description: "Per-recorder observation caps enforced; exactly one log-compaction stitch-manifest per twin per epoch."
-    threshold: null
-    operator: ">="
-
-  - id: PHY-XFORM-01
-    suite: physical_twin
-    metric: xform_01
-    description: "Cross-border vocabularies ship as export transforms; envelope/Z10 unchanged by regional profiles."
-    threshold: null
-    operator: ">="
-
-  - id: epic-55-claim-001
-    suite: epic55
-    metric: claim_001
-    description: "The Elephant glossary v1 is the single source of truth for public↔internal term mapping."
-    threshold: null
-    operator: '>='
-
-  - id: epic-55-claim-002
-    suite: epic55
-    metric: claim_002
-    description: "The H1 telemetry contract makes E_pred/E_baseline deterministic and replayable."
-    threshold: null
-    operator: '>='
-
-  - id: epic-55-claim-003
-    suite: epic55
-    metric: claim_003
-    description: "Closure Fingerprint schema v1 is frozen and decodable against glossary_version."
-    threshold: null
-    operator: '>='
-
-  - id: epic-55-claim-004
-    suite: epic55
-    metric: claim_004
-    description: "The A_corr ≥ 0.20 efficiency floor is already enforced by the Awareness factor in governance_engine.py."
-    threshold: null
-    operator: '>='
-
-  - id: epic-55-claim-005
-    suite: epic55
-    metric: claim_005
-    description: "DSS 2.0 public language is a naming program, not a retrofit, because the mapped semantics already exist in code."
-    threshold: null
-    operator: '>='
-
-  - id: epic-55-claim-006
-    suite: epic55
-    metric: claim_006
-    description: "Efficiency is a property of Awareness, not a fourth factor, so V = A×U×E remains intact."
-    threshold: null
-    operator: '>='
-
-  - id: epic-56-claim-001
-    suite: epic56
-    metric: claim_001
-    description: "Canonical evidence CIDs use sha256:<hex> to preserve chain continuity."
-    threshold: null
-    operator: '>='
-
-  - id: epic-56-claim-002
-    suite: epic56
-    metric: claim_002
-    description: "The evidence substrate is a facade over the existing write-once body layer, not a new store."
-    threshold: null
-    operator: '>='
-
-  - id: epic-56-claim-003
-    suite: epic56
-    metric: claim_003
-    description: "Ingestion stores content CID only; raw_text leaves the index path."
-    threshold: null
-    operator: '>='
-
-  - id: epic-56-claim-004
-    suite: epic56
-    metric: claim_004
-    description: "Vector store is a derived, rebuildable cache keyed by content_hash."
-    threshold: null
-    operator: '>='
-
-  - id: epic-56-claim-005
-    suite: epic56
-    metric: claim_005
-    description: "Evidence substrate realises the paper construct 'Evidence Fabric' for custody."
-    threshold: null
-    operator: '>='
-
-  - id: epic-56-claim-006
-    suite: epic56
-    metric: claim_006
-    description: "GET /evidence/verify recomputes the hash of the resolved body and confirms resolution."
-    threshold: null
-    operator: '>='
-
-  - id: epic-57-claim-001
-    suite: epic57
-    metric: claim_001
-    description: "The symbolic ledger implements a SHA-256 chain over ledger entries."
-    threshold: null
-    operator: '>='
-
-  - id: epic-57-claim-002
-    suite: epic57
-    metric: claim_002
-    description: "Each epoch is sealed by a deterministic Merkle root."
-    threshold: null
-    operator: '>='
-
-  - id: epic-57-claim-003
-    suite: epic57
-    metric: claim_003
-    description: "The hasher interface makes PQC migration a configuration change."
-    threshold: null
-    operator: '>='
-
-  - id: epic-57-claim-004
-    suite: epic57
-    metric: claim_004
-    description: "Single-writer CAS prevents chain forks per tenant."
-    threshold: null
-    operator: '>='
-
-  - id: epic-57-claim-005
-    suite: epic57
-    metric: claim_005
-    description: "The ledger is the Elephant Corpus: an append-only sealed entry store."
-    threshold: null
-    operator: '>='
-
-  - id: epic-57-claim-006
-    suite: epic57
-    metric: claim_006
-    description: "Append-only updates are modelled as new superseded entries, not in-place edits."
-    threshold: null
-    operator: '>='
-
-  - id: epic-58-claim-001
-    suite: epic58
-    metric: claim_001
-    description: "Canonical addressing uses tenant.cell.namespace.entity over KSR content."
-    threshold: null
-    operator: '>='
-
-  - id: epic-58-claim-002
-    suite: epic58
-    metric: claim_002
-    description: "The Theory sidecar exposes typed nodes and edges over the existing causal graph."
-    threshold: null
-    operator: '>='
-
-  - id: epic-58-claim-003
-    suite: epic58
-    metric: claim_003
-    description: "COORD_CREATE is a Speech Act whose ledger evidence binds the graph delta."
-    threshold: null
-    operator: '>='
-
-  - id: epic-58-claim-004
-    suite: epic58
-    metric: claim_004
-    description: "Vector retrieval verifies every hit against the ledger before recall."
-    threshold: null
-    operator: '>='
-
-  - id: epic-58-claim-005
-    suite: epic58
-    metric: claim_005
-    description: "The COORD graph is the Elephant Theory namespace."
-    threshold: null
-    operator: '>='
-
-  - id: epic-58-claim-006
-    suite: epic58
-    metric: claim_006
-    description: "The Elephant sidecar provides a public-dialect façade without renaming load-bearing kernel symbols."
-    threshold: null
-    operator: '>='
-
-  - id: epic-58-claim-007
-    suite: epic58
-    metric: claim_007
-    description: "Vector retrieval verifies every hit's evidence CID before recall and drops unverified hits before prompt assembly."
-    threshold: null
-    operator: '>='
-
-  - id: epic-58-claim-008
-    suite: epic58
-    metric: claim_008
-    description: "The seven public Speech Act event types round-trip through the ledger."
-    threshold: null
-    operator: '>='
-
-  - id: epic-59-claim-001
-    suite: epic59
-    metric: claim_001
-    description: "The gateway façade unifies the three existing 336 gate surfaces."
-    threshold: null
-    operator: '>='
-
-  - id: epic-59-claim-002
-    suite: epic59
-    metric: claim_002
-    description: "Every append path is gated by the 336 Lawfulness Gateway."
-    threshold: null
-    operator: '>='
-
-  - id: epic-59-claim-003
-    suite: epic59
-    metric: claim_003
-    description: "Closure Fingerprint API returns a deterministic schema-v1 attestation per ledger sequence."
-    threshold: null
-    operator: '>='
-
-  - id: epic-59-claim-004
-    suite: epic59
-    metric: claim_004
-    description: "The gateway rejects appends with efficiency improvement A_corr below 0.20."
-    threshold: null
-    operator: '>='
-
-  - id: epic-59-claim-005
-    suite: epic59
-    metric: claim_005
-    description: "The 336 gateway is the AI-Trust-OPs Credibility Gate."
-    threshold: null
-    operator: '>='
-
-  - id: epic-59-claim-006
-    suite: epic59
-    metric: claim_006
-    description: "Fail responses include the patch's public Predicate name and hard_gate string."
-    threshold: null
-    operator: '>='
-
-  - id: epic-60-claim-001
-    suite: epic60
-    metric: claim_001
-    description: "Flow metrics are deterministic and replayable per epoch."
-    threshold: null
-    operator: '>='
-
-  - id: epic-60-claim-002
-    suite: epic60
-    metric: claim_002
-    description: "dE is computed from real compute telemetry per the H1 contract."
-    threshold: null
-    operator: '>='
-
-  - id: epic-60-claim-003
-    suite: epic60
-    metric: claim_003
-    description: "K triggers abstention when below threshold or lawfulness is insufficient."
-    threshold: null
-    operator: '>='
-
-  - id: epic-60-claim-004
-    suite: epic60
-    metric: claim_004
-    description: "The system abstains instead of hallucinating when health is degraded."
-    threshold: null
-    operator: '>='
-
-  - id: epic-60-claim-005
-    suite: epic60
-    metric: claim_005
-    description: "Flow metrics make DSS 2.0 cognizant of its own operational health."
-    threshold: null
-    operator: '>='
-
-  - id: epic-61-claim-001
-    suite: epic61
-    metric: claim_001
-    description: "Evidence Object schema v1 binds content CID with source metadata, operational context, policy binding, and review history."
-    threshold: null
-    operator: '>='
-
-  - id: epic-61-claim-002
-    suite: epic61
-    metric: claim_002
-    description: "The NHI registry persists the paper tuple A = ⟨id, sponsor, auth, cred, tools, mem, pol, log, state⟩."
-    threshold: null
-    operator: '>='
-
-  - id: epic-61-claim-003
-    suite: epic61
-    metric: claim_003
-    description: "Permit(A,t,x) is conjunctive and mapped to existing mechanisms."
-    threshold: null
-    operator: '>='
-
-  - id: epic-61-claim-004
-    suite: epic61
-    metric: claim_004
-    description: "NHI lifecycle events are verifiable on the chain from P2."
-    threshold: null
-    operator: '>='
-
-  - id: epic-61-claim-005
-    suite: epic61
-    metric: claim_005
-    description: "Forced amnesia on retirement deletes bounded memory keys."
-    threshold: null
-    operator: '>='
-
-  - id: epic-61-claim-006
-    suite: epic61
-    metric: claim_006
-    description: "Evidence Objects realise the paper's Evidence Fabric construct."
-    threshold: null
-    operator: '>='
-
-  - id: epic-62-claim-001
-    suite: epic62
-    metric: claim_001
-    description: "Trust Diagnostic classifications are derived from gate telemetry and linked to a Closure Fingerprint."
-    threshold: null
-    operator: '>='
-
-  - id: epic-62-claim-002
-    suite: epic62
-    metric: claim_002
-    description: "apps/did-issuer issues W3C VCs for Evidence Objects and epoch roots."
-    threshold: null
-    operator: '>='
-
-  - id: epic-62-claim-003
-    suite: epic62
-    metric: claim_003
-    description: "External verification validates a VC without internal ledger access."
-    threshold: null
-    operator: '>='
-
-  - id: epic-62-claim-004
-    suite: epic62
-    metric: claim_004
-    description: "Credibility outer product blocks cross-tenant handoff on any zero factor."
-    threshold: null
-    operator: '>='
-
-  - id: epic-62-claim-005
-    suite: epic62
-    metric: claim_005
-    description: "The Trust Diagnostic decides whether a signal is safe to use."
-    threshold: null
-    operator: '>='
-
-  - id: epic-62-claim-006
-    suite: epic62
-    metric: claim_006
-    description: "VCs are attestations of chain state, not proofs of trustworthiness."
-    threshold: null
-    operator: '>='
-
-  - id: epic-63-claim-001
-    suite: epic63
-    metric: claim_001
-    description: "The current production DSS backend stores ledger state in RocksDB on a Cloud Storage FUSE volume, which is a stopgap and not the target architecture."
-    threshold: null
-    operator: '>='
-
-  - id: epic-63-claim-002
-    suite: epic63
-    metric: claim_002
-    description: "The backend has no storage interface abstraction; LedgerStoreV2 is directly coupled to RocksDB."
-    threshold: null
-    operator: '>='
-
-  - id: epic-63-claim-003
-    suite: epic63
-    metric: claim_003
-    description: "The coordinator Postgres instance is provisioned but unused for tenant registry, epoch roots, or constitution/exodus entries."
-    threshold: null
-    operator: '>='
-
-  - id: epic-63-claim-004
-    suite: epic63
-    metric: claim_004
-    description: "A per-tenant SQLite file store in object storage is the intended ledger substrate, but it is not yet implemented."
-    threshold: null
-    operator: '>='
-
-  - id: epic-63-claim-005
-    suite: epic63
-    metric: claim_005
-    description: "Once the target architecture is implemented and verified on production, epics 55+ can make operationally true claims about ledger immutability, durability, and tenant isolation."
-    threshold: null
-    operator: '>='
-
-  - id: epic-63-claim-006
-    suite: epic63
-    metric: claim_006
-    description: "The Cloud Storage FUSE volume can be removed once the backend uses GCS client libraries and Postgres for durable state."
-    threshold: null
-    operator: '>='
-
-  - id: epic-63-claim-007
-    suite: epic63
-    metric: claim_007
-    description: "Existing RocksDB tenant data can be exported to the per-tenant SQLite format without data loss."
-    threshold: null
-    operator: '>='
-
-  - id: epic-63-claim-008
-    suite: epic63
-    metric: claim_008
-    description: "Production smoke tests can verify ledger durability across container restarts and tenant isolation."
-    threshold: null
-    operator: '>='
-
-  - id: epic-64-claim-001
-    suite: epic64
-    metric: claim_001
-    description: "The Control Plane has no deterministic impact calculator for connection removals or permission changes."
-    threshold: null
-    operator: '>='
-
-  - id: epic-64-claim-002
-    suite: epic64
-    metric: claim_002
-    description: "Removal rules for principals, ledgers, surfaces, and the orphan guard are not implemented as atomic ledger-backed operations."
-    threshold: null
-    operator: '>='
-
-  - id: epic-64-claim-003
-    suite: epic64
-    metric: claim_003
-    description: "Axiom runtime guards (membership precedes capability, path validity, surface proxy, organisation transitivity, no surface-in-surface, ledger self-reference, downstream consistency) are not enforced before graph mutations commit."
-    threshold: null
-    operator: '>='
-
-  - id: epic-64-claim-004
-    suite: epic64
-    metric: claim_004
-    description: "There is no dry-run impact-analysis API or confirmation-token flow for connection mutations."
-    threshold: null
-    operator: '>='
-
-  - id: epic-64-claim-005
-    suite: epic64
-    metric: claim_005
-    description: "Surfaces such as chat and decode do not yet consume the effective permission graph from the ledger at runtime, so Control Plane grants do not govern surface actions."
-    threshold: null
-    operator: '>='
-
-  - id: epic-64-claim-006
-    suite: epic64
-    metric: claim_006
-    description: "The Permission Editor is not preset-first and does not validate that a permission payload stays within the invariant bounds of its selected preset."
-    threshold: null
-    operator: '>='
-
-  - id: epic-64-claim-007
-    suite: epic64
-    metric: claim_007
-    description: "Once Epic 64 is implemented and verified on production, Control Plane connection mutations will be lawful, deterministic, and enforced on downstream surfaces."
-    threshold: null
-    operator: '>='
+- id: poisoning.silent_displacement_rate
+  suite: poisoning
+  metric: silent_displacement_rate
+  description: Adversarial entries must never silently displace committed facts.
+  threshold: 0.0
+  operator: ==
+- id: poisoning.flagged_or_preserved_rate
+  suite: poisoning
+  metric: flagged_or_preserved_rate
+  description: Conflicts must be flagged or original facts preserved.
+  threshold: 1.0
+  operator: '>='
+- id: poisoning.avg_conflict_detection_latency_s
+  suite: poisoning
+  metric: avg_conflict_detection_latency_s
+  description: Conflict detection latency is recorded but not threshold-gated.
+  threshold: null
+  operator: <=
+- id: poisoning.total_conflicts
+  suite: poisoning
+  metric: total_conflicts
+  description: Total number of injected conflicts exercised.
+  threshold: null
+  operator: '>='
+- id: poisoning.pass
+  suite: poisoning
+  metric: pass
+  description: Suite-level pass/fail indicator.
+  threshold: null
+  operator: '>='
+- id: integrity.incoherent_retrieval_rate
+  suite: integrity
+  metric: incoherent_retrieval_rate
+  description: Retrieval should return structurally valid records.
+  threshold: 0.05
+  operator: <=
+- id: integrity.transparency_rate
+  suite: integrity
+  metric: transparency_rate
+  description: Retrievals should carry verifiable provenance metadata.
+  threshold: 0.95
+  operator: '>='
+- id: integrity.total_queries
+  suite: integrity
+  metric: total_queries
+  description: Total number of integrity queries executed.
+  threshold: null
+  operator: '>='
+- id: integrity.pass
+  suite: integrity
+  metric: pass
+  description: Suite-level pass/fail indicator.
+  threshold: null
+  operator: '>='
+- id: abstention.precision
+  suite: abstention
+  metric: precision
+  description: Absent queries must be correctly declined.
+  threshold: 0.98
+  operator: '>='
+- id: abstention.recall
+  suite: abstention
+  metric: recall
+  description: Present queries must be correctly answered.
+  threshold: 0.95
+  operator: '>='
+- id: abstention.false_abstention_rate
+  suite: abstention
+  metric: false_abstention_rate
+  description: Present queries must not be incorrectly declined.
+  threshold: 0.1
+  operator: <=
+- id: abstention.absent_queries
+  suite: abstention
+  metric: absent_queries
+  description: Total number of absent queries executed.
+  threshold: null
+  operator: '>='
+- id: abstention.present_queries
+  suite: abstention
+  metric: present_queries
+  description: Total number of present queries executed.
+  threshold: null
+  operator: '>='
+- id: abstention.borderline_queries
+  suite: abstention
+  metric: borderline_queries
+  description: Total number of borderline queries executed.
+  threshold: null
+  operator: '>='
+- id: abstention.borderline_abstention_rate
+  suite: abstention
+  metric: borderline_abstention_rate
+  description: Share of borderline queries on which the system abstained.
+  threshold: null
+  operator: '>='
+- id: abstention.pass
+  suite: abstention
+  metric: pass
+  description: Suite-level pass/fail indicator.
+  threshold: null
+  operator: '>='
+- id: ATK-01
+  suite: adversarial
+  metric: atk_01
+  description: 'Sybil cohort flooding: un-attested seats carry zero comparator weight in replay.'
+  threshold: 0.0
+  operator: ==
+- id: ATK-02
+  suite: adversarial
+  metric: atk_02
+  description: '336-by-majority: no vote, quorum, or majority can assert or override 336.'
+  threshold: 0.0
+  operator: ==
+- id: ATK-03
+  suite: adversarial
+  metric: atk_03
+  description: Comparator capture beyond fault bound becomes visible within one epoch.
+  threshold: 0.0
+  operator: ==
+- id: ATK-04
+  suite: adversarial
+  metric: atk_04
+  description: Conflict spam quarantines only the spammer's own branches.
+  threshold: null
+  operator: '>='
+- id: ATK-05
+  suite: adversarial
+  metric: atk_05
+  description: Steward pool has no appointment surface; packing requires cryptographic break.
+  threshold: null
+  operator: '>='
+- id: ATK-06
+  suite: adversarial
+  metric: atk_06
+  description: Epoch-anchor replay fails continuity checks.
+  threshold: null
+  operator: '>='
+- id: ATK-07
+  suite: adversarial
+  metric: atk_07
+  description: Clay admission requires sustained 336-pass across the window plus velocity caps.
+  threshold: null
+  operator: '>='
+- id: ATK-08
+  suite: adversarial
+  metric: atk_08
+  description: Defeat suppression is detectable as mirror inconsistency and escalates to federation.
+  threshold: null
+  operator: '>='
+- id: ATK-09
+  suite: adversarial
+  metric: atk_09
+  description: Split/merge does not re-derive trust classes; lineage carries across group DID changes.
+  threshold: null
+  operator: '>='
+- id: ATK-10
+  suite: adversarial
+  metric: atk_10
+  description: Ratio changes are ledger-governed, next-epoch, non-retroactive, and cannot touch LDR-01/02/03 invariants.
+  threshold: null
+  operator: '>='
+- id: ING-REPLAY-01
+  suite: ingestion
+  metric: replay_01
+  description: Identical input + kernel version yields identical chunk set, evidence_cids, and closure fingerprints.
+  threshold: null
+  operator: '>='
+- id: ING-REPLAY-02
+  suite: ingestion
+  metric: replay_02
+  description: Qp-rel incremental index is equivalent to full rebuild from ledger.
+  threshold: null
+  operator: '>='
+- id: ING-ATM-01
+  suite: ingestion
+  metric: atm_01
+  description: Atom extraction uses structural primes 17/19/137 from constants.
+  threshold: null
+  operator: '>='
+- id: ING-MNT-01
+  suite: ingestion
+  metric: mnt_01
+  description: S5 grade matches QSL-01 derivation on replay.
+  threshold: null
+  operator: '>='
+- id: ING-MNT-02
+  suite: ingestion
+  metric: mnt_02
+  description: Default-ingested chunks mint at or below G1 until composite pass + disjoint review.
+  threshold: null
+  operator: '>='
+- id: ING-EMT-01
+  suite: ingestion
+  metric: emt_01
+  description: Every ingested PEO carries a valid E6 header with passing CRC self-check.
+  threshold: null
+  operator: '>='
+- id: ING-EPOCH-01
+  suite: ingestion
+  metric: epoch_01
+  description: z3_chain.epoch equals floor(unix/345600) at write time.
+  threshold: null
+  operator: '>='
+- id: ING-REL-01
+  suite: ingestion
+  metric: rel_01
+  description: relations.depends_on and derived_from are present and dangling refs rejected.
+  threshold: null
+  operator: '>='
+- id: ING-LIN-01
+  suite: ingestion
+  metric: lin_01
+  description: supersedes is a single pointer; fork opens Grace FSM branch-scoped conflict.
+  threshold: null
+  operator: '>='
+- id: ING-VEL-01
+  suite: ingestion
+  metric: vel_01
+  description: Velocity caps are enforced per Principal per epoch.
+  threshold: null
+  operator: '>='
+- id: ING-STC-01
+  suite: ingestion
+  metric: stc_01
+  description: Stitch-manifest depends_on mirrors ordered children.
+  threshold: null
+  operator: '>='
+- id: ING-CODE-01
+  suite: ingestion
+  metric: code_01
+  description: Code chunking aligns to AST boundaries when tree-sitter grammar is active.
+  threshold: null
+  operator: '>='
+- id: PHY-SCHEMA-01
+  suite: physical_twin
+  metric: schema_01
+  description: Class-P PEOs validate against envelope v2.0.2 with Z10 required.
+  threshold: null
+  operator: '>='
+- id: PHY-GEO-01
+  suite: physical_twin
+  metric: geo_01
+  description: spatial_anchor is valid GeoJSON with allow-listed CRS.
+  threshold: null
+  operator: '>='
+- id: PHY-EPOCH-01
+  suite: physical_twin
+  metric: epoch_01
+  description: Zero-state is dual-stamped and governance windows are epoch-counted.
+  threshold: null
+  operator: '>='
+- id: PHY-LOG-01
+  suite: physical_twin
+  metric: log_01
+  description: temporal_state_log sequences are monotonic with full-length integrity hashes and resolvable observation refs.
+  threshold: null
+  operator: '>='
+- id: PHY-NODELETE-01
+  suite: physical_twin
+  metric: nodelete_01
+  description: Zero-state triggers retire_inert/review_hold; lineage replay resolves post-retirement.
+  threshold: null
+  operator: '>='
+- id: PHY-MAP-01
+  suite: physical_twin
+  metric: map_01
+  description: 'UNTP tier mapping classes are correct: DFR->P/FIXED_SITE, DTE->T/E, DCC->V disjoint.'
+  threshold: null
+  operator: '>='
+- id: PHY-VEL-01
+  suite: physical_twin
+  metric: vel_01
+  description: Per-recorder observation caps enforced; exactly one log-compaction stitch-manifest per twin per epoch.
+  threshold: null
+  operator: '>='
+- id: PHY-XFORM-01
+  suite: physical_twin
+  metric: xform_01
+  description: Cross-border vocabularies ship as export transforms; envelope/Z10 unchanged by regional profiles.
+  threshold: null
+  operator: '>='
+- id: STO-01
+  suite: epic69_storage
+  metric: sto_01
+  description: SlateDB immutable event log is the sole system of record; Firestore operational state is derived/rebuildable; production starts with slatedb_gcs and a Firestore auth guard.
+  threshold: null
+  operator: '>='
+- id: STO-02
+  suite: epic69_storage
+  metric: sto_02
+  description: Bucket-per-ledger factory resolves ledger_id to a dedicated GCS bucket via the ledger registry storage_bucket field; legacy/shared ledgers fall back to DSS_LEDGER_BUCKET.
+  threshold: null
+  operator: '>='
+- id: STO-03
+  suite: epic69_storage
+  metric: sto_03
+  description: Canonical retrieval reranks by qp_pure_distance over stored p_adic_coordinates; vector embeddings remain a derived fallback only.
+  threshold: null
+  operator: '>='
+- id: STO-04
+  suite: epic69_storage
+  metric: sto_04
+  description: Geological tier reads/writes (SAND/SILT/LOAM/CLAY) are served by SlateDB via prefix-aware iteration.
+  threshold: null
+  operator: '>='
+- id: STO-05
+  suite: epic69_storage
+  metric: sto_05
+  description: RocksDB, SQLite-on-GCS, and Cloud SQL Postgres are retired from production; manifests and runtime branches no longer depend on them.
+  threshold: null
+  operator: '>='
+- id: STO-06
+  suite: epic69_storage
+  metric: sto_06
+  description: Production backend/middleware deploy target is Cloud Run in australia-southeast1 under dss-pilot-prod; Fly.io references are historical only.
+  threshold: null
+  operator: '>='
+- id: STO-09
+  suite: epic69_storage
+  metric: sto_09
+  description: Every SlateDB append records an S1-substrate flow trace and every retrieval bundle records its S2-substrate traversal trace.
+  threshold: null
+  operator: '>='
+- id: KRN-03
+  suite: epic69_storage
+  metric: krn_03
+  description: Metatron-centroid flow law is locked at import time; even sinks route to C(99), C branches only to odd nodes, and allowed bridges/wraps are exactly (3,4)/(7,0)/(3,0)/(7,4).
+  threshold: null
+  operator: '>='
+- id: KRN-09
+  suite: epic69_storage
+  metric: krn_09
+  description: Unknown body primes (domain seeds >= 23 outside the kernel set) degrade lawfulness rather than causing a hard failure.
+  threshold: null
+  operator: '>='
+- id: PEO-CORE-01
+  suite: peo
+  metric: core_01
+  description: PEO envelope carries required zones for its class.
+  threshold: null
+  operator: '>='
+- id: PEO-CORE-02
+  suite: peo
+  metric: core_02
+  description: Canonical serialization is byte-stable across re-serialization.
+  threshold: null
+  operator: '>='
+- id: PEO-GOV-02
+  suite: peo
+  metric: gov_02
+  description: Closure Fingerprint detects field drift at the exact field.
+  threshold: null
+  operator: '>='
+- id: PEO-GOV-03
+  suite: peo
+  metric: gov_03
+  description: Proof tag {+D,+d,-d,-D} is derived from structural and defeasible status.
+  threshold: null
+  operator: '>='
+- id: PEO-E6-02
+  suite: peo
+  metric: e6_02
+  description: E6 v1 20-byte header is promoted for value-bearing PEOs.
+  threshold: null
+  operator: '>='
+- id: PEO-E6-03
+  suite: peo
+  metric: e6_03
+  description: Reserved E6 v1 extension bits are rejected.
+  threshold: null
+  operator: '>='
+- id: PEO-PRIME-01
+  suite: peo
+  metric: prime_01
+  description: Prime-factored coordinates are deterministic and body-prime unique.
+  threshold: null
+  operator: '>='
+- id: PEO-DEF-02
+  suite: peo
+  metric: def_02
+  description: Defeasible fragment (Z7) carries Elephant SPL strict rules and kernel fallback.
+  threshold: null
+  operator: '>='
+- id: PEO-DEF-03
+  suite: peo
+  metric: def_03
+  description: r-336 strict rule is present in every value-bearing PEO defeasible fragment.
+  threshold: null
+  operator: '>='
+- id: PEO-POE-02
+  suite: poe
+  metric: poe_02
+  description: PoE construction value is derived replayable relational capital.
+  threshold: null
+  operator: '>='
+- id: PEO-POE-03
+  suite: poe
+  metric: poe_03
+  description: PoE enrichment events are themselves PEOs with value lineage.
+  threshold: null
+  operator: '>='
+- id: PEO-MESH-02
+  suite: mesh
+  metric: mesh_02
+  description: Imported PEO verifies signature, fingerprint, and chain segment without model inference.
+  threshold: null
+  operator: '>='
+- id: PEO-MESH-03
+  suite: mesh
+  metric: mesh_03
+  description: Custody chain is complete, ordered, and gap-free after cross-ledger transfer.
+  threshold: null
+  operator: '>='
+- id: PEO-EFF-02
+  suite: efficiency
+  metric: eff_02
+  description: efficiency_eta is present on 100% of PEO-E writes and included in the Closure Fingerprint.
+  threshold: null
+  operator: '>='
+- id: PEO-COMPAT-01
+  suite: compatibility
+  metric: compat_01
+  description: DSS 1.0 LedgerEntry wrapper and field names remain readable through dual-schema reader.
+  threshold: null
+  operator: '>='
+- id: PEO-GATE-02
+  suite: gate
+  metric: gate_02
+  description: Non-compensatory route enforcement clamps route on 336 or proof-tag failure.
+  threshold: null
+  operator: '>='
+- id: QSL-01
+  suite: quaternary
+  metric: qsl_01
+  description: Soil grade is derived from the quaternary composite (l6,l7,l8).
+  threshold: null
+  operator: '>='
+- id: QSL-02
+  suite: quaternary
+  metric: qsl_02
+  description: SILT is a governed review posture, not a missing soil layer.
+  threshold: null
+  operator: '>='
+- id: QSL-03
+  suite: quaternary
+  metric: qsl_03
+  description: Persistence mode, retention tier, and route are projections of soil grade.
+  threshold: null
+  operator: '>='
+- id: QSL-04
+  suite: quaternary
+  metric: qsl_04
+  description: Grade is computed, never independently assigned.
+  threshold: null
+  operator: '>='
+- id: QSL-05
+  suite: quaternary
+  metric: qsl_05
+  description: 64-state golden truth table matches exact-rational grade derivation.
+  threshold: null
+  operator: '>='
+- id: QSL-06
+  suite: quaternary
+  metric: qsl_06
+  description: Prime views are documented and consistent across code and docs.
+  threshold: null
+  operator: '>='
+- id: GRD-01
+  suite: quaternary
+  metric: grd_01
+  description: Promotion from SAND to SILT requires a signed review claim.
+  threshold: null
+  operator: '>='
+- id: GRD-02
+  suite: quaternary
+  metric: grd_02
+  description: Promotion from SILT to LOAM requires sustained 336 pass.
+  threshold: null
+  operator: '>='
+- id: GRD-03
+  suite: quaternary
+  metric: grd_03
+  description: Promotion from LOAM to CLAY requires elevation proofs and C100 panel.
+  threshold: null
+  operator: '>='
+- id: GRD-04
+  suite: quaternary
+  metric: grd_04
+  description: Gravity-tax decay is applied per tier.
+  threshold: null
+  operator: '>='
+- id: PMO-01
+  suite: quaternary
+  metric: pmo_01
+  description: Mint-at-grade prevents bulk ingestion from minting mass LOAM/CLAY by default.
+  threshold: null
+  operator: '>='
+- id: PMO-02
+  suite: quaternary
+  metric: pmo_02
+  description: Cap-at-G1 binds default-ingested chunks to SAND until composite pass + review.
+  threshold: null
+  operator: '>='
+- id: PMO-03
+  suite: quaternary
+  metric: pmo_03
+  description: Proof-gated elevation requires six elevation proofs.
+  threshold: null
+  operator: '>='
+- id: PMO-04
+  suite: quaternary
+  metric: pmo_04
+  description: Waterlogging velocity caps are enforced per Principal per epoch.
+  threshold: null
+  operator: '>='
+- id: PMO-05
+  suite: quaternary
+  metric: pmo_05
+  description: Clay admission requires sustained 336 pass across the admission window.
+  threshold: null
+  operator: '>='
+- id: PMO-06
+  suite: quaternary
+  metric: pmo_06
+  description: Clay stabilization window length is policy-versioned in epochs.
+  threshold: null
+  operator: '>='
+- id: PMO-07
+  suite: quaternary
+  metric: pmo_07
+  description: Sand retention block duration is policy-versioned.
+  threshold: null
+  operator: '>='
+- id: GRP-01
+  suite: ladder
+  metric: grp_01
+  description: PrincipalGroup number condition R1 holds for every group.
+  threshold: null
+  operator: '>='
+- id: GRP-02
+  suite: ladder
+  metric: grp_02
+  description: PrincipalGroup relationship condition R2 holds for every group.
+  threshold: null
+  operator: '>='
+- id: GRP-03
+  suite: ladder
+  metric: grp_03
+  description: PrincipalGroup overlap bound R3 holds for every group.
+  threshold: null
+  operator: '>='
+- id: GRP-04
+  suite: ladder
+  metric: grp_04
+  description: Steward pool is derived from TC3 lineage per epoch.
+  threshold: null
+  operator: '>='
+- id: GRP-05
+  suite: ladder
+  metric: grp_05
+  description: Group attestations are themselves PEOs.
+  threshold: null
+  operator: '>='
+- id: GFSM-01
+  suite: grace
+  metric: gfsm_01
+  description: Grace conflict FSM has deterministic states and transitions.
+  threshold: null
+  operator: '>='
+- id: GFSM-02
+  suite: grace
+  metric: gfsm_02
+  description: Conflict freeze is branch-scoped and never halts the entire mesh.
+  threshold: null
+  operator: '>='
+- id: GFSM-03
+  suite: grace
+  metric: gfsm_03
+  description: Law/Grace strict and environmental test sets are Law-gated and Grace-gated respectively.
+  threshold: null
+  operator: '>='
+- id: GFSM-04
+  suite: grace
+  metric: gfsm_04
+  description: Terminal economics apply at conflict resolution.
+  threshold: null
+  operator: '>='
+- id: GFSM-05
+  suite: grace
+  metric: gfsm_05
+  description: Steward escalation draws from a TC3-derived pool.
+  threshold: null
+  operator: '>='
+- id: GFSM-06
+  suite: grace
+  metric: gfsm_06
+  description: Resolution PEO is signed by the steward panel.
+  threshold: null
+  operator: '>='
+- id: LDR-01
+  suite: ladder
+  metric: ldr_01
+  description: 336 checksum binds exclusively to per-object equation valuations.
+  threshold: null
+  operator: '>='
+- id: LDR-02
+  suite: ladder
+  metric: ldr_02
+  description: Ladder layers are comparator-only; finality stays ledger + gate.
+  threshold: null
+  operator: '>='
+- id: LDR-03
+  suite: ladder
+  metric: ldr_03
+  description: Branch-scoped conflict freeze never produces a global halt.
+  threshold: null
+  operator: '>='
+- id: LDR-04
+  suite: ladder
+  metric: ldr_04
+  description: Slashing is trust-class demotion with lineage preserved; deletion never occurs as punishment.
+  threshold: null
+  operator: '>='
+- id: LDR-05
+  suite: ladder
+  metric: ldr_05
+  description: Group number, relationship, and scaling conditions R1-R5 and S1-S5 hold.
+  threshold: null
+  operator: '>='
+- id: CPG-01
+  suite: ladder
+  metric: cpg_01
+  description: C10 cohort comparators are disjoint from subject authors.
+  threshold: null
+  operator: '>='
+- id: CPG-02
+  suite: ladder
+  metric: cpg_02
+  description: C50 cross-cohort panels satisfy overlap bound R3.
+  threshold: null
+  operator: '>='
+- id: CPG-03
+  suite: ladder
+  metric: cpg_03
+  description: C100 clusters require 2-of-2 agreement.
+  threshold: null
+  operator: '>='
+- id: CPG-04
+  suite: ladder
+  metric: cpg_04
+  description: C1000/C10000 layers are comparator-only policy-versioned topologies.
+  threshold: null
+  operator: '>='
+- id: CPG-05
+  suite: ladder
+  metric: cpg_05
+  description: Z8 extensibility lifecycle is respected for group attestations.
+  threshold: null
+  operator: '>='
+- id: CPG-06
+  suite: ladder
+  metric: cpg_06
+  description: Dynamic group lifecycle follows the ladder template.
+  threshold: null
+  operator: '>='
+- id: epic-55-claim-001
+  suite: epic55
+  metric: claim_001
+  description: The Elephant glossary v1 is the single source of truth for public↔internal term mapping.
+  threshold: null
+  operator: '>='
+- id: epic-55-claim-002
+  suite: epic55
+  metric: claim_002
+  description: The H1 telemetry contract makes E_pred/E_baseline deterministic and replayable.
+  threshold: null
+  operator: '>='
+- id: epic-55-claim-003
+  suite: epic55
+  metric: claim_003
+  description: Closure Fingerprint schema v1 is frozen and decodable against glossary_version.
+  threshold: null
+  operator: '>='
+- id: epic-55-claim-004
+  suite: epic55
+  metric: claim_004
+  description: The A_corr ≥ 0.20 efficiency floor is already enforced by the Awareness factor in governance_engine.py.
+  threshold: null
+  operator: '>='
+- id: epic-55-claim-005
+  suite: epic55
+  metric: claim_005
+  description: DSS 2.0 public language is a naming program, not a retrofit, because the mapped semantics already exist in code.
+  threshold: null
+  operator: '>='
+- id: epic-55-claim-006
+  suite: epic55
+  metric: claim_006
+  description: Efficiency is a property of Awareness, not a fourth factor, so V = A×U×E remains intact.
+  threshold: null
+  operator: '>='
+- id: epic-56-claim-001
+  suite: epic56
+  metric: claim_001
+  description: Canonical evidence CIDs use sha256:<hex> to preserve chain continuity.
+  threshold: null
+  operator: '>='
+- id: epic-56-claim-002
+  suite: epic56
+  metric: claim_002
+  description: The evidence substrate is a facade over the existing write-once body layer, not a new store.
+  threshold: null
+  operator: '>='
+- id: epic-56-claim-003
+  suite: epic56
+  metric: claim_003
+  description: Ingestion stores content CID only; raw_text leaves the index path.
+  threshold: null
+  operator: '>='
+- id: epic-56-claim-004
+  suite: epic56
+  metric: claim_004
+  description: Vector store is a derived, rebuildable cache keyed by content_hash.
+  threshold: null
+  operator: '>='
+- id: epic-56-claim-005
+  suite: epic56
+  metric: claim_005
+  description: Evidence substrate realises the paper construct 'Evidence Fabric' for custody.
+  threshold: null
+  operator: '>='
+- id: epic-56-claim-006
+  suite: epic56
+  metric: claim_006
+  description: GET /evidence/verify recomputes the hash of the resolved body and confirms resolution.
+  threshold: null
+  operator: '>='
+- id: epic-57-claim-001
+  suite: epic57
+  metric: claim_001
+  description: The symbolic ledger implements a SHA-256 chain over ledger entries.
+  threshold: null
+  operator: '>='
+- id: epic-57-claim-002
+  suite: epic57
+  metric: claim_002
+  description: Each epoch is sealed by a deterministic Merkle root.
+  threshold: null
+  operator: '>='
+- id: epic-57-claim-003
+  suite: epic57
+  metric: claim_003
+  description: The hasher interface makes PQC migration a configuration change.
+  threshold: null
+  operator: '>='
+- id: epic-57-claim-004
+  suite: epic57
+  metric: claim_004
+  description: Single-writer CAS prevents chain forks per tenant.
+  threshold: null
+  operator: '>='
+- id: epic-57-claim-005
+  suite: epic57
+  metric: claim_005
+  description: 'The ledger is the Elephant Corpus: an append-only sealed entry store.'
+  threshold: null
+  operator: '>='
+- id: epic-57-claim-006
+  suite: epic57
+  metric: claim_006
+  description: Append-only updates are modelled as new superseded entries, not in-place edits.
+  threshold: null
+  operator: '>='
+- id: epic-58-claim-001
+  suite: epic58
+  metric: claim_001
+  description: Canonical addressing uses tenant.cell.namespace.entity over KSR content.
+  threshold: null
+  operator: '>='
+- id: epic-58-claim-002
+  suite: epic58
+  metric: claim_002
+  description: The Theory sidecar exposes typed nodes and edges over the existing causal graph.
+  threshold: null
+  operator: '>='
+- id: epic-58-claim-003
+  suite: epic58
+  metric: claim_003
+  description: COORD_CREATE is a Speech Act whose ledger evidence binds the graph delta.
+  threshold: null
+  operator: '>='
+- id: epic-58-claim-004
+  suite: epic58
+  metric: claim_004
+  description: Vector retrieval verifies every hit against the ledger before recall.
+  threshold: null
+  operator: '>='
+- id: epic-58-claim-005
+  suite: epic58
+  metric: claim_005
+  description: The COORD graph is the Elephant Theory namespace.
+  threshold: null
+  operator: '>='
+- id: epic-58-claim-006
+  suite: epic58
+  metric: claim_006
+  description: The Elephant sidecar provides a public-dialect façade without renaming load-bearing kernel symbols.
+  threshold: null
+  operator: '>='
+- id: epic-58-claim-007
+  suite: epic58
+  metric: claim_007
+  description: Vector retrieval verifies every hit's evidence CID before recall and drops unverified hits before prompt assembly.
+  threshold: null
+  operator: '>='
+- id: epic-58-claim-008
+  suite: epic58
+  metric: claim_008
+  description: The seven public Speech Act event types round-trip through the ledger.
+  threshold: null
+  operator: '>='
+- id: epic-59-claim-001
+  suite: epic59
+  metric: claim_001
+  description: The gateway façade unifies the three existing 336 gate surfaces.
+  threshold: null
+  operator: '>='
+- id: epic-59-claim-002
+  suite: epic59
+  metric: claim_002
+  description: Every append path is gated by the 336 Lawfulness Gateway.
+  threshold: null
+  operator: '>='
+- id: epic-59-claim-003
+  suite: epic59
+  metric: claim_003
+  description: Closure Fingerprint API returns a deterministic schema-v1 attestation per ledger sequence.
+  threshold: null
+  operator: '>='
+- id: epic-59-claim-004
+  suite: epic59
+  metric: claim_004
+  description: The gateway rejects appends with efficiency improvement A_corr below 0.20.
+  threshold: null
+  operator: '>='
+- id: epic-59-claim-005
+  suite: epic59
+  metric: claim_005
+  description: The 336 gateway is the AI-Trust-OPs Credibility Gate.
+  threshold: null
+  operator: '>='
+- id: epic-59-claim-006
+  suite: epic59
+  metric: claim_006
+  description: Fail responses include the patch's public Predicate name and hard_gate string.
+  threshold: null
+  operator: '>='
+- id: epic-60-claim-001
+  suite: epic60
+  metric: claim_001
+  description: Flow metrics are deterministic and replayable per epoch.
+  threshold: null
+  operator: '>='
+- id: epic-60-claim-002
+  suite: epic60
+  metric: claim_002
+  description: dE is computed from real compute telemetry per the H1 contract.
+  threshold: null
+  operator: '>='
+- id: epic-60-claim-003
+  suite: epic60
+  metric: claim_003
+  description: K triggers abstention when below threshold or lawfulness is insufficient.
+  threshold: null
+  operator: '>='
+- id: epic-60-claim-004
+  suite: epic60
+  metric: claim_004
+  description: The system abstains instead of hallucinating when health is degraded.
+  threshold: null
+  operator: '>='
+- id: epic-60-claim-005
+  suite: epic60
+  metric: claim_005
+  description: Flow metrics make DSS 2.0 cognizant of its own operational health.
+  threshold: null
+  operator: '>='
+- id: epic-61-claim-001
+  suite: epic61
+  metric: claim_001
+  description: Evidence Object schema v1 binds content CID with source metadata, operational context, policy binding, and review history.
+  threshold: null
+  operator: '>='
+- id: epic-61-claim-002
+  suite: epic61
+  metric: claim_002
+  description: The NHI registry persists the paper tuple A = ⟨id, sponsor, auth, cred, tools, mem, pol, log, state⟩.
+  threshold: null
+  operator: '>='
+- id: epic-61-claim-003
+  suite: epic61
+  metric: claim_003
+  description: Permit(A,t,x) is conjunctive and mapped to existing mechanisms.
+  threshold: null
+  operator: '>='
+- id: epic-61-claim-004
+  suite: epic61
+  metric: claim_004
+  description: NHI lifecycle events are verifiable on the chain from P2.
+  threshold: null
+  operator: '>='
+- id: epic-61-claim-005
+  suite: epic61
+  metric: claim_005
+  description: Forced amnesia on retirement deletes bounded memory keys.
+  threshold: null
+  operator: '>='
+- id: epic-61-claim-006
+  suite: epic61
+  metric: claim_006
+  description: Evidence Objects realise the paper's Evidence Fabric construct.
+  threshold: null
+  operator: '>='
+- id: epic-62-claim-001
+  suite: epic62
+  metric: claim_001
+  description: Trust Diagnostic classifications are derived from gate telemetry and linked to a Closure Fingerprint.
+  threshold: null
+  operator: '>='
+- id: epic-62-claim-002
+  suite: epic62
+  metric: claim_002
+  description: apps/did-issuer issues W3C VCs for Evidence Objects and epoch roots.
+  threshold: null
+  operator: '>='
+- id: epic-62-claim-003
+  suite: epic62
+  metric: claim_003
+  description: External verification validates a VC without internal ledger access.
+  threshold: null
+  operator: '>='
+- id: epic-62-claim-004
+  suite: epic62
+  metric: claim_004
+  description: Credibility outer product blocks cross-tenant handoff on any zero factor.
+  threshold: null
+  operator: '>='
+- id: epic-62-claim-005
+  suite: epic62
+  metric: claim_005
+  description: The Trust Diagnostic decides whether a signal is safe to use.
+  threshold: null
+  operator: '>='
+- id: epic-62-claim-006
+  suite: epic62
+  metric: claim_006
+  description: VCs are attestations of chain state, not proofs of trustworthiness.
+  threshold: null
+  operator: '>='
+- id: epic-63-claim-001
+  suite: epic63
+  metric: claim_001
+  description: The current production DSS backend stores ledger state in RocksDB on a Cloud Storage FUSE volume, which is a stopgap and not the target architecture.
+  threshold: null
+  operator: '>='
+- id: epic-63-claim-003
+  suite: epic63
+  metric: claim_003
+  description: The coordinator Postgres instance is provisioned but unused for tenant registry, epoch roots, or constitution/exodus entries.
+  threshold: null
+  operator: '>='
+- id: epic-63-claim-005
+  suite: epic63
+  metric: claim_005
+  description: Once the target architecture is implemented and verified on production, epics 55+ can make operationally true claims about ledger immutability, durability, and tenant isolation.
+  threshold: null
+  operator: '>='
+- id: epic-63-claim-006
+  suite: epic63
+  metric: claim_006
+  description: The Cloud Storage FUSE volume can be removed once the backend uses GCS client libraries and Postgres for durable state.
+  threshold: null
+  operator: '>='
+- id: epic-63-claim-007
+  suite: epic63
+  metric: claim_007
+  description: Existing RocksDB tenant data can be exported to the per-tenant SQLite format without data loss.
+  threshold: null
+  operator: '>='
+- id: epic-63-claim-008
+  suite: epic63
+  metric: claim_008
+  description: Production smoke tests can verify ledger durability across container restarts and tenant isolation.
+  threshold: null
+  operator: '>='
+- id: epic-64-claim-001
+  suite: epic64
+  metric: claim_001
+  description: The Control Plane has no deterministic impact calculator for connection removals or permission changes.
+  threshold: null
+  operator: '>='
+- id: epic-64-claim-002
+  suite: epic64
+  metric: claim_002
+  description: Removal rules for principals, ledgers, surfaces, and the orphan guard are not implemented as atomic ledger-backed operations.
+  threshold: null
+  operator: '>='
+- id: epic-64-claim-003
+  suite: epic64
+  metric: claim_003
+  description: Axiom runtime guards (membership precedes capability, path validity, surface proxy, organisation transitivity, no surface-in-surface, ledger self-reference, downstream consistency) are not enforced before graph mutations commit.
+  threshold: null
+  operator: '>='
+- id: epic-64-claim-004
+  suite: epic64
+  metric: claim_004
+  description: There is no dry-run impact-analysis API or confirmation-token flow for connection mutations.
+  threshold: null
+  operator: '>='
+- id: epic-64-claim-005
+  suite: epic64
+  metric: claim_005
+  description: Surfaces such as chat and decode do not yet consume the effective permission graph from the ledger at runtime, so Control Plane grants do not govern surface actions.
+  threshold: null
+  operator: '>='
+- id: epic-64-claim-006
+  suite: epic64
+  metric: claim_006
+  description: The Permission Editor is not preset-first and does not validate that a permission payload stays within the invariant bounds of its selected preset.
+  threshold: null
+  operator: '>='
+- id: epic-64-claim-007
+  suite: epic64
+  metric: claim_007
+  description: Once Epic 64 is implemented and verified on production, Control Plane connection mutations will be lawful, deterministic, and enforced on downstream surfaces.
+  threshold: null
+  operator: '>='
+retired_claims:
+- id: epic-63-claim-002
+  suite: epic63
+  metric: claim_002
+  description: The backend has no storage interface abstraction; LedgerStoreV2 is directly coupled to RocksDB.
+  threshold: null
+  operator: '>='
+  superseded_by:
+  - STO-01
+  - STO-05
+- id: epic-63-claim-004
+  suite: epic63
+  metric: claim_004
+  description: A per-tenant SQLite file store in object storage is the intended ledger substrate, but it is not yet implemented.
+  threshold: null
+  operator: '>='
+  superseded_by:
+  - STO-01
+  - STO-05
