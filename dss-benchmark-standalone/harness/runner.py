@@ -95,6 +95,21 @@ def run_benchmarks(
         result = suite.run()
         suite_results.append(result)
 
+    # epic-94 (DSS-9405): the ladder attack-resistance simulations
+    # (ATK-01..ATK-10) run with every benchmark — deterministic, no adapter,
+    # golden outcomes bound to the ATK-* claims in the registry via explicit
+    # claim_ids. fail_ci applies to any unregistered scenario.
+    try:
+        from suites.ladder_attacks import run_ladder_attacks
+
+        suite_results.append(run_ladder_attacks())
+    except Exception as exc:  # pragma: no cover - the gate must see the failure
+        suite_results.append({
+            "suite": "ladder_attacks",
+            "claim_ids": {},
+            "error": str(exc),
+        })
+
     registry = load_registry()
     _apply_thresholds(suite_results, registry)
     run_suites = set(s.get("suite") for s in suite_results)
