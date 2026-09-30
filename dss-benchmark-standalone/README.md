@@ -21,8 +21,15 @@ python harness/runner.py --adapter langchain
 python harness/runner.py --suites poisoning abstention
 
 # Drive the same Go suites via dssc (from a sibling dss-conform checkout)
-python harness/dssc_subprocess_bridge.py --adapter lexical  # stdin JSON-lines; see dss-conform/docs/adapter-subprocess.md
+dssc run --adapter-cmd "python3 harness/dssc_subprocess_bridge.py --adapter faiss --mock-embeddings" \
+  --scale smoke --suites poisoning,integrity,abstention \
+  --claims ../dss-conform/examples/claims_registry.active.yaml --out /tmp/dssc-faiss
+
+# Offline bridge smoke (no SentenceTransformer weights)
+python3 -m pytest tests/test_dssc_subprocess_bridge.py -q
 ```
+
+JSON-lines protocol: `dss-conform/docs/adapter-subprocess.md`. v1 bridge adapters: `faiss`, `chroma`, `qdrant`, plus `lexical` for dependency-free smoke.
 
 Reports are written to `eval/reports/` as `benchmark_report.json` and
 `benchmark_summary.md`.

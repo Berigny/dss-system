@@ -13,24 +13,25 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from adapters.base import RetrievalAdapter, RetrievalResult  # noqa: E402
+from harness.runner import ADAPTER_MAP  # noqa: E402
 
-ADAPTER_MAP: dict[str, str] = {
-    "faiss": "adapters.faiss_adapter.FaissAdapter",
-    "chroma": "adapters.chroma_adapter.ChromaAdapter",
-    "qdrant": "adapters.qdrant_adapter.QdrantAdapter",
-    "sentence_transformers": "adapters.sentence_transformers_adapter.SentenceTransformersAdapter",
-    "langchain": "adapters.langchain_adapter.LangChainAdapter",
-    "llama_index": "adapters.llama_index_adapter.LlamaIndexAdapter",
-    "milvus": "adapters.milvus_adapter.MilvusAdapter",
+V1_BRIDGE_ADAPTERS = frozenset({"faiss", "chroma", "qdrant"})
+
+UNSUPPORTED_ADAPTERS: dict[str, str] = {
+    "langchain": "requires a retriever object in the corpus, not a documents list",
+    "llama_index": "requires a retriever object in the corpus, not a documents list",
+    "milvus": "adapter is an unimplemented stub in dss-benchmark-standalone",
+    "sentence_transformers": "not verified for plain documents-list corpus behind the bridge in v1",
 }
+
+PROVENANCE_KEYS = ("id", "source", "label", "flagged", "conflict")
 
 
 def _import_adapter_class(name: str) -> type:
-    if name not in ADAPTER_MAP:
+    cls = ADAPTER_MAP.get(name)
+    if cls is None:
         raise ValueError(f"unknown adapter {name}")
-    module_path, class_name = ADAPTER_MAP[name].rsplit(".", 1)
-    module = __import__(module_path, fromlist=[class_name])
-    return getattr(module, class_name)
+    return cls
 
 
 class LexicalBridgeAdapter:
@@ -63,7 +64,7 @@ class LexicalBridgeAdapter:
                             text=str(doc.get("text", "")),
                             score=score,
                             identifier=doc.get("id"),
-                            metadata=doc.get("metadata") or {},
+                            metadata=dict(doc.get("metadata") or {}),
                         ),
                     )
                 )
@@ -85,10 +86,14 @@ def _field(doc: dict, *keys: str) -> Any:
 
 
 def _normalize_doc(raw: dict) -> dict:
+    doc_id = _field(raw, "ID", "id")
+    metadata = dict(_field(raw, "Metadata", "metadata") or {})
+    if doc_id is not None and "id" not in metadata:
+        metadata["id"] = doc_id
     return {
-        "id": _field(raw, "ID", "id"),
+        "id": doc_id,
         "text": _field(raw, "Text", "text") or "",
-        "metadata": _field(raw, "Metadata", "metadata") or {},
+        "metadata": metadata,
     }
 
 
@@ -101,8 +106,49 @@ def _make_adapter(name: str, mock_embeddings: bool) -> RetrievalAdapter:
     return cls()
 
 
+def _validate_adapter_choice(name: str) -> None:
+    if name == "lexical":
+        return
+    reason = UNSUPPORTED_ADAPTERS.get(name)
+    if reason:
+        print(
+            f"dssc_subprocess_bridge: adapter {name!r} is not supported in v1: {reason}",
+            file=sys.stderr,
+        )
+        raise SystemExit(1)
+    if name not in V1_BRIDGE_ADAPTERS:
+        print(
+            f"dssc_subprocess_bridge: adapter {name!r} is not in the v1 bridge subset "
+            f"({', '.join(sorted(V1_BRIDGE_ADAPTERS))})",
+            file=sys.stderr,
+        )
+        raise SystemExit(1)
+
+
+def _probe_adapter(name: str, mock_embeddings: bool) -> None:
+    try:
+        _make_adapter(name, mock_embeddings)
+    except SystemExit:
+        raise
+    except Exception as exc:  # noqa: BLE001
+        print(
+            f"dssc_subprocess_bridge: failed to construct adapter {name!r}: {exc}",
+            file=sys.stderr,
+        )
+        raise SystemExit(1) from exc
+
+
 def _corpus(documents: List[dict]) -> dict:
     return {"documents": documents}
+
+
+def _metadata_for_result(documents: List[dict], result: RetrievalResult) -> Dict[str, Any]:
+    by_id = {str(d.get("id")): d.get("metadata") or {} for d in documents if d.get("id") is not None}
+    merged: Dict[str, Any] = dict(by_id.get(str(result.identifier), {}))
+    merged.update(result.metadata or {})
+    if result.identifier is not None:
+        merged["id"] = result.identifier
+    return merged
 
 
 def _respond(rid: str, ok: bool, **payload: Any) -> None:
@@ -112,13 +158,16 @@ def _respond(rid: str, ok: bool, **payload: Any) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="dssc subprocess adapter bridge")
-    parser.add_argument("--adapter", default="lexical", help="adapter name")
+    parser.add_argument("--adapter", default="faiss", help="adapter name (v1: faiss, chroma, qdrant, or lexical)")
     parser.add_argument(
         "--mock-embeddings",
         action="store_true",
         help="use mocked embeddings for faiss",
     )
     args, _ = parser.parse_known_args()
+
+    _validate_adapter_choice(args.adapter)
+    _probe_adapter(args.adapter, args.mock_embeddings)
 
     documents: List[dict] = []
     adapter: Optional[RetrievalAdapter] = None
@@ -146,7 +195,11 @@ def main() -> int:
                 if adapter is None:
                     adapter = _make_adapter(args.adapter, args.mock_embeddings)
                 query = str(req.get("query") or "")
-                results = adapter.query(_corpus(documents), query)
+                try:
+                    results = adapter.query(_corpus(documents), query)
+                except Exception as exc:  # noqa: BLE001
+                    _respond(rid, True, outcome="error", error=str(exc), results=[])
+                    continue
                 if not results:
                     _respond(rid, True, outcome="completed_empty", results=[])
                 else:
@@ -155,7 +208,7 @@ def main() -> int:
                             "ID": r.identifier or "",
                             "Text": r.text,
                             "Score": float(r.score),
-                            "Metadata": r.metadata or {},
+                            "Metadata": _metadata_for_result(documents, r),
                         }
                         for r in results
                     ]
