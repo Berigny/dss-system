@@ -19,6 +19,9 @@ python harness/runner.py --adapter langchain
 
 # Run a subset of suites
 python harness/runner.py --suites poisoning abstention
+
+# Drive the same Go suites via dssc (from a sibling dss-conform checkout)
+python harness/dssc_subprocess_bridge.py --adapter lexical  # stdin JSON-lines; see dss-conform/docs/adapter-subprocess.md
 ```
 
 Reports are written to `eval/reports/` as `benchmark_report.json` and
