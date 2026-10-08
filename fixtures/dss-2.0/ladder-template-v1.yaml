@@ -16,7 +16,7 @@ layers:
     composition: "5 cohorts (50 Principals)"
     default_ratio: 5
     duties: ["cross-cohort consistency (consistency_zk spot checks)", "SILT review posture arbitration", "LOAM promotion witnesses"]
-    bft_note: "comparator quorum 34/50 (2f+1, f=16); disagreement escalates to Grace FSM, never halts"
+    bft_note: "comparator quorum 34/50 (ceil((n+f+1)/2) for n=50, f=16; 2f+1 would be 33); disagreement escalates to Grace FSM, never halts"
   - name: C100
     role: "domain — policy cell"
     composition: "2 clusters (100 Principals)"
